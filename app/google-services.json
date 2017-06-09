@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "50712246132",
+    "project_id": "file-manager-4c1f2"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:50712246132:android:61ef3f8b7adbe55e",
+        "android_client_info": {
+          "package_name": "com.jakebarnby.filemanager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "50712246132-5sbprorm5fifdqg8vk95bb1m5sr58a40.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jakebarnby.filemanager",
+            "certificate_hash": "56cabd9161a913e351f15e7e2a30ece204d807ef"
+          }
+        },
+        {
+          "client_id": "50712246132-duttbf4tsq7iqarm3o03rmlvnfajebg4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDNcb3xdmjM3jiGSuw7fKC98lpEVfwZaE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
