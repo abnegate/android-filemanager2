@@ -25,7 +25,7 @@ public class DropboxFactory {
     private static final String TAG = "DROPBOX";
     private DbxClientV2 mClient;
 
-    public static DropboxFactory getInstance() {
+    public static DropboxFactory Instance() {
         return ourInstance;
     }
 

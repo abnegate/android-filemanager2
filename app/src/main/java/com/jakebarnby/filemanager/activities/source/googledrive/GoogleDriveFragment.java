@@ -24,12 +24,12 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.ExponentialBackOff;
-import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.SourceFragment;
+import com.jakebarnby.filemanager.managers.GoogleDriveFactory;
 import com.jakebarnby.filemanager.models.files.GoogleDriveFile;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
@@ -177,8 +177,6 @@ public class GoogleDriveFragment extends SourceFragment {
      * Placing the API calls in their own task ensures the UI stays responsive.
      */
     private class GoogleDriveFileSystemLoader extends AsyncTask<Void, Void, TreeNode<SourceFile>> {
-
-        private Drive mService = null;
         private Exception mLastError = null;
         private TreeNode<SourceFile> rootFileTreeNode;
         private TreeNode<SourceFile> currentLevelNode;
@@ -186,9 +184,11 @@ public class GoogleDriveFragment extends SourceFragment {
         GoogleDriveFileSystemLoader(GoogleAccountCredential credential) {
             HttpTransport transport = new NetHttpTransport();
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-            mService = new com.google.api.services.drive.Drive.Builder(transport, jsonFactory, credential)
-                    .setApplicationName("File Manager Android")
-                    .build();
+            GoogleDriveFactory.Instance().setService(
+                    new com.google.api.services.drive.Drive.Builder(transport, jsonFactory, credential)
+                            .setApplicationName("File Manager Android")
+                            .build());
+
         }
 
         @Override
@@ -200,7 +200,12 @@ public class GoogleDriveFragment extends SourceFragment {
         @Override
         protected TreeNode<SourceFile> doInBackground(Void... params) {
             try {
-                File rootFile = mService.files().get("root").execute();
+                File rootFile = GoogleDriveFactory
+                        .Instance()
+                        .getService()
+                        .files()
+                        .get("root")
+                        .execute();
                 SourceFile rootSourceFile = new GoogleDriveFile();
                 ((GoogleDriveFile) rootSourceFile).setFileProperties(rootFile);
 
@@ -223,7 +228,11 @@ public class GoogleDriveFragment extends SourceFragment {
          * @throws IOException
          */
         private TreeNode<SourceFile> parseDirectory(File currentDirectory) throws IOException {
-            FileList fileList = mService.files().list()
+            FileList fileList = GoogleDriveFactory
+                    .Instance()
+                    .getService()
+                    .files()
+                    .list()
                     .setQ(String.format("'%s' in parents", currentDirectory.getId()))
                     .setFields("files(name,id,mimeType,parents)")
                     .execute();
@@ -231,8 +240,8 @@ public class GoogleDriveFragment extends SourceFragment {
             if (files != null) {
                 for (File file : files) {
                     SourceFile sourceFile = new GoogleDriveFile();
-                    ((GoogleDriveFile) sourceFile).setFileProperties(file);
-                    if (file.getMimeType().equals(Constants.Sources.GOOGLE_DRIVE_FOLDER_MIME)) {
+                    ((GoogleDriveFile)sourceFile).setFileProperties(file);
+                    if (sourceFile.isDirectory()) {
                         currentLevelNode.addChild(sourceFile);
                         currentLevelNode = currentLevelNode.getChildren().get(currentLevelNode.getChildren().size() - 1);
                         parseDirectory(file);

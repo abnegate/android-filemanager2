@@ -11,7 +11,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.SourceActivity;
 import com.jakebarnby.filemanager.managers.DropboxFactory;
+import com.jakebarnby.filemanager.managers.GoogleDriveFactory;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
+import com.jakebarnby.filemanager.models.files.GoogleDriveFile;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 
@@ -112,7 +114,9 @@ public class SourceTransferService extends IntentService {
                     source = file.getUri().getPath();
                     break;
                 case Constants.Sources.DROPBOX:
-                    File newFile = DropboxFactory.getInstance().downloadFile(file.getUri().getPath(), file.getName());
+                    File newFile = DropboxFactory
+                            .Instance()
+                            .downloadFile(file.getUri().getPath(), file.getName());
                     if (newFile.exists())
                         source = newFile.getPath();
                     else
@@ -120,6 +124,13 @@ public class SourceTransferService extends IntentService {
                     break;
                 case Constants.Sources.GOOGLE_DRIVE:
                     //TODO: Download from google drive and get path as string
+                    File googleFile = GoogleDriveFactory
+                            .Instance()
+                            .downloadFile(((GoogleDriveFile)file).getDriveId(), destDir.getUri().getPath());
+                    if (googleFile.exists())
+                        source = googleFile.getPath();
+                    else
+                        returnInt = -1;
                     break;
                 case Constants.Sources.ONEDRIVE:
                     //TODO: Download from onedrive and get path as string
@@ -131,10 +142,14 @@ public class SourceTransferService extends IntentService {
                     returnInt = copyFileNative(source, destDir.getUri().getPath() + "/" + file.getName());
                     break;
                 case Constants.Sources.DROPBOX:
-                    DropboxFactory.getInstance().uploadFile(source, destDir.getUri().getPath());
+                    DropboxFactory
+                            .Instance()
+                            .uploadFile(source, destDir.getUri().getPath());
                     break;
                 case Constants.Sources.GOOGLE_DRIVE:
-                    //TODO: Upload to gogle drive
+                    GoogleDriveFactory
+                            .Instance()
+                            .uploadFile(source, ((GoogleDriveFile)destDir).getDriveId());
                     break;
                 case Constants.Sources.ONEDRIVE:
                     //TODO: Upload to onedrive

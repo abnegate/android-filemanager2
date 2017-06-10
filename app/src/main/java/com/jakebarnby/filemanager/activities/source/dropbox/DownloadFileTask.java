@@ -48,8 +48,11 @@ public class DownloadFileTask extends AsyncTask<String, Void, File> {
         try {
             File path = Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_DOWNLOADS);
-            File file = new File(path, name);
+            File file = new File(path+"/"+name);
 
+            if (file.createNewFile()) {
+                return file;
+            }
             // Make sure the Downloads directory exists.
             if (!path.exists()) {
                 if (!path.mkdirs()) {

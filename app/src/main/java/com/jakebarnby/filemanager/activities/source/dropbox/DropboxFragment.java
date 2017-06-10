@@ -65,7 +65,7 @@ public class DropboxFragment extends SourceFragment {
             DbxRequestConfig requestConfig = DbxRequestConfig.newBuilder("FileManagerAndroid/1.0")
                     .withHttpRequestor(new OkHttp3Requestor(OkHttp3Requestor.defaultOkHttpClient()))
                     .build();
-            DropboxFactory.getInstance().setClient(new DbxClientV2(requestConfig, accessToken));
+            DropboxFactory.Instance().setClient(new DbxClientV2(requestConfig, accessToken));
             setLoggedIn(true);
         }
     }
@@ -144,7 +144,7 @@ public class DropboxFragment extends SourceFragment {
             ListFolderResult result = null;
             try {
                 result = DropboxFactory
-                                    .getInstance()
+                                    .Instance()
                                     .getClient()
                                     .files()
                                     .listFolder("");
@@ -170,7 +170,7 @@ public class DropboxFragment extends SourceFragment {
                         currentLevelNode = currentLevelNode.getChildren().get(currentLevelNode.getChildren().size() - 1);
                         try {
                             parseFileSystem(DropboxFactory
-                                                        .getInstance()
+                                                        .Instance()
                                                         .getClient()
                                                         .files()
                                                         .listFolder(data.getPathLower()));

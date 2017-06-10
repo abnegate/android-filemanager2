@@ -205,6 +205,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
         }
 
+        //TODO: Only need to refresh the current fragment and the current directory of the adapterf ather than reload the whole tree
         for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
             fragment.setMultiSelectEnabled(false);
             fragment.setFilesLoaded(false);
@@ -232,7 +233,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         mDialog = new ProgressDialog(this);
         mDialog.setTitle("Copying..");
         mDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        mDialog.setIndeterminate(false);
+        mDialog.setIndeterminate(true);
         mDialog.setMax(totalCount);
         mDialog.setProgress(currentCount);
         mDialog.setButton(DialogInterface.BUTTON_NEGATIVE,getString(R.string.cancel), (dialog, which) ->
@@ -249,10 +250,14 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * @param intent    The broadcasted intent with update extras
      */
     private void updateProgressDialog(Intent intent) {
-        int currentCount = intent.getIntExtra(EXTRA_CURRENT_COUNT, 0);
         if (mDialog != null && mDialog.isShowing()) {
+            if (mDialog.isIndeterminate()) {
+                mDialog.setIndeterminate(false);
+            }
+            int currentCount = intent.getIntExtra(EXTRA_CURRENT_COUNT, 0);
             mDialog.setProgress(currentCount);
         }
+    }
     }
 
     @Override
