@@ -1,6 +1,8 @@
-package com.jakebarnby.filemanager.models;
+package com.jakebarnby.filemanager.models.files;
 
 import android.net.Uri;
+
+import com.jakebarnby.filemanager.util.Constants;
 
 import java.io.File;
 
@@ -13,13 +15,10 @@ public class LocalFile extends SourceFile {
     public LocalFile() {
     }
 
-    public LocalFile(Uri uri, String name) {
-        super(uri, name);
-    }
-
     public void setFileProperties(File file) {
-        setUri(Uri.parse(file.getAbsolutePath()));
+        setUri(Uri.parse(file.getPath()));
         setName(file.getName());
+        setSourceName(Constants.Sources.LOCAL);
         setDirectory(file.isDirectory());
         setCanRead(file.canRead());
         setSize(file.length());

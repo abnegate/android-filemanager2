@@ -5,10 +5,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.jakebarnby.filemanager.R;
-import com.jakebarnby.filemanager.models.SourceFile;
+import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.TreeNode;
-
-import java.util.List;
 
 /**
  * Created by Jake on 5/31/2017.
@@ -16,8 +14,8 @@ import java.util.List;
 
 public class FileSystemGridAdapter extends FileSystemAdapter {
 
-    public FileSystemGridAdapter(TreeNode<SourceFile> parent, List<TreeNode<SourceFile>> children) {
-        super(parent, children);
+    public FileSystemGridAdapter(TreeNode<SourceFile> rootNode) {
+        super(rootNode);
     }
 
     @Override

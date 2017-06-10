@@ -1,7 +1,11 @@
 package com.jakebarnby.filemanager.activities.source;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewCompat;
@@ -11,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -19,10 +24,12 @@ import com.jakebarnby.filemanager.activities.source.adapters.FileSystemAdapter;
 import com.jakebarnby.filemanager.activities.source.adapters.FileSystemGridAdapter;
 import com.jakebarnby.filemanager.activities.source.adapters.FileSystemListAdapter;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
-import com.jakebarnby.filemanager.models.AccessToken;
-import com.jakebarnby.filemanager.models.SourceFile;
+import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
+
+import java.io.File;
+import java.util.List;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -31,16 +38,17 @@ public abstract class SourceFragment extends Fragment {
 
     private String                  mSourceName;
     private TreeNode<SourceFile>    mRootFileTreeNode;
-    private AccessToken             mToken;
+    private TreeNode<SourceFile>    mCurrentDirectory;
     private boolean                 mLoggedIn;
     private boolean                 mFilesLoaded;
     private boolean                 mMultiSelectEnabled;
+
     protected RecyclerView          mRecycler;
     protected FileSystemListAdapter mFileSystemListAdapter;
     protected FileSystemGridAdapter mFileSystemGridAdapter;
-
-    protected LottieAnimationView mProgressBar;
+    protected LottieAnimationView   mProgressBar;
     protected Button                mConnectButton;
+
 
     /**
      * Authenticate the current source
@@ -51,6 +59,13 @@ public abstract class SourceFragment extends Fragment {
      * Load the current source
      */
     protected abstract void loadSource();
+
+    /**
+     * Attempts to open a {@link SourceFile} by finding it's mimetype then opening a compatible application
+     * @param file The file to attempt to open
+     */
+    protected abstract void openFile(SourceFile file);
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -81,10 +96,6 @@ public abstract class SourceFragment extends Fragment {
         this.mRootFileTreeNode = mFileTree;
     }
 
-    public AccessToken getToken() {
-        return mToken;
-    }
-
     public boolean isLoggedIn() {
         return mLoggedIn;
     }
@@ -107,6 +118,19 @@ public abstract class SourceFragment extends Fragment {
 
     public void setMultiSelectEnabled(boolean mMultiSelectEnabled) {
         this.mMultiSelectEnabled = mMultiSelectEnabled;
+
+        if (mRecycler.getAdapter() != null) {
+            ((FileSystemAdapter) mRecycler.getAdapter()).setMultiSelectEnabled(mMultiSelectEnabled);
+            mRecycler.getAdapter().notifyDataSetChanged();
+        }
+    }
+
+    public TreeNode<SourceFile>  getCurrentDirectory() {
+        return mCurrentDirectory;
+    }
+
+    public void setCurrentDirectory(TreeNode<SourceFile>  mCurrentDirectory) {
+        this.mCurrentDirectory = mCurrentDirectory;
     }
 
     /**
@@ -139,11 +163,36 @@ public abstract class SourceFragment extends Fragment {
         }
 
         if (curAdapter != null) {
-            newAdapter.setParentDir(curAdapter.getParentDir());
-            newAdapter.setCurrentDirChildren(curAdapter.getCurrentDirChildren());
+            TreeNode<SourceFile> transformedCurrentDir =
+                    transformCurrentDirectory(curAdapter.getCurrentDir(), newAdapter.getRootTreeNode());
+            if (transformedCurrentDir != null) {
+                newAdapter.setCurrentDirectory(transformedCurrentDir);
+            }
         }
         mRecycler.setAdapter(newAdapter);
-        mRecycler.getAdapter().notifyDataSetChanged();
+        if (mRecycler.getAdapter() != null) {
+            mRecycler.getAdapter().notifyDataSetChanged();
+        }
+    }
+
+    /**
+     * Attempt the find the current directory from the old adapter to set it to the new one
+     * @param oldAdapterDir     The directory to search for
+     * @param currentDir        The current directory being searched
+     * @return                  The matching directory or null if no match was found
+     */
+    private TreeNode<SourceFile> transformCurrentDirectory(TreeNode<SourceFile> oldAdapterDir,
+                                                           TreeNode<SourceFile> currentDir) {
+        for(TreeNode<SourceFile> child : currentDir.getChildren()) {
+            if (child.getChildren() != null && child.getChildren().size() > 0) {
+                if (child.getData().getName().equals(oldAdapterDir.getData().getName())) {
+                    return child;
+                } else {
+                    transformCurrentDirectory(oldAdapterDir, child);
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -155,12 +204,11 @@ public abstract class SourceFragment extends Fragment {
     protected void initializeSourceRecyclerView(TreeNode<SourceFile> file,
                                                 FileSystemAdapter.OnFileClickedListener onClickListener,
                                                 FileSystemAdapter.OnFileLongClickedListener onLongClickListener) {
-
-        mFileSystemListAdapter = new FileSystemListAdapter(file, file.getChildren());
+        mFileSystemListAdapter = new FileSystemListAdapter(file);
         mFileSystemListAdapter.setOnClickListener(onClickListener);
         mFileSystemListAdapter.setOnLongClickListener(onLongClickListener);
 
-        mFileSystemGridAdapter = new FileSystemGridAdapter(file, file.getChildren());
+        mFileSystemGridAdapter = new FileSystemGridAdapter(file);
         mFileSystemGridAdapter.setOnClickListener(onClickListener);
         mFileSystemGridAdapter.setOnLongClickListener(onLongClickListener);
 
@@ -168,20 +216,62 @@ public abstract class SourceFragment extends Fragment {
     }
 
     /**
+     *
+     */
+    protected void launchFilePicker() {
+        // Launch intent to pick file for upload
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, Constants.RequestCodes.FILE_PICKER);
+    }
+
+    /**
+     * Attempts to open a file by finding it's mimetype then opening a compatible application
+     * @param file The file to attempt to open
+     */
+    protected void viewFileInExternalApp(File file) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        String ext = file.getName().substring(file.getName().indexOf(".") + 1);
+        String type = mime.getMimeTypeFromExtension(ext);
+        intent.setDataAndType(Uri.fromFile(file), type);
+
+        PackageManager manager = getActivity().getPackageManager();
+        List<ResolveInfo> resolveInfo = manager.queryIntentActivities(intent, 0);
+        if (resolveInfo.size() > 0) {
+            startActivity(intent);
+        }
+    }
+
+    /**
      * Construct a click listener for a file or folder
      * @return  The constructed listener
      */
     protected FileSystemAdapter.OnFileClickedListener createOnClickListener() {
-        return file -> {
+        return (file, isChecked, position) -> {
             if (mMultiSelectEnabled) {
-                //TODO: Tihs should still open the dir, the checkbox should set selected
-                SelectedFilesManager.getInstance().getSelectedFiles().add(file.getData());
+                if (isChecked) {
+                    SelectedFilesManager
+                            .getInstance()
+                            .getSelectedFiles()
+                            .add(file.getData());
+                } else {
+                    SelectedFilesManager
+                            .getInstance()
+                            .getSelectedFiles()
+                            .remove(file.getData());
+                }
+                getActivity().setTitle(String.valueOf(SelectedFilesManager.getInstance().getSelectedFiles().size()) + " selected");
             } else {
+                setCurrentDirectory(file);
+                ((SourceActivity)getActivity()).setCurrentDir(file);
+
                 if (file.getData().isDirectory() && file.getData().canRead()) {
-                    ((FileSystemAdapter) mRecycler.getAdapter()).setCurrentDirectory(file.getParent(), file.getChildren());
+                    ((FileSystemAdapter) mRecycler.getAdapter()).setCurrentDirectory(file);
                     mRecycler.getAdapter().notifyDataSetChanged();
                 } else {
-                    //TODO: Open file
+                    openFile(file.getData());
                 }
             }
         };
@@ -193,9 +283,11 @@ public abstract class SourceFragment extends Fragment {
      */
     protected FileSystemAdapter.OnFileLongClickedListener createOnLongClickListener() {
         return file -> {
-            //TODO: Open context menu for multi-select
             if (!mMultiSelectEnabled) {
-                SelectedFilesManager.getInstance().getSelectedFiles().add(file.getData());
+//                for (SourceFragment fragment: ((SourceActivity)getActivity()).getPagerAdapter().getFragments()) {
+//                    fragment.setMultiSelectEnabled(true);
+//                }
+                setMultiSelectEnabled(true);
             }
         };
     }

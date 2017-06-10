@@ -22,6 +22,12 @@ android {
         targetCompatibility 1.8
         sourceCompatibility 1.8
     }
+
+    externalNativeBuild {
+        cmake {
+            path 'CMakeLists.txt'
+        }
+    }
 }
 
 configurations {
@@ -46,7 +52,7 @@ dependencies {
 
     //Dropbox
     compile 'com.dropbox.core:dropbox-core-sdk:3.0.3'
-    compile 'com.squareup.okhttp3:okhttp:3.7.0'
+    compile 'com.squareup.okhttp3:okhttp:3.8.0'
 
     //Google Drive
     compile('com.google.api-client:google-api-client-android:1.22.0')

@@ -1,6 +1,7 @@
 package com.jakebarnby.filemanager.activities.source.dropbox;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,10 +17,13 @@ import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
 import com.jakebarnby.filemanager.activities.source.SourceFragment;
-import com.jakebarnby.filemanager.models.DropboxFile;
-import com.jakebarnby.filemanager.models.SourceFile;
+import com.jakebarnby.filemanager.managers.DropboxFactory;
+import com.jakebarnby.filemanager.models.files.DropboxFile;
+import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * Created by Jake on 5/31/2017.
@@ -27,7 +31,7 @@ import com.jakebarnby.filemanager.util.TreeNode;
 
 public class DropboxFragment extends SourceFragment {
 
-    private DbxClientV2         mClient;
+    private static final String TAG = "DROPBOX";
 
     /**
      * Return a new instance of this Fragment
@@ -61,7 +65,7 @@ public class DropboxFragment extends SourceFragment {
             DbxRequestConfig requestConfig = DbxRequestConfig.newBuilder("FileManagerAndroid/1.0")
                     .withHttpRequestor(new OkHttp3Requestor(OkHttp3Requestor.defaultOkHttpClient()))
                     .build();
-            mClient = new DbxClientV2(requestConfig, accessToken);
+            DropboxFactory.getInstance().setClient(new DbxClientV2(requestConfig, accessToken));
             setLoggedIn(true);
         }
     }
@@ -100,6 +104,21 @@ public class DropboxFragment extends SourceFragment {
         }
     }
 
+    @Override
+    protected void openFile(SourceFile file) {
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, final Intent data) {
+        if (requestCode == Constants.RequestCodes.FILE_PICKER) {
+            if (resultCode == RESULT_OK) {
+                // This is the result of a call to launchFilePicker
+                //uploadFile(data.getData().toString());
+            }
+        }
+    }
+
     /**
      * Loads a file tree from a users Dropbox account
      */
@@ -118,14 +137,17 @@ public class DropboxFragment extends SourceFragment {
         protected TreeNode<SourceFile> doInBackground(Void... voids) {
             SourceFile rootSourceFile = new DropboxFile();
             ((DropboxFile) rootSourceFile).setFileProperties(new Metadata("Dropbox"));
-            rootSourceFile.setDirectory(true);
-
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
+            setCurrentDirectory(rootFileTreeNode);
 
             ListFolderResult result = null;
             try {
-                result = mClient.files().listFolder("");
+                result = DropboxFactory
+                                    .getInstance()
+                                    .getClient()
+                                    .files()
+                                    .listFolder("");
             } catch (DbxException e) {
                 e.printStackTrace();
             }
@@ -147,7 +169,11 @@ public class DropboxFragment extends SourceFragment {
                         currentLevelNode.addChild(sourceFile);
                         currentLevelNode = currentLevelNode.getChildren().get(currentLevelNode.getChildren().size() - 1);
                         try {
-                            parseFileSystem(mClient.files().listFolder(data.getPathLower()));
+                            parseFileSystem(DropboxFactory
+                                                        .getInstance()
+                                                        .getClient()
+                                                        .files()
+                                                        .listFolder(data.getPathLower()));
                         } catch (DbxException e) {
                             e.printStackTrace();
                         }

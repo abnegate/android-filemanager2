@@ -1,4 +1,4 @@
-package com.jakebarnby.filemanager.models;
+package com.jakebarnby.filemanager.models.files;
 
 
 import android.net.Uri;
@@ -23,6 +23,7 @@ public class GoogleDriveFile extends SourceFile {
         }
         setDriveId(file.getId());
         setName(file.getName());
+        setSourceName(Constants.Sources.GOOGLE_DRIVE);
         setCanRead(true);
         setDirectory(file.getMimeType().equals(Constants.Sources.GOOGLE_DRIVE_FOLDER_MIME));
     }

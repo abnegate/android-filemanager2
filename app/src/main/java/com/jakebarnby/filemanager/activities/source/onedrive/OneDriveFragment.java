@@ -10,8 +10,8 @@ import android.util.Log;
 import android.view.View;
 
 import com.jakebarnby.filemanager.activities.source.SourceFragment;
-import com.jakebarnby.filemanager.models.OneDriveFile;
-import com.jakebarnby.filemanager.models.SourceFile;
+import com.jakebarnby.filemanager.models.files.OneDriveFile;
+import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.microsoft.graph.concurrency.ICallback;
 import com.microsoft.graph.core.ClientException;
@@ -109,10 +109,10 @@ public class OneDriveFragment extends SourceFragment {
 
     @Override
     protected void loadSource() {
-        if (!isFilesLoaded()) {
+        if (!isFilesLoaded() && mAuthResult != null) {
             final IClientConfig mClientConfig = DefaultClientConfig
                     .createWithAuthenticationProvider(iHttpRequest -> {
-                        iHttpRequest.addHeader("Authorization", String.format("Bearer %s", mAuthResult.getAccessToken()));
+                            iHttpRequest.addHeader("Authorization", String.format("Bearer %s", mAuthResult.getAccessToken()));
                     });
 
             mGraphClient = new GraphServiceClient
@@ -137,6 +137,11 @@ public class OneDriveFragment extends SourceFragment {
                         }
                     });
         }
+    }
+
+    @Override
+    protected void openFile(SourceFile file) {
+
     }
 
     /**
@@ -247,9 +252,9 @@ public class OneDriveFragment extends SourceFragment {
             SourceFile rootSourceFile = new OneDriveFile();
             ((OneDriveFile) rootSourceFile).setFileProperties(driveItems[0]);
             rootSourceFile.setDirectory(true);
-
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
+            setCurrentDirectory(rootFileTreeNode);
             parseFileTree(driveItems[0]);
 
             return parseFileTree(driveItems[0]);

@@ -30,8 +30,8 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.SourceFragment;
-import com.jakebarnby.filemanager.models.GoogleDriveFile;
-import com.jakebarnby.filemanager.models.SourceFile;
+import com.jakebarnby.filemanager.models.files.GoogleDriveFile;
+import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
@@ -121,7 +121,6 @@ public class GoogleDriveFragment extends SourceFragment {
             } else if (!Utils.isConnectionReady(getContext())) {
                 //TODO: No internet
             } else {
-                //FIXME: Stop this being called multiple times, thats why it never finishes loading
                 loadSource();
             }
         }
@@ -132,6 +131,11 @@ public class GoogleDriveFragment extends SourceFragment {
         if (!isFilesLoaded()) {
             new GoogleDriveFileSystemLoader(mCredential).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
+    }
+
+    @Override
+    protected void openFile(SourceFile file) {
+
     }
 
     @Override
@@ -202,6 +206,7 @@ public class GoogleDriveFragment extends SourceFragment {
 
                 rootFileTreeNode = new TreeNode<>(rootSourceFile);
                 currentLevelNode = rootFileTreeNode;
+                setCurrentDirectory(rootFileTreeNode);
 
                 return parseDirectory(rootFile);
             } catch (Exception e) {

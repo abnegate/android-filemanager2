@@ -66,4 +66,28 @@ public class Utils {
                 Constants.RequestCodes.GOOGLE_PLAY_SERVICES);
         dialog.show();
     }
+
+    /**
+     * Get the file extension from a path
+     * @param path The path to the file, can be either local or remote
+     * @return
+     */
+    public static String fileExt(String path) {
+        if (path.indexOf("?") > -1) {
+            path = path.substring(0, path.indexOf("?"));
+        }
+        if (path.lastIndexOf(".") == -1) {
+            return null;
+        } else {
+            String ext = path.substring(path.lastIndexOf(".") + 1);
+            if (ext.indexOf("%") > -1) {
+                ext = ext.substring(0, ext.indexOf("%"));
+            }
+            if (ext.indexOf("/") > -1) {
+                ext = ext.substring(0, ext.indexOf("/"));
+            }
+            return ext.toLowerCase();
+
+        }
+    }
 }

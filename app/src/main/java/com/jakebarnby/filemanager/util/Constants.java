@@ -11,6 +11,10 @@ public class Constants {
     public class Sources {
         public static final String CALLBACK_URL = "https://google.com";
         public static final String GOOGLE_DRIVE_FOLDER_MIME = "application/vnd.google-apps.folder";
+        public static final String DROPBOX = "DROPBOX";
+        public static final String LOCAL = "LOCAL";
+        public static final String GOOGLE_DRIVE = "GOOGLE_DRIVE";
+        public static final String ONEDRIVE = "ONEDRIVE";
 
         public class Keys {
             public static final String DROPBOX_CLIENT_ID       = "rse09cxjnnn2yc1";
@@ -25,6 +29,7 @@ public class Constants {
         public static final int GOOGLE_PLAY_SERVICES = 105;
         public static final int ACCOUNTS_PERMISSIONS = 106;
         public static final int ACCOUNT_PICKER = 107;
+        public static final int FILE_PICKER = 108;
     }
 
     public class SharedPrefs {

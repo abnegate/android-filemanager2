@@ -2,11 +2,13 @@ package com.jakebarnby.filemanager.activities.source.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jakebarnby.filemanager.R;
-import com.jakebarnby.filemanager.models.SourceFile;
+import com.jakebarnby.filemanager.managers.SelectedFilesManager;
+import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.TreeNode;
 
 import java.util.List;
@@ -19,12 +21,30 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
 
     private TreeNode<SourceFile>        mParentDir;
     private List<TreeNode<SourceFile>>  mCurrentDirChildren;
+    private List<SourceFile>            mSelectedFiles;
     private OnFileClickedListener       mOnClickListener;
     private OnFileLongClickedListener   mOnLongClickListener;
+    private boolean                     mMultiSelectEnabled;
+    private TreeNode<SourceFile>        mRootTreeNode;
+    private TreeNode<SourceFile> mCurrentDir;
 
-    public FileSystemAdapter(TreeNode<SourceFile> parent, List<TreeNode<SourceFile>> children) {
-        mParentDir = parent;
-        mCurrentDirChildren = children;
+    public FileSystemAdapter(TreeNode<SourceFile> rootNode) {
+        mRootTreeNode = rootNode;
+        setCurrentDirectory(mRootTreeNode);
+        mSelectedFiles = SelectedFilesManager.getInstance().getSelectedFiles();
+    }
+
+    public boolean isMultiSelectEnabled() {
+        return mMultiSelectEnabled;
+    }
+
+    public void setMultiSelectEnabled(boolean mMultiSelectEnabled) {
+        this.mMultiSelectEnabled = mMultiSelectEnabled;
+    }
+
+    public void setCurrentDirectory(TreeNode<SourceFile> currentDir) {
+        setCurrentDirectory(currentDir.getParent(), currentDir.getChildren());
+        mCurrentDir = currentDir;
     }
 
     public void setCurrentDirectory(TreeNode<SourceFile> parent, List<TreeNode<SourceFile>> children) {
@@ -40,18 +60,28 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
         }
     }
 
+    public TreeNode<SourceFile> getRootTreeNode() {
+        return mRootTreeNode;
+    }
+
     @Override
     public void onBindViewHolder(FileViewHolder holder, int position) {
+        //TODO: Probably animate items here
+        holder.mCheckbox.setVisibility(mMultiSelectEnabled ? View.VISIBLE : View.GONE);
+
         if (mParentDir != null && mParentDir.getData().canRead() && position == 0) {
             holder.mText.setText("..");
+            if (mMultiSelectEnabled) {
+                holder.mCheckbox.setVisibility(View.INVISIBLE);
+            }
         } else {
             holder.mText.setText(mCurrentDirChildren.get(position).getData().getName());
         }
+
         if (mCurrentDirChildren.get(position).getData().isDirectory()) {
-            //TODO: Set folder icon
             holder.mPreviewImage.setImageResource(R.drawable.ic_folder);
         } else {
-            //TODO: Set file icon based on mime type
+            //TODO: Set file icon as thumbnail for file
         }
     }
 
@@ -76,13 +106,19 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
         this.mCurrentDirChildren = mCurrentDirChildren;
     }
 
+    public TreeNode<SourceFile> getCurrentDir() {
+        return mCurrentDir;
+    }
+
     public class FileViewHolder extends RecyclerView.ViewHolder {
         private ImageView   mPreviewImage;
+        private CheckBox    mCheckbox;
         private TextView    mText;
 
         public FileViewHolder(View itemView) {
             super(itemView);
             mPreviewImage   = (ImageView) itemView.findViewById(R.id.image_file_preview);
+            mCheckbox       = (CheckBox)  itemView.findViewById(R.id.checkbox);
             mText           = (TextView)  itemView.findViewById(R.id.text_file_title);
             itemView.setLongClickable(true);
             itemView.setOnClickListener(createOnClickListener());
@@ -94,8 +130,12 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
          * @return  The click listener
          */
         private View.OnClickListener createOnClickListener() {
-            return v ->
-                    mOnClickListener.OnClick(mCurrentDirChildren.get(getAdapterPosition()));
+            return v -> {
+                if (mMultiSelectEnabled) {
+                    mCheckbox.setChecked(!mCheckbox.isChecked());
+                }
+                mOnClickListener.OnClick(mCurrentDirChildren.get(getAdapterPosition()), mCheckbox.isChecked(), getAdapterPosition());
+            };
         }
 
         /**
@@ -104,6 +144,9 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
          */
         private View.OnLongClickListener createOnLongClickListener() {
             return v -> {
+                if (!mMultiSelectEnabled) {
+                    mMultiSelectEnabled = true;
+                }
                 mOnLongClickListener.OnLongClick(mCurrentDirChildren.get(getAdapterPosition()));
                 return true;
             };
@@ -120,7 +163,7 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
 
     @FunctionalInterface
     public interface OnFileClickedListener {
-        void OnClick(TreeNode<SourceFile> file);
+        void OnClick(TreeNode<SourceFile> file, boolean isChecked, int position);
     }
 
     @FunctionalInterface

@@ -12,4 +12,8 @@
     <string name="menu_item_cut">Cut</string>
     <string name="menu_item_paste">Paste</string>
     <string name="menu_item_delete">Delete</string>
+    <string name="zero">0</string>
+    <string name="background">Background</string>
+    <string name="copied">Selection copied</string>
+    <string name="cut">Selection cut</string>
 </resources>

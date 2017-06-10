@@ -3,6 +3,7 @@ package com.jakebarnby.filemanager.activities.source.local;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,15 +15,18 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.SourceFragment;
-import com.jakebarnby.filemanager.models.LocalFile;
-import com.jakebarnby.filemanager.models.SourceFile;
+import com.jakebarnby.filemanager.models.files.LocalFile;
+import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
+import com.jakebarnby.filemanager.util.Utils;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Created by Jake on 5/31/2017.
@@ -62,6 +66,23 @@ public class LocalFragment extends SourceFragment {
         }
     }
 
+    @Override
+    protected void openFile(SourceFile file) {
+        String extension = Utils.fileExt(file.getUri().getPath()).substring(1);
+        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(file.getUri(), mimeType);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        // Check for a handler in package manager, this is better than catching ActivityNotFoundException to avoid a crash
+        PackageManager manager = getActivity().getPackageManager();
+        List<ResolveInfo> resolveInfo = manager.queryIntentActivities(intent, 0);
+        if (resolveInfo.size() > 0) {
+            startActivity(intent);
+        }
+    }
+
     /**
      * Loads a file tree from the local file system
      */
@@ -81,9 +102,9 @@ public class LocalFragment extends SourceFragment {
             File rootFile = files[0];
             SourceFile rootSourceFile = new LocalFile();
             ((LocalFile) rootSourceFile).setFileProperties(rootFile);
-
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
+            setCurrentDirectory(rootFileTreeNode);
             return parseFileSystem(files[0]);
         }
 

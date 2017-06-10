@@ -2,6 +2,7 @@
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -28,7 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:tabIndicatorColor="@android:color/white"
-            app:tabMode="fixed" />
+            app:tabMode="scrollable" />
 
     </android.support.design.widget.AppBarLayout>
 
@@ -37,6 +38,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <!--<TextView-->
+        <!--android:id="@+id/text_selected_count"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_width="9dp"-->
+        <!--android:text="@string/zero"-->
+        <!--android:elevation="20dp"-->
+        <!--android:textSize="18sp"-->
+        <!--android:textColor="@android:color/white"-->
+        <!--app:layout_anchor="@+id/fab_speed_dial"-->
+        <!--app:layout_anchorGravity="left|center"-->
+        <!--tools:layout_editor_absoluteX="308dp" />-->
 
     <io.github.yavski.fabspeeddial.FabSpeedDial
         android:id="@+id/fab_speed_dial"

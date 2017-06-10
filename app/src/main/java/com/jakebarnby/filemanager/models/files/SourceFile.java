@@ -1,37 +1,35 @@
-package com.jakebarnby.filemanager.models;
+package com.jakebarnby.filemanager.models.files;
 
 import android.net.Uri;
+
+import java.io.Serializable;
 
 /**
  * Created by Jake on 6/5/2017.
  */
 
-public abstract class SourceFile {
+public abstract class SourceFile implements Serializable {
 
-    private Uri mUri;
-    private String mName;
-    private long mSize;
-    private boolean mIsDirectory;
-    private boolean mCanRead;
+    private transient Uri   mUri;
+    private String          mUriString;
+    private String          mName;
+    private String          mSourceName;
+    private long            mSize;
+    private boolean         mIsDirectory;
+    private boolean         mCanRead;
 
-    public SourceFile() {
-    }
-
-    public SourceFile(Uri uri) {
-        this.mUri = uri;
-    }
-
-    public SourceFile(Uri uri, String name) {
-        this.mUri = uri;
-        this.mName = name;
-    }
+    public SourceFile() {}
 
     public Uri getUri() {
+        if (mUri == null) {
+            mUri = Uri.parse(mUriString);
+        }
         return mUri;
     }
 
     public void setUri(Uri mUri) {
         this.mUri = mUri;
+        this.mUriString = mUri.getPath();
     }
 
     public String getName() {
@@ -40,6 +38,14 @@ public abstract class SourceFile {
 
     public void setName(String mName) {
         this.mName = mName;
+    }
+
+    public String getSourceName() {
+        return mSourceName;
+    }
+
+    public void setSourceName(String mSourceName) {
+        this.mSourceName = mSourceName;
     }
 
     public long getSize() {

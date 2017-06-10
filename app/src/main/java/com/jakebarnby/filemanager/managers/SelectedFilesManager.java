@@ -1,6 +1,6 @@
 package com.jakebarnby.filemanager.managers;
 
-import com.jakebarnby.filemanager.models.SourceFile;
+import com.jakebarnby.filemanager.models.files.SourceFile;
 
 import java.util.ArrayList;
 import java.util.List;
