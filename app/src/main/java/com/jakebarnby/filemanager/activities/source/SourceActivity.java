@@ -258,7 +258,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             mDialog.setProgress(currentCount);
         }
     }
-    }
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
