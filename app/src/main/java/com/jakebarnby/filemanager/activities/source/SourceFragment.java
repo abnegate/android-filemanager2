@@ -79,6 +79,8 @@ public abstract class SourceFragment extends Fragment {
         mConnectButton.setOnClickListener(v -> {
             authenticateSource();
         });
+        //FIXME: Elevation not being set on API 21, connect button and progress bar cant be seen
+        ViewCompat.setElevation(mRecycler, Constants.PROGRESSBAR_ELEVATION-1);
         ViewCompat.setElevation(mProgressBar, Constants.PROGRESSBAR_ELEVATION);
         ViewCompat.setElevation(mConnectButton, Constants.PROGRESSBAR_ELEVATION);
         return rootView;
@@ -265,7 +267,7 @@ public abstract class SourceFragment extends Fragment {
                 getActivity().setTitle(String.valueOf(SelectedFilesManager.getInstance().getSelectedFiles().size()) + " selected");
             } else {
                 setCurrentDirectory(file);
-                ((SourceActivity)getActivity()).setCurrentDir(file);
+                ((SourceActivity)getActivity()).setActiveDirectory(file);
 
                 if (file.getData().isDirectory() && file.getData().canRead()) {
                     ((FileSystemAdapter) mRecycler.getAdapter()).setCurrentDirectory(file);

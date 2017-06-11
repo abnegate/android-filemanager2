@@ -29,31 +29,49 @@ public class SourceTransferService extends IntentService {
     public static final String ACTION_COMPLETE = "com.jakebarnby.filemanager.services.action.COMPLETE";
     public static final String ACTION_SHOW_DIALOG = "com.jakebarnby.filemanager.services.action.SHOW_DIALOG";
     public static final String ACTION_UPDATE_DIALOG = "com.jakebarnby.filemanager.services.action.UPDATE_DIALOG";
-    public static final String EXTRA_CURRENT_COUNT = "com.jakebarnby.filemanager.services.extra.CURRENT_COUNT";
-    public static final String EXTRA_TOTAL_COUNT = "com.jakebarnby.filemanager.services.extra.TOTAL_COUNT";
-    public static final int NOTIFICATION_ID = 100;
+
     private static final String ACTION_COPY = "com.jakebarnby.filemanager.services.action.COPY";
     private static final String ACTION_MOVE = "com.jakebarnby.filemanager.services.action.MOVE";
     private static final String ACTION_DELETE = "com.jakebarnby.filemanager.services.action.DELETE";
+
+    public static final String EXTRA_CURRENT_COUNT = "com.jakebarnby.filemanager.services.extra.CURRENT_COUNT";
+    public static final String EXTRA_TOTAL_COUNT = "com.jakebarnby.filemanager.services.extra.TOTAL_COUNT";
     private static final String EXTRA_SOURCE_FILES = "com.jakebarnby.filemanager.services.extra.SOURCE_FILES";
     private static final String EXTRA_SOURCE_DEST = "com.jakebarnby.filemanager.services.extra.SOURCE DESTINATION";
+    public static final String EXTRA_DIALOG_TITLE = "com.jakebarnby.filemanager.services.extra.DIALOG_TITLE";
 
     static {
         System.loadLibrary("io-lib");
     }
 
+    /**
+     * Calls into native io-lib and copies the file at the given path to the given destination
+     * @param sourcePath            The path of the file to copy
+     * @param destinationPath       The destination of the file to copy
+     * @return                      0 for success, otherwise operation failed
+     */
     public native int copyFileNative(String sourcePath, String destinationPath);
 
+    /**
+     * Calls into native io-lib and deletes the file at the given path to the given destination
+     * @param sourcePath    The path of the file to delete
+     * @return              0 for success, otherwise operation failed
+     */
     public native int deleteFileNative(String sourcePath);
 
+    /**
+     * Create a new instance
+     */
     public SourceTransferService() {
         super("SourceTransferService");
     }
 
     /**
-     * @param context
-     * @param toCopy
-     * @param sourceDest
+     * Start the service for a copy or cut action with the given file.
+     * @param context       Context for resources
+     * @param toCopy        The files to copy
+     * @param sourceDest    The destination directory
+     * @param move          Whether the files should be deleted after copying
      */
     public static void startActionCopy(Context context, List<SourceFile> toCopy, SourceFile sourceDest, boolean move) {
         Intent intent = new Intent(context, SourceTransferService.class);
@@ -64,8 +82,7 @@ public class SourceTransferService extends IntentService {
     }
 
     /**
-     * Start the service for a delete action with the given files
-     *
+     * Start the service for a delete action with the given files.
      * @param context  Context for resources
      * @param toDelete The files to delete
      */
@@ -81,7 +98,6 @@ public class SourceTransferService extends IntentService {
         if (intent != null) {
             final List<SourceFile> targets = (List<SourceFile>) intent.getSerializableExtra(EXTRA_SOURCE_FILES);
             final SourceFile sourceDest = (SourceFile) intent.getSerializableExtra(EXTRA_SOURCE_DEST);
-
             final String action = intent.getAction();
             switch (action) {
                 case ACTION_COPY:
@@ -100,69 +116,21 @@ public class SourceTransferService extends IntentService {
 
     /**
      * Copy the given files to the given destination
-     *
      * @param toCopy  The files to copy
      * @param destDir Where to copy them to
      */
     private int copy(List<SourceFile> toCopy, SourceFile destDir, boolean move) {
-        showDialog(toCopy.size());
+        showDialog(move ? getString(R.string.moving) : getString(R.string.copying), toCopy.size());
         int returnInt = -1;
         for (SourceFile file : toCopy) {
-            String source = null;
-            switch (file.getSourceName()) {
-                case Constants.Sources.LOCAL:
-                    source = file.getUri().getPath();
-                    break;
-                case Constants.Sources.DROPBOX:
-                    File newFile = DropboxFactory
-                            .Instance()
-                            .downloadFile(file.getUri().getPath(), file.getName());
-                    if (newFile.exists())
-                        source = newFile.getPath();
-                    else
-                        returnInt = -1;
-                    break;
-                case Constants.Sources.GOOGLE_DRIVE:
-                    //TODO: Download from google drive and get path as string
-                    File googleFile = GoogleDriveFactory
-                            .Instance()
-                            .downloadFile(((GoogleDriveFile)file).getDriveId(), destDir.getUri().getPath());
-                    if (googleFile.exists())
-                        source = googleFile.getPath();
-                    else
-                        returnInt = -1;
-                    break;
-                case Constants.Sources.ONEDRIVE:
-                    //TODO: Download from onedrive and get path as string
-                    break;
-            }
-
-            switch (destDir.getSourceName()) {
-                case Constants.Sources.LOCAL:
-                    returnInt = copyFileNative(source, destDir.getUri().getPath() + "/" + file.getName());
-                    break;
-                case Constants.Sources.DROPBOX:
-                    DropboxFactory
-                            .Instance()
-                            .uploadFile(source, destDir.getUri().getPath());
-                    break;
-                case Constants.Sources.GOOGLE_DRIVE:
-                    GoogleDriveFactory
-                            .Instance()
-                            .uploadFile(source, ((GoogleDriveFile)destDir).getDriveId());
-                    break;
-                case Constants.Sources.ONEDRIVE:
-                    //TODO: Upload to onedrive
-                    break;
-            }
+            String newFilePath = getFile(file, destDir);
+            putFile(newFilePath, file.getName(), destDir);
             postNotification("File Manager", "Copying " + (toCopy.indexOf(file) + 1) + " of " + toCopy.size());
             updateDialog(toCopy.indexOf(file) + 1);
         }
         if (move) {
             delete(toCopy);
         }
-        postNotification("File Manager", "Copying complete!");
-
         Intent intent = new Intent();
         intent.setAction(ACTION_COMPLETE);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
@@ -171,11 +139,72 @@ public class SourceTransferService extends IntentService {
     }
 
     /**
+     * Gets the given source file and stores it in the given destination
+     * @param file          The file to retrieve
+     * @param destination   The destination to store it
+     * @return              The path of the retrieved file
+     */
+    private String getFile(SourceFile file, SourceFile destination) {
+        String newFilePath = null;
+        switch (file.getSourceName()) {
+            case Constants.Sources.LOCAL:
+                newFilePath = file.getUri().getPath();
+                break;
+            case Constants.Sources.DROPBOX:
+                File newFile = DropboxFactory
+                        .Instance()
+                        .downloadFile(file.getUri().getPath(), file.getName(), destination.getUri().getPath());
+                if (newFile.exists())
+                    newFilePath = newFile.getPath();
+                break;
+            case Constants.Sources.GOOGLE_DRIVE:
+                //TODO: Download from google drive and get path as string
+                File googleFile = GoogleDriveFactory
+                        .Instance()
+                        .downloadFile(((GoogleDriveFile)file).getDriveId(), destination.getUri().getPath());
+                if (googleFile.exists())
+                    newFilePath = googleFile.getPath();
+                break;
+            case Constants.Sources.ONEDRIVE:
+                //TODO: Download from onedrive and get path as string
+                break;
+        }
+        return newFilePath;
+    }
+
+    /**
+     * Puts the given file with the given fileName at the given destination
+     * @param newFilePath   The path of the file to put
+     * @param fileName      The name of the file to put
+     * @param destDir       The destination of the file
+     */
+    private void putFile(String newFilePath, String fileName, SourceFile destDir) {
+        switch (destDir.getSourceName()) {
+            case Constants.Sources.LOCAL:
+                copyFileNative(newFilePath, destDir.getUri().getPath() + "/" + fileName);
+                break;
+            case Constants.Sources.DROPBOX:
+                DropboxFactory
+                        .Instance()
+                        .uploadFile(newFilePath, destDir.getUri().getPath());
+                break;
+            case Constants.Sources.GOOGLE_DRIVE:
+                GoogleDriveFactory
+                        .Instance()
+                        .uploadFile(newFilePath, ((GoogleDriveFile)destDir).getDriveId());
+                break;
+            case Constants.Sources.ONEDRIVE:
+                //TODO: Upload to onedrive
+                break;
+        }
+    }
+
+    /**
      * Delete the given files
-     *
      * @param toDelete The files to delete
      */
     private int delete(List<SourceFile> toDelete) {
+        showDialog(getString(R.string.deleting), toDelete.size());
         int returnInt = -1;
         for (SourceFile file : toDelete) {
             switch (file.getSourceName()) {
@@ -192,13 +221,40 @@ public class SourceTransferService extends IntentService {
                     //TODO: Onedrive delete api call
                     break;
             }
+            updateDialog(toDelete.indexOf(file)+1);
         }
         return returnInt;
     }
 
+
+    /**
+     * Broadcasts that the hosting activity should display a dialog with the given title and max progress
+     * @param title         The title for the dialog
+     * @param totalCount    The max progress for the operation
+     */
+    private void showDialog(String title, int totalCount) {
+        Intent intent = new Intent();
+        intent.setAction(ACTION_SHOW_DIALOG);
+        intent.putExtra(EXTRA_DIALOG_TITLE, title);
+        intent.putExtra(EXTRA_TOTAL_COUNT, totalCount);
+        LocalBroadcastManager.getInstance(this)
+                .sendBroadcast(intent);
+    }
+
+    /**
+     * Broadcasts that the hosting activity should update a dialog (if showing) displaying the new progress value
+     * @param currentCount  The current progress of the operation
+     */
+    private void updateDialog(int currentCount) {
+        Intent intent = new Intent();
+        intent.setAction(ACTION_UPDATE_DIALOG);
+        intent.putExtra(EXTRA_CURRENT_COUNT, currentCount);
+        LocalBroadcastManager.getInstance(this)
+                .sendBroadcast(intent);
+    }
+
     /**
      * Post a notification with the given title and content to the status bar
-     *
      * @param title   Title for the notification
      * @param content Content body of the notification
      */
@@ -222,7 +278,7 @@ public class SourceTransferService extends IntentService {
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+        notificationManager.notify(Constants.NOTIFICATION_ID, mBuilder.build());
     }
 
     /**
@@ -231,22 +287,6 @@ public class SourceTransferService extends IntentService {
     private void hideNotification() {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancel(NOTIFICATION_ID);
-    }
-
-    private void updateDialog(int currentCount) {
-        Intent intent = new Intent();
-        intent.setAction(ACTION_UPDATE_DIALOG);
-        intent.putExtra(EXTRA_CURRENT_COUNT, currentCount);
-        LocalBroadcastManager.getInstance(this)
-                .sendBroadcast(intent);
-    }
-
-    private void showDialog(int totalCount) {
-        Intent intent = new Intent();
-        intent.setAction(ACTION_SHOW_DIALOG);
-        intent.putExtra(EXTRA_TOTAL_COUNT, totalCount);
-        LocalBroadcastManager.getInstance(this)
-                .sendBroadcast(intent);
+        notificationManager.cancel(Constants.NOTIFICATION_ID);
     }
 }

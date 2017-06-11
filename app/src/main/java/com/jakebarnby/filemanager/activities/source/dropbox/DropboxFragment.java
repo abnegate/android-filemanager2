@@ -137,6 +137,7 @@ public class DropboxFragment extends SourceFragment {
         protected TreeNode<SourceFile> doInBackground(Void... voids) {
             SourceFile rootSourceFile = new DropboxFile();
             ((DropboxFile) rootSourceFile).setFileProperties(new Metadata("Dropbox"));
+            rootSourceFile.setDirectory(true);
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
             setCurrentDirectory(rootFileTreeNode);

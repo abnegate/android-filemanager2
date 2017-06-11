@@ -1,7 +1,5 @@
 package com.jakebarnby.filemanager.managers;
 
-import android.content.Context;
-import android.os.Environment;
 import android.util.Log;
 
 import com.dropbox.core.DbxException;
@@ -46,21 +44,18 @@ public class DropboxFactory {
      * @param name
      * @return
      */
-    public File downloadFile(String downloadPath, String name) {
+    public File downloadFile(String downloadPath, String name, String destinationPath) {
         try {
-            File path = Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_DOWNLOADS);
-            File file = new File(path, name);
-            if (!path.exists()) {
-                if (!path.mkdirs()) {
-                    throw new RuntimeException("Unable to create directory: " + path);
+            File file = new File(destinationPath, name);
+            File destination = new File(destinationPath);
+            if (!destination.exists()) {
+                if (!destination.mkdirs()) {
+                    throw new RuntimeException("Unable to create directory: " + file);
                 }
             }
-
-            if (!path.isDirectory()) {
-                 throw new IllegalStateException("Download path is not a directory: " + path);
+            if (!destination.isDirectory()) {
+                 throw new IllegalStateException("Download path is not a directory: " + file);
             }
-
             try (OutputStream outputStream = new FileOutputStream(file)) {
                 getClient()
                         .files()
@@ -72,33 +67,27 @@ public class DropboxFactory {
             Log.e("DROPBOX", e.getLocalizedMessage());
             e.printStackTrace();
         }
-
         return null;
     }
 
     /**
-     *  @param context
      * @param fileUri
      * @param destPath
      */
     public FileMetadata uploadFile(String fileUri, String destPath) {
-        File localFile = new File(fileUri).exists() ? new File(fileUri) : null;
-
-        if (localFile != null) {
-            //FIXME: This doesn't ensuring the name is a valid dropbox file name
-            String remoteFileName = localFile.getName();
-
+        File localFile = new File(fileUri);
+        if (localFile.exists()) {
+            //FIXME: This doesn't ensure the name is a valid dropbox file name
             try (InputStream inputStream = new FileInputStream(localFile)) {
                 return getClient()
                         .files()
-                        .uploadBuilder(destPath + "/" + remoteFileName)
+                        .uploadBuilder(destPath + "/" + localFile.getName())
                         .withMode(WriteMode.OVERWRITE)
                         .uploadAndFinish(inputStream);
             } catch (DbxException | IOException e) {
                 e.printStackTrace();
             }
         }
-
         return null;
     }
 }

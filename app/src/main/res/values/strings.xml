@@ -16,4 +16,7 @@
     <string name="background">Background</string>
     <string name="copied">Selection copied</string>
     <string name="cut">Selection cut</string>
+    <string name="copying">Copying..</string>
+    <string name="deleting">Deleting..</string>
+    <string name="moving">Moving..</string>
 </resources>

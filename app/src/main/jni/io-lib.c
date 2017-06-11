@@ -61,20 +61,6 @@ JNIEXPORT jint JNICALL
 }
 
 JNIEXPORT jint JNICALL
-Java_com_jakebarnby_filemanager_services_SourceTransferService_moveFileNative(JNIEnv *env,
-                                                                         jobject instance,
-                                                                         jstring sourcePath_,
-                                                                         jstring destinationPath_) {
-    const char *sourcePath = (*env)->GetStringUTFChars(env, sourcePath_, 0);
-    const char *destinationPath = (*env)->GetStringUTFChars(env, destinationPath_, 0);
-
-    // TODO
-
-    (*env)->ReleaseStringUTFChars(env, sourcePath_, sourcePath);
-    (*env)->ReleaseStringUTFChars(env, destinationPath_, destinationPath);
-}
-
-JNIEXPORT jint JNICALL
 Java_com_jakebarnby_filemanager_services_SourceTransferService_deleteFileNative(JNIEnv *env,
                                                                           jobject instance,
                                                                           jstring sourcePath_) {

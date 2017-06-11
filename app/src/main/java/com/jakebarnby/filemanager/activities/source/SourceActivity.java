@@ -32,13 +32,14 @@ import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_C
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_SHOW_DIALOG;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_UPDATE_DIALOG;
 import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_CURRENT_COUNT;
+import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_DIALOG_TITLE;
 import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_TOTAL_COUNT;
 
 public class SourceActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
 
     private SourcesPagerAdapter         mSourcesPagerAdapter;
     private ViewPager                   mViewPager;
-    private TreeNode<SourceFile>        mCurrentDir;
+    private TreeNode<SourceFile>        mActiveDirectory;
     private FileAction                  mCurrentFileAction;
     private BroadcastReceiver           mBroadcastReciever;
     private ProgressDialog              mDialog;
@@ -52,12 +53,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         return mSourcesPagerAdapter;
     }
 
-    public TreeNode<SourceFile>  getCurrentDir() {
-        return mCurrentDir;
+    public TreeNode<SourceFile> getActiveDirectory() {
+        return mActiveDirectory;
     }
 
-    public void setCurrentDir(TreeNode<SourceFile>  mCurrentPath) {
-        this.mCurrentDir = mCurrentPath;
+    public void setActiveDirectory(TreeNode<SourceFile>  currentDirectory) {
+        this.mActiveDirectory = currentDirectory;
     }
 
     @Override
@@ -170,9 +171,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void startParseAction() {
         if (mCurrentFileAction != null) {
             if (mCurrentFileAction == FileAction.COPY)
-                SourceTransferService.startActionCopy(SourceActivity.this, SelectedFilesManager.getInstance().getSelectedFiles(), mCurrentDir.getData(), false);
+                SourceTransferService.startActionCopy(SourceActivity.this, SelectedFilesManager.getInstance().getSelectedFiles(), mActiveDirectory.getData(), false);
             else if (mCurrentFileAction == FileAction.CUT) {
-                SourceTransferService.startActionCopy(SourceActivity.this, SelectedFilesManager.getInstance().getSelectedFiles(), mCurrentDir.getData(), true);
+                SourceTransferService.startActionCopy(SourceActivity.this, SelectedFilesManager.getInstance().getSelectedFiles(), mActiveDirectory.getData(), true);
             }
         }
     }
@@ -202,15 +203,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void completeServiceAction(Intent intent) {
         if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
-
         }
-
-        //TODO: Only need to refresh the current fragment and the current directory of the adapterf ather than reload the whole tree
+        //TODO: Only need to refresh the current fragment and the current directory of the adapter rather than reload the whole tree
         for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
             fragment.setMultiSelectEnabled(false);
             fragment.setFilesLoaded(false);
             fragment.loadSource();
-            //FIXME: Not refreshing the recycler view after reloading source for some reason
         }
     }
 
@@ -227,11 +225,15 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * @param intent    The broadcasted intent with dialog extras
      */
     private void showProgressDialog(Intent intent) {
+        String title = intent.getStringExtra(EXTRA_DIALOG_TITLE);
+        if (title == null) {
+            title = "Operation in progress..";
+        }
         int totalCount = intent.getIntExtra(EXTRA_TOTAL_COUNT, 0);
         int currentCount = 0;
 
         mDialog = new ProgressDialog(this);
-        mDialog.setTitle("Copying..");
+        mDialog.setTitle(title);
         mDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mDialog.setIndeterminate(true);
         mDialog.setMax(totalCount);
@@ -246,7 +248,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     /**
-     * Up date the progress of the {@link ProgressDialog} if it is showing
+     * Update the progress of the {@link ProgressDialog} if it is showing
      * @param intent    The broadcasted intent with update extras
      */
     private void updateProgressDialog(Intent intent) {
@@ -268,7 +270,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     public void onPageSelected(int position) {
         TreeNode<SourceFile> currentDir = mSourcesPagerAdapter.getFragments().get(position).getCurrentDirectory();
         if (currentDir != null) {
-            setCurrentDir(currentDir);
+            setActiveDirectory(currentDir);
         }
     }
 
@@ -280,7 +282,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     @Override
     public void onBackPressed() {
         List<SourceFragment> fragments = mSourcesPagerAdapter.getFragments();
-
         boolean wasEnabled = false;
         for(SourceFragment fragment: fragments) {
             if (fragment.isMultiSelectEnabled()) {
