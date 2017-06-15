@@ -49,7 +49,6 @@ public abstract class SourceFragment extends Fragment {
     protected LottieAnimationView   mProgressBar;
     protected Button                mConnectButton;
 
-
     /**
      * Authenticate the current source
      */
@@ -286,9 +285,6 @@ public abstract class SourceFragment extends Fragment {
     protected FileSystemAdapter.OnFileLongClickedListener createOnLongClickListener() {
         return file -> {
             if (!mMultiSelectEnabled) {
-//                for (SourceFragment fragment: ((SourceActivity)getActivity()).getPagerAdapter().getFragments()) {
-//                    fragment.setMultiSelectEnabled(true);
-//                }
                 setMultiSelectEnabled(true);
             }
         };

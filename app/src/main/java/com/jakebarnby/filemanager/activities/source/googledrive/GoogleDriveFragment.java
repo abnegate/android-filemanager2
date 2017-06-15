@@ -10,9 +10,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.auth.GoogleAuthException;
@@ -275,7 +275,7 @@ public class GoogleDriveFragment extends SourceFragment {
                             ((UserRecoverableAuthIOException) mLastError).getIntent(),
                             Constants.RequestCodes.GOOGLE_SIGN_IN);
                 } else {
-                    Log.e("ERROR", mLastError.getLocalizedMessage());
+                    mLastError.printStackTrace();
                 }
             } else {
             }
@@ -321,9 +321,9 @@ public class GoogleDriveFragment extends SourceFragment {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     authGoogle();
                 } else if (!shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-//                    Snackbar.make(mRecycler, R.string.snackbar_permissions, Snackbar.LENGTH_LONG)
-//                            .setAction(R.string.action_settings, v -> String b = "";)
-//                            .show();
+                    Snackbar.make(mRecycler, R.string.snackbar_permissions, Snackbar.LENGTH_LONG)
+                            .setAction(R.string.action_settings, v -> {})
+                            .show();
                 }
                 break;
             }

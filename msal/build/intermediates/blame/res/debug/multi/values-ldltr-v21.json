@@ -1,6 +1,6 @@
 [
     {
-        "outputFile": "C:\\Users\\Jake\\Local\\FileManager\\msal\\build\\intermediates\\res\\merged\\debug\\values-ldltr-v21\\values-ldltr-v21.xml",
+        "outputFile": "/Users/jakebarnby/Local/android-filemanager2/msal/build/intermediates/res/merged/debug/values-ldltr-v21/values-ldltr-v21.xml",
         "map": [
             {
                 "to": {
@@ -11,7 +11,7 @@
                     "endOffset": 163
                 },
                 "from": {
-                    "file": "C:\\Users\\Jake\\.gradle\\caches\\transforms-1\\files-1.1\\appcompat-v7-25.3.1.aar\\2419e7064bd4d1824a34ca1890259eff\\res\\values-ldltr-v21\\values-ldltr-v21.xml",
+                    "file": "/Users/jakebarnby/.gradle/caches/transforms-1/files-1.1/appcompat-v7-25.3.1.aar/316b225d425b51d8c8a52f4b8e5f2a70/res/values-ldltr-v21/values-ldltr-v21.xml",
                     "position": {
                         "startLine": 2,
                         "startColumn": 4,

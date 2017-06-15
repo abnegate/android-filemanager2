@@ -136,7 +136,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         return super.onOptionsItemSelected(item);
     }
 
-
     /**
      * Handles menu clicks from the fab action menu
      * @param menuItem  The selected item
@@ -146,11 +145,11 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         switch(id) {
             case R.id.action_copy:
                 mCurrentFileAction = FileAction.COPY;
-                Snackbar.make(getWindow().getCurrentFocus(), getString(R.string.copied), Snackbar.LENGTH_SHORT);
+                Snackbar.make(mViewPager, getString(R.string.copied), Snackbar.LENGTH_SHORT).show();
                 break;
             case R.id.action_cut:
                 mCurrentFileAction = FileAction.CUT;
-                Snackbar.make(mViewPager, getString(R.string.cut), Snackbar.LENGTH_SHORT);
+                Snackbar.make(mViewPager, getString(R.string.cut), Snackbar.LENGTH_SHORT).show();
                 break;
             case R.id.action_paste:
                 startParseAction();
@@ -186,7 +185,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         String action = intent.getAction();
         switch(action) {
             case ACTION_COMPLETE:
-                completeServiceAction(intent);
+                completeServiceAction();
                 break;
             case ACTION_SHOW_DIALOG:
                 showProgressDialog(intent);
@@ -198,9 +197,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     /**
      *  Called when {@link SourceTransferService} broadcasts that it has completed a background action
-     * @param intent
      */
-    private void completeServiceAction(Intent intent) {
+    private void completeServiceAction() {
         if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
         }

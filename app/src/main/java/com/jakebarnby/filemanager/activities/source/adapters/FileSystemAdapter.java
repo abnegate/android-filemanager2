@@ -2,6 +2,10 @@ package com.jakebarnby.filemanager.activities.source.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -19,6 +23,9 @@ import java.util.List;
 
 public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.FileViewHolder> {
 
+    private static final long SCALE_DURATION = 1000L;
+    private static final long FADE_DURATION = 1000L;
+
     private TreeNode<SourceFile>        mParentDir;
     private List<TreeNode<SourceFile>>  mCurrentDirChildren;
     private List<SourceFile>            mSelectedFiles;
@@ -27,6 +34,8 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
     private boolean                     mMultiSelectEnabled;
     private TreeNode<SourceFile>        mRootTreeNode;
     private TreeNode<SourceFile> mCurrentDir;
+    private int lastPosition = -1;
+
 
     public FileSystemAdapter(TreeNode<SourceFile> rootNode) {
         mRootTreeNode = rootNode;
@@ -82,6 +91,26 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
             holder.mPreviewImage.setImageResource(R.drawable.ic_folder);
         } else {
             //TODO: Set file icon as thumbnail for file
+        }
+
+        setAnimation(holder.itemView, position);
+    }
+
+    private void setAnimation(View viewToAnimate, int position) {
+        AnimationSet animationSet = new AnimationSet(true);
+
+        if (position > lastPosition) {
+            ScaleAnimation scale = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+            scale.setDuration(SCALE_DURATION);
+
+            AlphaAnimation alpha = new AlphaAnimation(0.0f, 1.0f);
+            alpha.setDuration(FADE_DURATION);
+
+            animationSet.addAnimation(scale);
+            animationSet.addAnimation(alpha);
+
+            viewToAnimate.startAnimation(animationSet);
+            lastPosition = position;
         }
     }
 
