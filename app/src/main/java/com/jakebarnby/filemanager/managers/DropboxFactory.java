@@ -90,4 +90,18 @@ public class DropboxFactory {
         }
         return null;
     }
+
+    /**
+     *
+     * @param filePath
+     */
+    public void deleteFile(String filePath) {
+        try {
+            getClient()
+                    .files()
+                    .delete(filePath);
+        } catch (DbxException e) {
+            e.printStackTrace();
+        }
+    }
 }

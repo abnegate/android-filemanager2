@@ -75,10 +75,6 @@ public class GoogleDriveFragment extends SourceFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mCredential = GoogleAccountCredential.usingOAuth2(
-                getActivity().getApplicationContext(), Arrays.asList(SCOPES))
-                .setBackOff(new ExponentialBackOff());
-
     }
 
     @Override
@@ -93,6 +89,10 @@ public class GoogleDriveFragment extends SourceFragment {
      * Create a google credential and try to call the API with it, show a login dialog if it fails
      */
     private void authGoogle() {
+        mCredential = GoogleAccountCredential.usingOAuth2(
+                getActivity().getApplicationContext(), Arrays.asList(SCOPES))
+                .setBackOff(new ExponentialBackOff());
+
         getResultsFromApi();
     }
 

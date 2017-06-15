@@ -12,8 +12,10 @@ import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.SourceActivity;
 import com.jakebarnby.filemanager.managers.DropboxFactory;
 import com.jakebarnby.filemanager.managers.GoogleDriveFactory;
+import com.jakebarnby.filemanager.managers.OneDriveFactory;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.models.files.GoogleDriveFile;
+import com.jakebarnby.filemanager.models.files.OneDriveFile;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 
@@ -119,7 +121,7 @@ public class SourceTransferService extends IntentService {
      * @param toCopy  The files to copy
      * @param destDir Where to copy them to
      */
-    private int copy(List<SourceFile> toCopy, SourceFile destDir, boolean move) {
+    private void copy(List<SourceFile> toCopy, SourceFile destDir, boolean move) {
         showDialog(move ? getString(R.string.moving) : getString(R.string.copying), toCopy.size());
         int returnInt = -1;
         for (SourceFile file : toCopy) {
@@ -131,11 +133,7 @@ public class SourceTransferService extends IntentService {
         if (move) {
             delete(toCopy);
         }
-        Intent intent = new Intent();
-        intent.setAction(ACTION_COMPLETE);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-        SelectedFilesManager.getInstance().getSelectedFiles().clear();
-        return returnInt;
+        finishOperation();
     }
 
     /**
@@ -158,7 +156,7 @@ public class SourceTransferService extends IntentService {
                     newFilePath = newFile.getPath();
                 break;
             case Constants.Sources.GOOGLE_DRIVE:
-                //TODO: Download from google drive and get path as string
+                //FIXME: Download from google drive and get path as string
                 File googleFile = GoogleDriveFactory
                         .Instance()
                         .downloadFile(((GoogleDriveFile)file).getDriveId(), destination.getUri().getPath());
@@ -203,7 +201,7 @@ public class SourceTransferService extends IntentService {
      * Delete the given files
      * @param toDelete The files to delete
      */
-    private int delete(List<SourceFile> toDelete) {
+    private void delete(List<SourceFile> toDelete) {
         showDialog(getString(R.string.deleting), toDelete.size());
         int returnInt = -1;
         for (SourceFile file : toDelete) {
@@ -212,18 +210,30 @@ public class SourceTransferService extends IntentService {
                     returnInt = deleteFileNative(file.getUri().getPath());
                     break;
                 case Constants.Sources.DROPBOX:
-                    //TODO: Dropbox delete api call
+                    DropboxFactory.Instance().deleteFile(file.getUri().getPath());
                     break;
                 case Constants.Sources.GOOGLE_DRIVE:
                     //TODO: Google drive delete api call
+                    GoogleDriveFactory.Instance().deleteFile(((GoogleDriveFile)file).getDriveId());
                     break;
                 case Constants.Sources.ONEDRIVE:
                     //TODO: Onedrive delete api call
+                    OneDriveFactory.getInstance().deleteFile(((OneDriveFile)file).getDriveId());
                     break;
             }
             updateDialog(toDelete.indexOf(file)+1);
         }
-        return returnInt;
+        finishOperation();
+    }
+
+    /**
+     * Notifies the activity that this operation is finished
+     */
+    private void finishOperation() {
+        Intent intent = new Intent();
+        intent.setAction(ACTION_COMPLETE);
+        SelectedFilesManager.getInstance().getSelectedFiles().clear();
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
 

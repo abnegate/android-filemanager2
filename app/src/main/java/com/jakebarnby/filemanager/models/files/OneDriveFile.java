@@ -10,11 +10,23 @@ import com.microsoft.graph.extensions.DriveItem;
  */
 
 public class OneDriveFile extends SourceFile {
+
+    private String mDriveId;
+
     public void setFileProperties(DriveItem file) {
         setUri(Uri.parse(file.webUrl));
+        setDriveId(file.id);
         setName(file.name);
         setSourceName(Constants.Sources.ONEDRIVE);
         setCanRead(true);
         setDirectory(file.folder != null);
+    }
+
+    public String getDriveId() {
+        return mDriveId;
+    }
+
+    public void setDriveId(String mDriveId) {
+        this.mDriveId = mDriveId;
     }
 }

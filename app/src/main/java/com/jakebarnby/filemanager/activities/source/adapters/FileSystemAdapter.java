@@ -23,7 +23,7 @@ import java.util.List;
 
 public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.FileViewHolder> {
 
-    private static final long SCALE_DURATION = 1000L;
+    private static final long SCALE_DURATION = 700L;
     private static final long FADE_DURATION = 1000L;
 
     private TreeNode<SourceFile>        mParentDir;

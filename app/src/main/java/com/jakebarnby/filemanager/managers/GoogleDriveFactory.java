@@ -37,6 +37,7 @@ public class GoogleDriveFactory {
     public Drive getService() {
         return mService;
     }
+
     /**
      * Download a file from Google Drive with the given id and the given path name
      * @param fileId        Id of the file to download
@@ -80,5 +81,17 @@ public class GoogleDriveFactory {
             e.printStackTrace();
         }
         System.out.println("File uploaded");
+    }
+
+    /**
+     * Delete the gile with the given ID from Google Drive
+     * @param fileId    The ID of the file to delete
+     */
+    public void deleteFile(String fileId) {
+        try {
+            mService.files().delete(fileId);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

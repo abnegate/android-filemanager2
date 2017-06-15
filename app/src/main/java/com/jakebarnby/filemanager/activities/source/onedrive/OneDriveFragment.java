@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.jakebarnby.filemanager.activities.source.SourceFragment;
+import com.jakebarnby.filemanager.managers.OneDriveFactory;
 import com.jakebarnby.filemanager.models.files.OneDriveFile;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.TreeNode;
@@ -20,7 +21,6 @@ import com.microsoft.graph.core.IClientConfig;
 import com.microsoft.graph.extensions.DriveItem;
 import com.microsoft.graph.extensions.GraphServiceClient;
 import com.microsoft.graph.extensions.IDriveItemCollectionPage;
-import com.microsoft.graph.extensions.IGraphServiceClient;
 import com.microsoft.identity.client.AuthenticationCallback;
 import com.microsoft.identity.client.AuthenticationResult;
 import com.microsoft.identity.client.MsalClientException;
@@ -35,17 +35,14 @@ import java.util.List;
 /**
  * Created by Jake on 6/7/2017.
  */
-
 public class OneDriveFragment extends SourceFragment {
 
-    public static final String              TAG = "ONEDRIVE";
-    final static String                     CLIENT_ID = "019d333e-3e7f-4c04-a214-f12602dd5b10";
-    private static final String[]           SCOPES  = {"https://graph.microsoft.com/Files.ReadWrite"};
-    final static String                     MSGRAPH_URL = "https://graph.microsoft.com/v1.0/me";
+    public static final String              TAG         = "ONEDRIVE";
+    final static String                     CLIENT_ID   = "019d333e-3e7f-4c04-a214-f12602dd5b10";
+    private static final String[]           SCOPES      = {"https://graph.microsoft.com/Files.ReadWrite"};
 
     private PublicClientApplication         mClient;
     private AuthenticationResult            mAuthResult;
-    private IGraphServiceClient             mGraphClient;
 
     /**
      * Return a new instance of this Fragment
@@ -58,10 +55,6 @@ public class OneDriveFragment extends SourceFragment {
         args.putString("TITLE", sourceName);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    public PublicClientApplication getClient() {
-        return mClient;
     }
 
     @Override
@@ -115,12 +108,17 @@ public class OneDriveFragment extends SourceFragment {
                             iHttpRequest.addHeader("Authorization", String.format("Bearer %s", mAuthResult.getAccessToken()));
                     });
 
-            mGraphClient = new GraphServiceClient
-                    .Builder()
-                    .fromConfig(mClientConfig)
-                    .buildClient();
+            OneDriveFactory
+                    .getInstance()
+                    .setGraphClient(
+                        new GraphServiceClient
+                            .Builder()
+                            .fromConfig(mClientConfig)
+                            .buildClient());
 
-            mGraphClient
+            OneDriveFactory
+                    .getInstance()
+                    .getGraphClient()
                     .getMe()
                     .getDrive()
                     .getRoot()
@@ -264,14 +262,16 @@ public class OneDriveFragment extends SourceFragment {
          * @param currentDirectory
          */
         private TreeNode<SourceFile> parseFileTree(DriveItem currentDirectory) {
-            IDriveItemCollectionPage items = mGraphClient
-                    .getMe()
-                    .getDrive()
-                    .getItems(currentDirectory.id)
-                    .getChildren()
-                    .buildRequest()
-                    .select("id, name, webUrl, folder")
-                    .get();
+            IDriveItemCollectionPage items = OneDriveFactory
+                                                    .getInstance()
+                                                    .getGraphClient()
+                                                    .getMe()
+                                                    .getDrive()
+                                                    .getItems(currentDirectory.id)
+                                                    .getChildren()
+                                                    .buildRequest()
+                                                    .select("id, name, webUrl, folder")
+                                                    .get();
 
             List<DriveItem> pageItems = items.getCurrentPage();
             for (DriveItem file : pageItems) {

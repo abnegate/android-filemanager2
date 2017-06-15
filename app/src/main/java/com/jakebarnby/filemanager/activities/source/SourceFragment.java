@@ -8,7 +8,6 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -79,9 +78,8 @@ public abstract class SourceFragment extends Fragment {
             authenticateSource();
         });
         //FIXME: Elevation not being set on API 21, connect button and progress bar cant be seen
-        ViewCompat.setElevation(mRecycler, Constants.PROGRESSBAR_ELEVATION-1);
-        ViewCompat.setElevation(mProgressBar, Constants.PROGRESSBAR_ELEVATION);
-        ViewCompat.setElevation(mConnectButton, Constants.PROGRESSBAR_ELEVATION);
+//        ViewCompat.setElevation(mProgressBar, Constants.PROGRESSBAR_ELEVATION);
+//        ViewCompat.setElevation(mConnectButton, Constants.PROGRESSBAR_ELEVATION);
         return rootView;
     }
 

@@ -39,18 +39,6 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-    <!--<TextView-->
-        <!--android:id="@+id/text_selected_count"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_width="9dp"-->
-        <!--android:text="@string/zero"-->
-        <!--android:elevation="20dp"-->
-        <!--android:textSize="18sp"-->
-        <!--android:textColor="@android:color/white"-->
-        <!--app:layout_anchor="@+id/fab_speed_dial"-->
-        <!--app:layout_anchorGravity="left|center"-->
-        <!--tools:layout_editor_absoluteX="308dp" />-->
-
     <io.github.yavski.fabspeeddial.FabSpeedDial
         android:id="@+id/fab_speed_dial"
         android:layout_width="wrap_content"
