@@ -39,29 +39,17 @@ public class DropboxFactory {
     }
 
     /**
-     *
      * @param downloadPath
-     * @param name
+     * @param destinationPath
      * @return
      */
-    public File downloadFile(String downloadPath, String name, String destinationPath) {
-        try {
-            File file = new File(destinationPath, name);
-            File destination = new File(destinationPath);
-            if (!destination.exists()) {
-                if (!destination.mkdirs()) {
-                    throw new RuntimeException("Unable to create directory: " + file);
-                }
-            }
-            if (!destination.isDirectory()) {
-                 throw new IllegalStateException("Download path is not a directory: " + file);
-            }
-            try (OutputStream outputStream = new FileOutputStream(file)) {
-                getClient()
-                        .files()
-                        .download(downloadPath)
-                        .download(outputStream);
-            }
+    public File downloadFile(String downloadPath, String destinationPath) {
+        File file = new File(destinationPath);
+        try (OutputStream outputStream = new FileOutputStream(file)) {
+            getClient()
+                    .files()
+                    .download(downloadPath)
+                    .download(outputStream);
             return file;
         } catch (DbxException | IOException e) {
             Log.e("DROPBOX", e.getLocalizedMessage());
@@ -92,7 +80,6 @@ public class DropboxFactory {
     }
 
     /**
-     *
      * @param filePath
      */
     public void deleteFile(String filePath) {
@@ -100,6 +87,21 @@ public class DropboxFactory {
             getClient()
                     .files()
                     .delete(filePath);
+        } catch (DbxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     *
+     * @param name
+     * @param path
+     */
+    public void createFolder(String name, String path) {
+        try {
+            getClient()
+                    .files()
+                    .createFolder(name + File.separator + path);
         } catch (DbxException e) {
             e.printStackTrace();
         }

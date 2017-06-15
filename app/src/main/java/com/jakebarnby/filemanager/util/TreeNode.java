@@ -8,30 +8,55 @@ import java.util.List;
  */
 
 public class TreeNode<T>{
-    private T data = null;
-    private List<TreeNode<T>> children = new ArrayList<>();
-    private TreeNode<T> parent = null;
+    private T                   data = null;
+    private List<TreeNode<T>>   children = new ArrayList<>();
+    private TreeNode<T>         parent = null;
 
     public TreeNode(T data) {
         this.data = data;
     }
 
+    /**
+     *
+     * @param child
+     */
     public void addChild(TreeNode<T> child) {
         child.setParent(this);
         this.children.add(child);
     }
 
+    /**
+     *
+     * @param data
+     */
     public void addChild(T data) {
         TreeNode<T> newChild = new TreeNode<>(data);
         newChild.setParent(this);
         children.add(newChild);
     }
 
+    /**
+     *
+     * @param children
+     */
     public void addChildren(List<TreeNode<T>> children) {
         for(TreeNode<T> t : children) {
             t.setParent(this);
         }
         this.children.addAll(children);
+    }
+
+    public void replaceNode(TreeNode<T> parent, List<TreeNode<T>> children) {
+        this.parent = parent;
+        this.children = children;
+    }
+
+    /**
+     *
+     * @param children
+     */
+    public void setChildren(List<TreeNode<T>> children) {
+        this.children = children;
     }
 
     public List<TreeNode<T>> getChildren() {
@@ -46,7 +71,7 @@ public class TreeNode<T>{
         this.data = data;
     }
 
-    private void setParent(TreeNode<T> parent) {
+    public void setParent(TreeNode<T> parent) {
         this.parent = parent;
     }
 

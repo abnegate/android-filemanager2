@@ -75,6 +75,9 @@ public class GoogleDriveFragment extends SourceFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mCredential = GoogleAccountCredential.usingOAuth2(
+                getActivity().getApplicationContext(), Arrays.asList(SCOPES))
+                .setBackOff(new ExponentialBackOff());
     }
 
     @Override
@@ -89,10 +92,6 @@ public class GoogleDriveFragment extends SourceFragment {
      * Create a google credential and try to call the API with it, show a login dialog if it fails
      */
     private void authGoogle() {
-        mCredential = GoogleAccountCredential.usingOAuth2(
-                getActivity().getApplicationContext(), Arrays.asList(SCOPES))
-                .setBackOff(new ExponentialBackOff());
-
         getResultsFromApi();
     }
 
@@ -129,13 +128,21 @@ public class GoogleDriveFragment extends SourceFragment {
     @Override
     protected void loadSource() {
         if (!isFilesLoaded()) {
-            new GoogleDriveFileSystemLoader(mCredential).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            new GoogleDriveFileSystemLoader(mCredential).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "root");
         }
     }
 
     @Override
     protected void openFile(SourceFile file) {
 
+    }
+
+    @Override
+    protected void replaceCurrentDirectory(TreeNode<SourceFile> oldAdapterDir) {
+        setReload(true);
+        new GoogleDriveFileSystemLoader(mCredential)
+                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+                        ((GoogleDriveFile)oldAdapterDir.getData()).getDriveId());
     }
 
     @Override
@@ -176,7 +183,7 @@ public class GoogleDriveFragment extends SourceFragment {
      * An asynchronous task that handles the Drive API call.
      * Placing the API calls in their own task ensures the UI stays responsive.
      */
-    private class GoogleDriveFileSystemLoader extends AsyncTask<Void, Void, TreeNode<SourceFile>> {
+    private class GoogleDriveFileSystemLoader extends AsyncTask<String, Void, TreeNode<SourceFile>> {
         private Exception mLastError = null;
         private TreeNode<SourceFile> rootFileTreeNode;
         private TreeNode<SourceFile> currentLevelNode;
@@ -198,21 +205,22 @@ public class GoogleDriveFragment extends SourceFragment {
         }
 
         @Override
-        protected TreeNode<SourceFile> doInBackground(Void... params) {
+        protected TreeNode<SourceFile> doInBackground(String... paths) {
             try {
                 File rootFile = GoogleDriveFactory
                         .Instance()
                         .getService()
                         .files()
-                        .get("root")
+                        .get(paths[0])
                         .execute();
                 SourceFile rootSourceFile = new GoogleDriveFile();
                 ((GoogleDriveFile) rootSourceFile).setFileProperties(rootFile);
-
                 rootFileTreeNode = new TreeNode<>(rootSourceFile);
                 currentLevelNode = rootFileTreeNode;
-                setCurrentDirectory(rootFileTreeNode);
 
+                if (!isReload()) {
+                    setCurrentDirectory(rootFileTreeNode);
+                }
                 return parseDirectory(rootFile);
             } catch (Exception e) {
                 mLastError = e;
@@ -256,8 +264,14 @@ public class GoogleDriveFragment extends SourceFragment {
 
         @Override
         protected void onPostExecute(TreeNode<SourceFile> fileTree) {
-            setFileTreeRoot(fileTree);
-            initializeSourceRecyclerView(fileTree, createOnClickListener(), createOnLongClickListener());
+            super.onPostExecute(fileTree);
+            if (!isReload()) {
+                setFileTreeRoot(fileTree);
+                initializeSourceRecyclerView(fileTree, createOnClickListener(), createOnLongClickListener());
+            } else {
+                transformCurrentDirectory(getCurrentDirectory(), fileTree);
+                setReload(false);
+            }
             setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
         }
@@ -267,17 +281,12 @@ public class GoogleDriveFragment extends SourceFragment {
             mProgressBar.setVisibility(View.GONE);
             if (mLastError != null) {
                 if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
-                    Utils.showGooglePlayServicesAvailabilityErrorDialog(
-                            getActivity(), ((GooglePlayServicesAvailabilityIOException) mLastError)
-                                    .getConnectionStatusCode());
+                    Utils.showGooglePlayServicesAvailabilityErrorDialog(getActivity(), ((GooglePlayServicesAvailabilityIOException) mLastError).getConnectionStatusCode());
                 } else if (mLastError instanceof UserRecoverableAuthIOException) {
-                    startActivityForResult(
-                            ((UserRecoverableAuthIOException) mLastError).getIntent(),
-                            Constants.RequestCodes.GOOGLE_SIGN_IN);
+                    startActivityForResult(((UserRecoverableAuthIOException) mLastError).getIntent(), Constants.RequestCodes.GOOGLE_SIGN_IN);
                 } else {
                     mLastError.printStackTrace();
                 }
-            } else {
             }
         }
     }
@@ -296,7 +305,7 @@ public class GoogleDriveFragment extends SourceFragment {
     }
 
     /**
-     * Check if the user has granted local storage permission and request them if not
+     * Check if the user has granted contacts permission and request it if not
      */
     protected void checkPermissions() {
         int permissionCheck = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.GET_ACCOUNTS);
@@ -322,7 +331,7 @@ public class GoogleDriveFragment extends SourceFragment {
                     authGoogle();
                 } else if (!shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
                     Snackbar.make(mRecycler, R.string.snackbar_permissions, Snackbar.LENGTH_LONG)
-                            .setAction(R.string.action_settings, v -> {})
+                            .setAction(R.string.action_settings, v -> showAppDetails())
                             .show();
                 }
                 break;

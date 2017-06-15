@@ -20,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|enterAlways"
+            app:layout_scrollFlags="exitUntilCollapsed"
             app:popupTheme="@style/AppTheme.PopupOverlay">
         </android.support.v7.widget.Toolbar>
 
@@ -44,6 +44,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
+        android:visibility="invisible"
         app:fabGravity="bottom_end"
         app:fabMenu="@menu/menu_file_actions"
         app:miniFabBackgroundTint="@android:color/white"

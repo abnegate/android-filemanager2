@@ -5,9 +5,10 @@ import android.webkit.MimeTypeMap;
 
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.model.File;
+import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.Utils;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -39,19 +40,17 @@ public class GoogleDriveFactory {
     }
 
     /**
-     * Download a file from Google Drive with the given id and the given path name
-     * @param fileId        Id of the file to download
-     * @param fileName      The name of the file to download
-     * @throws IOException  Throws IO exception if an error occured when downloading the file
+     *
+     * @param fileId
+     * @param destinationPath
+     * @return
      */
-    public java.io.File downloadFile(String fileId, String fileName) {
-        try {
-            java.io.File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            java.io.File file = new java.io.File(path+fileName);
-            OutputStream outputStream = new FileOutputStream(file);
+    public File downloadFile(String fileId, String destinationPath) {
+        File file = new File(destinationPath);
+        try(OutputStream outputStream = new FileOutputStream(file)) {
             mService.files()
                     .get(fileId)
-                    .executeMediaAndDownloadTo(outputStream);
+                    .executeAndDownloadTo(outputStream);
             return file;
         } catch (IOException e) {
             e.printStackTrace();
@@ -63,18 +62,19 @@ public class GoogleDriveFactory {
      * Upload a file at the given path on Google Drive
      * @param filePath  Path to upload the file to
      */
-    public void uploadFile(String filePath, String parentId) {
-        java.io.File file = new java.io.File(filePath);
-        File fileMetadata = new File();
+    public void uploadFile(String filePath, String fileName, String parentId) {
+        File file = new File(filePath);
+        com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
         fileMetadata.setParents(Collections.singletonList(parentId));
-        fileMetadata.setName(filePath.substring(filePath.lastIndexOf("/")+1));
+        fileMetadata.setName(fileName);
 
         MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
         String mimeType = mimeTypeMap.getMimeTypeFromExtension(Utils.fileExt(filePath));
 
-        FileContent mediaContent = new FileContent(mimeType, file);
+        FileContent googleFile = new FileContent(mimeType, file);
         try {
-            mService.files().create(fileMetadata, mediaContent)
+            mService.files()
+                    .create(fileMetadata, googleFile)
                     .setFields("id")
                     .execute();
         } catch (IOException e) {
@@ -89,7 +89,28 @@ public class GoogleDriveFactory {
      */
     public void deleteFile(String fileId) {
         try {
-            mService.files().delete(fileId);
+            mService.files().delete(fileId).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 
+     * @param name
+     * @param parentId
+     */
+    public void createFolder(String name, String parentId) {
+        com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
+        fileMetadata.setName(name);
+        fileMetadata.setMimeType(Constants.GOOGLE_DRIVE_FOLDER_MIME);
+        fileMetadata.setParents(Collections.singletonList(parentId));
+        try {
+            com.google.api.services.drive.model.File file = mService
+                                                                .files()
+                                                                .create(fileMetadata)
+                                                                .setFields("id")
+                                                                .execute();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -1,6 +1,14 @@
 package com.jakebarnby.filemanager.managers;
-
+import com.microsoft.graph.extensions.DriveItem;
+import com.microsoft.graph.extensions.Folder;
 import com.microsoft.graph.extensions.IGraphServiceClient;
+import com.microsoft.graph.extensions.ItemReference;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Created by Jake on 6/9/2017.
@@ -26,15 +34,91 @@ public class OneDriveFactory {
         this.mGraphClient = mGraphClient;
     }
 
-    public void downloadFile() {
-        throw new UnsupportedOperationException("Not yet implemented");
+    /**
+     *
+     * @param id
+     * @param filename
+     * @param destinationPath
+     * @return
+     */
+    public File downloadFile(String id, String filename, String destinationPath) {
+        File file = new File(destinationPath, filename);
+
+        try(InputStream inputStream = mGraphClient
+                                    .getMe()
+                                    .getDrive()
+                                    .getItems(id)
+                                    .getContent()
+                                    .buildRequest()
+                                    .get();
+            OutputStream outputStream = new FileOutputStream(file)) {
+            byte[] buffer = new byte[inputStream.available()];
+            inputStream.read(buffer);
+            outputStream.write(buffer);
+            return file;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    public void uploadFile() {
-        throw new UnsupportedOperationException("Not yet implemented");
+    /**
+     *
+     * @param filePath
+     * @param fileName
+     * @param parentPath
+     */
+    public void uploadFile(String filePath, String fileName, String parentPath) {
+        File file = new File(filePath);
+        try(FileOutputStream outputStream = new FileOutputStream(file)) {
+            byte[] buffer = new byte[(int)file.length()];
+            outputStream.write(buffer);
+
+            mGraphClient
+                    .getMe()
+                    .getDrive()
+                    .getRoot()
+                    .getItemWithPath(parentPath + fileName)
+                    .getContent()
+                    .buildRequest()
+                    .put(buffer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    /**
+     *
+     * @param driveId
+     */
     public void deleteFile(String driveId) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        mGraphClient
+                .getMe()
+                .getDrive()
+                .getItems(driveId)
+                .buildRequest()
+                .delete();
+    }
+
+    /**
+     *
+     * @param name
+     * @param parentId
+     */
+    public void createFolder(String name, String parentId) {
+        DriveItem item = new DriveItem();
+        ItemReference parentRef  = new ItemReference();
+        parentRef.driveId = parentId;
+        item.parentReference = parentRef;
+        item.name = name;
+        item.folder = new Folder();
+
+        mGraphClient
+                .getMe()
+                .getDrive()
+                .getItems(parentId)
+                .getChildren()
+                .buildRequest()
+                .post(item);
     }
 }

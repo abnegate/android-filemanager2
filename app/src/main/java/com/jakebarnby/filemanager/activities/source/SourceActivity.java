@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.adapters.SourcesPagerAdapter;
@@ -43,6 +44,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private FileAction                  mCurrentFileAction;
     private BroadcastReceiver           mBroadcastReciever;
     private ProgressDialog              mDialog;
+    private FabSpeedDial mFabMenu;
 
     public enum FileAction {
         COPY,
@@ -57,7 +59,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         return mActiveDirectory;
     }
 
-    public void setActiveDirectory(TreeNode<SourceFile>  currentDirectory) {
+    public void setActiveDirectory(TreeNode<SourceFile> currentDirectory) {
         this.mActiveDirectory = currentDirectory;
     }
 
@@ -82,8 +84,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             }
         };
 
-        FabSpeedDial fabSpeedDial = (FabSpeedDial) findViewById(R.id.fab_speed_dial);
-        fabSpeedDial.setMenuListener(new SimpleMenuListenerAdapter() {
+        mFabMenu = (FabSpeedDial) findViewById(R.id.fab_speed_dial);
+        mFabMenu.setMenuListener(new SimpleMenuListenerAdapter() {
             @Override
             public boolean onMenuItemSelected(MenuItem menuItem) {
                 handleFabMenuItemSelected(menuItem);
@@ -138,11 +140,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     /**
      * Handles menu clicks from the fab action menu
-     * @param menuItem  The selected item
+     *
+     * @param menuItem The selected item
      */
     private void handleFabMenuItemSelected(MenuItem menuItem) {
         int id = menuItem.getItemId();
-        switch(id) {
+        switch (id) {
             case R.id.action_copy:
                 mCurrentFileAction = FileAction.COPY;
                 Snackbar.make(mViewPager, getString(R.string.copied), Snackbar.LENGTH_SHORT).show();
@@ -152,6 +155,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 Snackbar.make(mViewPager, getString(R.string.cut), Snackbar.LENGTH_SHORT).show();
                 break;
             case R.id.action_paste:
+                toggleFloatingMenu(false);
                 startParseAction();
                 break;
             case R.id.action_delete:
@@ -159,7 +163,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 break;
         }
 
-        for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
+        for (SourceFragment fragment : mSourcesPagerAdapter.getFragments()) {
             fragment.setMultiSelectEnabled(false);
         }
     }
@@ -179,11 +183,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     /**
      * Called when a broadcasted intent is recieved
-     * @param intent    The broadcasted intent
+     *
+     * @param intent The broadcasted intent
      */
     private void handleIntent(Intent intent) {
         String action = intent.getAction();
-        switch(action) {
+        switch (action) {
             case ACTION_COMPLETE:
                 completeServiceAction();
                 break;
@@ -196,18 +201,17 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     /**
-     *  Called when {@link SourceTransferService} broadcasts that it has completed a background action
+     * Called when {@link SourceTransferService} broadcasts that it has completed a background action
      */
     private void completeServiceAction() {
         if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
         }
-        //TODO: Only need to refresh the current fragment and the current directory of the adapter rather than reload the whole tree
-        for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
-            fragment.setMultiSelectEnabled(false);
-            fragment.setFilesLoaded(false);
-            fragment.loadSource();
-        }
+        setTitle(getString(R.string.app_name));
+        toggleFloatingMenu(false);
+        SourceFragment activeFragment = mSourcesPagerAdapter.getFragments().get(mViewPager.getCurrentItem());
+        activeFragment.replaceCurrentDirectory(getActiveDirectory());
+        activeFragment.setMultiSelectEnabled(false);
     }
 
     /**
@@ -220,7 +224,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     /**
      * Show a progress dialog
-     * @param intent    The broadcasted intent with dialog extras
+     *
+     * @param intent The broadcasted intent with dialog extras
      */
     private void showProgressDialog(Intent intent) {
         String title = intent.getStringExtra(EXTRA_DIALOG_TITLE);
@@ -236,18 +241,19 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         mDialog.setIndeterminate(true);
         mDialog.setMax(totalCount);
         mDialog.setProgress(currentCount);
-        mDialog.setButton(DialogInterface.BUTTON_NEGATIVE,getString(R.string.cancel), (dialog, which) ->
-            stopService(new Intent(this, SourceTransferService.class))
+        mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), (dialog, which) ->
+                stopService(new Intent(this, SourceTransferService.class))
         );
-        mDialog.setButton(DialogInterface.BUTTON_POSITIVE,getString(R.string.background), (dialog, which) ->
-            dialog.dismiss()
+        mDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.background), (dialog, which) ->
+                dialog.dismiss()
         );
         mDialog.show();
     }
 
     /**
      * Update the progress of the {@link ProgressDialog} if it is showing
-     * @param intent    The broadcasted intent with update extras
+     *
+     * @param intent The broadcasted intent with update extras
      */
     private void updateProgressDialog(Intent intent) {
         if (mDialog != null && mDialog.isShowing()) {
@@ -257,6 +263,10 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             int currentCount = intent.getIntExtra(EXTRA_CURRENT_COUNT, 0);
             mDialog.setProgress(currentCount);
         }
+    }
+
+    public void toggleFloatingMenu(boolean enabled) {
+        mFabMenu.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override
@@ -279,16 +289,13 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     @Override
     public void onBackPressed() {
-        List<SourceFragment> fragments = mSourcesPagerAdapter.getFragments();
-        boolean wasEnabled = false;
-        for(SourceFragment fragment: fragments) {
-            if (fragment.isMultiSelectEnabled()) {
-                fragment.setMultiSelectEnabled(false);
-                setTitle(R.string.app_name);
-                wasEnabled = true;
-            }
+        SourceFragment activeFragment = mSourcesPagerAdapter.getFragments().get(mViewPager.getCurrentItem());
+        if (activeFragment.isMultiSelectEnabled()) {
+            activeFragment.setMultiSelectEnabled(false);
+            toggleFloatingMenu(false);
+            setTitle(R.string.app_name);
+            return;
         }
-        if (wasEnabled) return;
         super.onBackPressed();
     }
 }

@@ -7,7 +7,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -41,6 +43,7 @@ public abstract class SourceFragment extends Fragment {
     private boolean                 mLoggedIn;
     private boolean                 mFilesLoaded;
     private boolean                 mMultiSelectEnabled;
+    private boolean                 mIsReload;
 
     protected RecyclerView          mRecycler;
     protected FileSystemListAdapter mFileSystemListAdapter;
@@ -64,6 +67,11 @@ public abstract class SourceFragment extends Fragment {
      */
     protected abstract void openFile(SourceFile file);
 
+    /**
+     *
+     * @param oldAdapterDir
+     */
+    protected abstract void replaceCurrentDirectory(TreeNode<SourceFile> oldAdapterDir);
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -78,7 +86,7 @@ public abstract class SourceFragment extends Fragment {
             authenticateSource();
         });
         //FIXME: Elevation not being set on API 21, connect button and progress bar cant be seen
-//        ViewCompat.setElevation(mProgressBar, Constants.PROGRESSBAR_ELEVATION);
+          ViewCompat.setElevation(mProgressBar, Constants.PROGRESSBAR_ELEVATION);
 //        ViewCompat.setElevation(mConnectButton, Constants.PROGRESSBAR_ELEVATION);
         return rootView;
     }
@@ -115,11 +123,13 @@ public abstract class SourceFragment extends Fragment {
         return mMultiSelectEnabled;
     }
 
-    public void setMultiSelectEnabled(boolean mMultiSelectEnabled) {
-        this.mMultiSelectEnabled = mMultiSelectEnabled;
-
+    public void setMultiSelectEnabled(boolean enabled) {
+        if (enabled) {
+            ((SourceActivity)getActivity()).toggleFloatingMenu(true);
+        }
+        this.mMultiSelectEnabled = enabled;
         if (mRecycler.getAdapter() != null) {
-            ((FileSystemAdapter) mRecycler.getAdapter()).setMultiSelectEnabled(mMultiSelectEnabled);
+            ((FileSystemAdapter) mRecycler.getAdapter()).setMultiSelectEnabled(enabled);
             mRecycler.getAdapter().notifyDataSetChanged();
         }
     }
@@ -130,6 +140,14 @@ public abstract class SourceFragment extends Fragment {
 
     public void setCurrentDirectory(TreeNode<SourceFile>  mCurrentDirectory) {
         this.mCurrentDirectory = mCurrentDirectory;
+    }
+
+    public boolean isReload() {
+        return mIsReload;
+    }
+
+    public void setReload(boolean reload) {
+        mIsReload = reload;
     }
 
     /**
@@ -161,13 +179,6 @@ public abstract class SourceFragment extends Fragment {
             newAdapter = mFileSystemGridAdapter;
         }
 
-        if (curAdapter != null) {
-            TreeNode<SourceFile> transformedCurrentDir =
-                    transformCurrentDirectory(curAdapter.getCurrentDir(), newAdapter.getRootTreeNode());
-            if (transformedCurrentDir != null) {
-                newAdapter.setCurrentDirectory(transformedCurrentDir);
-            }
-        }
         mRecycler.setAdapter(newAdapter);
         if (mRecycler.getAdapter() != null) {
             mRecycler.getAdapter().notifyDataSetChanged();
@@ -175,23 +186,18 @@ public abstract class SourceFragment extends Fragment {
     }
 
     /**
-     * Attempt the find the current directory from the old adapter to set it to the new one
-     * @param oldAdapterDir     The directory to search for
-     * @param currentDir        The current directory being searched
-     * @return                  The matching directory or null if no match was found
+     *
+     * @param oldAdapterDir
+     * @param newAdapterDir
+     * @return
      */
-    private TreeNode<SourceFile> transformCurrentDirectory(TreeNode<SourceFile> oldAdapterDir,
-                                                           TreeNode<SourceFile> currentDir) {
-        for(TreeNode<SourceFile> child : currentDir.getChildren()) {
-            if (child.getChildren() != null && child.getChildren().size() > 0) {
-                if (child.getData().getName().equals(oldAdapterDir.getData().getName())) {
-                    return child;
-                } else {
-                    transformCurrentDirectory(oldAdapterDir, child);
-                }
-            }
-        }
-        return null;
+    protected void transformCurrentDirectory(TreeNode<SourceFile> oldAdapterDir, TreeNode<SourceFile> newAdapterDir) {
+        newAdapterDir.setParent(oldAdapterDir.getParent());
+        oldAdapterDir.replaceNode(oldAdapterDir.getParent(), newAdapterDir.getChildren());
+        setCurrentDirectory(newAdapterDir);
+        ((FileSystemAdapter)mRecycler.getAdapter()).setCurrentDirectory(newAdapterDir);
+        ((SourceActivity)getActivity()).setActiveDirectory(newAdapterDir);
+        mRecycler.getAdapter().notifyDataSetChanged();
     }
 
     /**
@@ -241,6 +247,17 @@ public abstract class SourceFragment extends Fragment {
         if (resolveInfo.size() > 0) {
             startActivity(intent);
         }
+    }
+
+    /**
+     * Opens the app details page for this app
+     */
+    protected void showAppDetails() {
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", "com.jakebarnby.filemanager", null);
+        intent.setData(uri);
+        startActivity(intent);
     }
 
     /**

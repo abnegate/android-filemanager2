@@ -35,7 +35,6 @@ public class DropboxFragment extends SourceFragment {
 
     /**
      * Return a new instance of this Fragment
-     *
      * @param sourceName The name of the source controlled by this fragment
      * @return A new instance of this fragment
      */
@@ -57,7 +56,6 @@ public class DropboxFragment extends SourceFragment {
 
     /**
      * Set up the dropbox client
-     *
      * @param accessToken The access token for this dropbox session
      */
     private void setupClient(String accessToken) {
@@ -100,7 +98,7 @@ public class DropboxFragment extends SourceFragment {
     @Override
     protected void loadSource() {
         if (!isFilesLoaded()) {
-            new DropboxFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            new DropboxFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
         }
     }
 
@@ -110,19 +108,16 @@ public class DropboxFragment extends SourceFragment {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, final Intent data) {
-        if (requestCode == Constants.RequestCodes.FILE_PICKER) {
-            if (resultCode == RESULT_OK) {
-                // This is the result of a call to launchFilePicker
-                //uploadFile(data.getData().toString());
-            }
-        }
+    protected void replaceCurrentDirectory(TreeNode<SourceFile> currentDirectory) {
+        setReload(true);
+        new DropboxFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+                                                        currentDirectory.getData().getUri().toString());
     }
 
     /**
      * Loads a file tree from a users Dropbox account
      */
-    private class DropboxFileSystemLoader extends AsyncTask<Void, Void, TreeNode<SourceFile>> {
+    private class DropboxFileSystemLoader extends AsyncTask<String, Void, TreeNode<SourceFile>> {
         private TreeNode<SourceFile> rootFileTreeNode;
         private TreeNode<SourceFile> currentLevelNode;
 
@@ -134,13 +129,16 @@ public class DropboxFragment extends SourceFragment {
         }
 
         @Override
-        protected TreeNode<SourceFile> doInBackground(Void... voids) {
+        protected TreeNode<SourceFile> doInBackground(String... paths) {
             SourceFile rootSourceFile = new DropboxFile();
-            ((DropboxFile) rootSourceFile).setFileProperties(new Metadata("Dropbox"));
+            ((DropboxFile) rootSourceFile).setFileProperties(new Metadata(paths[0]));
             rootSourceFile.setDirectory(true);
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
-            setCurrentDirectory(rootFileTreeNode);
+
+            if (!isReload()) {
+                setCurrentDirectory(rootFileTreeNode);
+            }
 
             ListFolderResult result = null;
             try {
@@ -148,7 +146,7 @@ public class DropboxFragment extends SourceFragment {
                                     .Instance()
                                     .getClient()
                                     .files()
-                                    .listFolder("");
+                                    .listFolder(paths[0]);
             } catch (DbxException e) {
                 e.printStackTrace();
             }
@@ -157,7 +155,6 @@ public class DropboxFragment extends SourceFragment {
 
         /**
          * Recursively build a tree representing the files and folders of this device
-         *
          * @param result    The directory to start the search at
          * @return          The root node of the tree
          */
@@ -190,11 +187,15 @@ public class DropboxFragment extends SourceFragment {
         @Override
         protected void onPostExecute(TreeNode<SourceFile> fileTree) {
             super.onPostExecute(fileTree);
-            setFileTreeRoot(fileTree);
-            initializeSourceRecyclerView(fileTree, createOnClickListener(), createOnLongClickListener());
+            if (!isReload()) {
+                setFileTreeRoot(fileTree);
+                initializeSourceRecyclerView(fileTree, createOnClickListener(), createOnLongClickListener());
+            } else {
+                transformCurrentDirectory(getCurrentDirectory(), fileTree);
+                setReload(false);
+            }
             setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
-            mConnectButton.setVisibility(View.GONE);
         }
     }
 }

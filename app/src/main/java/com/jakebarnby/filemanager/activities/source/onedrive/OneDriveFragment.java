@@ -142,6 +142,30 @@ public class OneDriveFragment extends SourceFragment {
 
     }
 
+    @Override
+    protected void replaceCurrentDirectory(TreeNode<SourceFile> oldAdapterDir) {
+        setReload(true);
+        mProgressBar.setVisibility(View.VISIBLE);
+        OneDriveFactory
+                .getInstance()
+                .getGraphClient()
+                .getMe()
+                .getDrive()
+                .getItems(((OneDriveFile)oldAdapterDir.getData()).getDriveId())
+                .buildRequest()
+                .get(new ICallback<DriveItem>() {
+                    @Override
+                    public void success(DriveItem driveItem) {
+                        new OneDriveFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, driveItem);
+                    }
+
+                    @Override
+                    public void failure(ClientException e) {
+                        e.printStackTrace();
+                    }
+                });
+    }
+
     /**
      * Check for a valid access token and store it in shared preferences if found, then load the source
      */
@@ -252,9 +276,9 @@ public class OneDriveFragment extends SourceFragment {
             rootSourceFile.setDirectory(true);
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
-            setCurrentDirectory(rootFileTreeNode);
-            parseFileTree(driveItems[0]);
-
+            if (!isReload()) {
+                setCurrentDirectory(rootFileTreeNode);
+            }
             return parseFileTree(driveItems[0]);
         }
 
@@ -290,10 +314,15 @@ public class OneDriveFragment extends SourceFragment {
         }
 
         @Override
-        protected void onPostExecute(TreeNode<SourceFile> sourceFileTreeNode) {
-            super.onPostExecute(sourceFileTreeNode);
-            setFileTreeRoot(sourceFileTreeNode);
-            initializeSourceRecyclerView(sourceFileTreeNode, createOnClickListener(), createOnLongClickListener());
+        protected void onPostExecute(TreeNode<SourceFile> fileTree) {
+            super.onPostExecute(fileTree);
+            if (!isReload()) {
+                setFileTreeRoot(fileTree);
+                initializeSourceRecyclerView(fileTree, createOnClickListener(), createOnLongClickListener());
+            } else {
+                transformCurrentDirectory(getCurrentDirectory(), fileTree);
+                setReload(false);
+            }
             setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
         }

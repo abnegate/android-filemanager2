@@ -83,6 +83,13 @@ public class LocalFragment extends SourceFragment {
         }
     }
 
+    @Override
+    protected void replaceCurrentDirectory(TreeNode<SourceFile> oldAdapterDir) {
+        setReload(true);
+        new LocalFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+                                new File(oldAdapterDir.getData().getUri().getPath()));
+    }
+
     /**
      * Loads a file tree from the local file system
      */
@@ -104,7 +111,10 @@ public class LocalFragment extends SourceFragment {
             ((LocalFile) rootSourceFile).setFileProperties(rootFile);
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
-            setCurrentDirectory(rootFileTreeNode);
+
+            if (!isReload()) {
+                setCurrentDirectory(rootFileTreeNode);
+            }
             return parseFileSystem(files[0]);
         }
 
@@ -136,8 +146,13 @@ public class LocalFragment extends SourceFragment {
         @Override
         protected void onPostExecute(TreeNode<SourceFile> fileTree) {
             super.onPostExecute(fileTree);
-            setFileTreeRoot(fileTree);
-            initializeSourceRecyclerView(fileTree, createOnClickListener(), createOnLongClickListener());
+            if (!isReload()) {
+                setFileTreeRoot(fileTree);
+                initializeSourceRecyclerView(fileTree, createOnClickListener(), createOnLongClickListener());
+            } else {
+                transformCurrentDirectory(getCurrentDirectory(), fileTree);
+                setReload(false);
+            }
             setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
         }
@@ -191,16 +206,5 @@ public class LocalFragment extends SourceFragment {
                 break;
             }
         }
-    }
-
-    /**
-     * Opens the app details page for this app
-     */
-    private void showAppDetails() {
-        Intent intent = new Intent();
-        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        Uri uri = Uri.fromParts("package", "com.jakebarnby.filemanager", null);
-        intent.setData(uri);
-        startActivity(intent);
     }
 }

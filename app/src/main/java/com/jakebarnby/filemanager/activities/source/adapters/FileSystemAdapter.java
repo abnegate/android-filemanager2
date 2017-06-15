@@ -152,6 +152,9 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
             itemView.setLongClickable(true);
             itemView.setOnClickListener(createOnClickListener());
             itemView.setOnLongClickListener(createOnLongClickListener());
+
+            mCheckbox.setOnClickListener(v -> mOnClickListener.OnClick(
+                    mCurrentDirChildren.get(getAdapterPosition()), mCheckbox.isChecked(), getAdapterPosition()));
         }
 
         /**
@@ -163,7 +166,9 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
                 if (mMultiSelectEnabled) {
                     mCheckbox.setChecked(!mCheckbox.isChecked());
                 }
-                mOnClickListener.OnClick(mCurrentDirChildren.get(getAdapterPosition()), mCheckbox.isChecked(), getAdapterPosition());
+                mOnClickListener.OnClick(mCurrentDirChildren.get(getAdapterPosition()),
+                                                                mCheckbox.isChecked(),
+                                                                getAdapterPosition());
             };
         }
 

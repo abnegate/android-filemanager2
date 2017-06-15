@@ -14,6 +14,7 @@ public abstract class SourceFile implements Serializable {
     private String          mUriString;
     private String          mName;
     private String          mSourceName;
+    private String          mThumbnailLink;
     private long            mSize;
     private boolean         mIsDirectory;
     private boolean         mCanRead;
@@ -46,6 +47,14 @@ public abstract class SourceFile implements Serializable {
 
     public void setSourceName(String mSourceName) {
         this.mSourceName = mSourceName;
+    }
+
+    public String getThumbnailLink() {
+        return mThumbnailLink;
+    }
+
+    public void setThumbnailLink(String mThumbnailLink) {
+        this.mThumbnailLink = mThumbnailLink;
     }
 
     public long getSize() {

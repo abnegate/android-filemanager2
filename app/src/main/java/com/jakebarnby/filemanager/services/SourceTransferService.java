@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Environment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -123,7 +124,6 @@ public class SourceTransferService extends IntentService {
      */
     private void copy(List<SourceFile> toCopy, SourceFile destDir, boolean move) {
         showDialog(move ? getString(R.string.moving) : getString(R.string.copying), toCopy.size());
-        int returnInt = -1;
         for (SourceFile file : toCopy) {
             String newFilePath = getFile(file, destDir);
             putFile(newFilePath, file.getName(), destDir);
@@ -151,20 +151,22 @@ public class SourceTransferService extends IntentService {
             case Constants.Sources.DROPBOX:
                 File newFile = DropboxFactory
                         .Instance()
-                        .downloadFile(file.getUri().getPath(), file.getName(), destination.getUri().getPath());
+                        .downloadFile(file.getUri().getPath(), getCacheDir().getPath()+File.separator+file.getName());
                 if (newFile.exists())
                     newFilePath = newFile.getPath();
                 break;
             case Constants.Sources.GOOGLE_DRIVE:
-                //FIXME: Download from google drive and get path as string
                 File googleFile = GoogleDriveFactory
                         .Instance()
-                        .downloadFile(((GoogleDriveFile)file).getDriveId(), destination.getUri().getPath());
+                        .downloadFile(((GoogleDriveFile)file).getDriveId(), getCacheDir().getPath()+File.separator+file.getName());
                 if (googleFile.exists())
                     newFilePath = googleFile.getPath();
                 break;
             case Constants.Sources.ONEDRIVE:
-                //TODO: Download from onedrive and get path as string
+                File oneDriveFile = OneDriveFactory.getInstance().downloadFile(((OneDriveFile)file).getDriveId(), file.getName(), getCacheDir().getPath());
+                if (oneDriveFile.exists()) {
+                    newFilePath = oneDriveFile.getPath();
+                }
                 break;
         }
         return newFilePath;
@@ -179,7 +181,7 @@ public class SourceTransferService extends IntentService {
     private void putFile(String newFilePath, String fileName, SourceFile destDir) {
         switch (destDir.getSourceName()) {
             case Constants.Sources.LOCAL:
-                copyFileNative(newFilePath, destDir.getUri().getPath() + "/" + fileName);
+                copyFileNative(newFilePath, destDir.getUri().getPath()+"/"+fileName);
                 break;
             case Constants.Sources.DROPBOX:
                 DropboxFactory
@@ -189,10 +191,10 @@ public class SourceTransferService extends IntentService {
             case Constants.Sources.GOOGLE_DRIVE:
                 GoogleDriveFactory
                         .Instance()
-                        .uploadFile(newFilePath, ((GoogleDriveFile)destDir).getDriveId());
+                        .uploadFile(newFilePath, fileName, ((GoogleDriveFile)destDir).getDriveId());
                 break;
             case Constants.Sources.ONEDRIVE:
-                //TODO: Upload to onedrive
+                OneDriveFactory.getInstance().uploadFile(newFilePath, fileName, destDir.getUri().getPath());
                 break;
         }
     }
@@ -203,21 +205,18 @@ public class SourceTransferService extends IntentService {
      */
     private void delete(List<SourceFile> toDelete) {
         showDialog(getString(R.string.deleting), toDelete.size());
-        int returnInt = -1;
         for (SourceFile file : toDelete) {
             switch (file.getSourceName()) {
                 case Constants.Sources.LOCAL:
-                    returnInt = deleteFileNative(file.getUri().getPath());
+                    deleteFileNative(file.getUri().getPath());
                     break;
                 case Constants.Sources.DROPBOX:
                     DropboxFactory.Instance().deleteFile(file.getUri().getPath());
                     break;
                 case Constants.Sources.GOOGLE_DRIVE:
-                    //TODO: Google drive delete api call
                     GoogleDriveFactory.Instance().deleteFile(((GoogleDriveFile)file).getDriveId());
                     break;
                 case Constants.Sources.ONEDRIVE:
-                    //TODO: Onedrive delete api call
                     OneDriveFactory.getInstance().deleteFile(((OneDriveFile)file).getDriveId());
                     break;
             }
