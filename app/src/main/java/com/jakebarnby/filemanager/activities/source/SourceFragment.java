@@ -259,12 +259,12 @@ public abstract class SourceFragment extends Fragment {
                     SelectedFilesManager
                             .getInstance()
                             .getSelectedFiles()
-                            .add(file.getData());
+                            .add(file);
                 } else {
                     SelectedFilesManager
                             .getInstance()
                             .getSelectedFiles()
-                            .remove(file.getData());
+                            .remove(file);
                 }
                 getActivity().setTitle(String.valueOf(SelectedFilesManager.getInstance().getSelectedFiles().size()) + " selected");
                 //TODO: Set the Fragment tab title with selected count, e.g. LOCAL (3) DROPBOX (1)

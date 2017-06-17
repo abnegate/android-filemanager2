@@ -5,6 +5,7 @@ import android.util.Log;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.WriteMode;
 
 import java.io.File;
@@ -23,7 +24,7 @@ public class DropboxFactory {
     private static final String TAG = "DROPBOX";
     private DbxClientV2 mClient;
 
-    public static DropboxFactory Instance() {
+    public static DropboxFactory getInstance() {
         return ourInstance;
     }
 
@@ -93,17 +94,17 @@ public class DropboxFactory {
     }
 
     /**
-     *
-     * @param name
+     *  @param name
      * @param path
      */
-    public void createFolder(String name, String path) {
+    public FolderMetadata createFolder(String name, String path) {
         try {
-            getClient()
+            return getClient()
                     .files()
-                    .createFolder(name + File.separator + path);
+                    .createFolder( path+File.separator+name);
         } catch (DbxException e) {
             e.printStackTrace();
         }
+        return null;
     }
 }

@@ -63,18 +63,17 @@ public class OneDriveFactory {
     }
 
     /**
-     *
-     * @param filePath
+     *  @param filePath
      * @param fileName
      * @param parentPath
      */
-    public void uploadFile(String filePath, String fileName, String parentPath) {
+    public DriveItem uploadFile(String filePath, String fileName, String parentPath) {
         File file = new File(filePath);
         try(FileOutputStream outputStream = new FileOutputStream(file)) {
             byte[] buffer = new byte[(int)file.length()];
             outputStream.write(buffer);
 
-            mGraphClient
+            return mGraphClient
                     .getMe()
                     .getDrive()
                     .getRoot()
@@ -85,6 +84,7 @@ public class OneDriveFactory {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     /**
@@ -101,11 +101,10 @@ public class OneDriveFactory {
     }
 
     /**
-     *
-     * @param name
+     *  @param name
      * @param parentId
      */
-    public void createFolder(String name, String parentId) {
+    public DriveItem createFolder(String name, String parentId) {
         DriveItem item = new DriveItem();
         ItemReference parentRef  = new ItemReference();
         parentRef.driveId = parentId;
@@ -113,7 +112,7 @@ public class OneDriveFactory {
         item.name = name;
         item.folder = new Folder();
 
-        mGraphClient
+        return mGraphClient
                 .getMe()
                 .getDrive()
                 .getItems(parentId)

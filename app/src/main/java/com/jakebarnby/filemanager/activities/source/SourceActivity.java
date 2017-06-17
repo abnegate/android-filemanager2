@@ -74,6 +74,10 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         this.mActiveDirectory = currentDirectory;
     }
 
+    public SourceFragment getActiveFragment() {
+        return mSourcesPagerAdapter.getFragments().get(mViewPager.getCurrentItem());
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -159,6 +163,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             case R.id.action_viewas:
                 showViewAsDialog();
                 break;
+            case R.id.action_new_folder:
+                showCreateFolderDialog();
             default:
                 break;
         }
@@ -182,7 +188,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 Snackbar.make(mViewPager, getString(R.string.cut), Snackbar.LENGTH_SHORT).show();
                 break;
             case R.id.action_paste:
-                toggleFloatingMenu(false);
                 startParseAction();
                 break;
             case R.id.action_delete:
@@ -201,9 +206,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void startParseAction() {
         if (mCurrentFileAction != null) {
             if (mCurrentFileAction == FileAction.COPY)
-                SourceTransferService.startActionCopy(SourceActivity.this, SelectedFilesManager.getInstance().getSelectedFiles(), mActiveDirectory.getData(), false);
+                SourceTransferService.startActionCopy(SourceActivity.this, SelectedFilesManager.getInstance().getSelectedFiles(), mActiveDirectory, false);
             else if (mCurrentFileAction == FileAction.CUT) {
-                SourceTransferService.startActionCopy(SourceActivity.this, SelectedFilesManager.getInstance().getSelectedFiles(), mActiveDirectory.getData(), true);
+                SourceTransferService.startActionCopy(SourceActivity.this, SelectedFilesManager.getInstance().getSelectedFiles(), mActiveDirectory, true);
             }
         }
     }
@@ -233,19 +238,22 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void completeServiceAction() {
         if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
+            toggleFloatingMenu(false);
+            getActiveFragment().setMultiSelectEnabled(false);
+            setTitle(getString(R.string.app_name));
         }
-        setTitle(getString(R.string.app_name));
-        SourceFragment activeFragment = mSourcesPagerAdapter.getFragments().get(mViewPager.getCurrentItem());
-        activeFragment.replaceCurrentDirectory(getActiveDirectory());
-        activeFragment.setMultiSelectEnabled(false);
+        getActiveFragment().replaceCurrentDirectory(getActiveDirectory());
     }
 
     /**
      * Shows a dialog allowing a user to choose a grid or list layout for displaying files
      */
     private void showViewAsDialog() {
-        ViewAsDialogFragment dialog = new ViewAsDialogFragment();
-        dialog.show(getSupportFragmentManager(), "Dialog");
+        new ViewAsDialogFragment().show(getSupportFragmentManager(), "ViewAs");
+    }
+
+    private void showCreateFolderDialog() {
+        new CreateFolderDialogFragment().show(getSupportFragmentManager(), "CreateFolder");
     }
 
     /**
@@ -327,7 +335,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     @Override
     public void onPageSelected(int position) {
-        TreeNode<SourceFile> currentDir = mSourcesPagerAdapter.getFragments().get(position).getCurrentDirectory();
+        TreeNode<SourceFile> currentDir = getActiveFragment().getCurrentDirectory();
         if (currentDir != null) {
             setActiveDirectory(currentDir);
         }
@@ -340,9 +348,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     @Override
     public void onBackPressed() {
-        SourceFragment activeFragment = mSourcesPagerAdapter.getFragments().get(mViewPager.getCurrentItem());
-        if (activeFragment.isMultiSelectEnabled()) {
-            activeFragment.setMultiSelectEnabled(false);
+        if (getActiveFragment().isMultiSelectEnabled()) {
+            getActiveFragment().setMultiSelectEnabled(false);
             toggleFloatingMenu(false);
             setTitle(R.string.app_name);
             SelectedFilesManager.getInstance().getSelectedFiles().clear();
