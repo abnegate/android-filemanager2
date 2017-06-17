@@ -1,6 +1,5 @@
 package com.jakebarnby.filemanager.managers;
 
-import android.os.Environment;
 import android.webkit.MimeTypeMap;
 
 import com.google.api.client.http.FileContent;
@@ -22,7 +21,7 @@ public class GoogleDriveFactory {
 
     private static final GoogleDriveFactory sInstance = new GoogleDriveFactory();
 
-    public static GoogleDriveFactory Instance() {
+    public static GoogleDriveFactory getInstance() {
         return sInstance;
     }
 
@@ -62,7 +61,7 @@ public class GoogleDriveFactory {
      * Upload a file at the given path on Google Drive
      * @param filePath  Path to upload the file to
      */
-    public void uploadFile(String filePath, String fileName, String parentId) {
+    public com.google.api.services.drive.model.File uploadFile(String filePath, String fileName, String parentId) {
         File file = new File(filePath);
         com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
         fileMetadata.setParents(Collections.singletonList(parentId));
@@ -73,7 +72,7 @@ public class GoogleDriveFactory {
 
         FileContent googleFile = new FileContent(mimeType, file);
         try {
-            mService.files()
+            return mService.files()
                     .create(fileMetadata, googleFile)
                     .setFields("id")
                     .execute();
@@ -81,6 +80,7 @@ public class GoogleDriveFactory {
             e.printStackTrace();
         }
         System.out.println("File uploaded");
+        return fileMetadata;
     }
 
     /**
@@ -96,23 +96,23 @@ public class GoogleDriveFactory {
     }
 
     /**
-     * 
-     * @param name
+     *  @param name
      * @param parentId
      */
-    public void createFolder(String name, String parentId) {
+    public com.google.api.services.drive.model.File createFolder(String name, String parentId) {
         com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
         fileMetadata.setName(name);
         fileMetadata.setMimeType(Constants.GOOGLE_DRIVE_FOLDER_MIME);
         fileMetadata.setParents(Collections.singletonList(parentId));
         try {
-            com.google.api.services.drive.model.File file = mService
-                                                                .files()
-                                                                .create(fileMetadata)
-                                                                .setFields("id")
-                                                                .execute();
+            return mService
+                    .files()
+                    .create(fileMetadata)
+                    .setFields("id")
+                    .execute();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 }

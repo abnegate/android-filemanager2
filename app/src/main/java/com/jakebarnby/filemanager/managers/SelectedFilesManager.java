@@ -1,6 +1,7 @@
 package com.jakebarnby.filemanager.managers;
 
 import com.jakebarnby.filemanager.models.files.SourceFile;
+import com.jakebarnby.filemanager.util.TreeNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
 public class SelectedFilesManager {
 
     private static volatile  SelectedFilesManager sInstance;
-    private List<SourceFile> mSelectedFiles = new ArrayList<>();
+    private List<TreeNode<SourceFile>> mSelectedFiles = new ArrayList<>();
 
     public static SelectedFilesManager getInstance() {
         if (sInstance == null) {
@@ -21,7 +22,7 @@ public class SelectedFilesManager {
         return sInstance;
     }
 
-    public List<SourceFile> getSelectedFiles() {
+    public List<TreeNode<SourceFile>> getSelectedFiles() {
         return mSelectedFiles;
     }
 }

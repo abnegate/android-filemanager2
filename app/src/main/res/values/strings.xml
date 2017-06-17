@@ -22,4 +22,6 @@
     <string name="menu_item_rename">Rename</string>
     <string name="menu_item_new_folder">New Folder</string>
     <string name="menu_item_properties">Properties</string>
+    <string name="create_folder">Create Folder</string>
+    <string name="new_folder_name">New folder name</string>
 </resources>

@@ -5,7 +5,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Environment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -65,6 +64,8 @@ public class SourceTransferService extends IntentService {
      */
     public native int deleteFileNative(String sourcePath);
 
+    public native int createFolderNative(String newPath);
+
     /**
      * Create a new instance
      */
@@ -79,7 +80,7 @@ public class SourceTransferService extends IntentService {
      * @param sourceDest    The destination directory
      * @param move          Whether the files should be deleted after copying
      */
-    public static void startActionCopy(Context context, List<SourceFile> toCopy, SourceFile sourceDest, boolean move) {
+    public static void startActionCopy(Context context, List<TreeNode<SourceFile>> toCopy, TreeNode<SourceFile> sourceDest, boolean move) {
         Intent intent = new Intent(context, SourceTransferService.class);
         intent.setAction(move ? ACTION_MOVE : ACTION_COPY);
         intent.putExtra(EXTRA_SOURCE_FILES, (Serializable) toCopy);
@@ -92,7 +93,7 @@ public class SourceTransferService extends IntentService {
      * @param context  Context for resources
      * @param toDelete The files to delete
      */
-    public static void startActionDelete(Context context, List<SourceFile> toDelete) {
+    public static void startActionDelete(Context context, List<TreeNode<SourceFile>> toDelete) {
         Intent intent = new Intent(context, SourceTransferService.class);
         intent.setAction(ACTION_DELETE);
         intent.putExtra(EXTRA_SOURCE_FILES, (Serializable) toDelete);
@@ -115,13 +116,14 @@ public class SourceTransferService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
-            final List<SourceFile> targets = (List<SourceFile>) intent.getSerializableExtra(EXTRA_SOURCE_FILES);
-            final SourceFile sourceDest = (SourceFile) intent.getSerializableExtra(EXTRA_SOURCE_DEST);
+            final List<TreeNode<SourceFile>> targets = (List<TreeNode<SourceFile>>) intent.getSerializableExtra(EXTRA_SOURCE_FILES);
+            final TreeNode<SourceFile> sourceDest = (TreeNode<SourceFile>) intent.getSerializableExtra(EXTRA_SOURCE_DEST);
             final String folderName = intent.getStringExtra(EXTRA_FOLDER_NAME);
             final String action = intent.getAction();
             switch (action) {
                 case ACTION_CREATE_FOLDER:
-                    //createFolder(sourceDest, folderName);
+                    createFolder(sourceDest, folderName);
+                    break;
                 case ACTION_COPY:
                     copy(targets, sourceDest, false);
                     break;
@@ -129,24 +131,40 @@ public class SourceTransferService extends IntentService {
                     copy(targets, sourceDest, true);
                     break;
                 case ACTION_DELETE:
-                    delete(targets);
+                    delete(targets, false);
                     break;
             }
         }
         hideNotification();
     }
 
-    private void createFolder(TreeNode<SourceFile> currentDirectory, String name) {
-        switch(currentDirectory.getData().getSourceName()) {
+    /**
+     * Create a new folder in the given directory with the given name
+     * @param destDir  The directory to create the folder in
+     * @param name              The name for the new folder
+     */
+    private void createFolder(TreeNode<SourceFile> destDir, String name) {
+        switch(destDir.getData().getSourceName()) {
             case Constants.Sources.LOCAL:
+                createFolderNative(destDir.getData().getUri().getPath()+File.separator+name);
                 break;
             case Constants.Sources.DROPBOX:
+                DropboxFactory
+                        .getInstance()
+                        .createFolder(name, destDir.getData().getUri().getPath());
                 break;
             case Constants.Sources.GOOGLE_DRIVE:
+                GoogleDriveFactory
+                        .getInstance()
+                        .createFolder(name, ((GoogleDriveFile)destDir.getData()).getDriveId());
                 break;
             case Constants.Sources.ONEDRIVE:
+                OneDriveFactory
+                        .getInstance()
+                        .createFolder(name, ((OneDriveFile)destDir.getData()).getDriveId());
                 break;
         }
+        finishOperation();
     }
 
     /**
@@ -154,16 +172,16 @@ public class SourceTransferService extends IntentService {
      * @param toCopy  The files to copy
      * @param destDir Where to copy them to
      */
-    private void copy(List<SourceFile> toCopy, SourceFile destDir, boolean move) {
+    private void copy(List<TreeNode<SourceFile>> toCopy, TreeNode<SourceFile> destDir, boolean move) {
         showDialog(move ? getString(R.string.moving) : getString(R.string.copying), toCopy.size());
-        for (SourceFile file : toCopy) {
-            String newFilePath = getFile(file, destDir);
-            putFile(newFilePath, file.getName(), destDir);
+        for (TreeNode<SourceFile> file : toCopy) {
+            String newFilePath = getFile(file.getData());
+            putFile(newFilePath, file.getData().getName(), destDir.getData());
             postNotification("File Manager", "Copying " + (toCopy.indexOf(file) + 1) + " of " + toCopy.size());
             updateDialog(toCopy.indexOf(file) + 1);
         }
         if (move) {
-            delete(toCopy);
+            delete(toCopy, true);
         }
         finishOperation();
     }
@@ -171,10 +189,9 @@ public class SourceTransferService extends IntentService {
     /**
      * Gets the given source file and stores it in the given destination
      * @param file          The file to retrieve
-     * @param destination   The destination to store it
      * @return              The path of the retrieved file
      */
-    private String getFile(SourceFile file, SourceFile destination) {
+    private String getFile(SourceFile file) {
         String newFilePath = null;
         switch (file.getSourceName()) {
             case Constants.Sources.LOCAL:
@@ -182,20 +199,22 @@ public class SourceTransferService extends IntentService {
                 break;
             case Constants.Sources.DROPBOX:
                 File newFile = DropboxFactory
-                        .Instance()
+                        .getInstance()
                         .downloadFile(file.getUri().getPath(), getCacheDir().getPath()+File.separator+file.getName());
                 if (newFile.exists())
                     newFilePath = newFile.getPath();
                 break;
             case Constants.Sources.GOOGLE_DRIVE:
                 File googleFile = GoogleDriveFactory
-                        .Instance()
+                        .getInstance()
                         .downloadFile(((GoogleDriveFile)file).getDriveId(), getCacheDir().getPath()+File.separator+file.getName());
                 if (googleFile.exists())
                     newFilePath = googleFile.getPath();
                 break;
             case Constants.Sources.ONEDRIVE:
-                File oneDriveFile = OneDriveFactory.getInstance().downloadFile(((OneDriveFile)file).getDriveId(), file.getName(), getCacheDir().getPath());
+                File oneDriveFile = OneDriveFactory
+                        .getInstance()
+                        .downloadFile(((OneDriveFile)file).getDriveId(), file.getName(), getCacheDir().getPath()+File.separator+file.getName());
                 if (oneDriveFile.exists()) {
                     newFilePath = oneDriveFile.getPath();
                 }
@@ -217,12 +236,12 @@ public class SourceTransferService extends IntentService {
                 break;
             case Constants.Sources.DROPBOX:
                 DropboxFactory
-                        .Instance()
+                        .getInstance()
                         .uploadFile(newFilePath, destDir.getUri().getPath());
                 break;
             case Constants.Sources.GOOGLE_DRIVE:
                 GoogleDriveFactory
-                        .Instance()
+                        .getInstance()
                         .uploadFile(newFilePath, fileName, ((GoogleDriveFile)destDir).getDriveId());
                 break;
             case Constants.Sources.ONEDRIVE:
@@ -235,26 +254,32 @@ public class SourceTransferService extends IntentService {
      * Delete the given files
      * @param toDelete The files to delete
      */
-    private void delete(List<SourceFile> toDelete) {
-        showDialog(getString(R.string.deleting), toDelete.size());
-        for (SourceFile file : toDelete) {
-            switch (file.getSourceName()) {
+    private void delete(List<TreeNode<SourceFile>> toDelete, boolean isSilent) {
+        if (!isSilent) showDialog(getString(R.string.deleting), toDelete.size());
+        for (TreeNode<SourceFile> file : toDelete) {
+            switch (file.getData().getSourceName()) {
                 case Constants.Sources.LOCAL:
-                    deleteFileNative(file.getUri().getPath());
+                    deleteFileNative(file.getData().getUri().getPath());
                     break;
                 case Constants.Sources.DROPBOX:
-                    DropboxFactory.Instance().deleteFile(file.getUri().getPath());
+                    DropboxFactory
+                            .getInstance()
+                            .deleteFile(file.getData().getUri().getPath());
                     break;
                 case Constants.Sources.GOOGLE_DRIVE:
-                    GoogleDriveFactory.Instance().deleteFile(((GoogleDriveFile)file).getDriveId());
+                    GoogleDriveFactory
+                            .getInstance()
+                            .deleteFile(((GoogleDriveFile)file.getData()).getDriveId());
                     break;
                 case Constants.Sources.ONEDRIVE:
-                    OneDriveFactory.getInstance().deleteFile(((OneDriveFile)file).getDriveId());
+                    OneDriveFactory
+                            .getInstance()
+                            .deleteFile(((OneDriveFile)file.getData()).getDriveId());
                     break;
             }
-            updateDialog(toDelete.indexOf(file)+1);
+            if (!isSilent) updateDialog(toDelete.indexOf(file)+1);
         }
-        finishOperation();
+        if (!isSilent) finishOperation();
     }
 
     /**

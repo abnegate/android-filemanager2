@@ -191,7 +191,7 @@ public class GoogleDriveFragment extends SourceFragment {
         GoogleDriveFileSystemLoader(GoogleAccountCredential credential) {
             HttpTransport transport = new NetHttpTransport();
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-            GoogleDriveFactory.Instance().setService(
+            GoogleDriveFactory.getInstance().setService(
                     new com.google.api.services.drive.Drive.Builder(transport, jsonFactory, credential)
                             .setApplicationName("File Manager Android")
                             .build());
@@ -208,7 +208,7 @@ public class GoogleDriveFragment extends SourceFragment {
         protected TreeNode<SourceFile> doInBackground(String... paths) {
             try {
                 File rootFile = GoogleDriveFactory
-                        .Instance()
+                        .getInstance()
                         .getService()
                         .files()
                         .get(paths[0])
@@ -237,7 +237,7 @@ public class GoogleDriveFragment extends SourceFragment {
          */
         private TreeNode<SourceFile> parseDirectory(File currentDirectory) throws IOException {
             FileList fileList = GoogleDriveFactory
-                    .Instance()
+                    .getInstance()
                     .getService()
                     .files()
                     .list()

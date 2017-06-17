@@ -1,7 +1,6 @@
 package com.jakebarnby.filemanager.activities.source.dropbox;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,8 +21,6 @@ import com.jakebarnby.filemanager.models.files.DropboxFile;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
-
-import static android.app.Activity.RESULT_OK;
 
 /**
  * Created by Jake on 5/31/2017.
@@ -63,7 +60,7 @@ public class DropboxFragment extends SourceFragment {
             DbxRequestConfig requestConfig = DbxRequestConfig.newBuilder("FileManagerAndroid/1.0")
                     .withHttpRequestor(new OkHttp3Requestor(OkHttp3Requestor.defaultOkHttpClient()))
                     .build();
-            DropboxFactory.Instance().setClient(new DbxClientV2(requestConfig, accessToken));
+            DropboxFactory.getInstance().setClient(new DbxClientV2(requestConfig, accessToken));
             setLoggedIn(true);
         }
     }
@@ -143,7 +140,7 @@ public class DropboxFragment extends SourceFragment {
             ListFolderResult result = null;
             try {
                 result = DropboxFactory
-                                    .Instance()
+                                    .getInstance()
                                     .getClient()
                                     .files()
                                     .listFolder(paths[0]);
@@ -168,7 +165,7 @@ public class DropboxFragment extends SourceFragment {
                         currentLevelNode = currentLevelNode.getChildren().get(currentLevelNode.getChildren().size() - 1);
                         try {
                             parseFileSystem(DropboxFactory
-                                                        .Instance()
+                                                        .getInstance()
                                                         .getClient()
                                                         .files()
                                                         .listFolder(data.getPathLower()));

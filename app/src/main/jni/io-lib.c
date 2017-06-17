@@ -3,6 +3,7 @@
 //
 #include <jni.h>
 #include <stdio.h>
+#include <sys/stat.h>
 
 JNIEXPORT jint JNICALL
               Java_com_jakebarnby_filemanager_services_SourceTransferService_copyFileNative(JNIEnv *env,
@@ -19,19 +20,14 @@ JNIEXPORT jint JNICALL
     if (sourcePath == destinationPath) {
         return 0;
     }
-
-    // Open source file
     if((from = fopen(sourcePath, "rb"))==NULL) {
         printf("Cannot open source file.\n");
     }
-
-    //Open destination file
     if((to = fopen(destinationPath, "wb"))==NULL) {
         printf("Cannot open destination file.\n");
         return -1;
     }
 
-    // Copy the file
     while(!feof(from)) {
         ch = fgetc(from);
         if(ferror(from)) {
@@ -69,4 +65,14 @@ Java_com_jakebarnby_filemanager_services_SourceTransferService_deleteFileNative(
     remove(sourcePath);
 
     (*env)->ReleaseStringUTFChars(env, sourcePath_, sourcePath);
+}
+
+JNIEXPORT jint JNICALL
+Java_com_jakebarnby_filemanager_services_SourceTransferService_createFolderNative(JNIEnv *env,
+                                                                                  jobject instance,
+                                                                                  jstring newPath_) {
+    const char *newPath = (*env)->GetStringUTFChars(env, newPath_, 0);
+    int result =  mkdir(newPath, 0777);
+    (*env)->ReleaseStringUTFChars(env, newPath_, newPath);
+    return result;
 }
