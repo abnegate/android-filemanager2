@@ -120,4 +120,21 @@ public class OneDriveFactory {
                 .buildRequest()
                 .post(item);
     }
+
+    public DriveItem rename(String newName, String itemId) {
+        DriveItem toRename =  mGraphClient
+                .getMe()
+                .getDrive()
+                .getItems(itemId)
+                .buildRequest()
+                .get();
+
+        toRename.name = newName;
+        return mGraphClient
+                .getMe()
+                .getDrive()
+                .getItems(itemId)
+                .buildRequest()
+                .patch(toRename);
+    }
 }

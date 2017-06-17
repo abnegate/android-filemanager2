@@ -1,4 +1,4 @@
-package com.jakebarnby.filemanager.activities.source;
+package com.jakebarnby.filemanager.activities.source.dialogs;
 
 import android.app.Dialog;
 import android.content.res.Resources;
@@ -12,21 +12,25 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 
 import com.jakebarnby.filemanager.R;
+import com.jakebarnby.filemanager.activities.source.SourceActivity;
+import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.services.SourceTransferService;
+import com.jakebarnby.filemanager.util.Constants;
 
 /**
  * Created by Jake on 6/18/2017.
  */
 
-public class CreateFolderDialogFragment extends DialogFragment {
+public class RenameDialogFragment extends DialogFragment{
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(getString(R.string.create_folder));
+        builder.setTitle(getArguments().getString(Constants.DIALOG_TITLE_KEY));
 
         final FrameLayout frame = new FrameLayout(getContext());
         final EditText input = new EditText(getContext());
-        input.setHint(getString(R.string.new_folder_name));
+        input.setHint(SelectedFilesManager.getInstance().getSelectedFiles().get(0).getData().getName());
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         input.setMaxLines(1);
 
@@ -42,10 +46,11 @@ public class CreateFolderDialogFragment extends DialogFragment {
         builder.setView(frame);
 
         builder.setPositiveButton("OK", (dialog, which) -> {
-            SourceTransferService.startActionCreateFolder(
+            SourceTransferService.startActionRename(
                     getContext(),
-                    input.getText().toString(),
-                    ((SourceActivity)getActivity()).getActiveDirectory());
+                    //FIXME: Shouldn't just get first index
+                    SelectedFilesManager.getInstance().getSelectedFiles().get(0),
+                    input.getText().toString());
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         return builder.create();

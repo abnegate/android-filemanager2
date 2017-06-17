@@ -7,7 +7,9 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.design.widget.Snackbar;
 import android.view.Display;
+import android.view.View;
 import android.view.WindowManager;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -137,5 +139,13 @@ public class Utils {
             screenWidth = size.x;
         }
         return screenWidth;
+    }
+
+    public static void showSnackBar(View view, String text, String actionText, View.OnClickListener listener) {
+        Snackbar bar = Snackbar.make(view, text, Snackbar.LENGTH_LONG);
+        if (actionText != null && listener != null) {
+            bar.setAction(actionText, listener);
+        }
+        bar.show();
     }
 }

@@ -163,7 +163,7 @@ public abstract class SourceFragment extends Fragment {
     /**
      * Set the {@link RecyclerView} layout and adapter based on users preferences
      */
-    protected void setRecyclerLayout() {
+    public void setRecyclerLayout() {
         FileSystemAdapter newAdapter;
 
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);

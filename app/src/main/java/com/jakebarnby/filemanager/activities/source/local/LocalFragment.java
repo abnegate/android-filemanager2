@@ -18,6 +18,7 @@ import android.view.View;
 import android.webkit.MimeTypeMap;
 
 import com.jakebarnby.filemanager.R;
+import com.jakebarnby.filemanager.activities.source.SourceActivity;
 import com.jakebarnby.filemanager.activities.source.SourceFragment;
 import com.jakebarnby.filemanager.models.files.LocalFile;
 import com.jakebarnby.filemanager.models.files.SourceFile;
@@ -149,6 +150,7 @@ public class LocalFragment extends SourceFragment {
             if (!isReload()) {
                 setFileTreeRoot(fileTree);
                 initializeSourceRecyclerView(fileTree, createOnClickListener(), createOnLongClickListener());
+                ((SourceActivity)getActivity()).setActiveDirectory(rootFileTreeNode);
             } else {
                 transformCurrentDirectory(getCurrentDirectory(), fileTree);
                 setReload(false);

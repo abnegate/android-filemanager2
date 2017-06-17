@@ -6,6 +6,7 @@ import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
+import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.WriteMode;
 
 import java.io.File;
@@ -102,6 +103,23 @@ public class DropboxFactory {
             return getClient()
                     .files()
                     .createFolder( path+File.separator+name);
+        } catch (DbxException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     *
+     * @param oldPath
+     * @param newPath
+     * @return
+     */
+    public Metadata rename(String oldPath, String newPath) {
+        try {
+            return  getClient()
+                    .files()
+                    .move(oldPath, newPath);
         } catch (DbxException e) {
             e.printStackTrace();
         }
