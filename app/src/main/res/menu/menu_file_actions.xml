@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/action_new_folder"
+        android:icon="@drawable/ic_action_new_folder"
+        android:title="@string/menu_item_new_folder" />
+    <item
         android:id="@+id/action_copy"
         android:icon="@drawable/ic_action_copy"
         android:title="@string/menu_item_copy" />
@@ -12,6 +16,14 @@
         android:id="@+id/action_paste"
         android:icon="@drawable/ic_action_paste"
         android:title="@string/menu_item_paste" />
+    <item
+        android:id="@+id/action_rename"
+        android:icon="@drawable/ic_action_rename"
+        android:title="@string/menu_item_rename" />
+    <item
+        android:id="@+id/action_properties"
+        android:icon="@drawable/ic_action_properties"
+        android:title="@string/menu_item_properties" />
     <item
         android:id="@+id/action_delete"
         android:icon="@drawable/ic_action_delete"

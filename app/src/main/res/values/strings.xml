@@ -19,4 +19,7 @@
     <string name="copying">Copying..</string>
     <string name="deleting">Deleting..</string>
     <string name="moving">Moving..</string>
+    <string name="menu_item_rename">Rename</string>
+    <string name="menu_item_new_folder">New Folder</string>
+    <string name="menu_item_properties">Properties</string>
 </resources>

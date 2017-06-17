@@ -19,6 +19,7 @@ import com.jakebarnby.filemanager.models.files.GoogleDriveFile;
 import com.jakebarnby.filemanager.models.files.OneDriveFile;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.TreeNode;
 
 import java.io.File;
 import java.io.Serializable;
@@ -36,12 +37,14 @@ public class SourceTransferService extends IntentService {
     private static final String ACTION_COPY = "com.jakebarnby.filemanager.services.action.COPY";
     private static final String ACTION_MOVE = "com.jakebarnby.filemanager.services.action.MOVE";
     private static final String ACTION_DELETE = "com.jakebarnby.filemanager.services.action.DELETE";
+    private static final String ACTION_CREATE_FOLDER = "com.jakebarnby.filemanager.services.action.CREATE_FOLDER";
 
     public static final String EXTRA_CURRENT_COUNT = "com.jakebarnby.filemanager.services.extra.CURRENT_COUNT";
     public static final String EXTRA_TOTAL_COUNT = "com.jakebarnby.filemanager.services.extra.TOTAL_COUNT";
     private static final String EXTRA_SOURCE_FILES = "com.jakebarnby.filemanager.services.extra.SOURCE_FILES";
     private static final String EXTRA_SOURCE_DEST = "com.jakebarnby.filemanager.services.extra.SOURCE DESTINATION";
     public static final String EXTRA_DIALOG_TITLE = "com.jakebarnby.filemanager.services.extra.DIALOG_TITLE";
+    private static final String EXTRA_FOLDER_NAME = "com.jakebarnby.filemanager.services.extra.FOLDER_NAME";
 
     static {
         System.loadLibrary("io-lib");
@@ -96,13 +99,29 @@ public class SourceTransferService extends IntentService {
         context.startService(intent);
     }
 
+    /**
+     * Start the service for a new folder action
+     * @param context
+     * @param currentDirectory
+     */
+    public static void startActionCreateFolder(Context context, String name, TreeNode<SourceFile> currentDirectory) {
+        Intent intent = new Intent(context, SourceTransferService.class);
+        intent.setAction(ACTION_CREATE_FOLDER);
+        intent.putExtra(EXTRA_SOURCE_DEST, currentDirectory);
+        intent.putExtra(EXTRA_FOLDER_NAME, name);
+        context.startService(intent);
+    }
+
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final List<SourceFile> targets = (List<SourceFile>) intent.getSerializableExtra(EXTRA_SOURCE_FILES);
             final SourceFile sourceDest = (SourceFile) intent.getSerializableExtra(EXTRA_SOURCE_DEST);
+            final String folderName = intent.getStringExtra(EXTRA_FOLDER_NAME);
             final String action = intent.getAction();
             switch (action) {
+                case ACTION_CREATE_FOLDER:
+                    //createFolder(sourceDest, folderName);
                 case ACTION_COPY:
                     copy(targets, sourceDest, false);
                     break;
@@ -115,6 +134,19 @@ public class SourceTransferService extends IntentService {
             }
         }
         hideNotification();
+    }
+
+    private void createFolder(TreeNode<SourceFile> currentDirectory, String name) {
+        switch(currentDirectory.getData().getSourceName()) {
+            case Constants.Sources.LOCAL:
+                break;
+            case Constants.Sources.DROPBOX:
+                break;
+            case Constants.Sources.GOOGLE_DRIVE:
+                break;
+            case Constants.Sources.ONEDRIVE:
+                break;
+        }
     }
 
     /**

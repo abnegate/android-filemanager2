@@ -1,5 +1,6 @@
 package com.jakebarnby.filemanager.util;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +8,7 @@ import java.util.List;
  * Created by Jake on 5/31/2017.
  */
 
-public class TreeNode<T>{
+public class TreeNode<T extends Serializable> implements Serializable {
     private T                   data = null;
     private List<TreeNode<T>>   children = new ArrayList<>();
     private TreeNode<T>         parent = null;

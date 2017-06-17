@@ -164,7 +164,6 @@ public abstract class SourceFragment extends Fragment {
      * Set the {@link RecyclerView} layout and adapter based on users preferences
      */
     protected void setRecyclerLayout() {
-        FileSystemAdapter curAdapter = (FileSystemAdapter) mRecycler.getAdapter();
         FileSystemAdapter newAdapter;
 
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
@@ -221,17 +220,6 @@ public abstract class SourceFragment extends Fragment {
     }
 
     /**
-     *
-     */
-    protected void launchFilePicker() {
-        // Launch intent to pick file for upload
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("*/*");
-        startActivityForResult(intent, Constants.RequestCodes.FILE_PICKER);
-    }
-
-    /**
      * Attempts to open a file by finding it's mimetype then opening a compatible application
      * @param file The file to attempt to open
      */
@@ -279,13 +267,13 @@ public abstract class SourceFragment extends Fragment {
                             .remove(file.getData());
                 }
                 getActivity().setTitle(String.valueOf(SelectedFilesManager.getInstance().getSelectedFiles().size()) + " selected");
+                //TODO: Set the Fragment tab title with selected count, e.g. LOCAL (3) DROPBOX (1)
             } else {
-                setCurrentDirectory(file);
-                ((SourceActivity)getActivity()).setActiveDirectory(file);
-
-                if (file.getData().isDirectory() && file.getData().canRead()) {
+                if (file.getData().isDirectory()) {
                     ((FileSystemAdapter) mRecycler.getAdapter()).setCurrentDirectory(file);
                     mRecycler.getAdapter().notifyDataSetChanged();
+                    setCurrentDirectory(file);
+                    ((SourceActivity)getActivity()).setActiveDirectory(file);
                 } else {
                     openFile(file.getData());
                 }

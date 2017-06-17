@@ -1,11 +1,15 @@
 package com.jakebarnby.filemanager.activities.source.adapters;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -14,6 +18,7 @@ import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.TreeNode;
+import com.jakebarnby.filemanager.util.Utils;
 
 import java.util.List;
 
@@ -23,28 +28,24 @@ import java.util.List;
 
 public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.FileViewHolder> {
 
-    private static final long SCALE_DURATION = 700L;
-    private static final long FADE_DURATION = 1000L;
+    private static final long           FADE_DURATION = 1000L;
+    private static final long           TRANSLATE_DURATION = 700L;
 
     private TreeNode<SourceFile>        mParentDir;
     private List<TreeNode<SourceFile>>  mCurrentDirChildren;
-    private List<SourceFile>            mSelectedFiles;
     private OnFileClickedListener       mOnClickListener;
     private OnFileLongClickedListener   mOnLongClickListener;
     private boolean                     mMultiSelectEnabled;
     private TreeNode<SourceFile>        mRootTreeNode;
-    private TreeNode<SourceFile> mCurrentDir;
-    private int lastPosition = -1;
+    private TreeNode<SourceFile>        mCurrentDir;
+    private int                         lastPosition = -1;
+    private AnimationSet mAnimationSet;
 
 
     public FileSystemAdapter(TreeNode<SourceFile> rootNode) {
         mRootTreeNode = rootNode;
         setCurrentDirectory(mRootTreeNode);
-        mSelectedFiles = SelectedFilesManager.getInstance().getSelectedFiles();
-    }
-
-    public boolean isMultiSelectEnabled() {
-        return mMultiSelectEnabled;
+        mAnimationSet = new AnimationSet(false);
     }
 
     public void setMultiSelectEnabled(boolean mMultiSelectEnabled) {
@@ -69,14 +70,19 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
         }
     }
 
-    public TreeNode<SourceFile> getRootTreeNode() {
-        return mRootTreeNode;
-    }
-
     @Override
     public void onBindViewHolder(FileViewHolder holder, int position) {
         //TODO: Probably animate items here
         holder.mCheckbox.setVisibility(mMultiSelectEnabled ? View.VISIBLE : View.GONE);
+        if (mMultiSelectEnabled) {
+            TranslateAnimation translate = new TranslateAnimation(-100f, 0.0f, 0.0f, 0.0f);
+            translate.setInterpolator(new DecelerateInterpolator(3.0f));
+            translate.setDuration(TRANSLATE_DURATION);
+            holder.mPreviewImage.startAnimation(translate);
+            holder.mText.startAnimation(translate);
+            holder.mCheckbox.startAnimation(translate);
+        }
+
 
         if (mParentDir != null && mParentDir.getData().canRead() && position == 0) {
             holder.mText.setText("..");
@@ -96,20 +102,25 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
         setAnimation(holder.itemView, position);
     }
 
+    /**
+     *
+     * @param viewToAnimate
+     * @param position
+     */
     private void setAnimation(View viewToAnimate, int position) {
-        AnimationSet animationSet = new AnimationSet(true);
-
         if (position > lastPosition) {
-            ScaleAnimation scale = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-            scale.setDuration(SCALE_DURATION);
+            final int screenHeight = Utils.getScreenHeight(viewToAnimate.getContext());
+            TranslateAnimation translate = new TranslateAnimation(0.0f, 0.0f, screenHeight, 0.0f);
+            translate.setInterpolator(new DecelerateInterpolator(3.0f));
+            translate.setDuration(TRANSLATE_DURATION);
 
             AlphaAnimation alpha = new AlphaAnimation(0.0f, 1.0f);
+            alpha.setInterpolator(new DecelerateInterpolator(2.0f));
             alpha.setDuration(FADE_DURATION);
 
-            animationSet.addAnimation(scale);
-            animationSet.addAnimation(alpha);
-
-            viewToAnimate.startAnimation(animationSet);
+            mAnimationSet.addAnimation(alpha);
+            mAnimationSet.addAnimation(translate);
+            viewToAnimate.startAnimation(mAnimationSet);
             lastPosition = position;
         }
     }
@@ -119,36 +130,16 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
         return mCurrentDirChildren.size();
     }
 
-    public TreeNode<SourceFile> getParentDir() {
-        return mParentDir;
-    }
-
-    public void setParentDir(TreeNode<SourceFile> mParentDir) {
-        this.mParentDir = mParentDir;
-    }
-
-    public List<TreeNode<SourceFile>> getCurrentDirChildren() {
-        return mCurrentDirChildren;
-    }
-
-    public void setCurrentDirChildren(List<TreeNode<SourceFile>> mCurrentDirChildren) {
-        this.mCurrentDirChildren = mCurrentDirChildren;
-    }
-
-    public TreeNode<SourceFile> getCurrentDir() {
-        return mCurrentDir;
-    }
-
-    public class FileViewHolder extends RecyclerView.ViewHolder {
+    class FileViewHolder extends RecyclerView.ViewHolder {
         private ImageView   mPreviewImage;
         private CheckBox    mCheckbox;
         private TextView    mText;
 
-        public FileViewHolder(View itemView) {
+        FileViewHolder(View itemView) {
             super(itemView);
-            mPreviewImage   = (ImageView) itemView.findViewById(R.id.image_file_preview);
-            mCheckbox       = (CheckBox)  itemView.findViewById(R.id.checkbox);
-            mText           = (TextView)  itemView.findViewById(R.id.text_file_title);
+            mPreviewImage   =  itemView.findViewById(R.id.image_file_preview);
+            mCheckbox       =  itemView.findViewById(R.id.checkbox);
+            mText           =  itemView.findViewById(R.id.text_file_title);
             itemView.setLongClickable(true);
             itemView.setOnClickListener(createOnClickListener());
             itemView.setOnLongClickListener(createOnLongClickListener());
@@ -180,6 +171,7 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
             return v -> {
                 if (!mMultiSelectEnabled) {
                     mMultiSelectEnabled = true;
+                    //TODO: Animate checkbox here
                 }
                 mOnLongClickListener.OnLongClick(mCurrentDirChildren.get(getAdapterPosition()));
                 return true;

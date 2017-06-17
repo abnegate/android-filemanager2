@@ -6,7 +6,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.BlurMaskFilter;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.internal.NavigationMenu;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.LocalBroadcastManager;
@@ -16,6 +19,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
+import android.view.animation.TranslateAnimation;
 
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.adapters.SourcesPagerAdapter;
@@ -23,11 +32,13 @@ import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.services.SourceTransferService;
 import com.jakebarnby.filemanager.util.TreeNode;
+import com.jakebarnby.filemanager.util.Utils;
 
 import java.util.List;
 
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
+import jp.wasabeef.blurry.Blurry;
 
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_COMPLETE;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_SHOW_DIALOG;
@@ -44,7 +55,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private FileAction                  mCurrentFileAction;
     private BroadcastReceiver           mBroadcastReciever;
     private ProgressDialog              mDialog;
-    private FabSpeedDial mFabMenu;
+    private FabSpeedDial                mFabMenu;
 
     public enum FileAction {
         COPY,
@@ -72,7 +83,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         setSupportActionBar(toolbar);
 
         mSourcesPagerAdapter = new SourcesPagerAdapter(getSupportFragmentManager());
-        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager = (ViewPager) findViewById(R.id.view_pager);
         mViewPager.setAdapter(mSourcesPagerAdapter);
         mViewPager.addOnPageChangeListener(this);
         mViewPager.setOffscreenPageLimit(mSourcesPagerAdapter.getCount() - 1);
@@ -87,9 +98,25 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         mFabMenu = (FabSpeedDial) findViewById(R.id.fab_speed_dial);
         mFabMenu.setMenuListener(new SimpleMenuListenerAdapter() {
             @Override
+            public boolean onPrepareMenu(NavigationMenu navigationMenu) {
+                Blurry.with(SourceActivity.this)
+                        .radius(17)
+                        .sampling(1)
+                        .onto((ViewGroup) findViewById(R.id.wrapper));
+                return super.onPrepareMenu(navigationMenu);
+            }
+
+            @Override
             public boolean onMenuItemSelected(MenuItem menuItem) {
+                Blurry.delete((ViewGroup) findViewById(R.id.wrapper));
                 handleFabMenuItemSelected(menuItem);
                 return true;
+            }
+
+            @Override
+            public void onMenuClosed() {
+                Blurry.delete((ViewGroup) findViewById(R.id.wrapper));
+                super.onMenuClosed();
             }
         });
 
@@ -208,7 +235,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             mDialog.dismiss();
         }
         setTitle(getString(R.string.app_name));
-        toggleFloatingMenu(false);
         SourceFragment activeFragment = mSourcesPagerAdapter.getFragments().get(mViewPager.getCurrentItem());
         activeFragment.replaceCurrentDirectory(getActiveDirectory());
         activeFragment.setMultiSelectEnabled(false);
@@ -265,8 +291,33 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         }
     }
 
+    /**
+     *
+     * @param enabled
+     */
     public void toggleFloatingMenu(boolean enabled) {
-        mFabMenu.setVisibility(enabled ? View.VISIBLE : View.INVISIBLE);
+        if (enabled) mFabMenu.setVisibility(View.VISIBLE);
+        final int screenHeight = Utils.getScreenHeight(mFabMenu.getContext());
+        TranslateAnimation translate = new TranslateAnimation(0.0f, 0.0f, enabled ? screenHeight : 0.0f, enabled ? 0.0f : screenHeight);
+        translate.setInterpolator(enabled? new OvershootInterpolator(0.55f) : new AccelerateInterpolator(2.0f));
+        translate.setDuration(400);
+        translate.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                if (!enabled) mFabMenu.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        mFabMenu.startAnimation(translate);
     }
 
     @Override
@@ -294,6 +345,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             activeFragment.setMultiSelectEnabled(false);
             toggleFloatingMenu(false);
             setTitle(R.string.app_name);
+            SelectedFilesManager.getInstance().getSelectedFiles().clear();
             return;
         }
         super.onBackPressed();
