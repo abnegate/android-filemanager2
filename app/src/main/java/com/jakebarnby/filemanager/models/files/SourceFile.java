@@ -22,7 +22,7 @@ public abstract class SourceFile implements Serializable {
     public SourceFile() {}
 
     public Uri getUri() {
-        if (mUri == null) {
+        if (mUri == null && mUriString != null) {
             mUri = Uri.parse(mUriString);
         }
         return mUri;

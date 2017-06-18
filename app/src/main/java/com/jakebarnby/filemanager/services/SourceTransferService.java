@@ -37,13 +37,14 @@ public class SourceTransferService extends IntentService {
     private static final String ACTION_MOVE = "com.jakebarnby.filemanager.services.action.MOVE";
     private static final String ACTION_DELETE = "com.jakebarnby.filemanager.services.action.DELETE";
     private static final String ACTION_CREATE_FOLDER = "com.jakebarnby.filemanager.services.action.CREATE_FOLDER";
+    private static final String ACTION_RENAME = "com.jakebarnby.filemanager.services.action.RENAME";
 
     public static final String EXTRA_CURRENT_COUNT = "com.jakebarnby.filemanager.services.extra.CURRENT_COUNT";
     public static final String EXTRA_TOTAL_COUNT = "com.jakebarnby.filemanager.services.extra.TOTAL_COUNT";
     private static final String EXTRA_SOURCE_FILES = "com.jakebarnby.filemanager.services.extra.SOURCE_FILES";
     private static final String EXTRA_SOURCE_DEST = "com.jakebarnby.filemanager.services.extra.SOURCE DESTINATION";
     public static final String EXTRA_DIALOG_TITLE = "com.jakebarnby.filemanager.services.extra.DIALOG_TITLE";
-    private static final String EXTRA_FOLDER_NAME = "com.jakebarnby.filemanager.services.extra.FOLDER_NAME";
+    private static final String EXTRA_NAME = "com.jakebarnby.filemanager.services.extra.NAME";
 
     static {
         System.loadLibrary("io-lib");
@@ -64,7 +65,20 @@ public class SourceTransferService extends IntentService {
      */
     public native int deleteFileNative(String sourcePath);
 
+    /**
+     *
+     * @param newPath
+     * @return
+     */
     public native int createFolderNative(String newPath);
+
+    /**
+     *
+     * @param oldPath
+     * @param newPath
+     * @return
+     */
+    public native int renameFolderNative(String oldPath, String newPath);
 
     /**
      * Create a new instance
@@ -105,11 +119,19 @@ public class SourceTransferService extends IntentService {
      * @param context
      * @param currentDirectory
      */
-    public static void startActionCreateFolder(Context context, String name, TreeNode<SourceFile> currentDirectory) {
+    public static void startActionCreateFolder(Context context, TreeNode<SourceFile> currentDirectory, String name) {
         Intent intent = new Intent(context, SourceTransferService.class);
         intent.setAction(ACTION_CREATE_FOLDER);
         intent.putExtra(EXTRA_SOURCE_DEST, currentDirectory);
-        intent.putExtra(EXTRA_FOLDER_NAME, name);
+        intent.putExtra(EXTRA_NAME, name);
+        context.startService(intent);
+    }
+
+    public static void startActionRename(Context context, TreeNode<SourceFile> toRename, String newName) {
+        Intent intent = new Intent(context, SourceTransferService.class);
+        intent.setAction(ACTION_RENAME);
+        intent.putExtra(EXTRA_SOURCE_DEST, toRename);
+        intent.putExtra(EXTRA_NAME, newName);
         context.startService(intent);
     }
 
@@ -118,11 +140,14 @@ public class SourceTransferService extends IntentService {
         if (intent != null) {
             final List<TreeNode<SourceFile>> targets = (List<TreeNode<SourceFile>>) intent.getSerializableExtra(EXTRA_SOURCE_FILES);
             final TreeNode<SourceFile> sourceDest = (TreeNode<SourceFile>) intent.getSerializableExtra(EXTRA_SOURCE_DEST);
-            final String folderName = intent.getStringExtra(EXTRA_FOLDER_NAME);
+            final String name = intent.getStringExtra(EXTRA_NAME);
             final String action = intent.getAction();
             switch (action) {
                 case ACTION_CREATE_FOLDER:
-                    createFolder(sourceDest, folderName);
+                    createFolder(sourceDest, name);
+                    break;
+                case ACTION_RENAME:
+                    rename(sourceDest, name);
                     break;
                 case ACTION_COPY:
                     copy(targets, sourceDest, false);
@@ -162,6 +187,43 @@ public class SourceTransferService extends IntentService {
                 OneDriveFactory
                         .getInstance()
                         .createFolder(name, ((OneDriveFile)destDir.getData()).getDriveId());
+                break;
+        }
+        finishOperation();
+    }
+
+    /**
+     * Renames the given file or folder to the given name
+     * @param destDir    The file or folder to rename
+     * @param name       The new name of the file or folder
+     */
+    private void rename(TreeNode<SourceFile> destDir, String name) {
+        String oldPath = null;
+        String newPath = null;
+        if (destDir.getData().getUri() != null) {
+            oldPath = destDir.getData().getUri().getPath();
+            newPath = destDir.getData().getUri().getPath().substring(0, destDir.getData().getUri().getPath().lastIndexOf(File.separator) + 1) + name;
+        }
+
+        switch(destDir.getData().getSourceName()) {
+            case Constants.Sources.LOCAL:
+
+                renameFolderNative(oldPath, newPath);
+                break;
+            case Constants.Sources.DROPBOX:
+                DropboxFactory
+                        .getInstance()
+                        .rename(oldPath, newPath);
+                break;
+            case Constants.Sources.GOOGLE_DRIVE:
+                GoogleDriveFactory
+                        .getInstance()
+                        .rename(name, ((GoogleDriveFile)destDir.getData()).getDriveId());
+                break;
+            case Constants.Sources.ONEDRIVE:
+                OneDriveFactory
+                        .getInstance()
+                        .rename(name, ((OneDriveFile)destDir.getData()).getDriveId());
                 break;
         }
         finishOperation();

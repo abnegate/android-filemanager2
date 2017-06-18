@@ -9,6 +9,7 @@ public class Constants {
     public static final int PROGRESSBAR_ELEVATION = 11;
     public static final int NOTIFICATION_ID = 100;
     public static final String GOOGLE_DRIVE_FOLDER_MIME = "application/vnd.google-apps.folder";
+    public static final java.lang.String DIALOG_TITLE_KEY = "DIALOG_TITLE";
 
     public class Sources {
         public static final String CALLBACK_URL = "https://google.com";

@@ -79,7 +79,6 @@ public class GoogleDriveFactory {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("File uploaded");
         return fileMetadata;
     }
 
@@ -109,6 +108,26 @@ public class GoogleDriveFactory {
                     .files()
                     .create(fileMetadata)
                     .setFields("id")
+                    .execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     *
+     * @param newName
+     * @param parentId
+     * @return
+     */
+    public com.google.api.services.drive.model.File rename(String newName, String parentId) {
+        com.google.api.services.drive.model.File file = new com.google.api.services.drive.model.File();
+        file.setName(newName);
+        try {
+            return mService.files()
+                    .update(parentId, file)
+                    .setFields("name")
                     .execute();
         } catch (IOException e) {
             e.printStackTrace();

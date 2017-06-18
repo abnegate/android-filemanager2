@@ -72,7 +72,26 @@ Java_com_jakebarnby_filemanager_services_SourceTransferService_createFolderNativ
                                                                                   jobject instance,
                                                                                   jstring newPath_) {
     const char *newPath = (*env)->GetStringUTFChars(env, newPath_, 0);
+
     int result =  mkdir(newPath, 0777);
+
     (*env)->ReleaseStringUTFChars(env, newPath_, newPath);
+
+    return result;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_jakebarnby_filemanager_services_SourceTransferService_renameFolderNative(JNIEnv *env,
+                                                                                  jobject instance,
+                                                                                  jstring oldPath_,
+                                                                                  jstring newPath_) {
+    const char *oldPath = (*env)->GetStringUTFChars(env, oldPath_, 0);
+    const char *newPath = (*env)->GetStringUTFChars(env, newPath_, 0);
+
+    int result = rename(oldPath, newPath);
+
+    (*env)->ReleaseStringUTFChars(env, oldPath_, oldPath);
+    (*env)->ReleaseStringUTFChars(env, newPath_, newPath);
+
     return result;
 }

@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.BlurMaskFilter;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.internal.NavigationMenu;
 import android.support.design.widget.Snackbar;
@@ -22,19 +20,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
-import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.TranslateAnimation;
 
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.adapters.SourcesPagerAdapter;
+import com.jakebarnby.filemanager.activities.source.dialogs.InputDialogFragment;
+import com.jakebarnby.filemanager.activities.source.dialogs.RenameDialogFragment;
+import com.jakebarnby.filemanager.activities.source.dialogs.ViewAsDialogFragment;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.services.SourceTransferService;
+import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
-
-import java.util.List;
 
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
@@ -165,6 +164,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 break;
             case R.id.action_new_folder:
                 showCreateFolderDialog();
+                break;
+            case R.id.action_multi_select:
+                if (!getActiveFragment().isMultiSelectEnabled()) {
+                    getActiveFragment().setMultiSelectEnabled(true);
+                }
+                break;
             default:
                 break;
         }
@@ -179,6 +184,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void handleFabMenuItemSelected(MenuItem menuItem) {
         int id = menuItem.getItemId();
         switch (id) {
+            case R.id.action_rename:
+                showRenameDialog();
+                break;
             case R.id.action_copy:
                 mCurrentFileAction = FileAction.COPY;
                 Snackbar.make(mViewPager, getString(R.string.copied), Snackbar.LENGTH_SHORT).show();
@@ -240,8 +248,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             mDialog.dismiss();
             toggleFloatingMenu(false);
             getActiveFragment().setMultiSelectEnabled(false);
-            setTitle(getString(R.string.app_name));
         }
+        setTitle(getString(R.string.app_name));
+        SelectedFilesManager.getInstance().getSelectedFiles().clear();
         getActiveFragment().replaceCurrentDirectory(getActiveDirectory());
     }
 
@@ -253,7 +262,32 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     private void showCreateFolderDialog() {
-        new CreateFolderDialogFragment().show(getSupportFragmentManager(), "CreateFolder");
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.DIALOG_TITLE_KEY, getString(R.string.create_folder));
+        InputDialogFragment dialog =  new InputDialogFragment();
+        dialog.setArguments(bundle);
+        dialog.show(getSupportFragmentManager(), "CreateFolder");
+    }
+
+    private void showRenameDialog() {
+        int size = SelectedFilesManager.getInstance().getSelectedFiles().size();
+        if (size == 0) {
+            Utils.showSnackBar(mViewPager, getString(R.string.no_selection), null, null);
+            setTitle(getString(R.string.app_name));
+            SelectedFilesManager.getInstance().getSelectedFiles().clear();
+            return;
+        } else if (size > 1) {
+            Utils.showSnackBar(mViewPager, getString(R.string.too_many_selected), null, null);
+            setTitle(getString(R.string.app_name));
+            SelectedFilesManager.getInstance().getSelectedFiles().clear();
+            return;
+        }
+
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.DIALOG_TITLE_KEY, getString(R.string.rename));
+        RenameDialogFragment dialog =  new RenameDialogFragment();
+        dialog.setArguments(bundle);
+        dialog.show(getSupportFragmentManager(), "Rename");
     }
 
     /**

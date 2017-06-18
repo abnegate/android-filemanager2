@@ -1,4 +1,4 @@
-package com.jakebarnby.filemanager.activities.source;
+package com.jakebarnby.filemanager.activities.source.dialogs;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -8,6 +8,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
 import com.jakebarnby.filemanager.R;
+import com.jakebarnby.filemanager.activities.source.SourceActivity;
 
 /**
  * Created by Jake on 5/31/2017.

@@ -3,15 +3,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".sources.SourceActivity">
     <item
-        android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        app:showAsAction="never" />
+        android:id="@+id/action_new_folder"
+        android:title="@string/menu_item_new_folder"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_multi_select"
+        android:title="@string/menu_item_multi_select"
+        app:showAsAction="never"/>
     <item
         android:id="@+id/action_viewas"
         android:title="@string/action_viewas"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_new_folder"
-        android:title="@string/menu_item_new_folder"
-        app:showAsAction="never"/>
+        android:id="@+id/action_settings"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
 </menu>
