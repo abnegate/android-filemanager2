@@ -20,6 +20,10 @@ public class OneDriveFile extends SourceFile {
         setSourceName(Constants.Sources.ONEDRIVE);
         setCanRead(true);
         setDirectory(file.folder != null);
+        setSize(file.size);
+        setCreatedTime(file.createdDateTime.getTimeInMillis());
+        setModifiedTime(file.lastModifiedDateTime.getTimeInMillis());
+        setThumbnailLink(file.webUrl);
     }
 
     public String getDriveId() {

@@ -62,9 +62,11 @@ Java_com_jakebarnby_filemanager_services_SourceTransferService_deleteFileNative(
                                                                           jstring sourcePath_) {
     const char *sourcePath = (*env)->GetStringUTFChars(env, sourcePath_, 0);
 
-    remove(sourcePath);
+    int result = remove(sourcePath);
 
     (*env)->ReleaseStringUTFChars(env, sourcePath_, sourcePath);
+
+    return result;
 }
 
 JNIEXPORT jint JNICALL

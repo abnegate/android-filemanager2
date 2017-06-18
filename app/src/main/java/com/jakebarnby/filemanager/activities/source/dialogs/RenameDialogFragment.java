@@ -30,7 +30,7 @@ public class RenameDialogFragment extends DialogFragment{
 
         final FrameLayout frame = new FrameLayout(getContext());
         final EditText input = new EditText(getContext());
-        input.setHint(SelectedFilesManager.getInstance().getSelectedFiles().get(0).getData().getName());
+        input.setText(SelectedFilesManager.getInstance().getSelectedFiles().get(0).getData().getName());
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         input.setMaxLines(1);
 

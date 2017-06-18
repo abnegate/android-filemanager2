@@ -18,6 +18,8 @@ public abstract class SourceFile implements Serializable {
     private long            mSize;
     private boolean         mIsDirectory;
     private boolean         mCanRead;
+    private long            mCreatedTime;
+    private long            mModifiedTime;
 
     public SourceFile() {}
 
@@ -79,5 +81,21 @@ public abstract class SourceFile implements Serializable {
 
     public void setCanRead(boolean mCanRead) {
         this.mCanRead = mCanRead;
+    }
+
+    public long getCreatedTime() {
+        return mCreatedTime;
+    }
+
+    public void setCreatedTime(long mCreatedTime) {
+        this.mCreatedTime = mCreatedTime;
+    }
+
+    public long getModifiedTime() {
+        return mModifiedTime;
+    }
+
+    public void setModifiedTime(long mModifiedTime) {
+        this.mModifiedTime = mModifiedTime;
     }
 }

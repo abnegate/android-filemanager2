@@ -2,6 +2,9 @@ package com.jakebarnby.filemanager.activities.source.adapters;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -14,12 +17,19 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.models.files.SourceFile;
+import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -70,6 +80,10 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
         }
     }
 
+    public TreeNode<SourceFile> getCurrentDir() {
+        return mCurrentDir;
+    }
+
     @Override
     public void onBindViewHolder(FileViewHolder holder, int position) {
         //TODO: Probably animate items here
@@ -96,7 +110,24 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
         if (mCurrentDirChildren.get(position).getData().isDirectory()) {
             holder.mPreviewImage.setImageResource(R.drawable.ic_folder);
         } else {
-            //TODO: Set file icon as thumbnail for file
+            Glide
+                    .with(holder.itemView)
+                    .load(mCurrentDir.getData().getSourceName().equals(Constants.Sources.LOCAL)?
+                            new File(mCurrentDirChildren.get(position).getData().getThumbnailLink()):
+                            Uri.parse(mCurrentDirChildren.get(position).getData().getThumbnailLink()))
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            holder.mPreviewImage.setImageResource(R.mipmap.ic_launcher_round);
+                            return true;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            return false;
+                        }
+                    })
+                    .into(holder.mPreviewImage);
         }
 
         setAnimation(holder.itemView, position);

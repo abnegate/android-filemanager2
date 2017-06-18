@@ -76,9 +76,9 @@ public abstract class SourceFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_source, container, false);
-        mRecycler = (RecyclerView) rootView.findViewById(R.id.recycler_local);
-        mProgressBar = (LottieAnimationView) rootView.findViewById(R.id.animation_view);
-        mConnectButton = (Button) rootView.findViewById(R.id.btn_connect);
+        mRecycler = rootView.findViewById(R.id.recycler_local);
+        mProgressBar = rootView.findViewById(R.id.animation_view);
+        mConnectButton = rootView.findViewById(R.id.btn_connect);
         if (hasToken(getSourceName())) {
             mConnectButton.setVisibility(View.GONE);
         }

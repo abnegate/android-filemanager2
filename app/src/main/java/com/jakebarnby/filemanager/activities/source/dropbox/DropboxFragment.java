@@ -160,6 +160,16 @@ public class DropboxFragment extends SourceFragment {
                 for (Metadata data : result.getEntries()) {
                     SourceFile sourceFile = new DropboxFile();
                     ((DropboxFile) sourceFile).setFileProperties(data);
+                    try {
+                        sourceFile.setThumbnailLink(DropboxFactory
+                                .getInstance()
+                                .getClient()
+                                .files()
+                                .getTemporaryLink(sourceFile.getUri().getPath()).getLink()
+                        );
+                    } catch (DbxException e) {
+                        e.printStackTrace();
+                    }
                     if (data instanceof FolderMetadata) {
                         currentLevelNode.addChild(sourceFile);
                         currentLevelNode = currentLevelNode.getChildren().get(currentLevelNode.getChildren().size() - 1);
