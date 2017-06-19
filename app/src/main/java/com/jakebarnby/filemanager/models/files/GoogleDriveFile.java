@@ -18,18 +18,19 @@ public class GoogleDriveFile extends SourceFile {
     }
 
     public void setFileProperties(File file) {
-        if (file.getWebContentLink() != null) {
-            setUri(Uri.parse(file.getWebContentLink()));
-        }
-        setDriveId(file.getId());
         setName(file.getName());
         setSourceName(Constants.Sources.GOOGLE_DRIVE);
-        setCanRead(true);
+        setDriveId(file.getId());
         setDirectory(file.getMimeType().equals(Constants.Sources.GOOGLE_DRIVE_FOLDER_MIME));
-        setSize(file.getSize());
+        setThumbnailLink(file.getHasThumbnail() ? file.getThumbnailLink() : file.getIconLink());
         setCreatedTime(file.getCreatedTime().getValue());
         setModifiedTime(file.getModifiedTime().getValue());
-        setThumbnailLink(file.getThumbnailLink());
+        if (!isDirectory()) {
+            setSize(file.getSize() == null? 0 : file.getSize());
+        }
+        if (file.getWebViewLink() != null) {
+            setPath(file.getWebViewLink());
+        }
     }
 
     public String getDriveId() {

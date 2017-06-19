@@ -8,13 +8,13 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 
 import com.jakebarnby.filemanager.R;
@@ -69,11 +69,11 @@ public class LocalFragment extends SourceFragment {
 
     @Override
     protected void openFile(SourceFile file) {
-        String extension = Utils.fileExt(file.getUri().getPath()).substring(1);
+        String extension = Utils.fileExt(file.getPath()).substring(1);
         String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(file.getUri(), mimeType);
+        intent.setDataAndType(Uri.parse(file.getPath()), mimeType);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         // Check for a handler in package manager, this is better than catching ActivityNotFoundException to avoid a crash
@@ -88,7 +88,7 @@ public class LocalFragment extends SourceFragment {
     protected void replaceCurrentDirectory(TreeNode<SourceFile> oldAdapterDir) {
         setReload(true);
         new LocalFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                                new File(oldAdapterDir.getData().getUri().getPath()));
+                                new File(oldAdapterDir.getData().getPath()));
     }
 
     /**
@@ -149,7 +149,7 @@ public class LocalFragment extends SourceFragment {
             super.onPostExecute(fileTree);
             if (!isReload()) {
                 setFileTreeRoot(fileTree);
-                initializeSourceRecyclerView(fileTree, createOnClickListener(), createOnLongClickListener());
+                initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
                 ((SourceActivity)getActivity()).setActiveDirectory(rootFileTreeNode);
             } else {
                 transformCurrentDirectory(getCurrentDirectory(), fileTree);

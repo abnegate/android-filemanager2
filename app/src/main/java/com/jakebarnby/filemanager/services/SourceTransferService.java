@@ -41,7 +41,6 @@ public class SourceTransferService extends IntentService {
 
     public static final String EXTRA_CURRENT_COUNT = "com.jakebarnby.filemanager.services.extra.CURRENT_COUNT";
     public static final String EXTRA_TOTAL_COUNT = "com.jakebarnby.filemanager.services.extra.TOTAL_COUNT";
-    private static final String EXTRA_SOURCE_FILES = "com.jakebarnby.filemanager.services.extra.SOURCE_FILES";
     private static final String EXTRA_SOURCE_DEST = "com.jakebarnby.filemanager.services.extra.SOURCE DESTINATION";
     public static final String EXTRA_DIALOG_TITLE = "com.jakebarnby.filemanager.services.extra.DIALOG_TITLE";
     private static final String EXTRA_NAME = "com.jakebarnby.filemanager.services.extra.NAME";
@@ -90,14 +89,12 @@ public class SourceTransferService extends IntentService {
     /**
      * Start the service for a copy or cut action with the given file.
      * @param context       Context for resources
-     * @param toCopy        The files to copy
      * @param sourceDest    The destination directory
      * @param move          Whether the files should be deleted after copying
      */
-    public static void startActionCopy(Context context, List<TreeNode<SourceFile>> toCopy, TreeNode<SourceFile> sourceDest, boolean move) {
+    public static void startActionCopy(Context context, TreeNode<SourceFile> sourceDest, boolean move) {
         Intent intent = new Intent(context, SourceTransferService.class);
         intent.setAction(move ? ACTION_MOVE : ACTION_COPY);
-        intent.putExtra(EXTRA_SOURCE_FILES, (Serializable) toCopy);
         intent.putExtra(EXTRA_SOURCE_DEST, sourceDest);
         context.startService(intent);
     }
@@ -105,12 +102,10 @@ public class SourceTransferService extends IntentService {
     /**
      * Start the service for a delete action with the given files.
      * @param context  Context for resources
-     * @param toDelete The files to delete
      */
-    public static void startActionDelete(Context context, List<TreeNode<SourceFile>> toDelete) {
+    public static void startActionDelete(Context context) {
         Intent intent = new Intent(context, SourceTransferService.class);
         intent.setAction(ACTION_DELETE);
-        intent.putExtra(EXTRA_SOURCE_FILES, (Serializable) toDelete);
         context.startService(intent);
     }
 
@@ -127,10 +122,9 @@ public class SourceTransferService extends IntentService {
         context.startService(intent);
     }
 
-    public static void startActionRename(Context context, TreeNode<SourceFile> toRename, String newName) {
+    public static void startActionRename(Context context, String newName) {
         Intent intent = new Intent(context, SourceTransferService.class);
         intent.setAction(ACTION_RENAME);
-        intent.putExtra(EXTRA_SOURCE_DEST, toRename);
         intent.putExtra(EXTRA_NAME, newName);
         context.startService(intent);
     }
@@ -138,7 +132,6 @@ public class SourceTransferService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
-            final List<TreeNode<SourceFile>> targets = (List<TreeNode<SourceFile>>) intent.getSerializableExtra(EXTRA_SOURCE_FILES);
             final TreeNode<SourceFile> sourceDest = (TreeNode<SourceFile>) intent.getSerializableExtra(EXTRA_SOURCE_DEST);
             final String name = intent.getStringExtra(EXTRA_NAME);
             final String action = intent.getAction();
@@ -147,16 +140,16 @@ public class SourceTransferService extends IntentService {
                     createFolder(sourceDest, name);
                     break;
                 case ACTION_RENAME:
-                    rename(sourceDest, name);
+                    rename(name);
                     break;
                 case ACTION_COPY:
-                    copy(targets, sourceDest, false);
+                    copy(sourceDest, false);
                     break;
                 case ACTION_MOVE:
-                    copy(targets, sourceDest, true);
+                    copy(sourceDest, true);
                     break;
                 case ACTION_DELETE:
-                    delete(targets, false);
+                    delete(false);
                     break;
             }
         }
@@ -171,12 +164,12 @@ public class SourceTransferService extends IntentService {
     private void createFolder(TreeNode<SourceFile> destDir, String name) {
         switch(destDir.getData().getSourceName()) {
             case Constants.Sources.LOCAL:
-                createFolderNative(destDir.getData().getUri().getPath()+File.separator+name);
+                createFolderNative(destDir.getData().getPath()+File.separator+name);
                 break;
             case Constants.Sources.DROPBOX:
                 DropboxFactory
                         .getInstance()
-                        .createFolder(name, destDir.getData().getUri().getPath());
+                        .createFolder(name, destDir.getData().getPath());
                 break;
             case Constants.Sources.GOOGLE_DRIVE:
                 GoogleDriveFactory
@@ -193,21 +186,21 @@ public class SourceTransferService extends IntentService {
     }
 
     /**
-     * Renames the given file or folder to the given name
-     * @param destDir    The file or folder to rename
+     * Renames the selected file or folder to the given name
      * @param name       The new name of the file or folder
      */
-    private void rename(TreeNode<SourceFile> destDir, String name) {
+    private void rename(String name) {
+        //Can only get here if only 1 item is selected
+        TreeNode<SourceFile> destDir = SelectedFilesManager.getInstance().getSelectedFiles().get(0);
         String oldPath = null;
         String newPath = null;
-        if (destDir.getData().getUri() != null) {
-            oldPath = destDir.getData().getUri().getPath();
-            newPath = destDir.getData().getUri().getPath().substring(0, destDir.getData().getUri().getPath().lastIndexOf(File.separator) + 1) + name;
+        if (destDir.getData().getPath() != null) {
+            oldPath = destDir.getData().getPath();
+            newPath = destDir.getData().getPath().substring(0, destDir.getData().getPath().lastIndexOf(File.separator) + 1) + name;
         }
 
         switch(destDir.getData().getSourceName()) {
             case Constants.Sources.LOCAL:
-
                 renameFolderNative(oldPath, newPath);
                 break;
             case Constants.Sources.DROPBOX:
@@ -230,11 +223,11 @@ public class SourceTransferService extends IntentService {
     }
 
     /**
-     * Copy the given files to the given destination
-     * @param toCopy  The files to copy
+     * Copy the selected files to the given destination
      * @param destDir Where to copy them to
      */
-    private void copy(List<TreeNode<SourceFile>> toCopy, TreeNode<SourceFile> destDir, boolean move) {
+    private void copy(TreeNode<SourceFile> destDir, boolean move) {
+        List<TreeNode<SourceFile>> toCopy = SelectedFilesManager.getInstance().getSelectedFiles();
         showDialog(move ? getString(R.string.moving) : getString(R.string.copying), toCopy.size());
         for (TreeNode<SourceFile> file : toCopy) {
             String newFilePath = getFile(file.getData());
@@ -243,7 +236,7 @@ public class SourceTransferService extends IntentService {
             updateDialog(toCopy.indexOf(file) + 1);
         }
         if (move) {
-            delete(toCopy, true);
+            delete(true);
         }
         finishOperation();
     }
@@ -257,12 +250,12 @@ public class SourceTransferService extends IntentService {
         String newFilePath = null;
         switch (file.getSourceName()) {
             case Constants.Sources.LOCAL:
-                newFilePath = file.getUri().getPath();
+                newFilePath = file.getPath();
                 break;
             case Constants.Sources.DROPBOX:
                 File newFile = DropboxFactory
                         .getInstance()
-                        .downloadFile(file.getUri().getPath(), getCacheDir().getPath()+File.separator+file.getName());
+                        .downloadFile(file.getPath(), getCacheDir().getPath()+File.separator+file.getName());
                 if (newFile.exists())
                     newFilePath = newFile.getPath();
                 break;
@@ -294,12 +287,12 @@ public class SourceTransferService extends IntentService {
     private void putFile(String newFilePath, String fileName, SourceFile destDir) {
         switch (destDir.getSourceName()) {
             case Constants.Sources.LOCAL:
-                copyFileNative(newFilePath, destDir.getUri().getPath()+"/"+fileName);
+                copyFileNative(newFilePath, destDir.getPath()+"/"+fileName);
                 break;
             case Constants.Sources.DROPBOX:
                 DropboxFactory
                         .getInstance()
-                        .uploadFile(newFilePath, destDir.getUri().getPath());
+                        .uploadFile(newFilePath, destDir.getPath());
                 break;
             case Constants.Sources.GOOGLE_DRIVE:
                 GoogleDriveFactory
@@ -307,26 +300,26 @@ public class SourceTransferService extends IntentService {
                         .uploadFile(newFilePath, fileName, ((GoogleDriveFile)destDir).getDriveId());
                 break;
             case Constants.Sources.ONEDRIVE:
-                OneDriveFactory.getInstance().uploadFile(newFilePath, fileName, destDir.getUri().getPath());
+                OneDriveFactory.getInstance().uploadFile(newFilePath, fileName, destDir.getPath());
                 break;
         }
     }
 
     /**
-     * Delete the given files
-     * @param toDelete The files to delete
+     * Delete the selected files
      */
-    private void delete(List<TreeNode<SourceFile>> toDelete, boolean isSilent) {
+    private void delete(boolean isSilent) {
+        List<TreeNode<SourceFile>> toDelete = SelectedFilesManager.getInstance().getSelectedFiles();
         if (!isSilent) showDialog(getString(R.string.deleting), toDelete.size());
         for (TreeNode<SourceFile> file : toDelete) {
             switch (file.getData().getSourceName()) {
                 case Constants.Sources.LOCAL:
-                    deleteFileNative(file.getData().getUri().getPath());
+                    deleteFileNative(file.getData().getPath());
                     break;
                 case Constants.Sources.DROPBOX:
                     DropboxFactory
                             .getInstance()
-                            .deleteFile(file.getData().getUri().getPath());
+                            .deleteFile(file.getData().getPath());
                     break;
                 case Constants.Sources.GOOGLE_DRIVE:
                     GoogleDriveFactory

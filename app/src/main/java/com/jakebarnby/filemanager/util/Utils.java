@@ -4,9 +4,12 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.support.design.widget.Snackbar;
 import android.view.Display;
 import android.view.View;
@@ -36,10 +39,8 @@ public class Utils {
      * @return True if Google Play Services is available and up to date on this device, false otherwise.
      */
     public static boolean isGooglePlayServicesAvailable(Context context) {
-        GoogleApiAvailability apiAvailability =
-                GoogleApiAvailability.getInstance();
-        final int connectionStatusCode =
-                apiAvailability.isGooglePlayServicesAvailable(context);
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        final int connectionStatusCode = apiAvailability.isGooglePlayServicesAvailable(context);
         return connectionStatusCode == ConnectionResult.SUCCESS;
     }
 
@@ -48,8 +49,7 @@ public class Utils {
      * Play Services installation via a user dialog, if possible.
      */
     public static void acquireGooglePlayServices(Activity activity) {
-        GoogleApiAvailability apiAvailability =
-                GoogleApiAvailability.getInstance();
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         final int connectionStatusCode =
                 apiAvailability.isGooglePlayServicesAvailable(activity);
         if (apiAvailability.isUserResolvableError(connectionStatusCode)) {
@@ -141,11 +141,22 @@ public class Utils {
         return screenWidth;
     }
 
-    public static void showSnackBar(View view, String text, String actionText, View.OnClickListener listener) {
-        Snackbar bar = Snackbar.make(view, text, Snackbar.LENGTH_LONG);
-        if (actionText != null && listener != null) {
-            bar.setAction(actionText, listener);
+    /**
+     *
+     * @return
+     */
+    public static Drawable getProgressBarIndeterminate(Context context) {
+        final int[] attrs = {android.R.attr.indeterminateDrawable};
+        final int attrs_indeterminateDrawable_index = 0;
+        TypedArray a = context.obtainStyledAttributes(android.R.style.Widget_ProgressBar, attrs);
+        try {
+            Drawable drawable = a.getDrawable(attrs_indeterminateDrawable_index);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                drawable.applyTheme(context.getTheme());
+            }
+            return drawable;
+        } finally {
+            a.recycle();
         }
-        bar.show();
     }
 }

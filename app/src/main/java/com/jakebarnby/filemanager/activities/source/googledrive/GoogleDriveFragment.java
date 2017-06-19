@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.auth.GoogleAuthException;
@@ -212,6 +213,7 @@ public class GoogleDriveFragment extends SourceFragment {
                         .getService()
                         .files()
                         .get(paths[0])
+                        .setFields("name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime,createdTime")
                         .execute();
                 SourceFile rootSourceFile = new GoogleDriveFile();
                 ((GoogleDriveFile) rootSourceFile).setFileProperties(rootFile);
@@ -242,7 +244,7 @@ public class GoogleDriveFragment extends SourceFragment {
                     .files()
                     .list()
                     .setQ(String.format("'%s' in parents", currentDirectory.getId()))
-                    .setFields("files(name,id,mimeType,parents)")
+                    .setFields("files(name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime,createdTime)")
                     .execute();
             List<File> files = fileList.getFiles();
             if (files != null) {
@@ -267,7 +269,7 @@ public class GoogleDriveFragment extends SourceFragment {
             super.onPostExecute(fileTree);
             if (!isReload()) {
                 setFileTreeRoot(fileTree);
-                initializeSourceRecyclerView(fileTree, createOnClickListener(), createOnLongClickListener());
+                initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
             } else {
                 transformCurrentDirectory(getCurrentDirectory(), fileTree);
                 setReload(false);

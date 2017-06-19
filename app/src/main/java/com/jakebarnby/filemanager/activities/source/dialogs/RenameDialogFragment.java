@@ -48,8 +48,6 @@ public class RenameDialogFragment extends DialogFragment{
         builder.setPositiveButton("OK", (dialog, which) -> {
             SourceTransferService.startActionRename(
                     getContext(),
-                    //FIXME: Shouldn't just get first index
-                    SelectedFilesManager.getInstance().getSelectedFiles().get(0),
                     input.getText().toString());
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());

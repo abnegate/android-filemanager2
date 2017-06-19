@@ -40,7 +40,7 @@ public class ViewAsDialogFragment extends DialogFragment {
                     mSharedPrefs.edit().putString("ViewAs", mOptions[which]).apply();
                 })
                 .setPositiveButton(R.string.ok, (dialog, id) -> {
-                    ((SourceActivity)getActivity()).getActiveFragment().setRecyclerLayout();
+                    ((SourceActivity)getActivity()).getActiveFragment().initRecyclerView();
                     dismiss();
                 })
                 .setNegativeButton(R.string.cancel, (dialog, id) -> {

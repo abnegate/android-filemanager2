@@ -14,16 +14,17 @@ public class OneDriveFile extends SourceFile {
     private String mDriveId;
 
     public void setFileProperties(DriveItem file) {
-        setUri(Uri.parse(file.webUrl));
+        setPath(file.webUrl);
         setDriveId(file.id);
         setName(file.name);
         setSourceName(Constants.Sources.ONEDRIVE);
-        setCanRead(true);
         setDirectory(file.folder != null);
         setSize(file.size);
         setCreatedTime(file.createdDateTime.getTimeInMillis());
         setModifiedTime(file.lastModifiedDateTime.getTimeInMillis());
-        setThumbnailLink(file.webUrl);
+        if (file.thumbnails != null && file.thumbnails.getCurrentPage().size() > 0) {
+            setThumbnailLink(file.thumbnails.getCurrentPage().get(0).small.url);
+        }
     }
 
     public String getDriveId() {

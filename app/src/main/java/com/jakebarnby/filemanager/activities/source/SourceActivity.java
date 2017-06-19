@@ -22,6 +22,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.TranslateAnimation;
+import android.widget.RelativeLayout;
 
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.adapters.SourcesPagerAdapter;
@@ -55,6 +56,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private BroadcastReceiver           mBroadcastReciever;
     private ProgressDialog              mDialog;
     private FabSpeedDial                mFabMenu;
+    private RelativeLayout              mWrapperLayout;
 
     public enum FileAction {
         COPY,
@@ -82,11 +84,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_source);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         mSourcesPagerAdapter = new SourcesPagerAdapter(getSupportFragmentManager());
-        mViewPager = (ViewPager) findViewById(R.id.view_pager);
+        mViewPager = findViewById(R.id.view_pager);
+        mWrapperLayout = findViewById(R.id.wrapper);
         mViewPager.setAdapter(mSourcesPagerAdapter);
         mViewPager.addOnPageChangeListener(this);
         mViewPager.setOffscreenPageLimit(mSourcesPagerAdapter.getCount() - 1);
@@ -98,32 +101,32 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             }
         };
 
-        mFabMenu = (FabSpeedDial) findViewById(R.id.fab_speed_dial);
+        mFabMenu = findViewById(R.id.fab_speed_dial);
         mFabMenu.setMenuListener(new SimpleMenuListenerAdapter() {
             @Override
             public boolean onPrepareMenu(NavigationMenu navigationMenu) {
                 Blurry.with(SourceActivity.this)
                         .radius(17)
                         .sampling(1)
-                        .onto((ViewGroup) findViewById(R.id.wrapper));
+                        .onto(mWrapperLayout);
                 return super.onPrepareMenu(navigationMenu);
             }
 
             @Override
             public boolean onMenuItemSelected(MenuItem menuItem) {
-                Blurry.delete((ViewGroup) findViewById(R.id.wrapper));
+                Blurry.delete(mWrapperLayout);
                 handleFabMenuItemSelected(menuItem);
                 return true;
             }
 
             @Override
             public void onMenuClosed() {
-                Blurry.delete((ViewGroup) findViewById(R.id.wrapper));
+                Blurry.delete(mWrapperLayout);
                 super.onMenuClosed();
             }
         });
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
     }
 
@@ -199,7 +202,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 startParseAction();
                 break;
             case R.id.action_delete:
-                SourceTransferService.startActionDelete(SourceActivity.this, SelectedFilesManager.getInstance().getSelectedFiles());
+                SourceTransferService.startActionDelete(SourceActivity.this);
                 break;
         }
 
@@ -214,9 +217,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void startParseAction() {
         if (mCurrentFileAction != null) {
             if (mCurrentFileAction == FileAction.COPY)
-                SourceTransferService.startActionCopy(SourceActivity.this, SelectedFilesManager.getInstance().getSelectedFiles(), mActiveDirectory, false);
+                SourceTransferService.startActionCopy(SourceActivity.this, mActiveDirectory, false);
             else if (mCurrentFileAction == FileAction.CUT) {
-                SourceTransferService.startActionCopy(SourceActivity.this, SelectedFilesManager.getInstance().getSelectedFiles(), mActiveDirectory, true);
+                SourceTransferService.startActionCopy(SourceActivity.this, mActiveDirectory, true);
             }
         }
     }
@@ -272,12 +275,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void showRenameDialog() {
         int size = SelectedFilesManager.getInstance().getSelectedFiles().size();
         if (size == 0) {
-            Utils.showSnackBar(mViewPager, getString(R.string.no_selection), null, null);
+            Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
             setTitle(getString(R.string.app_name));
             SelectedFilesManager.getInstance().getSelectedFiles().clear();
             return;
         } else if (size > 1) {
-            Utils.showSnackBar(mViewPager, getString(R.string.too_many_selected), null, null);
+            Snackbar.make(mViewPager, getString(R.string.too_many_selected), Snackbar.LENGTH_LONG).show();
             setTitle(getString(R.string.app_name));
             SelectedFilesManager.getInstance().getSelectedFiles().clear();
             return;

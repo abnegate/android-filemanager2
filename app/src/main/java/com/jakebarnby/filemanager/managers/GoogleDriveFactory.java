@@ -64,7 +64,11 @@ public class GoogleDriveFactory {
     public com.google.api.services.drive.model.File uploadFile(String filePath, String fileName, String parentId) {
         File file = new File(filePath);
         com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
+
+        MimeTypeMap map = MimeTypeMap.getSingleton();
         fileMetadata.setParents(Collections.singletonList(parentId));
+        fileMetadata.setMimeType(map.getMimeTypeFromExtension(Utils.fileExt(filePath)));
+        fileMetadata.setHasThumbnail(true);
         fileMetadata.setName(fileName);
 
         MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
