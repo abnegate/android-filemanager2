@@ -106,9 +106,6 @@ public class OneDriveFactory {
      */
     public DriveItem createFolder(String name, String parentId) {
         DriveItem item = new DriveItem();
-        ItemReference parentRef  = new ItemReference();
-        parentRef.driveId = parentId;
-        item.parentReference = parentRef;
         item.name = name;
         item.folder = new Folder();
 
@@ -122,19 +119,13 @@ public class OneDriveFactory {
     }
 
     public DriveItem rename(String newName, String itemId) {
-        DriveItem toRename =  mGraphClient
-                .getMe()
-                .getDrive()
-                .getItems(itemId)
-                .buildRequest()
-                .get();
-
-        toRename.name = newName;
+        DriveItem item = new DriveItem();
+        item.name = newName;
         return mGraphClient
                 .getMe()
                 .getDrive()
                 .getItems(itemId)
                 .buildRequest()
-                .patch(toRename);
+                .patch(item);
     }
 }
