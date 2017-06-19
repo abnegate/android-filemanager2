@@ -1,9 +1,12 @@
 package com.jakebarnby.filemanager.activities.source.adapters;
 
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.TreeNode;
@@ -14,8 +17,8 @@ import com.jakebarnby.filemanager.util.TreeNode;
 
 public class FileSystemGridAdapter extends FileSystemAdapter {
 
-    public FileSystemGridAdapter(TreeNode<SourceFile> rootNode) {
-        super(rootNode);
+    public FileSystemGridAdapter(TreeNode<SourceFile> rootNode, RequestBuilder<Drawable> requestBuilder, ViewPreloadSizeProvider sizeProvider) {
+        super(rootNode, requestBuilder, sizeProvider);
     }
 
     @Override

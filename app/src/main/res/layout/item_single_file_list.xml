@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:animateLayoutChanges="true"
@@ -15,16 +15,22 @@
         android:layout_gravity="center_vertical"
         android:layout_marginStart="5dp"
         android:layout_marginEnd="10dp"
-        android:visibility="invisible"/>
+        android:visibility="gone"/>
 
-    <ImageView
-        android:id="@+id/image_file_preview"
+    <android.support.percent.PercentRelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginStart="5dp"
-        android:adjustViewBounds="true"
-        android:padding="2dp"
-        android:src="@mipmap/ic_launcher_round"/>
+        android:layout_height="match_parent">
+        <ImageView
+            android:id="@+id/image_file_preview"
+            android:layout_marginStart="5dp"
+            android:scaleType="centerCrop"
+            android:padding="2dp"
+            android:src="@mipmap/ic_launcher_round"
+            app:layout_heightPercent="100%"
+            app:layout_aspectRatio="100%"/>
+    </android.support.percent.PercentRelativeLayout>
+
+
 
     <TextView
         android:id="@+id/text_file_title"

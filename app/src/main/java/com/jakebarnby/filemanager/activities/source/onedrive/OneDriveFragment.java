@@ -21,6 +21,7 @@ import com.microsoft.graph.core.IClientConfig;
 import com.microsoft.graph.extensions.DriveItem;
 import com.microsoft.graph.extensions.GraphServiceClient;
 import com.microsoft.graph.extensions.IDriveItemCollectionPage;
+import com.microsoft.graph.extensions.Thumbnail;
 import com.microsoft.identity.client.AuthenticationCallback;
 import com.microsoft.identity.client.AuthenticationResult;
 import com.microsoft.identity.client.MsalClientException;
@@ -37,15 +38,16 @@ import java.util.List;
  */
 public class OneDriveFragment extends SourceFragment {
 
-    public static final String              TAG         = "ONEDRIVE";
-    final static String                     CLIENT_ID   = "019d333e-3e7f-4c04-a214-f12602dd5b10";
-    private static final String[]           SCOPES      = {"https://graph.microsoft.com/Files.ReadWrite"};
+    public static final String TAG = "ONEDRIVE";
+    final static String CLIENT_ID = "019d333e-3e7f-4c04-a214-f12602dd5b10";
+    private static final String[] SCOPES = {"https://graph.microsoft.com/Files.ReadWrite"};
 
-    private PublicClientApplication         mClient;
-    private AuthenticationResult            mAuthResult;
+    private PublicClientApplication mClient;
+    private AuthenticationResult mAuthResult;
 
     /**
      * Return a new instance of this Fragment
+     *
      * @param sourceName The name of the source controlled by this fragment
      * @return A new instance of this fragment
      */
@@ -89,8 +91,8 @@ public class OneDriveFragment extends SourceFragment {
 
             } catch (IndexOutOfBoundsException e) {
                 Log.d(TAG, "User at this position does not exist: " + e.toString());
-                    mConnectButton.setVisibility(View.VISIBLE);
-                    mProgressBar.setVisibility(View.GONE);
+                mConnectButton.setVisibility(View.VISIBLE);
+                mProgressBar.setVisibility(View.GONE);
             }
         }
     }
@@ -105,16 +107,16 @@ public class OneDriveFragment extends SourceFragment {
         if (!isFilesLoaded() && mAuthResult != null) {
             final IClientConfig mClientConfig = DefaultClientConfig
                     .createWithAuthenticationProvider(iHttpRequest -> {
-                            iHttpRequest.addHeader("Authorization", String.format("Bearer %s", mAuthResult.getAccessToken()));
+                        iHttpRequest.addHeader("Authorization", String.format("Bearer %s", mAuthResult.getAccessToken()));
                     });
 
             OneDriveFactory
                     .getInstance()
                     .setGraphClient(
-                        new GraphServiceClient
-                            .Builder()
-                            .fromConfig(mClientConfig)
-                            .buildClient());
+                            new GraphServiceClient
+                                    .Builder()
+                                    .fromConfig(mClientConfig)
+                                    .buildClient());
 
             OneDriveFactory
                     .getInstance()
@@ -151,7 +153,7 @@ public class OneDriveFragment extends SourceFragment {
                 .getGraphClient()
                 .getMe()
                 .getDrive()
-                .getItems(((OneDriveFile)oldAdapterDir.getData()).getDriveId())
+                .getItems(((OneDriveFile) oldAdapterDir.getData()).getDriveId())
                 .buildRequest()
                 .get(new ICallback<DriveItem>() {
                     @Override
@@ -196,6 +198,7 @@ public class OneDriveFragment extends SourceFragment {
      * Callback method for acquireTokenSilent calls
      * Looks if tokens are in the cache (refreshes if necessary and if we don't forceRefresh)
      * else errors that we need to do an interactive request.
+     *
      * @return
      */
     private AuthenticationCallback getAuthSilentCallback() {
@@ -228,10 +231,10 @@ public class OneDriveFragment extends SourceFragment {
         };
     }
 
-
     /**
      * Callback used for interactive request.  If succeeds we use the access
      * token to call the Microsoft Graph. Does not check cache
+     *
      * @return
      */
     private AuthenticationCallback getAuthInteractiveCallback() {
@@ -287,15 +290,16 @@ public class OneDriveFragment extends SourceFragment {
          */
         private TreeNode<SourceFile> parseFileTree(DriveItem currentDirectory) {
             IDriveItemCollectionPage items = OneDriveFactory
-                                                    .getInstance()
-                                                    .getGraphClient()
-                                                    .getMe()
-                                                    .getDrive()
-                                                    .getItems(currentDirectory.id)
-                                                    .getChildren()
-                                                    .buildRequest()
-                                                    .select("id, name, webUrl, folder")
-                                                    .get();
+                    .getInstance()
+                    .getGraphClient()
+                    .getMe()
+                    .getDrive()
+                    .getItems(currentDirectory.id)
+                    .getChildren()
+                    .buildRequest()
+                    .select("id,name,webUrl,folder,size,createdDateTime,lastModifiedDateTime")
+                    .expand("thumbnails")
+                    .get();
 
             List<DriveItem> pageItems = items.getCurrentPage();
             for (DriveItem file : pageItems) {
@@ -318,7 +322,7 @@ public class OneDriveFragment extends SourceFragment {
             super.onPostExecute(fileTree);
             if (!isReload()) {
                 setFileTreeRoot(fileTree);
-                initializeSourceRecyclerView(fileTree, createOnClickListener(), createOnLongClickListener());
+                initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
             } else {
                 transformCurrentDirectory(getCurrentDirectory(), fileTree);
                 setReload(false);

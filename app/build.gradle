@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.0rc2"
+    buildToolsVersion "26.0.0"
     defaultConfig {
         applicationId "com.jakebarnby.filemanager"
         minSdkVersion 19
@@ -45,19 +45,20 @@ dependencies {
 
     //Android
     compile 'com.android.support:multidex:1.0.1'
-    compile 'com.android.support:appcompat-v7:25.1.0'
-    compile 'com.android.support:design:25.1.0'
-    compile 'com.android.support:cardview-v7:25.1.0'
-    compile 'com.android.support:recyclerview-v7:25.1.0'
+    compile "com.android.support:appcompat-v7:${project.SUPPORT_LIB_VERSION}"
+    compile "com.android.support:design:${project.SUPPORT_LIB_VERSION}"
+    compile "com.android.support:cardview-v7:${project.SUPPORT_LIB_VERSION}"
+    compile "com.android.support:recyclerview-v7:${project.SUPPORT_LIB_VERSION}"
+    compile "com.android.support:percent:${project.SUPPORT_LIB_VERSION}"
 
     //Dropbox
     compile 'com.dropbox.core:dropbox-core-sdk:3.0.3'
     compile 'com.squareup.okhttp3:okhttp:3.8.0'
 
     //Google Drive
-    compile('com.google.api-client:google-api-client-android:1.22.0')
-    compile 'com.google.android.gms:play-services-auth:10.2.6'
-    compile 'com.google.apis:google-api-services-drive:v3-rev75-1.22.0'
+    compile "com.google.api-client:google-api-client-android:${project.GOOGLE_API_VERSION}"
+    compile 'com.google.android.gms:play-services-auth:11.0.1'
+    compile "com.google.apis:google-api-services-drive:v3-rev75-${project.GOOGLE_API_VERSION}"
 
     //OneDrive
     compile project(':msal')
@@ -72,6 +73,11 @@ dependencies {
 
     //Screen blur
     compile 'jp.wasabeef:blurry:2.1.1'
+
+    //Glide
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC0'
+    compile 'com.github.bumptech.glide:glide:4.0.0-RC0'
+    implementation "com.github.bumptech.glide:recyclerview-integration:4.0.0-RC0@aar"
 }
 
 apply plugin: 'com.google.gms.google-services'

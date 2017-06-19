@@ -108,7 +108,7 @@ public class DropboxFragment extends SourceFragment {
     protected void replaceCurrentDirectory(TreeNode<SourceFile> currentDirectory) {
         setReload(true);
         new DropboxFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                                                        currentDirectory.getData().getUri().toString());
+                                                        currentDirectory.getData().getPath().toString());
     }
 
     /**
@@ -160,6 +160,17 @@ public class DropboxFragment extends SourceFragment {
                 for (Metadata data : result.getEntries()) {
                     SourceFile sourceFile = new DropboxFile();
                     ((DropboxFile) sourceFile).setFileProperties(data);
+                    try {
+                        if (!sourceFile.isDirectory()) {
+                        sourceFile.setThumbnailLink(DropboxFactory
+                                .getInstance()
+                                .getClient()
+                                .files()
+                                .getTemporaryLink(sourceFile.getPath()).getLink());
+                        }
+                    } catch (DbxException e) {
+                        e.printStackTrace();
+                    }
                     if (data instanceof FolderMetadata) {
                         currentLevelNode.addChild(sourceFile);
                         currentLevelNode = currentLevelNode.getChildren().get(currentLevelNode.getChildren().size() - 1);
@@ -186,7 +197,7 @@ public class DropboxFragment extends SourceFragment {
             super.onPostExecute(fileTree);
             if (!isReload()) {
                 setFileTreeRoot(fileTree);
-                initializeSourceRecyclerView(fileTree, createOnClickListener(), createOnLongClickListener());
+                initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
             } else {
                 transformCurrentDirectory(getCurrentDirectory(), fileTree);
                 setReload(false);

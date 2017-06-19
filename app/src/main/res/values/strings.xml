@@ -28,4 +28,5 @@
     <string name="no_selection">No files or folders selected.</string>
     <string name="too_many_selected">Only one file or folder can be renamed at a time.</string>
     <string name="menu_item_multi_select">Multi Select</string>
+    <string name="error">Error</string>
 </resources>

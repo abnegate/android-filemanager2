@@ -9,75 +9,61 @@ import java.io.Serializable;
  */
 
 public abstract class SourceFile implements Serializable {
-
-    private transient Uri   mUri;
-    private String          mUriString;
+    private String          mPath;
     private String          mName;
     private String          mSourceName;
     private String          mThumbnailLink;
-    private long            mSize;
     private boolean         mIsDirectory;
-    private boolean         mCanRead;
+    private long            mSize;
+    private long            mCreatedTime;
+    private long            mModifiedTime;
 
-    public SourceFile() {}
-
-    public Uri getUri() {
-        if (mUri == null && mUriString != null) {
-            mUri = Uri.parse(mUriString);
-        }
-        return mUri;
+    public String getPath() {
+        return mPath;
     }
-
-    public void setUri(Uri mUri) {
-        this.mUri = mUri;
-        this.mUriString = mUri.getPath();
+    public void setPath(String path) {
+        this.mPath = path;
     }
-
     public String getName() {
         return mName;
     }
-
     public void setName(String mName) {
         this.mName = mName;
     }
-
     public String getSourceName() {
         return mSourceName;
     }
-
     public void setSourceName(String mSourceName) {
         this.mSourceName = mSourceName;
     }
-
     public String getThumbnailLink() {
         return mThumbnailLink;
     }
-
     public void setThumbnailLink(String mThumbnailLink) {
         this.mThumbnailLink = mThumbnailLink;
     }
-
     public long getSize() {
-        return mSize;
+        return (long) mSize;
     }
-
     public void setSize(long size) {
         this.mSize = size;
     }
-
     public boolean isDirectory() {
         return mIsDirectory;
     }
-
     public void setDirectory(boolean directory) {
         mIsDirectory = directory;
     }
-
-    public boolean canRead() {
-        return mCanRead;
+    public long getCreatedTime() {
+        return (long) mCreatedTime;
     }
-
-    public void setCanRead(boolean mCanRead) {
-        this.mCanRead = mCanRead;
+    public void setCreatedTime(long mCreatedTime) {
+        this.mCreatedTime = mCreatedTime;
+    }
+    public long getModifiedTime() {
+        return (long) mModifiedTime;
+    }
+    public void setModifiedTime(long mModifiedTime) {
+        this.mModifiedTime = mModifiedTime;
     }
 }

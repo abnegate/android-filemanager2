@@ -16,10 +16,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
+import com.bumptech.glide.util.FixedPreloadSizeProvider;
+import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.adapters.FileSystemAdapter;
 import com.jakebarnby.filemanager.activities.source.adapters.FileSystemGridAdapter;
@@ -76,9 +82,9 @@ public abstract class SourceFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_source, container, false);
-        mRecycler = (RecyclerView) rootView.findViewById(R.id.recycler_local);
-        mProgressBar = (LottieAnimationView) rootView.findViewById(R.id.animation_view);
-        mConnectButton = (Button) rootView.findViewById(R.id.btn_connect);
+        mRecycler = rootView.findViewById(R.id.recycler_local);
+        mProgressBar = rootView.findViewById(R.id.animation_view);
+        mConnectButton = rootView.findViewById(R.id.btn_connect);
         if (hasToken(getSourceName())) {
             mConnectButton.setVisibility(View.GONE);
         }
@@ -163,7 +169,7 @@ public abstract class SourceFragment extends Fragment {
     /**
      * Set the {@link RecyclerView} layout and adapter based on users preferences
      */
-    public void setRecyclerLayout() {
+    public void initRecyclerView() {
         FileSystemAdapter newAdapter;
 
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
@@ -182,6 +188,13 @@ public abstract class SourceFragment extends Fragment {
         if (mRecycler.getAdapter() != null) {
             mRecycler.getAdapter().notifyDataSetChanged();
         }
+
+        mRecycler.addOnScrollListener(
+                new RecyclerViewPreloader<>(
+                        this,
+                        (FileSystemAdapter) mRecycler.getAdapter(),
+                        ((FileSystemAdapter) mRecycler.getAdapter()).getSizeProvider(),
+                        20));
     }
 
     /**
@@ -205,18 +218,22 @@ public abstract class SourceFragment extends Fragment {
      * @param onClickListener       The click listener for files and folders
      * @param onLongClickListener   The long click listener for files and folders
      */
-    protected void initializeSourceRecyclerView(TreeNode<SourceFile> file,
-                                                FileSystemAdapter.OnFileClickedListener onClickListener,
-                                                FileSystemAdapter.OnFileLongClickedListener onLongClickListener) {
-        mFileSystemListAdapter = new FileSystemListAdapter(file);
+    protected void initAdapters(TreeNode<SourceFile> file,
+                                FileSystemAdapter.OnFileClickedListener onClickListener,
+                                FileSystemAdapter.OnFileLongClickedListener onLongClickListener) {
+        mFileSystemListAdapter = new FileSystemListAdapter(file,
+                                                           Glide.with(this).asDrawable(),
+                                                           new ViewPreloadSizeProvider());
         mFileSystemListAdapter.setOnClickListener(onClickListener);
         mFileSystemListAdapter.setOnLongClickListener(onLongClickListener);
 
-        mFileSystemGridAdapter = new FileSystemGridAdapter(file);
+        mFileSystemGridAdapter = new FileSystemGridAdapter(file,
+                                                           Glide.with(this).asDrawable(),
+                                                           new ViewPreloadSizeProvider());
         mFileSystemGridAdapter.setOnClickListener(onClickListener);
         mFileSystemGridAdapter.setOnLongClickListener(onLongClickListener);
 
-        setRecyclerLayout();
+        initRecyclerView();
     }
 
     /**

@@ -30,7 +30,7 @@ public class RenameDialogFragment extends DialogFragment{
 
         final FrameLayout frame = new FrameLayout(getContext());
         final EditText input = new EditText(getContext());
-        input.setHint(SelectedFilesManager.getInstance().getSelectedFiles().get(0).getData().getName());
+        input.setText(SelectedFilesManager.getInstance().getSelectedFiles().get(0).getData().getName());
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         input.setMaxLines(1);
 
@@ -48,8 +48,6 @@ public class RenameDialogFragment extends DialogFragment{
         builder.setPositiveButton("OK", (dialog, which) -> {
             SourceTransferService.startActionRename(
                     getContext(),
-                    //FIXME: Shouldn't just get first index
-                    SelectedFilesManager.getInstance().getSelectedFiles().get(0),
                     input.getText().toString());
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());

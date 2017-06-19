@@ -16,11 +16,12 @@ public class LocalFile extends SourceFile {
     }
 
     public void setFileProperties(File file) {
-        setUri(Uri.parse(file.getPath()));
+        setPath(file.getPath());
         setName(file.getName());
         setSourceName(Constants.Sources.LOCAL);
         setDirectory(file.isDirectory());
-        setCanRead(file.canRead());
         setSize(file.length());
+        setThumbnailLink(file.getAbsolutePath());
+        setModifiedTime(file.lastModified());
     }
 }
