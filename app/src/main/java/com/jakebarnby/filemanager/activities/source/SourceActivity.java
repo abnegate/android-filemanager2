@@ -27,6 +27,7 @@ import android.widget.RelativeLayout;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.adapters.SourcesPagerAdapter;
 import com.jakebarnby.filemanager.activities.source.dialogs.InputDialogFragment;
+import com.jakebarnby.filemanager.activities.source.dialogs.PropertiesDialogFragment;
 import com.jakebarnby.filemanager.activities.source.dialogs.RenameDialogFragment;
 import com.jakebarnby.filemanager.activities.source.dialogs.ViewAsDialogFragment;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
@@ -201,13 +202,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             case R.id.action_paste:
                 startParseAction();
                 break;
+            case R.id.action_properties:
+                showPropertiesDialog();
+                break;
             case R.id.action_delete:
                 SourceTransferService.startActionDelete(SourceActivity.this);
                 break;
-        }
-
-        for (SourceFragment fragment : mSourcesPagerAdapter.getFragments()) {
-            fragment.setMultiSelectEnabled(false);
         }
     }
 
@@ -249,10 +249,10 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void completeServiceAction() {
         if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
-            toggleFloatingMenu(false);
-            getActiveFragment().setMultiSelectEnabled(false);
         }
         setTitle(getString(R.string.app_name));
+        toggleFloatingMenu(false);
+        getActiveFragment().setMultiSelectEnabled(false);
         SelectedFilesManager.getInstance().getSelectedFiles().clear();
         getActiveFragment().replaceCurrentDirectory(getActiveDirectory());
     }
@@ -272,6 +272,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         dialog.show(getSupportFragmentManager(), "CreateFolder");
     }
 
+    /**
+     * Shows a dialog allowing the user to rename a file or folder
+     */
     private void showRenameDialog() {
         int size = SelectedFilesManager.getInstance().getSelectedFiles().size();
         if (size == 0) {
@@ -291,6 +294,17 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         RenameDialogFragment dialog =  new RenameDialogFragment();
         dialog.setArguments(bundle);
         dialog.show(getSupportFragmentManager(), "Rename");
+    }
+
+    private void showPropertiesDialog() {
+        int size = SelectedFilesManager.getInstance().getSelectedFiles().size();
+        if (size == 0) {
+            Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
+            setTitle(getString(R.string.app_name));
+            SelectedFilesManager.getInstance().getSelectedFiles().clear();
+        } else {
+            new PropertiesDialogFragment().show(getSupportFragmentManager(), "Properties");
+        }
     }
 
     /**
@@ -341,6 +355,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * @param enabled
      */
     public void toggleFloatingMenu(boolean enabled) {
+        if (!enabled && mFabMenu.getVisibility() == View.INVISIBLE) return;
+        if (enabled && mFabMenu.getVisibility() == View.VISIBLE) return;
         if (enabled) mFabMenu.setVisibility(View.VISIBLE);
         final int screenHeight = Utils.getScreenHeight(mFabMenu.getContext());
         TranslateAnimation translate = new TranslateAnimation(0.0f, 0.0f, enabled ? screenHeight : 0.0f, enabled ? 0.0f : screenHeight);
@@ -375,6 +391,11 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         TreeNode<SourceFile> currentDir = getActiveFragment().getCurrentDirectory();
         if (currentDir != null) {
             setActiveDirectory(currentDir);
+        }
+        if (getActiveFragment().isMultiSelectEnabled()) {
+            toggleFloatingMenu(true);
+        } else {
+            toggleFloatingMenu(false);
         }
     }
 

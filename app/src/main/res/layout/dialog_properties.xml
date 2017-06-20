@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:columnCount="2"
+    android:orientation="vertical"
+    android:padding="25dp"
+    android:rowCount="6">
+
+    <TableRow
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/name"
+            android:textAlignment="textEnd"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/text_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textAlignment="textStart" />
+    </TableRow>
+
+    <TableRow
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/sourceName"
+            android:textAlignment="textEnd"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/text_sourceName"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:textAlignment="textStart" />
+    </TableRow>
+
+    <TableRow
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/path"
+            android:textAlignment="textEnd"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/text_path"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textAlignment="textStart" />
+    </TableRow>
+
+    <TableRow
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/size"
+            android:textAlignment="textEnd"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/text_size"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:textAlignment="textStart" />
+    </TableRow>
+
+    <TableRow
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/createdTime"
+            android:textAlignment="textEnd"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/text_createdTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textAlignment="textStart" />
+    </TableRow>
+
+    <TableRow
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/modifiedTime"
+            android:textAlignment="textEnd"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/text_modifiedTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textAlignment="textStart" />
+    </TableRow>
+</TableLayout>
