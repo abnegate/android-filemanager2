@@ -110,12 +110,6 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
     @Override
     public void onBindViewHolder(FileViewHolder holder, int position) {
         holder.mCheckbox.setVisibility(mMultiSelectEnabled ? View.VISIBLE : View.GONE);
-        if (mMultiSelectEnabled) {
-            TranslateAnimation translate = new TranslateAnimation(-500f, 0.0f, 0.0f, 0.0f);
-            translate.setInterpolator(new DecelerateInterpolator(3.0f));
-            translate.setDuration(400);
-            holder.mCheckbox.startAnimation(translate);
-        }
 
         if (mParentDir != null && position == 0) {
             holder.mText.setText("..");
@@ -124,6 +118,13 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
             }
         } else {
             holder.mText.setText(mCurrentDirChildren.get(position).getData().getName());
+        }
+
+        if (mMultiSelectEnabled && holder.mCheckbox.getVisibility() == View.VISIBLE) {
+            TranslateAnimation translate = new TranslateAnimation(-500f, 0.0f, 0.0f, 0.0f);
+            translate.setInterpolator(new DecelerateInterpolator(3.0f));
+            translate.setDuration(400);
+            holder.mCheckbox.startAnimation(translate);
         }
 
         if (mCurrentDirChildren.get(position).getData().isDirectory()) {

@@ -29,4 +29,13 @@
     <string name="too_many_selected">Only one file or folder can be renamed at a time.</string>
     <string name="menu_item_multi_select">Multi Select</string>
     <string name="error">Error</string>
+    <string name="name">Name</string>
+    <string name="path">Path</string>
+    <string name="sourceName">Source</string>
+    <string name="size">Size</string>
+    <string name="createdTime">Created</string>
+    <string name="modifiedTime">Modified</string>
+    <string name="selected_item_count">%1$d selected</string>
+    <string name="properties">Properties</string>
+    <string name="sizeDisplay">%.2f MB</string>
 </resources>
