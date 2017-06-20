@@ -22,6 +22,8 @@ import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
 
+import java.util.Comparator;
+
 /**
  * Created by Jake on 5/31/2017.
  */
@@ -191,6 +193,13 @@ public class DropboxFragment extends SourceFragment {
         protected void onPostExecute(TreeNode<SourceFile> fileTree) {
             super.onPostExecute(fileTree);
             if (!isReload()) {
+                TreeNode.sortTree(fileTree, new Comparator<TreeNode<? extends SourceFile>>() {
+                    @Override
+                    public int compare(TreeNode<? extends SourceFile> node1, TreeNode<? extends SourceFile> node2) {
+                        int result = node1.getData().getName().compareTo(node2.getData().getName());
+                        return result;
+                    }
+                });
                 setFileTreeRoot(fileTree);
                 initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
             } else {

@@ -1,7 +1,13 @@
 package com.jakebarnby.filemanager.util;
 
+import android.support.annotation.NonNull;
+
+import com.jakebarnby.filemanager.models.files.SourceFile;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -78,5 +84,15 @@ public class TreeNode<T extends Serializable> implements Serializable {
 
     public TreeNode<T> getParent() {
         return parent;
+    }
+
+    public static void sortTree(TreeNode<? extends SourceFile> rootNode, Comparator<TreeNode<? extends SourceFile>> comparator) {
+        Collections.sort(rootNode.getChildren(), comparator);
+
+        for (TreeNode<? extends SourceFile> child : rootNode.getChildren()) {
+            if (child.getData().isDirectory()) {
+                sortTree(child, comparator);
+            }
+        }
     }
 }

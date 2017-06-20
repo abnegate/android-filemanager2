@@ -263,6 +263,9 @@ public class GoogleDriveFragment extends SourceFragment {
         protected void onPostExecute(TreeNode<SourceFile> fileTree) {
             super.onPostExecute(fileTree);
             if (!isReload()) {
+                TreeNode.sortTree(fileTree, (node1, node2) ->
+                        node1.getData().getName().compareTo(node2.getData().getName())
+                );
                 setFileTreeRoot(fileTree);
                 initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
             } else {

@@ -7,6 +7,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -28,34 +29,24 @@ public class RenameDialogFragment extends DialogFragment{
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(getArguments().getString(Constants.DIALOG_TITLE_KEY));
 
-        final FrameLayout frame = new FrameLayout(getContext());
-        final EditText input = new EditText(getContext());
-        input.setText(SelectedFilesManager.getInstance().getSelectedFiles().get(0).getData().getName());
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        input.setMaxLines(1);
+        View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_rename, null);
+        EditText input = view.findViewById(R.id.text_rename);
+        String name = SelectedFilesManager
+                .getInstance()
+                .getSelectedFiles()
+                .get(0)
+                .getData()
+                .getName();
+        input.setText(name.substring(0, name.lastIndexOf('.')));
+        input.setSelection(input.getText().length());
 
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-
-        int px = dpToPx(20);
-        params.setMargins(px,px,px,px);
-        input.setLayoutParams(params);
-
-        frame.addView(input);
-        builder.setView(frame);
-
+        builder.setView(view);
         builder.setPositiveButton("OK", (dialog, which) -> {
             SourceTransferService.startActionRename(
                     getContext(),
-                    input.getText().toString());
+                    input.getText().toString()+name.substring(name.lastIndexOf('.')));
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         return builder.create();
-    }
-
-    private int dpToPx(int px) {
-        Resources r = getResources();
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, px, r.getDisplayMetrics());
     }
 }

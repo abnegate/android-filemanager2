@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/name"
-            android:textAlignment="textEnd"
+            android:textAlignment="textStart"
             android:textStyle="bold" />
 
         <TextView
@@ -34,7 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/sourceName"
-            android:textAlignment="textEnd"
+            android:textAlignment="textStart"
             android:textStyle="bold" />
 
         <TextView
@@ -53,7 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/path"
-            android:textAlignment="textEnd"
+            android:textAlignment="textStart"
             android:textStyle="bold" />
 
         <TextView
@@ -72,7 +72,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/size"
-            android:textAlignment="textEnd"
+            android:textAlignment="textStart"
             android:textStyle="bold" />
 
         <TextView
@@ -91,7 +91,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/createdTime"
-            android:textAlignment="textEnd"
+            android:textAlignment="textStart"
             android:textStyle="bold" />
 
         <TextView
@@ -110,7 +110,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/modifiedTime"
-            android:textAlignment="textEnd"
+            android:textAlignment="textStart"
             android:textStyle="bold" />
 
         <TextView

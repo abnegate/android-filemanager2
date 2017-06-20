@@ -28,6 +28,7 @@ import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
 
 import java.io.File;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -132,6 +133,9 @@ public class LocalFragment extends SourceFragment {
         protected void onPostExecute(TreeNode<SourceFile> fileTree) {
             super.onPostExecute(fileTree);
             if (!isReload()) {
+                TreeNode.sortTree(fileTree, (node1, node2) ->
+                        node1.getData().getName().compareTo(node2.getData().getName())
+                );
                 setFileTreeRoot(fileTree);
                 initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
                 ((SourceActivity)getActivity()).setActiveDirectory(rootFileTreeNode);
