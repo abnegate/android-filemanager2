@@ -1,9 +1,12 @@
 package com.jakebarnby.filemanager.managers;
+import com.jakebarnby.filemanager.util.Utils;
+import com.microsoft.graph.core.ClientException;
 import com.microsoft.graph.extensions.DriveItem;
 import com.microsoft.graph.extensions.Folder;
 import com.microsoft.graph.extensions.IGraphServiceClient;
 import com.microsoft.graph.extensions.ItemReference;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -50,13 +53,10 @@ public class OneDriveFactory {
                                     .getItems(id)
                                     .getContent()
                                     .buildRequest()
-                                    .get();
-            OutputStream outputStream = new FileOutputStream(file)) {
-            byte[] buffer = new byte[inputStream.available()];
-            inputStream.read(buffer);
-            outputStream.write(buffer);
+                                    .get()) {
+            Utils.copyInputStreamToFile(inputStream, file);
             return file;
-        } catch (IOException e) {
+        } catch (IOException | ClientException e) {
             e.printStackTrace();
         }
         return null;

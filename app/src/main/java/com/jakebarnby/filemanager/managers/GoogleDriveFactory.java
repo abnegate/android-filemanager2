@@ -49,7 +49,7 @@ public class GoogleDriveFactory {
         try(OutputStream outputStream = new FileOutputStream(file)) {
             mService.files()
                     .get(fileId)
-                    .executeAndDownloadTo(outputStream);
+                    .executeMediaAndDownloadTo(outputStream);
             return file;
         } catch (IOException e) {
             e.printStackTrace();

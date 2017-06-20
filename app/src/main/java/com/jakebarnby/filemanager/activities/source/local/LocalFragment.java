@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,23 +65,6 @@ public class LocalFragment extends SourceFragment {
     protected void loadSource() {
         if (!isFilesLoaded()) {
             new LocalFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Environment.getExternalStorageDirectory());
-        }
-    }
-
-    @Override
-    protected void openFile(SourceFile file) {
-        String extension = Utils.fileExt(file.getPath()).substring(1);
-        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.parse(file.getPath()), mimeType);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        // Check for a handler in package manager, this is better than catching ActivityNotFoundException to avoid a crash
-        PackageManager manager = getActivity().getPackageManager();
-        List<ResolveInfo> resolveInfo = manager.queryIntentActivities(intent, 0);
-        if (resolveInfo.size() > 0) {
-            startActivity(intent);
         }
     }
 

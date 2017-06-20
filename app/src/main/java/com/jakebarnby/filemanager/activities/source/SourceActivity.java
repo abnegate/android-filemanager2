@@ -6,10 +6,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.internal.NavigationMenu;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.content.FileProvider;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +26,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.TranslateAnimation;
+import android.webkit.MimeTypeMap;
 import android.widget.RelativeLayout;
 
 import com.jakebarnby.filemanager.R;
@@ -35,6 +40,9 @@ import com.jakebarnby.filemanager.services.SourceTransferService;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
+
+import java.io.File;
+import java.util.List;
 
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
@@ -233,7 +241,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         String action = intent.getAction();
         switch (action) {
             case ACTION_COMPLETE:
-                completeServiceAction();
+                completeServiceAction(intent);
                 break;
             case ACTION_SHOW_DIALOG:
                 showProgressDialog(intent);
@@ -246,15 +254,23 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     /**
      * Called when {@link SourceTransferService} broadcasts that it has completed a background action
      */
-    private void completeServiceAction() {
+    private void completeServiceAction(Intent intent) {
+        String path = intent.getStringExtra(Constants.FILE_PATH_KEY);
+
         if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
-            toggleFloatingMenu(false);
-            getActiveFragment().setMultiSelectEnabled(false);
+            if (path == null) {
+                toggleFloatingMenu(false);
+                getActiveFragment().setMultiSelectEnabled(false);
+            } else {
+                viewFileInExternalApp(new File(path));
+                return;
+            }
         }
         setTitle(getString(R.string.app_name));
         SelectedFilesManager.getInstance().getSelectedFiles().clear();
         getActiveFragment().replaceCurrentDirectory(getActiveDirectory());
+
     }
 
     /**
@@ -310,8 +326,13 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         mDialog.setTitle(title);
         mDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mDialog.setIndeterminate(true);
-        mDialog.setMax(totalCount);
-        mDialog.setProgress(currentCount);
+        if (totalCount != 0) {
+            mDialog.setMax(totalCount);
+            mDialog.setProgress(currentCount);
+        } else {
+            mDialog.setProgressNumberFormat(null);
+            mDialog.setProgressPercentFormat(null);
+        }
         mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel), (dialog, which) ->
                 stopService(new Intent(this, SourceTransferService.class))
         );
@@ -333,6 +354,29 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             }
             int currentCount = intent.getIntExtra(EXTRA_CURRENT_COUNT, 0);
             mDialog.setProgress(currentCount);
+        }
+    }
+
+    /**
+     * Attempts to open a file by finding it's mimetype then opening a compatible application
+     * @param file The file to attempt to open
+     */
+    private void viewFileInExternalApp(File file) {
+        String extension = Utils.fileExt(file.getPath());
+        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+
+        Uri reachableUri = FileProvider.getUriForFile(this, "com.jakebarnby.filemanager", file);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(reachableUri, mimeType);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        PackageManager manager = getPackageManager();
+        List<ResolveInfo> resolveInfo = manager.queryIntentActivities(intent, 0);
+        if (resolveInfo.size() > 0) {
+            startActivity(intent);
+        } else {
+            //TODO: Handle no app to open file
         }
     }
 

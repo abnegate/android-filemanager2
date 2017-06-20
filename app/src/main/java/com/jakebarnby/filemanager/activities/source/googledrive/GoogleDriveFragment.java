@@ -134,11 +134,6 @@ public class GoogleDriveFragment extends SourceFragment {
     }
 
     @Override
-    protected void openFile(SourceFile file) {
-
-    }
-
-    @Override
     protected void replaceCurrentDirectory(TreeNode<SourceFile> oldAdapterDir) {
         setReload(true);
         new GoogleDriveFileSystemLoader(mCredential)

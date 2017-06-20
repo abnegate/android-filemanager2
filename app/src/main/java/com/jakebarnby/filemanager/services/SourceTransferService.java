@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -38,13 +39,13 @@ public class SourceTransferService extends IntentService {
     private static final String ACTION_DELETE = "com.jakebarnby.filemanager.services.action.DELETE";
     private static final String ACTION_CREATE_FOLDER = "com.jakebarnby.filemanager.services.action.CREATE_FOLDER";
     private static final String ACTION_RENAME = "com.jakebarnby.filemanager.services.action.RENAME";
+    private static final String ACTION_OPEN = "com.jakebarnby.filemanager.services.action.OPEN";
 
     public static final String EXTRA_CURRENT_COUNT = "com.jakebarnby.filemanager.services.extra.CURRENT_COUNT";
     public static final String EXTRA_TOTAL_COUNT = "com.jakebarnby.filemanager.services.extra.TOTAL_COUNT";
     private static final String EXTRA_SOURCE_DEST = "com.jakebarnby.filemanager.services.extra.SOURCE DESTINATION";
     public static final String EXTRA_DIALOG_TITLE = "com.jakebarnby.filemanager.services.extra.DIALOG_TITLE";
     private static final String EXTRA_NAME = "com.jakebarnby.filemanager.services.extra.NAME";
-
     static {
         System.loadLibrary("io-lib");
     }
@@ -111,8 +112,8 @@ public class SourceTransferService extends IntentService {
 
     /**
      * Start the service for a new folder action
-     * @param context
-     * @param currentDirectory
+     * @param context           Context for resources
+     * @param currentDirectory  The directory to create the new folder in
      */
     public static void startActionCreateFolder(Context context, TreeNode<SourceFile> currentDirectory, String name) {
         Intent intent = new Intent(context, SourceTransferService.class);
@@ -122,10 +123,27 @@ public class SourceTransferService extends IntentService {
         context.startService(intent);
     }
 
+    /**
+     * Start the service for a rename action
+     * @param context Context for resources
+     * @param newName The new name for the file or folder
+     */
     public static void startActionRename(Context context, String newName) {
         Intent intent = new Intent(context, SourceTransferService.class);
         intent.setAction(ACTION_RENAME);
         intent.putExtra(EXTRA_NAME, newName);
+        context.startService(intent);
+    }
+
+    /**
+     * Start the service for an open file action
+     * @param context Context for resources
+     * @param toOpen  The file to open
+     */
+    public static void startActionOpen(Context context, TreeNode<SourceFile> toOpen) {
+        Intent intent = new Intent(context, SourceTransferService.class);
+        intent.setAction(ACTION_OPEN);
+        intent.putExtra(EXTRA_SOURCE_DEST, toOpen);
         context.startService(intent);
     }
 
@@ -150,6 +168,9 @@ public class SourceTransferService extends IntentService {
                     break;
                 case ACTION_DELETE:
                     delete(false);
+                    break;
+                case ACTION_OPEN:
+                    open(sourceDest);
                     break;
             }
         }
@@ -223,6 +244,19 @@ public class SourceTransferService extends IntentService {
     }
 
     /**
+     * Open the given {@link SourceFile}. If it is a remote file, dowload it first
+     * @param toOpen
+     */
+    private void open(TreeNode<SourceFile> toOpen) {
+        showDialog(getString(R.string.opening), 0);
+        String filePath = getFile(toOpen.getData());
+
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.FILE_PATH_KEY, filePath);
+        finishOperation(bundle);
+    }
+
+    /**
      * Copy the selected files to the given destination
      * @param destDir Where to copy them to
      */
@@ -269,7 +303,7 @@ public class SourceTransferService extends IntentService {
             case Constants.Sources.ONEDRIVE:
                 File oneDriveFile = OneDriveFactory
                         .getInstance()
-                        .downloadFile(((OneDriveFile)file).getDriveId(), file.getName(), getCacheDir().getPath()+File.separator+file.getName());
+                        .downloadFile(((OneDriveFile)file).getDriveId(), file.getName(), getCacheDir().getPath());
                 if (oneDriveFile.exists()) {
                     newFilePath = oneDriveFile.getPath();
                 }
@@ -341,12 +375,19 @@ public class SourceTransferService extends IntentService {
      * Notifies the activity that this operation is finished
      */
     private void finishOperation() {
+        finishOperation(null);
+    }
+
+    private void finishOperation(Bundle bundle) {
         Intent intent = new Intent();
         intent.setAction(ACTION_COMPLETE);
+
+        if (bundle != null) {
+            intent.putExtras(bundle);
+        }
         SelectedFilesManager.getInstance().getSelectedFiles().clear();
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
-
 
     /**
      * Broadcasts that the hosting activity should display a dialog with the given title and max progress

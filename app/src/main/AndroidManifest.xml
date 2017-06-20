@@ -50,9 +50,18 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".services.SourceTransferService">
+        <service android:name=".services.SourceTransferService"/>
 
-        </service>
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.jakebarnby.filemanager"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+
+        </provider>
     </application>
 
 </manifest>

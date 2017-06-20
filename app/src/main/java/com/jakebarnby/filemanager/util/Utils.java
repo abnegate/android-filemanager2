@@ -18,6 +18,11 @@ import android.view.WindowManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
  * Created by Jake on 6/6/2017.
  */
@@ -141,22 +146,18 @@ public class Utils {
         return screenWidth;
     }
 
-    /**
-     *
-     * @return
-     */
-    public static Drawable getProgressBarIndeterminate(Context context) {
-        final int[] attrs = {android.R.attr.indeterminateDrawable};
-        final int attrs_indeterminateDrawable_index = 0;
-        TypedArray a = context.obtainStyledAttributes(android.R.style.Widget_ProgressBar, attrs);
+    public static void copyInputStreamToFile(InputStream in, File file) {
         try {
-            Drawable drawable = a.getDrawable(attrs_indeterminateDrawable_index);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                drawable.applyTheme(context.getTheme());
+            OutputStream out = new FileOutputStream(file);
+            byte[] buf = new byte[1024];
+            int len;
+            while((len=in.read(buf))>0){
+                out.write(buf,0,len);
             }
-            return drawable;
-        } finally {
-            a.recycle();
+            out.close();
+            in.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
