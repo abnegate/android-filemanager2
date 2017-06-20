@@ -100,11 +100,6 @@ public class DropboxFragment extends SourceFragment {
     }
 
     @Override
-    protected void openFile(SourceFile file) {
-
-    }
-
-    @Override
     protected void replaceCurrentDirectory(TreeNode<SourceFile> currentDirectory) {
         setReload(true);
         new DropboxFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,

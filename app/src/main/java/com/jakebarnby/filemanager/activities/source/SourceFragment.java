@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -32,8 +33,10 @@ import com.jakebarnby.filemanager.activities.source.adapters.FileSystemGridAdapt
 import com.jakebarnby.filemanager.activities.source.adapters.FileSystemListAdapter;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.models.files.SourceFile;
+import com.jakebarnby.filemanager.services.SourceTransferService;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
+import com.jakebarnby.filemanager.util.Utils;
 
 import java.io.File;
 import java.util.List;
@@ -66,12 +69,6 @@ public abstract class SourceFragment extends Fragment {
      * Load the current source
      */
     protected abstract void loadSource();
-
-    /**
-     * Attempts to open a {@link SourceFile} by finding it's mimetype then opening a compatible application
-     * @param file The file to attempt to open
-     */
-    protected abstract void openFile(SourceFile file);
 
     /**
      *
@@ -237,24 +234,6 @@ public abstract class SourceFragment extends Fragment {
     }
 
     /**
-     * Attempts to open a file by finding it's mimetype then opening a compatible application
-     * @param file The file to attempt to open
-     */
-    protected void viewFileInExternalApp(File file) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        MimeTypeMap mime = MimeTypeMap.getSingleton();
-        String ext = file.getName().substring(file.getName().indexOf(".") + 1);
-        String type = mime.getMimeTypeFromExtension(ext);
-        intent.setDataAndType(Uri.fromFile(file), type);
-
-        PackageManager manager = getActivity().getPackageManager();
-        List<ResolveInfo> resolveInfo = manager.queryIntentActivities(intent, 0);
-        if (resolveInfo.size() > 0) {
-            startActivity(intent);
-        }
-    }
-
-    /**
      * Opens the app details page for this app
      */
     protected void showAppDetails() {
@@ -292,7 +271,7 @@ public abstract class SourceFragment extends Fragment {
                     setCurrentDirectory(file);
                     ((SourceActivity)getActivity()).setActiveDirectory(file);
                 } else {
-                    openFile(file.getData());
+                    SourceTransferService.startActionOpen(getContext(), file);
                 }
             }
         };
