@@ -20,7 +20,7 @@ import com.jakebarnby.filemanager.util.Constants;
  * Created by Jake on 6/18/2017.
  */
 
-public class InputDialogFragment extends DialogFragment {
+public class CreateFolderDialog extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

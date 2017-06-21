@@ -13,7 +13,7 @@ import com.jakebarnby.filemanager.util.Constants;
  * Created by Jake on 6/18/2017.
  */
 
-public class ErrorDialogFragment extends DialogFragment {
+public class ErrorDialog extends DialogFragment {
 
     @NonNull
     @Override

@@ -22,7 +22,7 @@ import java.util.List;
  * Created by Jake on 6/19/2017.
  */
 
-public class PropertiesDialogFragment extends DialogFragment {
+public class PropertiesDialog extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

@@ -21,7 +21,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.OvershootInterpolator;
@@ -31,10 +30,10 @@ import android.widget.RelativeLayout;
 
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.adapters.SourcesPagerAdapter;
-import com.jakebarnby.filemanager.activities.source.dialogs.InputDialogFragment;
-import com.jakebarnby.filemanager.activities.source.dialogs.PropertiesDialogFragment;
-import com.jakebarnby.filemanager.activities.source.dialogs.RenameDialogFragment;
-import com.jakebarnby.filemanager.activities.source.dialogs.ViewAsDialogFragment;
+import com.jakebarnby.filemanager.activities.source.dialogs.CreateFolderDialog;
+import com.jakebarnby.filemanager.activities.source.dialogs.PropertiesDialog;
+import com.jakebarnby.filemanager.activities.source.dialogs.RenameDialog;
+import com.jakebarnby.filemanager.activities.source.dialogs.ViewAsDialog;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.services.SourceTransferService;
@@ -279,13 +278,13 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * Shows a dialog allowing a user to choose a grid or list layout for displaying files
      */
     private void showViewAsDialog() {
-        new ViewAsDialogFragment().show(getSupportFragmentManager(), "ViewAs");
+        new ViewAsDialog().show(getSupportFragmentManager(), "ViewAs");
     }
 
     private void showCreateFolderDialog() {
         Bundle bundle = new Bundle();
         bundle.putString(Constants.DIALOG_TITLE_KEY, getString(R.string.create_folder));
-        InputDialogFragment dialog =  new InputDialogFragment();
+        CreateFolderDialog dialog =  new CreateFolderDialog();
         dialog.setArguments(bundle);
         dialog.show(getSupportFragmentManager(), "CreateFolder");
     }
@@ -305,7 +304,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
         Bundle bundle = new Bundle();
         bundle.putString(Constants.DIALOG_TITLE_KEY, getString(R.string.rename));
-        RenameDialogFragment dialog =  new RenameDialogFragment();
+        RenameDialog dialog =  new RenameDialog();
         dialog.setArguments(bundle);
         dialog.show(getSupportFragmentManager(), "Rename");
     }
@@ -317,7 +316,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             setTitle(getString(R.string.app_name));
             SelectedFilesManager.getInstance().getSelectedFiles().clear();
         } else {
-            new PropertiesDialogFragment().show(getSupportFragmentManager(), "Properties");
+            new PropertiesDialog().show(getSupportFragmentManager(), "Properties");
         }
     }
 

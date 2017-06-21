@@ -22,7 +22,7 @@ import com.jakebarnby.filemanager.util.Constants;
  * Created by Jake on 6/18/2017.
  */
 
-public class RenameDialogFragment extends DialogFragment{
+public class RenameDialog extends DialogFragment{
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -37,11 +37,11 @@ public class RenameDialogFragment extends DialogFragment{
                 .get(0)
                 .getData()
                 .getName();
-        if (name.lastIndexOf('.') > 0) {
-            input.setText(name.substring(0, name.lastIndexOf('.')));
-        } else {
-            input.setText(name);
-        }
+
+        input.setText(name.lastIndexOf('.') > 0 ?
+                name.substring(0, name.lastIndexOf('.')) :
+                name
+        );
         input.setSelection(input.getText().length());
 
         builder.setView(view);
@@ -49,7 +49,7 @@ public class RenameDialogFragment extends DialogFragment{
             String newName = name.lastIndexOf('.') > 0 ?
                     input.getText().toString()+name.substring(name.lastIndexOf('.')) :
                     input.getText().toString();
-            
+
             SourceTransferService.startActionRename(getContext(), newName);
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());

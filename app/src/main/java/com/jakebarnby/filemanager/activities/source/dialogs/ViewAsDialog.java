@@ -15,7 +15,7 @@ import com.jakebarnby.filemanager.activities.source.SourceActivity;
  *
  * Dialog that displays a choice of layout view options
  */
-public class ViewAsDialogFragment extends DialogFragment {
+public class ViewAsDialog extends DialogFragment {
 
     String[]                mOptions = {"List", "Grid"};
     SharedPreferences       mSharedPrefs;
