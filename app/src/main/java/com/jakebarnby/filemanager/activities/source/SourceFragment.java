@@ -90,8 +90,8 @@ public abstract class SourceFragment extends Fragment {
             authenticateSource();
         });
         //FIXME: Elevation not being set on API 21, connect button and progress bar cant be seen
-          ViewCompat.setElevation(mProgressBar, Constants.PROGRESSBAR_ELEVATION);
-//        ViewCompat.setElevation(mConnectButton, Constants.PROGRESSBAR_ELEVATION);
+        ViewCompat.setElevation(mProgressBar, Constants.PROGRESSBAR_ELEVATION);
+        ViewCompat.setElevation(mConnectButton, 11);
         return rootView;
     }
 
@@ -187,12 +187,12 @@ public abstract class SourceFragment extends Fragment {
             mRecycler.getAdapter().notifyDataSetChanged();
         }
 
-        mRecycler.addOnScrollListener(
-                new RecyclerViewPreloader<>(
-                        this,
-                        (FileSystemAdapter) mRecycler.getAdapter(),
-                        ((FileSystemAdapter) mRecycler.getAdapter()).getSizeProvider(),
-                        20));
+//        mRecycler.addOnScrollListener(
+//                new RecyclerViewPreloader<>(
+//                        this,
+//                        (FileSystemAdapter) mRecycler.getAdapter(),
+//                        ((FileSystemAdapter) mRecycler.getAdapter()).getSizeProvider(),
+//                        20));
     }
 
     /**

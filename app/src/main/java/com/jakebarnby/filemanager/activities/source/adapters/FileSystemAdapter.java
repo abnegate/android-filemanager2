@@ -34,8 +34,7 @@ import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOption
  * Created by Jake on 5/31/2017.
  */
 
-public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.FileViewHolder>
-        implements ListPreloader.PreloadModelProvider<TreeNode<SourceFile>> {
+public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.FileViewHolder> {
 
     private static final long               FADE_DURATION = 1000L;
     private static final long               TRANSLATE_DURATION = 700L;
@@ -97,13 +96,6 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
     public void setCurrentDirectory(TreeNode<SourceFile> parent, List<TreeNode<SourceFile>> children) {
         mParentDir = parent;
         mCurrentDirChildren = children;
-        if (mParentDir != null) {
-            if (mCurrentDirChildren.size() == 0) {
-                mCurrentDirChildren.add(0, mParentDir);
-            } else if (!mCurrentDirChildren.get(0).getData().equals(mParentDir.getData())) {
-                mCurrentDirChildren.add(0, mParentDir);
-            }
-        }
     }
 
     public ListPreloader.PreloadSizeProvider<TreeNode<SourceFile>> getSizeProvider() {
@@ -112,30 +104,24 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
 
     @Override
     public void onBindViewHolder(FileViewHolder holder, int position) {
+        String name = mCurrentDirChildren.get(position).getData().getName();
+        if (mCurrentDirChildren.get(position).getData().isDirectory()) {
+            holder.mText.setText(name);
+            holder.mPreviewImage.setImageResource(R.drawable.ic_folder);
+        } else {
+            if (name.lastIndexOf('.') > 0) {
+                holder.mText.setText(name.substring(0, name.lastIndexOf('.')));
+            } else {
+                holder.mText.setText(name);
+            }
+            setThumbnail(holder, position);
+        }
+
         if (!mMultiSelectEnabled) {
             holder.mCheckbox.setChecked(false);
             holder.mCheckbox.setVisibility(View.GONE);
         } else {
             holder.mCheckbox.setVisibility(View.VISIBLE);
-        }
-
-        if (mParentDir != null && position == 0) {
-            holder.mText.setText("..");
-            if (mMultiSelectEnabled) {
-                holder.mCheckbox.setVisibility(View.INVISIBLE);
-            }
-        } else {
-            String name = mCurrentDirChildren.get(position).getData().getName();
-            if (mCurrentDirChildren.get(position).getData().isDirectory()) {
-                holder.mText.setText(name);
-            } else {
-                Log.e("NAME", name);
-                //FIXME: Dropbox is getting a null string for name here sometimes
-                if (name.lastIndexOf('.') > 0)
-                    holder.mText.setText(name.substring(0, name.lastIndexOf('.')));
-                else
-                    holder.mText.setText(name);
-            }
         }
 
         if (mMultiSelectEnabled && holder.mCheckbox.getVisibility() == View.VISIBLE) {
@@ -144,13 +130,7 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
             translate.setDuration(400);
             holder.mCheckbox.startAnimation(translate);
         }
-
-        if (mCurrentDirChildren.get(position).getData().isDirectory()) {
-            holder.mPreviewImage.setImageResource(R.drawable.ic_folder);
-        } else {
-            setThumbnail(holder, position);
-        }
-        setAnimation(holder.itemView, position);
+        //setAnimation(holder.itemView, position);
         mSizeProvider.setView(holder.mPreviewImage);
     }
 
@@ -268,19 +248,20 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
         this.mOnLongClickListener = mOnLongClickListener;
     }
 
+//    @Override
+//    public List<TreeNode<SourceFile>> getPreloadItems(int position) {
+//        return Collections.singletonList(mCurrentDirChildren.get(position));
+//    }
 
-    @Override
-    public List<TreeNode<SourceFile>> getPreloadItems(int position) {
-        return Collections.singletonList(mCurrentDirChildren.get(position));
-    }
-
-    @Override
-    public RequestBuilder<Drawable> getPreloadRequestBuilder(TreeNode<SourceFile> item) {
-        return mRequestBuilder
-                .load(item.getData().getSourceName().equals(Constants.Sources.LOCAL) ?
-                        new File(item.getData().getThumbnailLink()) :
-                        Uri.parse(item.getData().getThumbnailLink()));
-    }
+//    @Override
+//    public RequestBuilder<Drawable> getPreloadRequestBuilder(TreeNode<SourceFile> item) {
+//        if (!item.getData().isDirectory()) {
+//            return mRequestBuilder
+//                    .load(item.getData().getSourceName().equals(Constants.Sources.LOCAL) ?
+//                            new File(item.getData().getThumbnailLink()) :
+//                            Uri.parse(item.getData().getThumbnailLink()));
+//        }
+//    }
 
     @FunctionalInterface
     public interface OnFileClickedListener {

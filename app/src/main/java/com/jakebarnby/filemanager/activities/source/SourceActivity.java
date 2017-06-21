@@ -29,6 +29,7 @@ import android.webkit.MimeTypeMap;
 import android.widget.RelativeLayout;
 
 import com.jakebarnby.filemanager.R;
+import com.jakebarnby.filemanager.activities.source.adapters.FileSystemAdapter;
 import com.jakebarnby.filemanager.activities.source.adapters.SourcesPagerAdapter;
 import com.jakebarnby.filemanager.activities.source.dialogs.CreateFolderDialog;
 import com.jakebarnby.filemanager.activities.source.dialogs.PropertiesDialog;
@@ -309,6 +310,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         dialog.show(getSupportFragmentManager(), "Rename");
     }
 
+    /**
+     * Shows a dialog displaying properties about the selected files and/or folders
+     */
     private void showPropertiesDialog() {
         int size = SelectedFilesManager.getInstance().getSelectedFiles().size();
         if (size == 0) {
@@ -453,6 +457,14 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             setTitle(R.string.app_name);
             SelectedFilesManager.getInstance().getSelectedFiles().clear();
             return;
+        } else {
+            if (getActiveDirectory().getParent() != null) {
+                getActiveFragment().setCurrentDirectory(getActiveDirectory().getParent());
+                ((FileSystemAdapter)getActiveFragment().mRecycler.getAdapter()).setCurrentDirectory(getActiveDirectory().getParent());
+                setActiveDirectory(getActiveDirectory().getParent());
+                getActiveFragment().mRecycler.getAdapter().notifyDataSetChanged();
+                return;
+            }
         }
         super.onBackPressed();
     }
