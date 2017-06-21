@@ -272,7 +272,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         getActiveFragment().setMultiSelectEnabled(false);
         SelectedFilesManager.getInstance().getSelectedFiles().clear();
         getActiveFragment().replaceCurrentDirectory(getActiveDirectory());
-
     }
 
     /**
@@ -463,6 +462,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 ((FileSystemAdapter)getActiveFragment().mRecycler.getAdapter()).setCurrentDirectory(getActiveDirectory().getParent());
                 setActiveDirectory(getActiveDirectory().getParent());
                 getActiveFragment().mRecycler.getAdapter().notifyDataSetChanged();
+                getActiveFragment().popBreadcrumb();
                 return;
             }
         }

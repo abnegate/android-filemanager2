@@ -3,30 +3,25 @@ package com.jakebarnby.filemanager.activities.source;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.FileProvider;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.webkit.MimeTypeMap;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
+import android.widget.TextView;
 
-import com.airbnb.lottie.LottieAnimationView;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
-import com.bumptech.glide.util.FixedPreloadSizeProvider;
 import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.adapters.FileSystemAdapter;
@@ -37,10 +32,6 @@ import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.services.SourceTransferService;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
-import com.jakebarnby.filemanager.util.Utils;
-
-import java.io.File;
-import java.util.List;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -60,6 +51,10 @@ public abstract class SourceFragment extends Fragment {
     protected FileSystemGridAdapter mFileSystemGridAdapter;
     protected ProgressBar           mProgressBar;
     protected Button                mConnectButton;
+    protected View                  mDivider;
+
+    private LinearLayout            mBreadcrumbBar;
+    private HorizontalScrollView    mBreadcrumbWrapper;
 
     /**
      * Authenticate the current source
@@ -80,8 +75,11 @@ public abstract class SourceFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_source, container, false);
+        mBreadcrumbWrapper = rootView.findViewById(R.id.breadcrumb_wrapper);
+        mBreadcrumbBar = rootView.findViewById(R.id.breadcrumbs);
         mRecycler = rootView.findViewById(R.id.recycler_local);
         mProgressBar = rootView.findViewById(R.id.animation_view);
+        mDivider = rootView.findViewById(R.id.divider);
         mConnectButton = rootView.findViewById(R.id.btn_connect);
         if (hasToken(getSourceName())) {
             mConnectButton.setVisibility(View.GONE);
@@ -89,9 +87,6 @@ public abstract class SourceFragment extends Fragment {
         mConnectButton.setOnClickListener(v -> {
             authenticateSource();
         });
-        //FIXME: Elevation not being set on API 21, connect button and progress bar cant be seen
-        ViewCompat.setElevation(mProgressBar, Constants.PROGRESSBAR_ELEVATION);
-        ViewCompat.setElevation(mConnectButton, 11);
         return rootView;
     }
 
@@ -186,6 +181,7 @@ public abstract class SourceFragment extends Fragment {
         if (mRecycler.getAdapter() != null) {
             mRecycler.getAdapter().notifyDataSetChanged();
         }
+        mDivider.setVisibility(View.VISIBLE);
 
 //        mRecycler.addOnScrollListener(
 //                new RecyclerViewPreloader<>(
@@ -268,11 +264,12 @@ public abstract class SourceFragment extends Fragment {
             } else {
                 if (file.getData().isDirectory()) {
                     ((FileSystemAdapter) mRecycler.getAdapter()).setCurrentDirectory(file);
-                    mRecycler.getAdapter().notifyDataSetChanged();
                     setCurrentDirectory(file);
                     ((SourceActivity)getActivity()).setActiveDirectory(file);
+                    pushBreadcrumb(file);
+                    mRecycler.getAdapter().notifyDataSetChanged();
                 } else {
-                    SourceTransferService.startActionOpen(getContext(), file);
+                    SourceTransferService.startActionOpen(getContext(), file.getData());
                 }
             }
         };
@@ -288,5 +285,38 @@ public abstract class SourceFragment extends Fragment {
                 setMultiSelectEnabled(true);
             }
         };
+    }
+
+    protected void pushBreadcrumb(TreeNode<SourceFile> directory) {
+        final ViewGroup crumbLayout = (ViewGroup) getActivity().getLayoutInflater()
+                .inflate(R.layout.view_breadcrumb, null);
+        crumbLayout.findViewById(R.id.crumb_arrow)
+                .setVisibility(directory.getParent() == null ? View.GONE : View.VISIBLE);
+        TextView text = crumbLayout.findViewById(R.id.crumb_text);
+        text.setText(directory.getData().getName());
+        crumbLayout.setOnClickListener(v -> {
+            TextView crumbText =  v.findViewById(R.id.crumb_text);
+
+            int diff = (mBreadcrumbBar.getChildCount()-1) - mBreadcrumbBar.indexOfChild(v);
+            for (int i = 0; i < diff; i++) popBreadcrumb();
+
+            String name = crumbText.getText().toString();
+
+            if (getCurrentDirectory().getData().getName().equals(name)) return;
+            TreeNode<SourceFile> selectedParent = TreeNode.findParent(getCurrentDirectory(), name);
+            ((SourceActivity)getActivity()).setActiveDirectory(selectedParent);
+            ((FileSystemAdapter)mRecycler.getAdapter()).setCurrentDirectory(selectedParent);
+            setCurrentDirectory(selectedParent);
+            mRecycler.getAdapter().notifyDataSetChanged();
+        });
+        mBreadcrumbWrapper.postDelayed(() ->
+                mBreadcrumbWrapper.fullScroll(HorizontalScrollView.FOCUS_RIGHT),
+                100L);
+        mBreadcrumbBar.addView(crumbLayout);
+        crumbLayout.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.breadcrumb_overshoot_z));
+    }
+
+    protected void popBreadcrumb() {
+        mBreadcrumbBar.removeViewAt(mBreadcrumbBar.getChildCount()-1);
     }
 }

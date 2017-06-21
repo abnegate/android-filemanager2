@@ -23,7 +23,7 @@ public class FileSystemGridAdapter extends FileSystemAdapter {
 
     @Override
     public FileViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View inflatedView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_single_file_grid, parent, false);
+        View inflatedView = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_file_grid, parent, false);
         return new FileViewHolder(inflatedView);
     }
 }

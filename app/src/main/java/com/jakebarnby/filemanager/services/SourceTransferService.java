@@ -46,6 +46,8 @@ public class SourceTransferService extends IntentService {
     private static final String EXTRA_SOURCE_DEST = "com.jakebarnby.filemanager.services.extra.SOURCE DESTINATION";
     public static final String EXTRA_DIALOG_TITLE = "com.jakebarnby.filemanager.services.extra.DIALOG_TITLE";
     private static final String EXTRA_NAME = "com.jakebarnby.filemanager.services.extra.NAME";
+    private static final String EXTRA_TO_OPEN = "com.jakebarnby.filemanager.services.extra.TO_OPEN";
+
     static {
         System.loadLibrary("io-lib");
     }
@@ -140,10 +142,10 @@ public class SourceTransferService extends IntentService {
      * @param context Context for resources
      * @param toOpen  The file to open
      */
-    public static void startActionOpen(Context context, TreeNode<SourceFile> toOpen) {
+    public static void startActionOpen(Context context, SourceFile toOpen) {
         Intent intent = new Intent(context, SourceTransferService.class);
         intent.setAction(ACTION_OPEN);
-        intent.putExtra(EXTRA_SOURCE_DEST, toOpen);
+        intent.putExtra(EXTRA_TO_OPEN, toOpen);
         context.startService(intent);
     }
 
@@ -151,6 +153,7 @@ public class SourceTransferService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final TreeNode<SourceFile> sourceDest = (TreeNode<SourceFile>) intent.getSerializableExtra(EXTRA_SOURCE_DEST);
+            final SourceFile toOpen = (SourceFile) intent.getSerializableExtra(EXTRA_TO_OPEN);
             final String name = intent.getStringExtra(EXTRA_NAME);
             final String action = intent.getAction();
             switch (action) {
@@ -170,7 +173,7 @@ public class SourceTransferService extends IntentService {
                     delete(false);
                     break;
                 case ACTION_OPEN:
-                    open(sourceDest);
+                    open(toOpen);
                     break;
             }
         }
@@ -247,9 +250,9 @@ public class SourceTransferService extends IntentService {
      * Open the given {@link SourceFile}. If it is a remote file, dowload it first
      * @param toOpen
      */
-    private void open(TreeNode<SourceFile> toOpen) {
+    private void open(SourceFile toOpen) {
         showDialog(getString(R.string.opening), 0);
-        String filePath = getFile(toOpen.getData());
+        String filePath = getFile(toOpen);
 
         Bundle bundle = new Bundle();
         bundle.putString(Constants.FILE_PATH_KEY, filePath);

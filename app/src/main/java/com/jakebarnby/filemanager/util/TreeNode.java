@@ -88,11 +88,18 @@ public class TreeNode<T extends Serializable> implements Serializable {
 
     public static void sortTree(TreeNode<? extends SourceFile> rootNode, Comparator<TreeNode<? extends SourceFile>> comparator) {
         Collections.sort(rootNode.getChildren(), comparator);
-
         for (TreeNode<? extends SourceFile> child : rootNode.getChildren()) {
             if (child.getData().isDirectory()) {
                 sortTree(child, comparator);
             }
+        }
+    }
+
+    public static TreeNode<SourceFile> findParent(TreeNode<SourceFile> currentNode, String parentToFind) {
+        if (currentNode.getParent().getData().getName().equals(parentToFind)) {
+            return currentNode.getParent();
+        } else {
+            return findParent(currentNode.getParent(), parentToFind);
         }
     }
 }
