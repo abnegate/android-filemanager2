@@ -131,7 +131,10 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
             } else {
                 Log.e("NAME", name);
                 //FIXME: Dropbox is getting a null string for name here sometimes
-                holder.mText.setText(name.substring(0, name.lastIndexOf('.')));
+                if (name.lastIndexOf('.') > 0)
+                    holder.mText.setText(name.substring(0, name.lastIndexOf('.')));
+                else
+                    holder.mText.setText(name);
             }
         }
 

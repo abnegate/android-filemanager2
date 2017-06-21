@@ -34,15 +34,12 @@
         android:textColor="@android:color/white"
         android:visibility="visible"/>
 
-    <com.airbnb.lottie.LottieAnimationView
+    <ProgressBar
         android:id="@+id/animation_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:visibility="gone"
-        app:lottie_fileName="loading.json"
-        app:lottie_loop="true"
-        app:lottie_autoPlay="true"
-        app:lottie_colorFilter="@color/colorPrimary" />
+        android:indeterminate="true"/>
 
 </RelativeLayout>

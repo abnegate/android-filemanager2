@@ -4,6 +4,21 @@
 #include <jni.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include <ftw.h>
+
+int unlink_cb(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
+{
+    int rv = remove(fpath);
+    if (rv)
+        perror(fpath);
+
+    return rv;
+}
+
+int rmrf(const char *path)
+{
+    return nftw(path, unlink_cb, 64, FTW_DEPTH | FTW_PHYS);
+}
 
 JNIEXPORT jint JNICALL
               Java_com_jakebarnby_filemanager_services_SourceTransferService_copyFileNative(JNIEnv *env,
@@ -62,8 +77,8 @@ Java_com_jakebarnby_filemanager_services_SourceTransferService_deleteFileNative(
                                                                           jstring sourcePath_) {
     const char *sourcePath = (*env)->GetStringUTFChars(env, sourcePath_, 0);
 
-    int result = remove(sourcePath);
-
+    //int result = remove(sourcePath);
+    int result  = rmrf(sourcePath);
     (*env)->ReleaseStringUTFChars(env, sourcePath_, sourcePath);
 
     return result;

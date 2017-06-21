@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -57,7 +58,7 @@ public abstract class SourceFragment extends Fragment {
     protected RecyclerView          mRecycler;
     protected FileSystemListAdapter mFileSystemListAdapter;
     protected FileSystemGridAdapter mFileSystemGridAdapter;
-    protected LottieAnimationView   mProgressBar;
+    protected ProgressBar           mProgressBar;
     protected Button                mConnectButton;
 
     /**

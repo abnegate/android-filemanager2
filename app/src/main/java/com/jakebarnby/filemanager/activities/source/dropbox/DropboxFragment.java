@@ -192,14 +192,14 @@ public class DropboxFragment extends SourceFragment {
         @Override
         protected void onPostExecute(TreeNode<SourceFile> fileTree) {
             super.onPostExecute(fileTree);
+            TreeNode.sortTree(fileTree, (node1, node2) -> {
+                int result = Boolean.valueOf(!node1.getData().isDirectory()).compareTo(!node2.getData().isDirectory());
+                if (result == 0) {
+                    result = node1.getData().getName().toLowerCase().compareTo(node2.getData().getName().toLowerCase());
+                }
+                return result;
+            });
             if (!isReload()) {
-                TreeNode.sortTree(fileTree, new Comparator<TreeNode<? extends SourceFile>>() {
-                    @Override
-                    public int compare(TreeNode<? extends SourceFile> node1, TreeNode<? extends SourceFile> node2) {
-                        int result = node1.getData().getName().compareTo(node2.getData().getName());
-                        return result;
-                    }
-                });
                 setFileTreeRoot(fileTree);
                 initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
             } else {

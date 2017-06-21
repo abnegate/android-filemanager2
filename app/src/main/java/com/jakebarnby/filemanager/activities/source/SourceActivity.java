@@ -297,13 +297,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         int size = SelectedFilesManager.getInstance().getSelectedFiles().size();
         if (size == 0) {
             Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
-            setTitle(getString(R.string.app_name));
-            SelectedFilesManager.getInstance().getSelectedFiles().clear();
             return;
         } else if (size > 1) {
             Snackbar.make(mViewPager, getString(R.string.too_many_selected), Snackbar.LENGTH_LONG).show();
-            setTitle(getString(R.string.app_name));
-            SelectedFilesManager.getInstance().getSelectedFiles().clear();
             return;
         }
 

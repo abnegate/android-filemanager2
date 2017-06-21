@@ -37,14 +37,20 @@ public class RenameDialogFragment extends DialogFragment{
                 .get(0)
                 .getData()
                 .getName();
-        input.setText(name.substring(0, name.lastIndexOf('.')));
+        if (name.lastIndexOf('.') > 0) {
+            input.setText(name.substring(0, name.lastIndexOf('.')));
+        } else {
+            input.setText(name);
+        }
         input.setSelection(input.getText().length());
 
         builder.setView(view);
         builder.setPositiveButton("OK", (dialog, which) -> {
-            SourceTransferService.startActionRename(
-                    getContext(),
-                    input.getText().toString()+name.substring(name.lastIndexOf('.')));
+            String newName = name.lastIndexOf('.') > 0 ?
+                    input.getText().toString()+name.substring(name.lastIndexOf('.')) :
+                    input.getText().toString();
+            
+            SourceTransferService.startActionRename(getContext(), newName);
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         return builder.create();

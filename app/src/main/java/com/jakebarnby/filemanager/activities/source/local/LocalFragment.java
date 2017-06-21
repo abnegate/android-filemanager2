@@ -132,10 +132,14 @@ public class LocalFragment extends SourceFragment {
         @Override
         protected void onPostExecute(TreeNode<SourceFile> fileTree) {
             super.onPostExecute(fileTree);
+            TreeNode.sortTree(fileTree, (node1, node2) -> {
+                int result = Boolean.valueOf(!node1.getData().isDirectory()).compareTo(!node2.getData().isDirectory());
+                if (result == 0) {
+                    result = node1.getData().getName().toLowerCase().compareTo(node2.getData().getName().toLowerCase());
+                }
+                return result;
+            });
             if (!isReload()) {
-                TreeNode.sortTree(fileTree, (node1, node2) ->
-                        node1.getData().getName().compareTo(node2.getData().getName())
-                );
                 setFileTreeRoot(fileTree);
                 initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
                 ((SourceActivity)getActivity()).setActiveDirectory(rootFileTreeNode);
