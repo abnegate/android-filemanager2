@@ -1,31 +1,33 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin">
 
     <android.support.v7.widget.CardView
-        android:id="@+id/card_fileview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        card_view:cardCornerRadius="@dimen/cardview_corner_radius"
-        card_view:cardElevation="6dp"
-        card_view:cardUseCompatPadding="true"
-        card_view:contentPadding="@dimen/cardview_content_padding">
+        android:layout_height="match_parent">
 
         <RelativeLayout
+            android:id="@+id/layout_blur"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin">
 
             <HorizontalScrollView
                 android:id="@+id/breadcrumb_wrapper"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:requiresFadingEdge="horizontal"
                 android:scrollbars="none">
 
                 <LinearLayout
@@ -34,9 +36,7 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="center_vertical"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingEnd="@dimen/activity_horizontal_margin"
-                    android:paddingStart="@dimen/activity_horizontal_margin" />
+                    android:orientation="horizontal" />
 
             </HorizontalScrollView>
 
@@ -45,17 +45,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_below="@id/breadcrumb_wrapper"
+                android:layout_marginEnd="10dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginTop="5dp"
-                android:layout_marginBottom="25dp"
-                android:visibility="gone"
-                android:background="@color/colorAccent" />
+                android:background="@color/colorAccent"
+                android:visibility="gone" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recycler_local"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_below="@id/divider"
-                android:overScrollMode="never" />
+                android:requiresFadingEdge="vertical" />
 
             <RelativeLayout
                 android:layout_width="match_parent"

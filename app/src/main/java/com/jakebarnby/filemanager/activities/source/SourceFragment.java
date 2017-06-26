@@ -94,10 +94,6 @@ public abstract class SourceFragment extends Fragment {
         return mSourceName;
     }
 
-    public TreeNode<SourceFile> getFileTreeRoot() {
-        return mRootFileTreeNode;
-    }
-
     public void setFileTreeRoot(TreeNode<SourceFile> mFileTree) {
         this.mRootFileTreeNode = mFileTree;
     }
@@ -182,13 +178,6 @@ public abstract class SourceFragment extends Fragment {
             mRecycler.getAdapter().notifyDataSetChanged();
         }
         mDivider.setVisibility(View.VISIBLE);
-
-//        mRecycler.addOnScrollListener(
-//                new RecyclerViewPreloader<>(
-//                        this,
-//                        (FileSystemAdapter) mRecycler.getAdapter(),
-//                        ((FileSystemAdapter) mRecycler.getAdapter()).getSizeProvider(),
-//                        20));
     }
 
     /**
@@ -287,6 +276,10 @@ public abstract class SourceFragment extends Fragment {
         };
     }
 
+    /**
+     * Push a breadcrumb onto the view stack
+     * @param directory The directory to push
+     */
     protected void pushBreadcrumb(TreeNode<SourceFile> directory) {
         final ViewGroup crumbLayout = (ViewGroup) getActivity().getLayoutInflater()
                 .inflate(R.layout.view_breadcrumb, null);
@@ -311,11 +304,14 @@ public abstract class SourceFragment extends Fragment {
         });
         mBreadcrumbWrapper.postDelayed(() ->
                 mBreadcrumbWrapper.fullScroll(HorizontalScrollView.FOCUS_RIGHT),
-                100L);
+                50L);
         mBreadcrumbBar.addView(crumbLayout);
         crumbLayout.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.breadcrumb_overshoot_z));
     }
 
+    /**
+     * Pop the latest breakcrumb added to the stack
+     */
     protected void popBreadcrumb() {
         mBreadcrumbBar.removeViewAt(mBreadcrumbBar.getChildCount()-1);
     }

@@ -140,7 +140,9 @@ public class DropboxFragment extends SourceFragment {
                                     .getInstance()
                                     .getClient()
                                     .files()
-                                    .listFolder(paths[0]);
+                                    .listFolderBuilder(paths[0])
+                                    .withRecursive(true)
+                                    .start();
             } catch (DbxException e) {
                 e.printStackTrace();
             }
