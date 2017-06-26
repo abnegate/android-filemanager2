@@ -140,9 +140,10 @@ public class LocalFragment extends SourceFragment {
                 return result;
             });
             if (!isReload()) {
+                pushBreadcrumb(fileTree);
                 setFileTreeRoot(fileTree);
                 initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
-                ((SourceActivity)getActivity()).setActiveDirectory(rootFileTreeNode);
+                ((SourceActivity)getActivity()).setActiveDirectory(fileTree);
             } else {
                 transformCurrentDirectory(getCurrentDirectory(), fileTree);
                 setReload(false);

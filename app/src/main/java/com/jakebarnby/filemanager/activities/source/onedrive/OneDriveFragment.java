@@ -323,6 +323,7 @@ public class OneDriveFragment extends SourceFragment {
                 return result;
             });
             if (!isReload()) {
+                pushBreadcrumb(fileTree);
                 setFileTreeRoot(fileTree);
                 initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
             } else {

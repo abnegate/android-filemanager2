@@ -25,7 +25,7 @@ public class FileSystemListAdapter extends FileSystemAdapter {
 
     @Override
     public FileViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View inflatedView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_single_file_list, parent, false);
+        View inflatedView = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_file_list, parent, false);
         return new FileViewHolder(inflatedView);
     }
 }
