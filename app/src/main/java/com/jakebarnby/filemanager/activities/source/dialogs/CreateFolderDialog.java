@@ -3,18 +3,22 @@ package com.jakebarnby.filemanager.activities.source.dialogs;
 import android.app.Dialog;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.SourceActivity;
+import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.services.SourceTransferService;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.TreeNode;
 
 /**
  * Created by Jake on 6/18/2017.
@@ -45,10 +49,18 @@ public class CreateFolderDialog extends DialogFragment {
         builder.setView(frame);
 
         builder.setPositiveButton("OK", (dialog, which) -> {
-            SourceTransferService.startActionCreateFolder(
-                    getContext(),
-                    ((SourceActivity)getActivity()).getActiveDirectory(),
-                    input.getText().toString());
+            TreeNode<SourceFile> activeDirectory = ((SourceActivity)getActivity()).getActiveDirectory();
+            String name = input.getText().toString();
+
+            for(TreeNode<SourceFile> file: activeDirectory.getChildren()) {
+                if (file.getData().isDirectory()) {
+                    if (file.getData().getName().equalsIgnoreCase(name)) {
+                        Snackbar.make(getActivity().getCurrentFocus(), "A folder with that name already exists here", Snackbar.LENGTH_LONG).show();
+                        return;
+                    }
+                }
+            }
+            SourceTransferService.startActionCreateFolder(getContext(), activeDirectory, name);
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         return builder.create();

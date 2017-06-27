@@ -400,6 +400,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      */
     private void updateProgressDialog(Intent intent) {
         if (mDialog != null && mDialog.isShowing()) {
+            if (mDialog.isIndeterminate()) {
+                mDialog.setIndeterminate(false);
+            }
             int currentCount = intent.getIntExtra(EXTRA_CURRENT_COUNT, 0);
             mDialog.setProgress(currentCount);
         }

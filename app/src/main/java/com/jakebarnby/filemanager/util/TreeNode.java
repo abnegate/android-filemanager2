@@ -95,6 +95,12 @@ public class TreeNode<T extends Serializable> implements Serializable {
         }
     }
 
+    /**
+     * Find parent with the given name in the given current node
+     * @param currentNode    The node to start search for parent at
+     * @param parentToFind   Name of the node to find as a parent of currentNode
+     * @return               Node with the given name which is a parent of the given node if it exists, otherwise null
+     */
     public static TreeNode<SourceFile> findParent(TreeNode<SourceFile> currentNode, String parentToFind) {
         if (currentNode.getParent().getData().getName().equals(parentToFind)) {
             return currentNode.getParent();
