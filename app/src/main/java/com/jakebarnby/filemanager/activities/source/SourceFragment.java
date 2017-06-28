@@ -283,10 +283,15 @@ public abstract class SourceFragment extends Fragment {
     protected void pushBreadcrumb(TreeNode<SourceFile> directory) {
         final ViewGroup crumbLayout = (ViewGroup) getActivity().getLayoutInflater()
                 .inflate(R.layout.view_breadcrumb, null);
+
         crumbLayout.findViewById(R.id.crumb_arrow)
                 .setVisibility(directory.getParent() == null ? View.GONE : View.VISIBLE);
+
         TextView text = crumbLayout.findViewById(R.id.crumb_text);
-        text.setText(directory.getData().getName());
+        text.setText(directory.getParent() == null ?
+                directory.getData().getSourceName().substring(0,1).toUpperCase() + directory.getData().getSourceName().substring(1).toLowerCase():
+                directory.getData().getName());
+
         crumbLayout.setOnClickListener(v -> {
             TextView crumbText =  v.findViewById(R.id.crumb_text);
 
@@ -294,9 +299,12 @@ public abstract class SourceFragment extends Fragment {
             for (int i = 0; i < diff; i++) popBreadcrumb();
 
             String name = crumbText.getText().toString();
-
             if (getCurrentDirectory().getData().getName().equals(name)) return;
             TreeNode<SourceFile> selectedParent = TreeNode.findParent(getCurrentDirectory(), name);
+            if (selectedParent == null) {
+                selectedParent = mRootFileTreeNode;
+            }
+
             ((SourceActivity)getActivity()).setActiveDirectory(selectedParent);
             ((FileSystemAdapter)mRecycler.getAdapter()).setCurrentDirectory(selectedParent);
             setCurrentDirectory(selectedParent);
