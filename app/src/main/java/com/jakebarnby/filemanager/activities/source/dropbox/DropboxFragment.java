@@ -102,13 +102,6 @@ public class DropboxFragment extends SourceFragment {
         }
     }
 
-    @Override
-    protected void replaceCurrentDirectory(TreeNode<SourceFile> currentDirectory) {
-        setReload(true);
-        new DropboxFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                                                        currentDirectory.getData().getPath().toString());
-    }
-
     /**
      * Loads a file tree from a users Dropbox account
      */
@@ -125,8 +118,7 @@ public class DropboxFragment extends SourceFragment {
 
         @Override
         protected TreeNode<SourceFile> doInBackground(String... paths) {
-            SourceFile rootSourceFile = new DropboxFile();
-            ((DropboxFile) rootSourceFile).setFileProperties(new Metadata(paths[0]));
+            SourceFile rootSourceFile = new DropboxFile(new Metadata(paths[0]));
             rootSourceFile.setDirectory(true);
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
@@ -159,8 +151,7 @@ public class DropboxFragment extends SourceFragment {
             if (result != null) {
                 long dirSize = 0L;
                 for (Metadata data : result.getEntries()) {
-                    SourceFile sourceFile = new DropboxFile();
-                    ((DropboxFile) sourceFile).setFileProperties(data);
+                    SourceFile sourceFile = new DropboxFile(data);
                     try {
                         if (!sourceFile.isDirectory()) {
                         sourceFile.setThumbnailLink(DropboxFactory

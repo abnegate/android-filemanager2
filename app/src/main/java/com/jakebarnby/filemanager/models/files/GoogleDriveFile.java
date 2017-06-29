@@ -14,10 +14,11 @@ public class GoogleDriveFile extends SourceFile {
 
     private String mDriveId;
 
-    public GoogleDriveFile() {
-    }
-
-    public void setFileProperties(File file) {
+    public GoogleDriveFile(File file) {
+        if (file.getWebContentLink() != null) {
+            setPath(file.getWebContentLink());
+        }
+        setDriveId(file.getId());
         setName(file.getName());
         setSourceName(Constants.Sources.GOOGLE_DRIVE);
         setDriveId(file.getId());
@@ -32,7 +33,6 @@ public class GoogleDriveFile extends SourceFile {
             setPath(file.getWebViewLink());
         }
     }
-
     public String getDriveId() {
         return mDriveId;
     }

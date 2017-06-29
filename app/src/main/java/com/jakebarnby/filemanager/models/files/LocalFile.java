@@ -12,10 +12,7 @@ import java.io.File;
 
 public class LocalFile extends SourceFile {
 
-    public LocalFile() {
-    }
-
-    public void setFileProperties(File file) {
+    public LocalFile(File file) {
         setPath(file.getPath());
         setName(file.getName());
         setSourceName(Constants.Sources.LOCAL);

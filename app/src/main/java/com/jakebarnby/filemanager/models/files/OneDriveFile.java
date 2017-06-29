@@ -13,7 +13,7 @@ public class OneDriveFile extends SourceFile {
 
     private String mDriveId;
 
-    public void setFileProperties(DriveItem file) {
+    public OneDriveFile(DriveItem file) {
         setPath(file.webUrl);
         setDriveId(file.id);
         setName(file.name);

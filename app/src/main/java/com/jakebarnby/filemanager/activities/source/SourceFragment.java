@@ -66,12 +66,6 @@ public abstract class SourceFragment extends Fragment {
      */
     protected abstract void loadSource();
 
-    /**
-     *
-     * @param oldAdapterDir
-     */
-    protected abstract void replaceCurrentDirectory(TreeNode<SourceFile> oldAdapterDir);
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_source, container, false);

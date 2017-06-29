@@ -139,30 +139,6 @@ public class OneDriveFragment extends SourceFragment {
         }
     }
 
-    @Override
-    protected void replaceCurrentDirectory(TreeNode<SourceFile> oldAdapterDir) {
-        setReload(true);
-        mProgressBar.setVisibility(View.VISIBLE);
-        OneDriveFactory
-                .getInstance()
-                .getGraphClient()
-                .getMe()
-                .getDrive()
-                .getItems(((OneDriveFile) oldAdapterDir.getData()).getDriveId())
-                .buildRequest()
-                .get(new ICallback<DriveItem>() {
-                    @Override
-                    public void success(DriveItem driveItem) {
-                        new OneDriveFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, driveItem);
-                    }
-
-                    @Override
-                    public void failure(ClientException e) {
-                        e.printStackTrace();
-                    }
-                });
-    }
-
     /**
      * Check for a valid access token and store it in shared preferences if found, then load the source
      */
@@ -269,8 +245,7 @@ public class OneDriveFragment extends SourceFragment {
 
         @Override
         protected TreeNode<SourceFile> doInBackground(DriveItem... driveItems) {
-            SourceFile rootSourceFile = new OneDriveFile();
-            ((OneDriveFile) rootSourceFile).setFileProperties(driveItems[0]);
+            SourceFile rootSourceFile = new OneDriveFile(driveItems[0]);
             rootSourceFile.setDirectory(true);
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
@@ -300,8 +275,7 @@ public class OneDriveFragment extends SourceFragment {
             long dirSize = 0L;
             if (pageItems != null) {
                 for (DriveItem file : pageItems) {
-                    SourceFile sourceFile = new OneDriveFile();
-                    ((OneDriveFile) sourceFile).setFileProperties(file);
+                    SourceFile sourceFile = new OneDriveFile(file);
                     if (file.folder != null) {
                         currentLevelNode.addChild(sourceFile);
                         currentLevelNode = currentLevelNode.getChildren().get(currentLevelNode.getChildren().size() - 1);

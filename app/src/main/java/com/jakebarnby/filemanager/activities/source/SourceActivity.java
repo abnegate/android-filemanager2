@@ -49,9 +49,12 @@ import io.github.yavski.fabspeeddial.FabSpeedDial;
 import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
 import jp.wasabeef.blurry.Blurry;
 
+import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_ADD_CHILD;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_COMPLETE;
+import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_REMOVE_CHILD;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_SHOW_DIALOG;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_UPDATE_DIALOG;
+import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_CHILD_FILE;
 import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_CURRENT_COUNT;
 import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_DIALOG_TITLE;
 import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_TOTAL_COUNT;
@@ -139,6 +142,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     protected void onResume() {
         super.onResume();
         IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_ADD_CHILD);
+        filter.addAction(ACTION_REMOVE_CHILD);
         filter.addAction(ACTION_SHOW_DIALOG);
         filter.addAction(ACTION_UPDATE_DIALOG);
         filter.addAction(ACTION_COMPLETE);
@@ -273,6 +278,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void handleIntent(Intent intent) {
         String action = intent.getAction();
         switch (action) {
+            case ACTION_ADD_CHILD:
+                addNewChildToActiveDirectory(intent);
+                break;
+            case ACTION_REMOVE_CHILD:
+                removeChildFromActiveDirectory(intent);
+                break;
             case ACTION_COMPLETE:
                 completeServiceAction(intent);
                 break;
@@ -310,7 +321,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         setTitle(getString(R.string.app_name));
         toggleFloatingMenu(false);
         SelectedFilesManager.getInstance().getSelectedFiles().clear();
-        getActiveFragment().replaceCurrentDirectory(getActiveDirectory());
     }
 
     /**
@@ -320,6 +330,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         new ViewAsDialog().show(getSupportFragmentManager(), "ViewAs");
     }
 
+    /**
+     * Shows a dialog asking for a new folder name which creates the folder on completion
+     */
     private void showCreateFolderDialog() {
         SelectedFilesManager.getInstance().setActiveDirectory(getActiveDirectory());
         Bundle bundle = new Bundle();
@@ -361,6 +374,24 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         } else {
             new PropertiesDialog().show(getSupportFragmentManager(), "Properties");
         }
+    }
+
+    /**
+     * Add a child from the given intent to the active directory
+     * @param intent
+     */
+    private void addNewChildToActiveDirectory(Intent intent) {
+        TreeNode<SourceFile> file = (TreeNode<SourceFile>) intent.getSerializableExtra(EXTRA_CHILD_FILE);
+        getActiveDirectory().addChild(file);
+    }
+
+    /**
+     * Remove a child from the given intent in the active directory
+     * @param intent
+     */
+    private void removeChildFromActiveDirectory(Intent intent) {
+        TreeNode<SourceFile> file = (TreeNode<SourceFile>) intent.getSerializableExtra(EXTRA_CHILD_FILE);
+        getActiveDirectory().removeChild(file);
     }
 
     /**
@@ -472,10 +503,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     @Override
     public void onPageSelected(int position) {
-        TreeNode<SourceFile> currentDir = getActiveFragment().getCurrentDirectory();
-        if (currentDir != null) {
-            setActiveDirectory(currentDir);
-        }
+        setActiveDirectory(getActiveFragment().getCurrentDirectory());
     }
 
     @Override
