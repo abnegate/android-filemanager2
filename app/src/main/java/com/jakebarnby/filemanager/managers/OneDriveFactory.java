@@ -8,6 +8,7 @@ import com.microsoft.graph.extensions.ItemReference;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,19 +66,20 @@ public class OneDriveFactory {
     /**
      *  @param filePath
      * @param fileName
-     * @param parentPath
+     * @param parentId
      */
-    public DriveItem uploadFile(String filePath, String fileName, String parentPath) {
+    public DriveItem uploadFile(String filePath, String fileName, String parentId) {
         File file = new File(filePath);
-        try(FileOutputStream outputStream = new FileOutputStream(file)) {
+        
+        try(FileInputStream in = new FileInputStream(file)) {
             byte[] buffer = new byte[(int)file.length()];
-            outputStream.write(buffer);
+            in.read(buffer);
 
             return mGraphClient
                     .getMe()
                     .getDrive()
-                    .getRoot()
-                    .getItemWithPath(parentPath + fileName)
+                    .getItems(parentId)
+                    .getChildren(fileName)
                     .getContent()
                     .buildRequest()
                     .put(buffer);
