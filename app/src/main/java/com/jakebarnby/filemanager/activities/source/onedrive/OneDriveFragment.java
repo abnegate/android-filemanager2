@@ -269,8 +269,7 @@ public class OneDriveFragment extends SourceFragment {
 
         @Override
         protected TreeNode<SourceFile> doInBackground(DriveItem... driveItems) {
-            SourceFile rootSourceFile = new OneDriveFile();
-            ((OneDriveFile) rootSourceFile).setFileProperties(driveItems[0]);
+            SourceFile rootSourceFile = new OneDriveFile(driveItems[0]);
             rootSourceFile.setDirectory(true);
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
@@ -300,8 +299,7 @@ public class OneDriveFragment extends SourceFragment {
             long dirSize = 0L;
             if (pageItems != null) {
                 for (DriveItem file : pageItems) {
-                    SourceFile sourceFile = new OneDriveFile();
-                    ((OneDriveFile) sourceFile).setFileProperties(file);
+                    SourceFile sourceFile = new OneDriveFile(file);
                     if (file.folder != null) {
                         currentLevelNode.addChild(sourceFile);
                         currentLevelNode = currentLevelNode.getChildren().get(currentLevelNode.getChildren().size() - 1);

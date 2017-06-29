@@ -13,16 +13,7 @@ import com.jakebarnby.filemanager.util.Constants;
 
 public class DropboxFile extends SourceFile {
 
-    public DropboxFile() {
-    }
-
-    public void setFileProperties(Metadata file) {
-        if (file instanceof FileMetadata) {
-            FileMetadata data = (FileMetadata)file;
-            setSize(data.getSize());
-            setModifiedTime(data.getClientModified().getTime());
-        }
-
+    public DropboxFile(Metadata file) {
         if (file.getPathDisplay() != null) {
             setPath(file.getPathDisplay());
         } else {
@@ -31,6 +22,5 @@ public class DropboxFile extends SourceFile {
         setName(file.getName());
         setSourceName(Constants.Sources.DROPBOX);
         setDirectory(file instanceof FolderMetadata);
-
     }
 }

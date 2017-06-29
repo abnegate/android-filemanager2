@@ -210,8 +210,7 @@ public class GoogleDriveFragment extends SourceFragment {
                         .get(paths[0])
                         .setFields("name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime,createdTime")
                         .execute();
-                SourceFile rootSourceFile = new GoogleDriveFile();
-                ((GoogleDriveFile) rootSourceFile).setFileProperties(rootFile);
+                SourceFile rootSourceFile = new GoogleDriveFile(rootFile);
                 rootFileTreeNode = new TreeNode<>(rootSourceFile);
                 currentLevelNode = rootFileTreeNode;
 
@@ -245,8 +244,7 @@ public class GoogleDriveFragment extends SourceFragment {
             long dirSize = 0L;
             if (files != null) {
                 for (File file : files) {
-                    SourceFile sourceFile = new GoogleDriveFile();
-                    ((GoogleDriveFile)sourceFile).setFileProperties(file);
+                    SourceFile sourceFile = new GoogleDriveFile(file);
                     if (sourceFile.isDirectory()) {
                         currentLevelNode.addChild(sourceFile);
                         currentLevelNode = currentLevelNode.getChildren().get(currentLevelNode.getChildren().size() - 1);

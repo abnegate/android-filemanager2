@@ -2,6 +2,10 @@ package com.jakebarnby.filemanager.models.files;
 
 import android.net.Uri;
 
+import com.dropbox.core.v2.files.Metadata;
+import com.google.api.services.drive.model.File;
+import com.microsoft.graph.extensions.DriveItem;
+
 import java.io.Serializable;
 
 /**

@@ -93,8 +93,7 @@ public class LocalFragment extends SourceFragment {
         @Override
         protected TreeNode<SourceFile> doInBackground(File... files) {
             File rootFile = files[0];
-            SourceFile rootSourceFile = new LocalFile();
-            ((LocalFile) rootSourceFile).setFileProperties(rootFile);
+            SourceFile rootSourceFile = new LocalFile(rootFile);
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
 
@@ -115,8 +114,7 @@ public class LocalFragment extends SourceFragment {
             long dirSize = 0L;
             if (listFile != null && listFile.length > 0) {
                 for (File file : listFile) {
-                    SourceFile sourceFile = new LocalFile();
-                    ((LocalFile) sourceFile).setFileProperties(file);
+                    SourceFile sourceFile = new LocalFile(file);
                     if (file.isDirectory()) {
                         currentLevelNode.addChild(sourceFile);
                         currentLevelNode = currentLevelNode.getChildren().get(currentLevelNode.getChildren().size() - 1);

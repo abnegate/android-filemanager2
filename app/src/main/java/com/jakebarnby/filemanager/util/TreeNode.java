@@ -58,6 +58,10 @@ public class TreeNode<T extends Serializable> implements Serializable {
         this.children = toReplace.getChildren();
     }
 
+    public void removeChild(TreeNode<T> toRemove) {
+        children.remove(toRemove);
+    }
+
     /**
      *
      * @param children
@@ -109,5 +113,15 @@ public class TreeNode<T extends Serializable> implements Serializable {
                 return findParent(currentNode.getParent(), parentToFind);
             }
         } else return currentNode;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (obj instanceof TreeNode){
+            boolean equal = ((TreeNode) obj).getData().equals(data);
+            return equal;
+        }
+        return false;
     }
 }

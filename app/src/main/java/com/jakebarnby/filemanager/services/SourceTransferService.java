@@ -9,17 +9,21 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.dropbox.core.v2.files.FolderMetadata;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.SourceActivity;
 import com.jakebarnby.filemanager.managers.DropboxFactory;
 import com.jakebarnby.filemanager.managers.GoogleDriveFactory;
 import com.jakebarnby.filemanager.managers.OneDriveFactory;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
+import com.jakebarnby.filemanager.models.files.DropboxFile;
 import com.jakebarnby.filemanager.models.files.GoogleDriveFile;
+import com.jakebarnby.filemanager.models.files.LocalFile;
 import com.jakebarnby.filemanager.models.files.OneDriveFile;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
+import com.microsoft.graph.extensions.DriveItem;
 
 import java.io.File;
 import java.util.List;
@@ -32,6 +36,8 @@ public class SourceTransferService extends IntentService {
     public static final String ACTION_COMPLETE = "com.jakebarnby.filemanager.services.action.COMPLETE";
     public static final String ACTION_SHOW_DIALOG = "com.jakebarnby.filemanager.services.action.SHOW_DIALOG";
     public static final String ACTION_UPDATE_DIALOG = "com.jakebarnby.filemanager.services.action.UPDATE_DIALOG";
+    public static final String ACTION_ADD_CHILD = "com.jakebarnby.filemanager.services.action.ADD_CHILD";
+    public static final String ACTION_REMOVE_CHILD = "com.jakebarnby.filemanager.services.action.REMOVE_CHILD";
 
     private static final String ACTION_COPY = "com.jakebarnby.filemanager.services.action.COPY";
     private static final String ACTION_MOVE = "com.jakebarnby.filemanager.services.action.MOVE";
@@ -42,6 +48,7 @@ public class SourceTransferService extends IntentService {
 
     public static final String EXTRA_CURRENT_COUNT = "com.jakebarnby.filemanager.services.extra.CURRENT_COUNT";
     public static final String EXTRA_TOTAL_COUNT = "com.jakebarnby.filemanager.services.extra.TOTAL_COUNT";
+    public static final String EXTRA_CHILD_FILE = "com.jakebarnby.filemanager.services.action.EXTRA_CHILD_FILE";
     private static final String EXTRA_SOURCE_DEST = "com.jakebarnby.filemanager.services.extra.SOURCE DESTINATION";
     public static final String EXTRA_DIALOG_TITLE = "com.jakebarnby.filemanager.services.extra.DIALOG_TITLE";
     private static final String EXTRA_NAME = "com.jakebarnby.filemanager.services.extra.NAME";
@@ -180,28 +187,33 @@ public class SourceTransferService extends IntentService {
      */
     private void createFolder(String name) {
         TreeNode<SourceFile> destDir = SelectedFilesManager.getInstance().getActiveDirectory();
-
+        SourceFile newFile = null;
         switch(destDir.getData().getSourceName()) {
             case Constants.Sources.LOCAL:
                 createFolderNative(destDir.getData().getPath()+File.separator+name);
+                newFile = new LocalFile(new File(destDir.getData().getPath()+File.separator+name));
                 break;
             case Constants.Sources.DROPBOX:
-                DropboxFactory
+                FolderMetadata dropboxFile = DropboxFactory
                         .getInstance()
                         .createFolder(name, destDir.getData().getPath());
+                newFile = new DropboxFile(dropboxFile);
                 break;
             case Constants.Sources.GOOGLE_DRIVE:
-                GoogleDriveFactory
+                com.google.api.services.drive.model.File googleFile = GoogleDriveFactory
                         .getInstance()
                         .createFolder(name, ((GoogleDriveFile)destDir.getData()).getDriveId());
+                newFile = new GoogleDriveFile(googleFile);
                 break;
             case Constants.Sources.ONEDRIVE:
-                OneDriveFactory
+                DriveItem onedriveFile = OneDriveFactory
                         .getInstance()
                         .createFolder(name, ((OneDriveFile)destDir.getData()).getDriveId());
+                newFile = new OneDriveFile(onedriveFile);
                 break;
         }
-        finishOperation();
+        destDir.addChild(newFile);
+        broadcastFinishedTask();
     }
 
     /**
@@ -237,7 +249,7 @@ public class SourceTransferService extends IntentService {
                         .rename(name, ((OneDriveFile)destDir.getData()).getDriveId());
                 break;
         }
-        finishOperation();
+        broadcastFinishedTask();
     }
 
     /**
@@ -245,12 +257,12 @@ public class SourceTransferService extends IntentService {
      * @param toOpen
      */
     private void open(SourceFile toOpen) {
-        showDialog(getString(R.string.opening), 0);
+        broadcastShowDialog(getString(R.string.opening), 0);
         String filePath = getFile(toOpen);
 
         Bundle bundle = new Bundle();
         bundle.putString(Constants.FILE_PATH_KEY, filePath);
-        finishOperation(bundle);
+        broadcastFinishedTask(bundle);
     }
 
     /**
@@ -260,11 +272,12 @@ public class SourceTransferService extends IntentService {
         List<TreeNode<SourceFile>> toCopy = SelectedFilesManager.getInstance().getSelectedFiles();
         TreeNode<SourceFile> destDir = SelectedFilesManager.getInstance().getActiveDirectory();
 
-        showDialog(move ? getString(R.string.moving) : getString(R.string.copying), toCopy.size());
+        broadcastShowDialog(move ? getString(R.string.moving) : getString(R.string.copying), toCopy.size());
         for (TreeNode<SourceFile> file : toCopy) {
             String newFilePath = getFile(file.getData());
             putFile(newFilePath, file.getData().getName(), destDir.getData());
 
+            destDir.addChild(file.getData());
             TreeNode<SourceFile> curDir = destDir;
             while (true) {
                 curDir.getData().addSize(file.getData().getSize());
@@ -273,12 +286,12 @@ public class SourceTransferService extends IntentService {
                 } else break;
             }
             postNotification("File Manager", "Copying " + (toCopy.indexOf(file) + 1) + " of " + toCopy.size());
-            updateDialog(toCopy.indexOf(file) + 1);
+            broadcastUpdate(toCopy.indexOf(file) + 1);
         }
         if (move) {
             delete(true);
         }
-        finishOperation();
+        broadcastFinishedTask();
     }
 
     /**
@@ -288,6 +301,7 @@ public class SourceTransferService extends IntentService {
      */
     private String getFile(SourceFile file) {
         String newFilePath = null;
+        String destPath = getCacheDir().getPath()+File.separator+file.getName();
         switch (file.getSourceName()) {
             case Constants.Sources.LOCAL:
                 newFilePath = file.getPath();
@@ -302,7 +316,7 @@ public class SourceTransferService extends IntentService {
             case Constants.Sources.GOOGLE_DRIVE:
                 File googleFile = GoogleDriveFactory
                         .getInstance()
-                        .downloadFile(((GoogleDriveFile)file).getDriveId(), getCacheDir().getPath()+File.separator+file.getName());
+                        .downloadFile(((GoogleDriveFile)file).getDriveId(), destPath);
                 if (googleFile.exists())
                     newFilePath = googleFile.getPath();
                 break;
@@ -340,7 +354,7 @@ public class SourceTransferService extends IntentService {
                         .uploadFile(newFilePath, fileName, ((GoogleDriveFile)destDir).getDriveId());
                 break;
             case Constants.Sources.ONEDRIVE:
-                OneDriveFactory.getInstance().uploadFile(newFilePath, fileName, destDir.getPath());
+                OneDriveFactory.getInstance().uploadFile(newFilePath, fileName, ((OneDriveFile)destDir).getDriveId());
                 break;
         }
     }
@@ -351,7 +365,7 @@ public class SourceTransferService extends IntentService {
     private void delete(boolean isSilent) {
         List<TreeNode<SourceFile>> toDelete = SelectedFilesManager.getInstance().getSelectedFiles();
         TreeNode<SourceFile> currentDir = SelectedFilesManager.getInstance().getActiveDirectory();
-        if (!isSilent) showDialog(getString(R.string.deleting), toDelete.size());
+        if (!isSilent) broadcastShowDialog(getString(R.string.deleting), toDelete.size());
         for (TreeNode<SourceFile> file : toDelete) {
             switch (file.getData().getSourceName()) {
                 case Constants.Sources.LOCAL:
@@ -373,6 +387,8 @@ public class SourceTransferService extends IntentService {
                             .deleteFile(((OneDriveFile)file.getData()).getDriveId());
                     break;
             }
+            currentDir.removeChild(file);
+
             TreeNode<SourceFile> curDir = currentDir;
             while (true) {
                 curDir.getData().removeSize(file.getData().getSize());
@@ -381,19 +397,19 @@ public class SourceTransferService extends IntentService {
                 } else break;
             }
 
-            if (!isSilent) updateDialog(toDelete.indexOf(file)+1);
+            if (!isSilent) broadcastUpdate(toDelete.indexOf(file)+1);
         }
-        if (!isSilent) finishOperation();
+        if (!isSilent) broadcastFinishedTask();
     }
 
     /**
      * Notifies the activity that this operation is finished
      */
-    private void finishOperation() {
-        finishOperation(null);
+    private void broadcastFinishedTask() {
+        broadcastFinishedTask(null);
     }
 
-    private void finishOperation(Bundle bundle) {
+    private void broadcastFinishedTask(Bundle bundle) {
         Intent intent = new Intent();
         intent.setAction(ACTION_COMPLETE);
 
@@ -405,11 +421,11 @@ public class SourceTransferService extends IntentService {
     }
 
     /**
-     * Broadcasts that the hosting activity should display a dialog with the given title and max progress
+     * Notifies the hosting activity to display a dialog with the given title and max progress
      * @param title         The title for the dialog
      * @param totalCount    The max progress for the operation
      */
-    private void showDialog(String title, int totalCount) {
+    private void broadcastShowDialog(String title, int totalCount) {
         Intent intent = new Intent();
         intent.setAction(ACTION_SHOW_DIALOG);
         intent.putExtra(EXTRA_DIALOG_TITLE, title);
@@ -419,10 +435,10 @@ public class SourceTransferService extends IntentService {
     }
 
     /**
-     * Broadcasts that the hosting activity should update a dialog (if showing) displaying the new progress value
+     * Notifies the hosting activity of an update to a dialog (if showing) displaying the new progress value
      * @param currentCount  The current progress of the operation
      */
-    private void updateDialog(int currentCount) {
+    private void broadcastUpdate(int currentCount) {
         Intent intent = new Intent();
         intent.setAction(ACTION_UPDATE_DIALOG);
         intent.putExtra(EXTRA_CURRENT_COUNT, currentCount);
