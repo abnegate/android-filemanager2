@@ -69,13 +69,6 @@ public class LocalFragment extends SourceFragment {
         }
     }
 
-    @Override
-    protected void replaceCurrentDirectory(TreeNode<SourceFile> oldAdapterDir) {
-        setReload(true);
-        new LocalFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                                new File(oldAdapterDir.getData().getPath()));
-    }
-
     /**
      * Loads a file tree from the local file system
      */

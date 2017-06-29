@@ -139,30 +139,6 @@ public class OneDriveFragment extends SourceFragment {
         }
     }
 
-    @Override
-    protected void replaceCurrentDirectory(TreeNode<SourceFile> oldAdapterDir) {
-        setReload(true);
-        mProgressBar.setVisibility(View.VISIBLE);
-        OneDriveFactory
-                .getInstance()
-                .getGraphClient()
-                .getMe()
-                .getDrive()
-                .getItems(((OneDriveFile) oldAdapterDir.getData()).getDriveId())
-                .buildRequest()
-                .get(new ICallback<DriveItem>() {
-                    @Override
-                    public void success(DriveItem driveItem) {
-                        new OneDriveFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, driveItem);
-                    }
-
-                    @Override
-                    public void failure(ClientException e) {
-                        e.printStackTrace();
-                    }
-                });
-    }
-
     /**
      * Check for a valid access token and store it in shared preferences if found, then load the source
      */

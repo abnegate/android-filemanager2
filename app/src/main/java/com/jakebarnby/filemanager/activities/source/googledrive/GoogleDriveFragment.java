@@ -134,14 +134,6 @@ public class GoogleDriveFragment extends SourceFragment {
     }
 
     @Override
-    protected void replaceCurrentDirectory(TreeNode<SourceFile> oldAdapterDir) {
-        setReload(true);
-        new GoogleDriveFileSystemLoader(mCredential)
-                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                        ((GoogleDriveFile)oldAdapterDir.getData()).getDriveId());
-    }
-
-    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {

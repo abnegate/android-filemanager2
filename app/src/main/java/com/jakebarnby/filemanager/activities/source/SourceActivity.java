@@ -321,7 +321,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         setTitle(getString(R.string.app_name));
         toggleFloatingMenu(false);
         SelectedFilesManager.getInstance().getSelectedFiles().clear();
-        //getActiveFragment().replaceCurrentDirectory(getActiveDirectory());
     }
 
     /**

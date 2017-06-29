@@ -102,13 +102,6 @@ public class DropboxFragment extends SourceFragment {
         }
     }
 
-    @Override
-    protected void replaceCurrentDirectory(TreeNode<SourceFile> currentDirectory) {
-        setReload(true);
-        new DropboxFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
-                                                        currentDirectory.getData().getPath().toString());
-    }
-
     /**
      * Loads a file tree from a users Dropbox account
      */
