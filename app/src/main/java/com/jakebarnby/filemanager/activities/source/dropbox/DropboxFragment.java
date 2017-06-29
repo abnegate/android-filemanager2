@@ -12,6 +12,7 @@ import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.android.Auth;
 import com.dropbox.core.http.OkHttp3Requestor;
 import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
@@ -156,6 +157,7 @@ public class DropboxFragment extends SourceFragment {
          */
         private TreeNode<SourceFile> parseFileSystem(ListFolderResult result) {
             if (result != null) {
+                long dirSize = 0L;
                 for (Metadata data : result.getEntries()) {
                     SourceFile sourceFile = new DropboxFile();
                     ((DropboxFile) sourceFile).setFileProperties(data);
@@ -182,11 +184,14 @@ public class DropboxFragment extends SourceFragment {
                         } catch (DbxException e) {
                             e.printStackTrace();
                         }
+                        currentLevelNode.getParent().getData().addSize(currentLevelNode.getData().getSize());
                         currentLevelNode = currentLevelNode.getParent();
                     } else {
+                        dirSize += ((FileMetadata)data).getSize();
                         currentLevelNode.addChild(sourceFile);
                     }
                 }
+                currentLevelNode.getData().addSize(dirSize);
             }
             return rootFileTreeNode;
         }

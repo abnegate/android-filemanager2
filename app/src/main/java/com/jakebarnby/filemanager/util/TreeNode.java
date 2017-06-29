@@ -53,9 +53,9 @@ public class TreeNode<T extends Serializable> implements Serializable {
         this.children.addAll(children);
     }
 
-    public void replaceNode(TreeNode<T> parent, List<TreeNode<T>> children) {
-        this.parent = parent;
-        this.children = children;
+    public void replaceNode(TreeNode<T> toReplace) {
+        this.parent = toReplace.getParent();
+        this.children = toReplace.getChildren();
     }
 
     /**
@@ -108,6 +108,6 @@ public class TreeNode<T extends Serializable> implements Serializable {
             } else {
                 return findParent(currentNode.getParent(), parentToFind);
             }
-        } else return null;
+        } else return currentNode;
     }
 }

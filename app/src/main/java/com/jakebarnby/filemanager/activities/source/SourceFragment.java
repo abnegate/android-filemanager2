@@ -188,7 +188,7 @@ public abstract class SourceFragment extends Fragment {
      */
     protected void transformCurrentDirectory(TreeNode<SourceFile> oldAdapterDir, TreeNode<SourceFile> newAdapterDir) {
         newAdapterDir.setParent(oldAdapterDir.getParent());
-        oldAdapterDir.replaceNode(oldAdapterDir.getParent(), newAdapterDir.getChildren());
+        oldAdapterDir.replaceNode(newAdapterDir);
         setCurrentDirectory(newAdapterDir);
         ((FileSystemAdapter)mRecycler.getAdapter()).setCurrentDirectory(newAdapterDir);
         ((SourceActivity)getActivity()).setActiveDirectory(newAdapterDir);
@@ -301,9 +301,6 @@ public abstract class SourceFragment extends Fragment {
             String name = crumbText.getText().toString();
             if (getCurrentDirectory().getData().getName().equals(name)) return;
             TreeNode<SourceFile> selectedParent = TreeNode.findParent(getCurrentDirectory(), name);
-            if (selectedParent == null) {
-                selectedParent = mRootFileTreeNode;
-            }
 
             ((SourceActivity)getActivity()).setActiveDirectory(selectedParent);
             ((FileSystemAdapter)mRecycler.getAdapter()).setCurrentDirectory(selectedParent);

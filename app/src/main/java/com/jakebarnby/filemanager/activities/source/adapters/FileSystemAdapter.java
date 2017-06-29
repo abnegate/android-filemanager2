@@ -226,7 +226,6 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
             return v -> {
                 if (!mMultiSelectEnabled) {
                     mMultiSelectEnabled = true;
-                    //TODO: Animate checkbox here
                 }
                 mOnLongClickListener.OnLongClick(mCurrentDirChildren.get(getAdapterPosition()));
                 return true;

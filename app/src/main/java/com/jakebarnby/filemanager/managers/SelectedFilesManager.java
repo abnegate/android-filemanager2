@@ -14,6 +14,7 @@ public class SelectedFilesManager {
 
     private static volatile  SelectedFilesManager sInstance;
     private List<TreeNode<SourceFile>> mSelectedFiles = new ArrayList<>();
+    private TreeNode<SourceFile> mActiveDirectory;
 
     public static SelectedFilesManager getInstance() {
         if (sInstance == null) {
@@ -24,5 +25,13 @@ public class SelectedFilesManager {
 
     public List<TreeNode<SourceFile>> getSelectedFiles() {
         return mSelectedFiles;
+    }
+
+    public TreeNode<SourceFile> getActiveDirectory() {
+        return mActiveDirectory;
+    }
+
+    public void setActiveDirectory(TreeNode<SourceFile> mPasteDirectory) {
+        this.mActiveDirectory = mPasteDirectory;
     }
 }

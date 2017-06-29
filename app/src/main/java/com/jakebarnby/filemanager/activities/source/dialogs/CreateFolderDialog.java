@@ -60,7 +60,7 @@ public class CreateFolderDialog extends DialogFragment {
                     }
                 }
             }
-            SourceTransferService.startActionCreateFolder(getContext(), activeDirectory, name);
+            SourceTransferService.startActionCreateFolder(getContext(), name);
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         return builder.create();
