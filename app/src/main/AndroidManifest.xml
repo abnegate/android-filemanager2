@@ -50,7 +50,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".services.SourceTransferService"/>
+        <service android:name="com.jakebarnby.filemanager.services.SourceTransferService"/>
 
         <provider
             android:name="android.support.v4.content.FileProvider"

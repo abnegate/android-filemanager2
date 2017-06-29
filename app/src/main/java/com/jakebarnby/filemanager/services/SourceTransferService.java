@@ -22,7 +22,6 @@ import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -92,13 +91,11 @@ public class SourceTransferService extends IntentService {
     /**
      * Start the service for a copy or cut action with the given file.
      * @param context       Context for resources
-     * @param sourceDest    The destination directory
      * @param move          Whether the files should be deleted after copying
      */
-    public static void startActionCopy(Context context, TreeNode<SourceFile> sourceDest, boolean move) {
+    public static void startActionCopy(Context context, boolean move) {
         Intent intent = new Intent(context, SourceTransferService.class);
         intent.setAction(move ? ACTION_MOVE : ACTION_COPY);
-        intent.putExtra(EXTRA_SOURCE_DEST, sourceDest);
         context.startService(intent);
     }
 
@@ -115,12 +112,10 @@ public class SourceTransferService extends IntentService {
     /**
      * Start the service for a new folder action
      * @param context           Context for resources
-     * @param currentDirectory  The directory to create the new folder in
      */
-    public static void startActionCreateFolder(Context context, TreeNode<SourceFile> currentDirectory, String name) {
+    public static void startActionCreateFolder(Context context, String name) {
         Intent intent = new Intent(context, SourceTransferService.class);
         intent.setAction(ACTION_CREATE_FOLDER);
-        intent.putExtra(EXTRA_SOURCE_DEST, currentDirectory);
         intent.putExtra(EXTRA_NAME, name);
         context.startService(intent);
     }
@@ -152,22 +147,21 @@ public class SourceTransferService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
-            final TreeNode<SourceFile> sourceDest = (TreeNode<SourceFile>) intent.getSerializableExtra(EXTRA_SOURCE_DEST);
             final SourceFile toOpen = (SourceFile) intent.getSerializableExtra(EXTRA_TO_OPEN);
             final String name = intent.getStringExtra(EXTRA_NAME);
             final String action = intent.getAction();
             switch (action) {
                 case ACTION_CREATE_FOLDER:
-                    createFolder(sourceDest, name);
+                    createFolder(name);
                     break;
                 case ACTION_RENAME:
                     rename(name);
                     break;
                 case ACTION_COPY:
-                    copy(sourceDest, false);
+                    copy(false);
                     break;
                 case ACTION_MOVE:
-                    copy(sourceDest, true);
+                    copy(true);
                     break;
                 case ACTION_DELETE:
                     delete(false);
@@ -182,10 +176,11 @@ public class SourceTransferService extends IntentService {
 
     /**
      * Create a new folder in the given directory with the given name
-     * @param destDir  The directory to create the folder in
      * @param name              The name for the new folder
      */
-    private void createFolder(TreeNode<SourceFile> destDir, String name) {
+    private void createFolder(String name) {
+        TreeNode<SourceFile> destDir = SelectedFilesManager.getInstance().getActiveDirectory();
+
         switch(destDir.getData().getSourceName()) {
             case Constants.Sources.LOCAL:
                 createFolderNative(destDir.getData().getPath()+File.separator+name);
@@ -214,7 +209,6 @@ public class SourceTransferService extends IntentService {
      * @param name       The new name of the file or folder
      */
     private void rename(String name) {
-        //Can only get here if only 1 item is selected
         TreeNode<SourceFile> destDir = SelectedFilesManager.getInstance().getSelectedFiles().get(0);
         String oldPath = null;
         String newPath = null;
@@ -261,14 +255,23 @@ public class SourceTransferService extends IntentService {
 
     /**
      * Copy the selected files to the given destination
-     * @param destDir Where to copy them to
      */
-    private void copy(TreeNode<SourceFile> destDir, boolean move) {
+    private void copy(boolean move) {
         List<TreeNode<SourceFile>> toCopy = SelectedFilesManager.getInstance().getSelectedFiles();
+        TreeNode<SourceFile> destDir = SelectedFilesManager.getInstance().getActiveDirectory();
+
         showDialog(move ? getString(R.string.moving) : getString(R.string.copying), toCopy.size());
         for (TreeNode<SourceFile> file : toCopy) {
             String newFilePath = getFile(file.getData());
             putFile(newFilePath, file.getData().getName(), destDir.getData());
+
+            TreeNode<SourceFile> curDir = destDir;
+            while (true) {
+                curDir.getData().addSize(file.getData().getSize());
+                if (curDir.getParent() != null) {
+                    curDir = curDir.getParent();
+                } else break;
+            }
             postNotification("File Manager", "Copying " + (toCopy.indexOf(file) + 1) + " of " + toCopy.size());
             updateDialog(toCopy.indexOf(file) + 1);
         }
@@ -347,6 +350,7 @@ public class SourceTransferService extends IntentService {
      */
     private void delete(boolean isSilent) {
         List<TreeNode<SourceFile>> toDelete = SelectedFilesManager.getInstance().getSelectedFiles();
+        TreeNode<SourceFile> currentDir = SelectedFilesManager.getInstance().getActiveDirectory();
         if (!isSilent) showDialog(getString(R.string.deleting), toDelete.size());
         for (TreeNode<SourceFile> file : toDelete) {
             switch (file.getData().getSourceName()) {
@@ -369,6 +373,14 @@ public class SourceTransferService extends IntentService {
                             .deleteFile(((OneDriveFile)file.getData()).getDriveId());
                     break;
             }
+            TreeNode<SourceFile> curDir = currentDir;
+            while (true) {
+                curDir.getData().removeSize(file.getData().getSize());
+                if (curDir.getParent() != null) {
+                    curDir = curDir.getParent();
+                } else break;
+            }
+
             if (!isSilent) updateDialog(toDelete.indexOf(file)+1);
         }
         if (!isSilent) finishOperation();

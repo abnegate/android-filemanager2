@@ -112,6 +112,7 @@ public class LocalFragment extends SourceFragment {
          */
         private TreeNode<SourceFile> parseFileSystem(File currentDir) {
             File listFile[] = currentDir.listFiles();
+            long dirSize = 0L;
             if (listFile != null && listFile.length > 0) {
                 for (File file : listFile) {
                     SourceFile sourceFile = new LocalFile();
@@ -120,11 +121,14 @@ public class LocalFragment extends SourceFragment {
                         currentLevelNode.addChild(sourceFile);
                         currentLevelNode = currentLevelNode.getChildren().get(currentLevelNode.getChildren().size() - 1);
                         parseFileSystem(file);
+                        currentLevelNode.getParent().getData().addSize(currentLevelNode.getData().getSize());
                         currentLevelNode = currentLevelNode.getParent();
                     } else {
+                        dirSize += file.length();
                         currentLevelNode.addChild(sourceFile);
                     }
                 }
+                currentLevelNode.getData().addSize(dirSize);
             }
             return rootFileTreeNode;
         }

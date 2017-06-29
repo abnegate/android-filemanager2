@@ -244,6 +244,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      */
     private void startDeleteAction() {
         if (SelectedFilesManager.getInstance().getSelectedFiles().size() > 0) {
+            SelectedFilesManager.getInstance().setActiveDirectory(getActiveDirectory());
             SourceTransferService.startActionDelete(SourceActivity.this);
         } else {
             Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
@@ -255,10 +256,11 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      */
     private void startParseAction() {
         if (mCurrentFileAction != null) {
+            SelectedFilesManager.getInstance().setActiveDirectory(getActiveDirectory());
             if (mCurrentFileAction == FileAction.COPY)
-                SourceTransferService.startActionCopy(SourceActivity.this, mActiveDirectory, false);
+                SourceTransferService.startActionCopy(SourceActivity.this, false);
             else if (mCurrentFileAction == FileAction.CUT) {
-                SourceTransferService.startActionCopy(SourceActivity.this, mActiveDirectory, true);
+                SourceTransferService.startActionCopy(SourceActivity.this, true);
             }
         }
     }
@@ -319,6 +321,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     private void showCreateFolderDialog() {
+        SelectedFilesManager.getInstance().setActiveDirectory(getActiveDirectory());
         Bundle bundle = new Bundle();
         bundle.putString(Constants.DIALOG_TITLE_KEY, getString(R.string.create_folder));
         CreateFolderDialog dialog = new CreateFolderDialog();

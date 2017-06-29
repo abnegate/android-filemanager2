@@ -48,6 +48,10 @@ public abstract class SourceFile implements Serializable {
     public void setSize(long size) {
         this.mSize = size;
     }
+    public void addSize(long size) {
+        this.mSize += size;
+    }
+    public void removeSize(long size) { this.mSize -= size; }
     public boolean isDirectory() {
         return mIsDirectory;
     }

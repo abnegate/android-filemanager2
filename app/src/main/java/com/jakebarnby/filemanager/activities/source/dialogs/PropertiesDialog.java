@@ -31,7 +31,6 @@ public class PropertiesDialog extends DialogFragment {
         TextView sourceNameText = view.findViewById(R.id.text_sourceName);
         TextView pathText = view.findViewById(R.id.text_path);
         TextView sizeText = view.findViewById(R.id.text_size);
-        TextView createdTimeText = view.findViewById(R.id.text_createdTime);
         TextView modifiedTimeText = view.findViewById(R.id.text_modifiedTime);
 
         List<TreeNode<SourceFile>> selected = SelectedFilesManager.getInstance().getSelectedFiles();
@@ -46,11 +45,10 @@ public class PropertiesDialog extends DialogFragment {
                 totalSize += file.getData().getSize();
             }
             nameText.setText(String.format(getString(R.string.selected_item_count), selected.size()));
-            pathText.setText("-");
+            view.findViewById(R.id.row_path).setVisibility(View.GONE);
             sourceNameText.setText(sourceNames);
             sizeText.setText(String.format(getString(R.string.sizeDisplay),totalSize/1024.0/1024.0));
-            createdTimeText.setText("-");
-            modifiedTimeText.setText("-");
+            view.findViewById(R.id.row_modified_time).setVisibility(View.GONE);
 
         } else if (selected.size() == 1){
             SourceFile file = selected.get(0).getData();
@@ -58,7 +56,6 @@ public class PropertiesDialog extends DialogFragment {
             pathText.setText(file.getPath());
             sourceNameText.setText(file.getSourceName());
             sizeText.setText(String.format(getString(R.string.sizeDisplay),file.getSize()/1024.0/1024.0));
-            createdTimeText.setText(new Date(file.getCreatedTime()).toString());
             modifiedTimeText.setText(new Date(file.getModifiedTime()).toString());
         }
 

@@ -297,17 +297,23 @@ public class OneDriveFragment extends SourceFragment {
                     .get();
 
             List<DriveItem> pageItems = items.getCurrentPage();
-            for (DriveItem file : pageItems) {
-                SourceFile sourceFile = new OneDriveFile();
-                ((OneDriveFile) sourceFile).setFileProperties(file);
-                if (file.folder != null) {
-                    currentLevelNode.addChild(sourceFile);
-                    currentLevelNode = currentLevelNode.getChildren().get(currentLevelNode.getChildren().size() - 1);
-                    parseFileTree(file);
-                    currentLevelNode = currentLevelNode.getParent();
-                } else {
-                    currentLevelNode.addChild(sourceFile);
+            long dirSize = 0L;
+            if (pageItems != null) {
+                for (DriveItem file : pageItems) {
+                    SourceFile sourceFile = new OneDriveFile();
+                    ((OneDriveFile) sourceFile).setFileProperties(file);
+                    if (file.folder != null) {
+                        currentLevelNode.addChild(sourceFile);
+                        currentLevelNode = currentLevelNode.getChildren().get(currentLevelNode.getChildren().size() - 1);
+                        parseFileTree(file);
+                        currentLevelNode.getParent().getData().addSize(currentLevelNode.getData().getSize());
+                        currentLevelNode = currentLevelNode.getParent();
+                    } else {
+                        dirSize += file.size;
+                        currentLevelNode.addChild(sourceFile);
+                    }
                 }
+                currentLevelNode.getData().addSize(dirSize);
             }
             return rootFileTreeNode;
         }

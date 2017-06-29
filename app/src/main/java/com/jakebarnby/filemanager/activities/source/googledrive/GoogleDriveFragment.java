@@ -242,6 +242,7 @@ public class GoogleDriveFragment extends SourceFragment {
                     .setFields("files(name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime,createdTime)")
                     .execute();
             List<File> files = fileList.getFiles();
+            long dirSize = 0L;
             if (files != null) {
                 for (File file : files) {
                     SourceFile sourceFile = new GoogleDriveFile();
@@ -250,11 +251,16 @@ public class GoogleDriveFragment extends SourceFragment {
                         currentLevelNode.addChild(sourceFile);
                         currentLevelNode = currentLevelNode.getChildren().get(currentLevelNode.getChildren().size() - 1);
                         parseDirectory(file);
+                        currentLevelNode.getParent().getData().addSize(currentLevelNode.getData().getSize());
                         currentLevelNode = currentLevelNode.getParent();
                     } else {
+                        if (file.getSize() != null) {
+                            dirSize += file.getSize();
+                        }
                         currentLevelNode.addChild(sourceFile);
                     }
                 }
+                currentLevelNode.getData().addSize(dirSize);
             }
             return rootFileTreeNode;
         }
