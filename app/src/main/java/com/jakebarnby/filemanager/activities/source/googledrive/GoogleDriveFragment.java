@@ -62,6 +62,7 @@ public class GoogleDriveFragment extends SourceFragment {
      */
     public static SourceFragment newInstance(String sourceName) {
         SourceFragment fragment = new GoogleDriveFragment();
+        fragment.setSourceName(sourceName);
         Bundle args = new Bundle();
         args.putString("TITLE", sourceName);
         fragment.setArguments(args);
@@ -129,6 +130,7 @@ public class GoogleDriveFragment extends SourceFragment {
     @Override
     protected void loadSource() {
         if (!isFilesLoaded()) {
+            if (!checkConnectionStatus()) return;
             new GoogleDriveFileSystemLoader(mCredential).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "root");
         }
     }
@@ -205,10 +207,8 @@ public class GoogleDriveFragment extends SourceFragment {
                 SourceFile rootSourceFile = new GoogleDriveFile(rootFile);
                 rootFileTreeNode = new TreeNode<>(rootSourceFile);
                 currentLevelNode = rootFileTreeNode;
+                setCurrentDirectory(rootFileTreeNode);
 
-                if (!isReload()) {
-                    setCurrentDirectory(rootFileTreeNode);
-                }
                 return parseDirectory(rootFile);
             } catch (Exception e) {
                 mLastError = e;
@@ -265,14 +265,9 @@ public class GoogleDriveFragment extends SourceFragment {
                 }
                 return result;
             });
-            if (!isReload()) {
-                pushBreadcrumb(fileTree);
-                setFileTreeRoot(fileTree);
-                initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
-            } else {
-                transformCurrentDirectory(getCurrentDirectory(), fileTree);
-                setReload(false);
-            }
+            pushBreadcrumb(fileTree);
+            setFileTreeRoot(fileTree);
+            initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
             setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
         }

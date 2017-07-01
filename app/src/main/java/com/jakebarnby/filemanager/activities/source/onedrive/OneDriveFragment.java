@@ -53,6 +53,7 @@ public class OneDriveFragment extends SourceFragment {
      */
     public static SourceFragment newInstance(String sourceName) {
         SourceFragment fragment = new OneDriveFragment();
+        fragment.setSourceName(sourceName);
         Bundle args = new Bundle();
         args.putString("TITLE", sourceName);
         fragment.setArguments(args);
@@ -105,6 +106,7 @@ public class OneDriveFragment extends SourceFragment {
     @Override
     protected void loadSource() {
         if (!isFilesLoaded() && mAuthResult != null) {
+            if (!checkConnectionStatus()) return;
             final IClientConfig mClientConfig = DefaultClientConfig
                     .createWithAuthenticationProvider(iHttpRequest -> {
                         iHttpRequest.addHeader("Authorization", String.format("Bearer %s", mAuthResult.getAccessToken()));
@@ -249,9 +251,7 @@ public class OneDriveFragment extends SourceFragment {
             rootSourceFile.setDirectory(true);
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
-            if (!isReload()) {
-                setCurrentDirectory(rootFileTreeNode);
-            }
+            setCurrentDirectory(rootFileTreeNode);
             return parseFileTree(driveItems[0]);
         }
 
@@ -302,14 +302,9 @@ public class OneDriveFragment extends SourceFragment {
                 }
                 return result;
             });
-            if (!isReload()) {
-                pushBreadcrumb(fileTree);
-                setFileTreeRoot(fileTree);
-                initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
-            } else {
-                transformCurrentDirectory(getCurrentDirectory(), fileTree);
-                setReload(false);
-            }
+            pushBreadcrumb(fileTree);
+            setFileTreeRoot(fileTree);
+            initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
             setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
         }

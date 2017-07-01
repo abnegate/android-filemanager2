@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -32,6 +33,7 @@ import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.services.SourceTransferService;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
+import com.jakebarnby.filemanager.util.Utils;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -79,9 +81,17 @@ public abstract class SourceFragment extends Fragment {
             mConnectButton.setVisibility(View.GONE);
         }
         mConnectButton.setOnClickListener(v -> {
-            authenticateSource();
+            if (Utils.isConnectionReady(SourceFragment.this.getContext())) {
+                authenticateSource();
+            } else {
+                Snackbar.make(rootView, R.string.no_connection, Snackbar.LENGTH_LONG).show();
+            }
         });
         return rootView;
+    }
+
+    public void setSourceName(String sourceName) {
+        this.mSourceName = sourceName;
     }
 
     public String getSourceName() {
@@ -131,14 +141,6 @@ public abstract class SourceFragment extends Fragment {
         this.mCurrentDirectory = mCurrentDirectory;
     }
 
-    public boolean isReload() {
-        return mIsReload;
-    }
-
-    public void setReload(boolean reload) {
-        mIsReload = reload;
-    }
-
     /**
      * Checks if this source has a valid access token
      * @return  Whether there is a valid access token for this source
@@ -172,21 +174,6 @@ public abstract class SourceFragment extends Fragment {
             mRecycler.getAdapter().notifyDataSetChanged();
         }
         mDivider.setVisibility(View.VISIBLE);
-    }
-
-    /**
-     *
-     * @param oldAdapterDir
-     * @param newAdapterDir
-     * @return
-     */
-    protected void transformCurrentDirectory(TreeNode<SourceFile> oldAdapterDir, TreeNode<SourceFile> newAdapterDir) {
-        newAdapterDir.setParent(oldAdapterDir.getParent());
-        oldAdapterDir.replaceNode(newAdapterDir);
-        setCurrentDirectory(newAdapterDir);
-        ((FileSystemAdapter)mRecycler.getAdapter()).setCurrentDirectory(newAdapterDir);
-        ((SourceActivity)getActivity()).setActiveDirectory(newAdapterDir);
-        mRecycler.getAdapter().notifyDataSetChanged();
     }
 
     /**
@@ -329,5 +316,18 @@ public abstract class SourceFragment extends Fragment {
      */
     protected void popBreadcrumb() {
         mBreadcrumbBar.removeViewAt(mBreadcrumbBar.getChildCount()-1);
+    }
+
+    /**
+     * If performing an action on a non-local directory, check internet and
+     */
+    protected boolean checkConnectionStatus() {
+        if (!getSourceName().equals(Constants.Sources.LOCAL)) {
+            if (!Utils.isConnectionReady(getContext())) {
+                Snackbar.make(getView(), R.string.no_connection, Snackbar.LENGTH_LONG).show();
+                return false;
+            }
+        }
+        return true;
     }
 }

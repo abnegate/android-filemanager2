@@ -248,6 +248,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      *
      */
     private void startDeleteAction() {
+        if (!getActiveFragment().checkConnectionStatus()) return;
         if (SelectedFilesManager.getInstance().getSelectedFiles().size() > 0) {
             SelectedFilesManager.getInstance().setActiveDirectory(getActiveDirectory());
             SourceTransferService.startActionDelete(SourceActivity.this);
@@ -260,6 +261,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * Call {@link SourceTransferService} to begin copying the currently selected files
      */
     private void startParseAction() {
+        if (!getActiveFragment().checkConnectionStatus()) return;
         if (mCurrentFileAction != null) {
             SelectedFilesManager.getInstance().setActiveDirectory(getActiveDirectory());
             if (mCurrentFileAction == FileAction.COPY)
@@ -313,9 +315,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         }
 
         for (SourceFragment fragment : mSourcesPagerAdapter.getFragments()) {
-            if (fragment.isMultiSelectEnabled()) {
-                fragment.setMultiSelectEnabled(false);
-            }
+            fragment.setMultiSelectEnabled(false);
         }
 
         setTitle(getString(R.string.app_name));
@@ -341,6 +341,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * Shows a dialog asking for a new folder name which creates the folder on completion
      */
     private void showCreateFolderDialog() {
+        if (!getActiveFragment().checkConnectionStatus()) return;
         SelectedFilesManager.getInstance().setActiveDirectory(getActiveDirectory());
         Bundle bundle = new Bundle();
         bundle.putString(Constants.DIALOG_TITLE_KEY, getString(R.string.create_folder));
@@ -353,6 +354,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * Shows a dialog allowing the user to rename a file or folder
      */
     private void showRenameDialog() {
+        if (!getActiveFragment().checkConnectionStatus()) return;
         SelectedFilesManager.getInstance().setActiveDirectory(getActiveDirectory());
         int size = SelectedFilesManager.getInstance().getSelectedFiles().size();
         if (size == 0) {

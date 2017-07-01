@@ -45,6 +45,7 @@ public class LocalFragment extends SourceFragment {
      */
     public static SourceFragment newInstance(String sourceName) {
         SourceFragment fragment = new LocalFragment();
+        fragment.setSourceName(sourceName);
         Bundle args = new Bundle();
         args.putString("TITLE", sourceName);
         fragment.setArguments(args);
@@ -89,10 +90,7 @@ public class LocalFragment extends SourceFragment {
             SourceFile rootSourceFile = new LocalFile(rootFile);
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
-
-            if (!isReload()) {
-                setCurrentDirectory(rootFileTreeNode);
-            }
+            setCurrentDirectory(rootFileTreeNode);
             return parseFileSystem(files[0]);
         }
 
@@ -134,15 +132,9 @@ public class LocalFragment extends SourceFragment {
                 }
                 return result;
             });
-            if (!isReload()) {
-                pushBreadcrumb(fileTree);
-                setFileTreeRoot(fileTree);
-                initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
-                ((SourceActivity)getActivity()).setActiveDirectory(fileTree);
-            } else {
-                transformCurrentDirectory(getCurrentDirectory(), fileTree);
-                setReload(false);
-            }
+            pushBreadcrumb(fileTree);
+            setFileTreeRoot(fileTree);
+            initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
             setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
         }
