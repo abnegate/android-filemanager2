@@ -40,6 +40,7 @@ public class DropboxFragment extends SourceFragment {
      */
     public static SourceFragment newInstance(String sourceName) {
         SourceFragment fragment = new DropboxFragment();
+        fragment.setSourceName(sourceName);
         Bundle args = new Bundle();
         args.putString("TITLE", sourceName);
         fragment.setArguments(args);
@@ -98,6 +99,7 @@ public class DropboxFragment extends SourceFragment {
     @Override
     protected void loadSource() {
         if (!isFilesLoaded()) {
+            if (!checkConnectionStatus()) return;
             new DropboxFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
         }
     }
@@ -122,10 +124,8 @@ public class DropboxFragment extends SourceFragment {
             rootSourceFile.setDirectory(true);
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
+            setCurrentDirectory(rootFileTreeNode);
 
-            if (!isReload()) {
-                setCurrentDirectory(rootFileTreeNode);
-            }
 
             ListFolderResult result = null;
             try {
@@ -197,14 +197,10 @@ public class DropboxFragment extends SourceFragment {
                 }
                 return result;
             });
-            if (!isReload()) {
-                pushBreadcrumb(fileTree);
-                setFileTreeRoot(fileTree);
-                initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
-            } else {
-                transformCurrentDirectory(getCurrentDirectory(), fileTree);
-                setReload(false);
-            }
+            pushBreadcrumb(fileTree);
+            setFileTreeRoot(fileTree);
+            initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
+
             setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
         }

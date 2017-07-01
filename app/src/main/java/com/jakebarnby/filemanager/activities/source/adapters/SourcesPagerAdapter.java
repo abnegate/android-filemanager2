@@ -9,6 +9,7 @@ import com.jakebarnby.filemanager.activities.source.dropbox.DropboxFragment;
 import com.jakebarnby.filemanager.activities.source.googledrive.GoogleDriveFragment;
 import com.jakebarnby.filemanager.activities.source.local.LocalFragment;
 import com.jakebarnby.filemanager.activities.source.onedrive.OneDriveFragment;
+import com.jakebarnby.filemanager.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +24,10 @@ public class SourcesPagerAdapter extends FragmentPagerAdapter {
 
     public SourcesPagerAdapter(FragmentManager fm) {
         super(fm);
-        fragments.add(LocalFragment.newInstance("local"));
-        fragments.add(DropboxFragment.newInstance("dropbox"));
-        fragments.add(GoogleDriveFragment.newInstance("google drive"));
-        fragments.add(OneDriveFragment.newInstance("onedrive"));
+        fragments.add(LocalFragment.newInstance(Constants.Sources.LOCAL));
+        fragments.add(DropboxFragment.newInstance(Constants.Sources.DROPBOX));
+        fragments.add(GoogleDriveFragment.newInstance(Constants.Sources.GOOGLE_DRIVE));
+        fragments.add(OneDriveFragment.newInstance(Constants.Sources.ONEDRIVE));
     }
 
     public List<SourceFragment> getFragments() {

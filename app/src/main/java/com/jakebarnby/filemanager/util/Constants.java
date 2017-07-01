@@ -18,7 +18,7 @@ public class Constants {
         public static final String GOOGLE_DRIVE_FOLDER_MIME = "application/vnd.google-apps.folder";
         public static final String DROPBOX = "DROPBOX";
         public static final String LOCAL = "LOCAL";
-        public static final String GOOGLE_DRIVE = "GOOGLE_DRIVE";
+        public static final String GOOGLE_DRIVE = "GOOGLE DRIVE";
         public static final String ONEDRIVE = "ONEDRIVE";
 
         public class Keys {
