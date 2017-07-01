@@ -1,5 +1,6 @@
 package com.jakebarnby.filemanager.activities.source;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -17,6 +18,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.menu.MenuItemImpl;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -111,12 +113,23 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
         mFabMenu = findViewById(R.id.fab_speed_dial);
         mFabMenu.setMenuListener(new SimpleMenuListenerAdapter() {
+            @SuppressLint("RestrictedApi")
             @Override
             public boolean onPrepareMenu(NavigationMenu navigationMenu) {
+                if (SelectedFilesManager.getInstance().getSelectedFiles().size() == 0) {
+                    Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
+                    return false;
+                }
                 Blurry.with(SourceActivity.this)
                         .radius(17)
                         .sampling(1)
                         .onto(mBlurWrapper);
+                if (mCurrentFileAction == null) {
+                    navigationMenu.findItem(R.id.action_paste).setVisible(false);
+                }
+                if  (SelectedFilesManager.getInstance().getSelectedFiles().size() > 1) {
+                    navigationMenu.findItem(R.id.action_rename).setVisible(false);
+                }
                 return super.onPrepareMenu(navigationMenu);
             }
 
@@ -328,6 +341,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             }
             return result;
         });
+        mCurrentFileAction = null;
     }
 
     /**
