@@ -249,6 +249,7 @@ public class SourceTransferService extends IntentService {
                         .rename(name, ((OneDriveFile)destDir.getData()).getDriveId());
                 break;
         }
+        destDir.getData().setName(name);
         broadcastFinishedTask();
     }
 

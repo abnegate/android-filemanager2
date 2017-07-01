@@ -20,6 +20,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.glide.GlideApp;
+import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
@@ -130,7 +131,13 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
             translate.setDuration(400);
             holder.mCheckbox.startAnimation(translate);
         }
-        //setAnimation(holder.itemView, position);
+
+        if (SelectedFilesManager
+                .getInstance()
+                .getSelectedFiles()
+                .contains(mCurrentDirChildren.get(position))) {
+            holder.mCheckbox.setChecked(true);
+        }
         mSizeProvider.setView(holder.mPreviewImage);
     }
 
@@ -246,21 +253,6 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
     public void setOnLongClickListener(OnFileLongClickedListener mOnLongClickListener) {
         this.mOnLongClickListener = mOnLongClickListener;
     }
-
-//    @Override
-//    public List<TreeNode<SourceFile>> getPreloadItems(int position) {
-//        return Collections.singletonList(mCurrentDirChildren.get(position));
-//    }
-
-//    @Override
-//    public RequestBuilder<Drawable> getPreloadRequestBuilder(TreeNode<SourceFile> item) {
-//        if (!item.getData().isDirectory()) {
-//            return mRequestBuilder
-//                    .load(item.getData().getSourceName().equals(Constants.Sources.LOCAL) ?
-//                            new File(item.getData().getThumbnailLink()) :
-//                            Uri.parse(item.getData().getThumbnailLink()));
-//        }
-//    }
 
     @FunctionalInterface
     public interface OnFileClickedListener {

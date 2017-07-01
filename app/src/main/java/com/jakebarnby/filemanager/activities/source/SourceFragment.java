@@ -242,7 +242,12 @@ public abstract class SourceFragment extends Fragment {
                             .getSelectedFiles()
                             .remove(file);
                 }
-                getActivity().setTitle(String.valueOf(SelectedFilesManager.getInstance().getSelectedFiles().size()) + " selected");
+
+                int size = SelectedFilesManager
+                        .getInstance()
+                        .getSelectedFiles()
+                        .size();
+                getActivity().setTitle(size + " selected");
                 //TODO: Set the Fragment tab title with selected count, e.g. LOCAL (3) DROPBOX (1)
             } else {
                 if (file.getData().isDirectory()) {
@@ -266,6 +271,17 @@ public abstract class SourceFragment extends Fragment {
         return file -> {
             if (!mMultiSelectEnabled) {
                 setMultiSelectEnabled(true);
+
+                SelectedFilesManager
+                        .getInstance()
+                        .getSelectedFiles()
+                        .add(file);
+
+                int size = SelectedFilesManager
+                        .getInstance()
+                        .getSelectedFiles()
+                        .size();
+                getActivity().setTitle(size + " selected");
             }
         };
     }

@@ -321,6 +321,13 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         setTitle(getString(R.string.app_name));
         toggleFloatingMenu(false);
         SelectedFilesManager.getInstance().getSelectedFiles().clear();
+        TreeNode.sortTree(getActiveDirectory(), (node1, node2) -> {
+            int result = Boolean.valueOf(!node1.getData().isDirectory()).compareTo(!node2.getData().isDirectory());
+            if (result == 0) {
+                result = node1.getData().getName().toLowerCase().compareTo(node2.getData().getName().toLowerCase());
+            }
+            return result;
+        });
     }
 
     /**
@@ -346,6 +353,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * Shows a dialog allowing the user to rename a file or folder
      */
     private void showRenameDialog() {
+        SelectedFilesManager.getInstance().setActiveDirectory(getActiveDirectory());
         int size = SelectedFilesManager.getInstance().getSelectedFiles().size();
         if (size == 0) {
             Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
@@ -518,17 +526,18 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             toggleFloatingMenu(false);
             setTitle(R.string.app_name);
             SelectedFilesManager.getInstance().getSelectedFiles().clear();
-            return;
-        } else {
             if (getActiveDirectory().getParent() != null) {
+                return;
+            }
+        } else if (getActiveDirectory().getParent() != null) {
                 getActiveFragment().setCurrentDirectory(getActiveDirectory().getParent());
                 ((FileSystemAdapter) getActiveFragment().mRecycler.getAdapter()).setCurrentDirectory(getActiveDirectory().getParent());
                 setActiveDirectory(getActiveDirectory().getParent());
                 getActiveFragment().mRecycler.getAdapter().notifyDataSetChanged();
                 getActiveFragment().popBreadcrumb();
                 return;
-            }
+        } else {
+            super.onBackPressed();
         }
-        super.onBackPressed();
     }
 }
