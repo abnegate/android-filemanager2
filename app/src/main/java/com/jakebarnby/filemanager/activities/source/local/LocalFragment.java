@@ -135,6 +135,7 @@ public class LocalFragment extends SourceFragment {
             pushBreadcrumb(fileTree);
             setFileTreeRoot(fileTree);
             initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
+            ((SourceActivity)getActivity()).setActiveDirectory(fileTree);
             setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
         }
