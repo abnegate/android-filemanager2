@@ -56,8 +56,8 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.8.0'
 
     //Google Drive
+    compile 'com.google.android.gms:play-services-auth:11.0.2'
     compile "com.google.api-client:google-api-client-android:${project.GOOGLE_API_VERSION}"
-    compile 'com.google.android.gms:play-services-auth:11.0.1'
     compile "com.google.apis:google-api-services-drive:v3-rev75-${project.GOOGLE_API_VERSION}"
 
     //OneDrive
@@ -75,8 +75,8 @@ dependencies {
     compile 'jp.wasabeef:blurry:2.1.1'
 
     //Glide
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC0'
     compile 'com.github.bumptech.glide:glide:4.0.0-RC0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC0'
     implementation "com.github.bumptech.glide:recyclerview-integration:4.0.0-RC0@aar"
 }
 
