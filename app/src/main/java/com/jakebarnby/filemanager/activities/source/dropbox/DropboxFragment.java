@@ -23,8 +23,6 @@ import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
 
-import java.util.Comparator;
-
 /**
  * Created by Jake on 5/31/2017.
  */
@@ -134,12 +132,14 @@ public class DropboxFragment extends SourceFragment {
                                     .getClient()
                                     .files()
                                     .listFolderBuilder(paths[0])
-                                    //.withRecursive(true)
+                                    .withRecursive(true)
                                     .start();
             } catch (DbxException e) {
                 e.printStackTrace();
             }
             return parseFileSystem(result);
+
+            //TODO: Dropbox also has a save_url endpoint that could be used instead of download/upload for remote -> remote operations
         }
 
         /**
@@ -166,15 +166,15 @@ public class DropboxFragment extends SourceFragment {
                     if (data instanceof FolderMetadata) {
                         currentLevelNode.addChild(sourceFile);
                         currentLevelNode = currentLevelNode.getChildren().get(currentLevelNode.getChildren().size() - 1);
-                        try {
-                            parseFileSystem(DropboxFactory
-                                                        .getInstance()
-                                                        .getClient()
-                                                        .files()
-                                                        .listFolder(data.getPathLower()));
-                        } catch (DbxException e) {
-                            e.printStackTrace();
-                        }
+//                        try {
+//                            parseFileSystem(DropboxFactory
+//                                                        .getInstance()
+//                                                        .getClient()
+//                                                        .files()
+//                                                        .listFolder(data.getPathLower()));
+//                        } catch (DbxException e) {
+//                            e.printStackTrace();
+//                        }
                         currentLevelNode.getParent().getData().addSize(currentLevelNode.getData().getSize());
                         currentLevelNode = currentLevelNode.getParent();
                     } else {

@@ -2,11 +2,18 @@ package com.jakebarnby.filemanager.managers;
 
 import android.util.Log;
 
+import com.annimon.stream.Stream;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.DeleteArg;
+import com.dropbox.core.v2.files.DeleteBatchJobStatus;
+import com.dropbox.core.v2.files.DeleteBatchLaunch;
+import com.dropbox.core.v2.files.DeleteBatchResult;
+import com.dropbox.core.v2.files.DeleteBatchResultEntry;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.files.RelocationPath;
 import com.dropbox.core.v2.files.WriteMode;
 
 import java.io.File;
@@ -15,6 +22,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Jake on 6/9/2017.
@@ -82,6 +91,23 @@ public class DropboxFactory {
     }
 
     /**
+     * Copies the file from the given path to the given destination path
+     * @param filepath  The path of the original file
+     * @param destPath  The destination to put the file at
+     * @return
+     */
+    public Metadata copyFile(String filepath, String destPath) {
+        try {
+            return getClient()
+                    .files()
+                    .copy(filepath, destPath);
+        } catch (DbxException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
      * @param filePath
      */
     public void deleteFile(String filePath) {
@@ -125,4 +151,66 @@ public class DropboxFactory {
         }
         return null;
     }
+
+    public List<Metadata> uploadBatch(List<String> paths, String destPath) {
+        return null;
+    }
+
+
+    public List<Metadata> copyBatch(List<String> paths, String destPath) {
+        List<RelocationPath> copyArgs = Stream.of(paths)
+                                    .map((path) -> new RelocationPath(path, destPath))
+                                    .toList();
+
+        try {
+            getClient()
+                    .files()
+                    .copyBatch(copyArgs);
+        } catch (DbxException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public List<DeleteBatchResultEntry> deleteBatch(List<String> paths) {
+        List<DeleteArg> toDelete = Stream.of(paths)
+                                           .map(DeleteArg::new)
+                                           .toList();
+        List<String> failedItems = new ArrayList<>();
+
+        try {
+            DeleteBatchLaunch dbl =  getClient().files().deleteBatch(toDelete);
+
+            if (dbl.isComplete()) {
+                DeleteBatchResult result = dbl.getCompleteValue();
+                return result.getEntries();
+            }
+
+            if (dbl.isAsyncJobId()) {
+                String id = dbl.getAsyncJobIdValue();
+                DeleteBatchJobStatus status = getClient().files().deleteBatchCheck(id);
+
+                while(status.isInProgress()) {}
+
+                if (status.isComplete()) {
+                    return status.getCompleteValue().getEntries();
+                }
+
+                if (status.isFailed()) {
+                    Log.d("DELETE_BATCH_FAILED", status.getFailedValue().toString());
+
+                }
+            }
+
+            if (dbl.isOther()) {
+                //TODO: Handle whatever the hell gets here
+            }
+
+        } catch (DbxException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

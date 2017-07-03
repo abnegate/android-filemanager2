@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.annimon.stream.Stream;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.SourceActivity;
@@ -49,7 +50,6 @@ public class SourceTransferService extends IntentService {
     public static final String EXTRA_CURRENT_COUNT = "com.jakebarnby.filemanager.services.extra.CURRENT_COUNT";
     public static final String EXTRA_TOTAL_COUNT = "com.jakebarnby.filemanager.services.extra.TOTAL_COUNT";
     public static final String EXTRA_CHILD_FILE = "com.jakebarnby.filemanager.services.action.EXTRA_CHILD_FILE";
-    private static final String EXTRA_SOURCE_DEST = "com.jakebarnby.filemanager.services.extra.SOURCE DESTINATION";
     public static final String EXTRA_DIALOG_TITLE = "com.jakebarnby.filemanager.services.extra.DIALOG_TITLE";
     private static final String EXTRA_NAME = "com.jakebarnby.filemanager.services.extra.NAME";
     private static final String EXTRA_TO_OPEN = "com.jakebarnby.filemanager.services.extra.TO_OPEN";
@@ -254,7 +254,7 @@ public class SourceTransferService extends IntentService {
     }
 
     /**
-     * Open the given {@link SourceFile}. If it is a remote file, dowload it first
+     * Open the given {@link SourceFile}. If it is a remote file, download it first
      * @param toOpen
      */
     private void open(SourceFile toOpen) {
@@ -364,19 +364,25 @@ public class SourceTransferService extends IntentService {
      * Delete the selected files
      */
     private void delete(boolean isSilent) {
-        List<TreeNode<SourceFile>> toDelete = SelectedFilesManager.getInstance().getSelectedFiles();
-        TreeNode<SourceFile> currentDir = SelectedFilesManager.getInstance().getActiveDirectory();
+        List<TreeNode<SourceFile>>  toDelete    = SelectedFilesManager.getInstance().getSelectedFiles();
+        TreeNode<SourceFile>        currentDir   = SelectedFilesManager.getInstance().getActiveDirectory();
+
         if (!isSilent) broadcastShowDialog(getString(R.string.deleting), toDelete.size());
-        for (TreeNode<SourceFile> file : toDelete) {
+
+        deleteLoop: for (TreeNode<SourceFile> file : toDelete) {
             switch (file.getData().getSourceName()) {
                 case Constants.Sources.LOCAL:
                     deleteFileNative(file.getData().getPath());
                     break;
                 case Constants.Sources.DROPBOX:
+                    List<String> deleteArgs = Stream.of(toDelete)
+                            .map((actionFile) -> actionFile.getData().getPath())
+                            .toList();
+
                     DropboxFactory
                             .getInstance()
-                            .deleteFile(file.getData().getPath());
-                    break;
+                            .deleteBatch(deleteArgs);
+                    break deleteLoop;
                 case Constants.Sources.GOOGLE_DRIVE:
                     GoogleDriveFactory
                             .getInstance()
@@ -388,6 +394,7 @@ public class SourceTransferService extends IntentService {
                             .deleteFile(((OneDriveFile)file.getData()).getDriveId());
                     break;
             }
+
             currentDir.removeChild(file);
 
             TreeNode<SourceFile> curDir = currentDir;
@@ -411,6 +418,8 @@ public class SourceTransferService extends IntentService {
     }
 
     private void broadcastFinishedTask(Bundle bundle) {
+        //TODO: Clear cache
+
         Intent intent = new Intent();
         intent.setAction(ACTION_COMPLETE);
 
