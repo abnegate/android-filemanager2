@@ -486,7 +486,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         if (resolveInfo.size() > 0) {
             startActivity(intent);
         } else {
-            //TODO: Handle no app to open file
+            Snackbar.make(mViewPager, R.string.no_app_available, Snackbar.LENGTH_LONG).show();
         }
     }
 
