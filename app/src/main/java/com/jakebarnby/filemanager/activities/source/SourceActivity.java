@@ -18,7 +18,6 @@ import android.support.v4.content.FileProvider;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.menu.MenuItemImpl;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -74,7 +73,11 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     public enum FileAction {
         COPY,
-        CUT
+        CUT,
+        RENAME,
+        DELETE,
+        NEW_FOLDER,
+        OPEN
     }
 
     public TreeNode<SourceFile> getActiveDirectory() {
@@ -87,6 +90,10 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     public SourceFragment getActiveFragment() {
         return mSourcesPagerAdapter.getFragments().get(mViewPager.getCurrentItem());
+    }
+
+    public void setCurrentFileAction(FileAction mCurrentFileAction) {
+        this.mCurrentFileAction = mCurrentFileAction;
     }
 
     @Override
@@ -263,6 +270,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void startDeleteAction() {
         if (!getActiveFragment().checkConnectionStatus()) return;
         if (SelectedFilesManager.getInstance().getSelectedFiles().size() > 0) {
+            mCurrentFileAction = FileAction.DELETE;
             SelectedFilesManager.getInstance().setActiveDirectory(getActiveDirectory());
             SourceTransferService.startActionDelete(SourceActivity.this);
         } else {
@@ -294,7 +302,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         String action = intent.getAction();
         switch (action) {
             case ACTION_ADD_CHILD:
-                addNewChildToActiveDirectory(intent);
+                addChildToActiveDirectory(intent);
                 break;
             case ACTION_REMOVE_CHILD:
                 removeChildFromActiveDirectory(intent);
@@ -316,17 +324,32 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void completeServiceAction(Intent intent) {
         String path = intent.getStringExtra(Constants.FILE_PATH_KEY);
 
-        if (mDialog != null && mDialog.isShowing()) {
-            mDialog.dismiss();
-            if (path == null) {
-                toggleFloatingMenu(false);
-                getActiveFragment().setMultiSelectEnabled(false);
-            } else {
-                viewFileInExternalApp(new File(path));
-                return;
-            }
+        switch(mCurrentFileAction) {
+            case CUT:
+            case COPY:
+            case DELETE:
+            case RENAME:
+            case NEW_FOLDER:
+                completeTreeModification();
+                break;
+            case OPEN:
+                viewFileInExternalApp(path);
+                break;
+            default:
+                break;
         }
 
+        if (mDialog != null && mDialog.isShowing()) {
+            mDialog.dismiss();
+        }
+
+        mCurrentFileAction = null;
+    }
+
+    /**
+     * Complete a service action that modified the file tree
+     */
+    private void completeTreeModification() {
         for (SourceFragment fragment : mSourcesPagerAdapter.getFragments()) {
             fragment.setMultiSelectEnabled(false);
         }
@@ -334,14 +357,13 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         setTitle(getString(R.string.app_name));
         toggleFloatingMenu(false);
         SelectedFilesManager.getInstance().getSelectedFiles().clear();
-        TreeNode.sortTree(getActiveDirectory(), (node1, node2) -> {
+        TreeNode.sortTree(SelectedFilesManager.getInstance().getActiveDirectory(), (node1, node2) -> {
             int result = Boolean.valueOf(!node1.getData().isDirectory()).compareTo(!node2.getData().isDirectory());
             if (result == 0) {
                 result = node1.getData().getName().toLowerCase().compareTo(node2.getData().getName().toLowerCase());
             }
             return result;
         });
-        mCurrentFileAction = null;
     }
 
     /**
@@ -356,6 +378,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      */
     private void showCreateFolderDialog() {
         if (!getActiveFragment().checkConnectionStatus()) return;
+
+        mCurrentFileAction = FileAction.NEW_FOLDER;
         SelectedFilesManager.getInstance().setActiveDirectory(getActiveDirectory());
         Bundle bundle = new Bundle();
         bundle.putString(Constants.DIALOG_TITLE_KEY, getString(R.string.create_folder));
@@ -369,6 +393,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      */
     private void showRenameDialog() {
         if (!getActiveFragment().checkConnectionStatus()) return;
+
+        mCurrentFileAction = FileAction.RENAME;
         SelectedFilesManager.getInstance().setActiveDirectory(getActiveDirectory());
         int size = SelectedFilesManager.getInstance().getSelectedFiles().size();
         if (size == 0) {
@@ -401,16 +427,16 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     /**
-     * Add a child from the given intent to the active directory
+     * Add a child stored in the given intent to the active directory
      * @param intent
      */
-    private void addNewChildToActiveDirectory(Intent intent) {
+    private void addChildToActiveDirectory(Intent intent) {
         TreeNode<SourceFile> file = (TreeNode<SourceFile>) intent.getSerializableExtra(EXTRA_CHILD_FILE);
         getActiveDirectory().addChild(file);
     }
 
     /**
-     * Remove a child from the given intent in the active directory
+     * Remove a child stored in the given intent in the active directory
      * @param intent
      */
     private void removeChildFromActiveDirectory(Intent intent) {
@@ -469,13 +495,16 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     /**
      * Attempts to open a file by finding it's mimetype then opening a compatible application
      *
-     * @param file The file to attempt to open
+     * @param filePath The path of the file to attempt to open
      */
-    private void viewFileInExternalApp(File file) {
-        String extension = Utils.fileExt(file.getPath());
+    private void viewFileInExternalApp(String filePath) {
+        if (filePath == null) return;
+
+        File file = new File(filePath);
+        String extension = Utils.fileExt(filePath);
         String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
 
-        Uri reachableUri = FileProvider.getUriForFile(this, "com.jakebarnby.filemanager", file);
+        Uri reachableUri = FileProvider.getUriForFile(this, getApplicationInfo().packageName, file);
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(reachableUri, mimeType);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -491,7 +520,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     /**
-     * @param enabled
+     * Toggles the floating action context menu
+     *
+     * @param enabled   Whether the menu should enabled or not
      */
     public void toggleFloatingMenu(boolean enabled) {
         if (!enabled && mFabMenu.getVisibility() == View.INVISIBLE) return;
