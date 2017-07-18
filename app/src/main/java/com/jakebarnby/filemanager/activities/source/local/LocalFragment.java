@@ -1,10 +1,7 @@
 package com.jakebarnby.filemanager.activities.source.local;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -12,11 +9,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
-import android.view.ViewGroup;
-import android.webkit.MimeTypeMap;
 
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.SourceActivity;
@@ -25,11 +19,8 @@ import com.jakebarnby.filemanager.models.files.LocalFile;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
-import com.jakebarnby.filemanager.util.Utils;
 
 import java.io.File;
-import java.util.Comparator;
-import java.util.List;
 
 /**
  * Created by Jake on 5/31/2017.
@@ -182,7 +173,7 @@ public class LocalFragment extends SourceFragment {
                     loadSource();
                     setLoggedIn(true);
                 } else if (!shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                    Snackbar.make(mRecycler, R.string.snackbar_permissions, Snackbar.LENGTH_LONG)
+                    Snackbar.make(mRecycler, R.string.storage_permission, Snackbar.LENGTH_LONG)
                             .setAction(R.string.action_settings, v -> showAppDetails())
                             .show();
                 }
