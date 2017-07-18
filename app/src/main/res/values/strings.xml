@@ -42,4 +42,8 @@
     <string name="greater_than"><![CDATA[>]]></string>
     <string name="no_connection">No connection available, check your internet and try again</string>
     <string name="no_app_available">No installed apps can open this file</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+    <string name="file_ready">File Ready</string>
+    <string name="open_now">Would you like to open %s now?</string>
 </resources>
