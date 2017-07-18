@@ -35,8 +35,8 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile "com.android.support:appcompat-v7:${project.SUPPORT_LIB_VERSION}"
-    compile "com.android.support:customtabs:${project.SUPPORT_LIB_VERSION}"
-    compile 'com.google.code.gson:gson:2.8.1'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "com.android.support:appcompat-v7:${project.supportLibVersion}"
+    implementation "com.android.support:customtabs:${project.supportLibVersion}"
+    implementation 'com.google.code.gson:gson:2.8.1'
 }
