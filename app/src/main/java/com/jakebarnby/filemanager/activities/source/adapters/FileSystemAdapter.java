@@ -152,13 +152,13 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
                 .with(holder.itemView)
                 .load(mCurrentDir.getData().getSourceName().equals(Constants.Sources.LOCAL) ?
                         new File(mCurrentDirChildren.get(position).getData().getThumbnailLink()) :
-                        Uri.parse(mCurrentDirChildren.get(position).getData().getThumbnailLink()))
+                        mCurrentDirChildren.get(position).getData().getThumbnailLink())
                 .error(R.mipmap.ic_launcher_round)
                 .placeholder(R.mipmap.ic_launcher_round)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .transition(withCrossFade())
-                .override(128, 128)
-                .thumbnail(0.25f)
+                .override(100, 100)
+                .thumbnail(0.2f)
                 .circleCrop()
                 .into(holder.mPreviewImage);
     }
