@@ -17,6 +17,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -333,7 +334,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 completeTreeModification();
                 break;
             case OPEN:
-                viewFileInExternalApp(path);
+                startOpenFile(path);
                 break;
             default:
                 break;
@@ -493,9 +494,41 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     /**
+     * Open a file at the given path. If the open operation was finished in the background,
+     * inform user file is ready to open with a dialog. Otherwise open the file immediately.
+     *
+     * If a user selects 'No' and chooses not the open the file, it will still be cached when
+     * attempting to open again (until next app launch.)
+     *
+     * @param filePath  The absolute path of the file to open
+     */
+    private void startOpenFile(String filePath) {
+        if (mDialog != null && !mDialog.isShowing()) {
+            String filename = filePath.substring(
+                    filePath.lastIndexOf(File.separator)+1,
+                    filePath.length());
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(getString(R.string.file_ready));
+            builder.setMessage(String.format(getString(R.string.open_now), filename));
+
+            builder.setNegativeButton(getString(R.string.no), (dialog, which) ->
+                    dialog.dismiss()
+            );
+            builder.setPositiveButton(getString(R.string.yes), (dialog, which) ->
+                    viewFileInExternalApp(filePath)
+            );
+
+            builder.create().show();
+        } else {
+            viewFileInExternalApp(filePath);
+        }
+    }
+
+    /**
      * Attempts to open a file by finding it's mimetype then opening a compatible application
      *
-     * @param filePath The path of the file to attempt to open
+     * @param filePath  The absolute path of the file to open
      */
     private void viewFileInExternalApp(String filePath) {
         if (filePath == null) return;
