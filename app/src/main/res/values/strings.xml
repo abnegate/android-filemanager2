@@ -6,8 +6,8 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="connect">Connect</string>
-    <string name="snackbar_permissions">Please enable storage permissions to view local files.</string>
-    <string name="dialog_contact_permission">Contacts permission is needed to list your available google accounts.</string>
+    <string name="storage_permission">Please enable storage permissions to view local files.</string>
+    <string name="contacts_permission">Contacts permission is needed to list your google accounts.</string>
     <string name="menu_item_copy">Copy</string>
     <string name="menu_item_cut">Cut</string>
     <string name="menu_item_paste">Paste</string>

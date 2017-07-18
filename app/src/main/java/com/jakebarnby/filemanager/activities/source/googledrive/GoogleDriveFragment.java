@@ -13,7 +13,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.auth.GoogleAuthException;
@@ -291,7 +290,9 @@ public class GoogleDriveFragment extends SourceFragment {
      * Show a dialog explaining why local storage permission is necessary
      */
     protected void showPermissionRationaleDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage(R.string.dialog_contact_permission);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        builder.setMessage(R.string.contacts_permission);
         builder.setPositiveButton("OK", (dialog, which) -> requestPermissions(
                 new String[]{Manifest.permission.GET_ACCOUNTS},
                 Constants.RequestCodes.ACCOUNTS_PERMISSIONS));
@@ -326,7 +327,7 @@ public class GoogleDriveFragment extends SourceFragment {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     authGoogle();
                 } else if (!shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                    Snackbar.make(mRecycler, R.string.snackbar_permissions, Snackbar.LENGTH_LONG)
+                    Snackbar.make(mRecycler, R.string.contacts_permission, Snackbar.LENGTH_LONG)
                             .setAction(R.string.action_settings, v -> showAppDetails())
                             .show();
                 }
