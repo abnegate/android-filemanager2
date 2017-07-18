@@ -259,7 +259,15 @@ public class SourceTransferService extends IntentService {
      */
     private void open(SourceFile toOpen) {
         broadcastShowDialog(getString(R.string.opening), 0);
-        String filePath = getFile(toOpen);
+
+        String cachePath = getCacheDir().getPath()+File.separator;
+        String filePath;
+
+        if (!new File(cachePath+toOpen.getName()).exists()) {
+            filePath = getFile(toOpen);
+        } else {
+            filePath = cachePath+toOpen.getName();
+        }
 
         Bundle bundle = new Bundle();
         bundle.putString(Constants.FILE_PATH_KEY, filePath);
@@ -366,6 +374,7 @@ public class SourceTransferService extends IntentService {
     private void delete(boolean isSilent) {
         List<TreeNode<SourceFile>> toDelete = SelectedFilesManager.getInstance().getSelectedFiles();
         TreeNode<SourceFile> currentDir = SelectedFilesManager.getInstance().getActiveDirectory();
+
         if (!isSilent) broadcastShowDialog(getString(R.string.deleting), toDelete.size());
         for (TreeNode<SourceFile> file : toDelete) {
             switch (file.getData().getSourceName()) {
@@ -398,9 +407,13 @@ public class SourceTransferService extends IntentService {
                 } else break;
             }
 
-            if (!isSilent) broadcastUpdate(toDelete.indexOf(file)+1);
+            if (!isSilent) {
+                broadcastUpdate(toDelete.indexOf(file)+1);
+            }
         }
-        if (!isSilent) broadcastFinishedTask();
+        if (!isSilent) {
+            broadcastFinishedTask();
+        }
     }
 
     /**
