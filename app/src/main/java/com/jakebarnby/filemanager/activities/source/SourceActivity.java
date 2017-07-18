@@ -505,7 +505,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void startOpenFile(String filePath) {
         if (mDialog != null && !mDialog.isShowing()) {
             String filename = filePath.substring(
-                    filePath.lastIndexOf(File.separator),
+                    filePath.lastIndexOf(File.separator)+1,
                     filePath.length());
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
