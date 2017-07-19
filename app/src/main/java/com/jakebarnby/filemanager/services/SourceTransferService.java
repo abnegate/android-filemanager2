@@ -26,6 +26,7 @@ import com.jakebarnby.filemanager.util.TreeNode;
 import com.microsoft.graph.extensions.DriveItem;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,13 +46,13 @@ public class SourceTransferService extends IntentService {
     private static final String ACTION_CREATE_FOLDER = "com.jakebarnby.filemanager.services.action.CREATE_FOLDER";
     private static final String ACTION_RENAME = "com.jakebarnby.filemanager.services.action.RENAME";
     private static final String ACTION_OPEN = "com.jakebarnby.filemanager.services.action.OPEN";
+    private static final String ACTION_CLEAR_CACHE = "com.jakebarnby.filemanager.services.action.CLEAR_CACHE";
 
     public static final String EXTRA_CURRENT_COUNT = "com.jakebarnby.filemanager.services.extra.CURRENT_COUNT";
     public static final String EXTRA_TOTAL_COUNT = "com.jakebarnby.filemanager.services.extra.TOTAL_COUNT";
     public static final String EXTRA_CHILD_FILE = "com.jakebarnby.filemanager.services.action.EXTRA_CHILD_FILE";
-    private static final String EXTRA_SOURCE_DEST = "com.jakebarnby.filemanager.services.extra.SOURCE DESTINATION";
     public static final String EXTRA_DIALOG_TITLE = "com.jakebarnby.filemanager.services.extra.DIALOG_TITLE";
-    private static final String EXTRA_NAME = "com.jakebarnby.filemanager.services.extra.NAME";
+    private static final String EXTRA_NEW_NAME = "com.jakebarnby.filemanager.services.extra.NAME";
     private static final String EXTRA_TO_OPEN = "com.jakebarnby.filemanager.services.extra.TO_OPEN";
 
     static {
@@ -123,7 +124,7 @@ public class SourceTransferService extends IntentService {
     public static void startActionCreateFolder(Context context, String name) {
         Intent intent = new Intent(context, SourceTransferService.class);
         intent.setAction(ACTION_CREATE_FOLDER);
-        intent.putExtra(EXTRA_NAME, name);
+        intent.putExtra(EXTRA_NEW_NAME, name);
         context.startService(intent);
     }
 
@@ -135,7 +136,7 @@ public class SourceTransferService extends IntentService {
     public static void startActionRename(Context context, String newName) {
         Intent intent = new Intent(context, SourceTransferService.class);
         intent.setAction(ACTION_RENAME);
-        intent.putExtra(EXTRA_NAME, newName);
+        intent.putExtra(EXTRA_NEW_NAME, newName);
         context.startService(intent);
     }
 
@@ -155,7 +156,7 @@ public class SourceTransferService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final SourceFile toOpen = (SourceFile) intent.getSerializableExtra(EXTRA_TO_OPEN);
-            final String name = intent.getStringExtra(EXTRA_NAME);
+            final String name = intent.getStringExtra(EXTRA_NEW_NAME);
             final String action = intent.getAction();
             switch (action) {
                 case ACTION_CREATE_FOLDER:
@@ -250,6 +251,7 @@ public class SourceTransferService extends IntentService {
                 break;
         }
         destDir.getData().setName(name);
+        destDir.getData().setPath(newPath);
         broadcastFinishedTask();
     }
 
@@ -284,9 +286,9 @@ public class SourceTransferService extends IntentService {
         broadcastShowDialog(move ? getString(R.string.moving) : getString(R.string.copying), toCopy.size());
         for (TreeNode<SourceFile> file : toCopy) {
             String newFilePath = getFile(file.getData());
-            putFile(newFilePath, file.getData().getName(), destDir.getData());
+            SourceFile newFile = putFile(newFilePath, file.getData().getName(), destDir.getData());
 
-            destDir.addChild(file.getData());
+            destDir.addChild(newFile);
             TreeNode<SourceFile> curDir = destDir;
             while (true) {
                 curDir.getData().addSize(file.getData().getSize());
@@ -301,6 +303,54 @@ public class SourceTransferService extends IntentService {
             delete(true);
         }
         broadcastFinishedTask();
+    }
+
+    /**
+     * Delete the selected files
+     */
+    private void delete(boolean isSilent) {
+        List<TreeNode<SourceFile>> toDelete = SelectedFilesManager.getInstance().getSelectedFiles();
+        TreeNode<SourceFile> currentDir = SelectedFilesManager.getInstance().getActiveDirectory();
+
+        if (!isSilent) broadcastShowDialog(getString(R.string.deleting), toDelete.size());
+        for (TreeNode<SourceFile> file : toDelete) {
+            switch (file.getData().getSourceName()) {
+                case Constants.Sources.LOCAL:
+                    deleteFileNative(file.getData().getPath());
+                    break;
+                case Constants.Sources.DROPBOX:
+                    DropboxFactory
+                            .getInstance()
+                            .deleteFile(file.getData().getPath());
+                    break;
+                case Constants.Sources.GOOGLE_DRIVE:
+                    GoogleDriveFactory
+                            .getInstance()
+                            .deleteFile(((GoogleDriveFile) file.getData()).getDriveId());
+                    break;
+                case Constants.Sources.ONEDRIVE:
+                    OneDriveFactory
+                            .getInstance()
+                            .deleteFile(((OneDriveFile) file.getData()).getDriveId());
+                    break;
+            }
+            currentDir.removeChild(file);
+
+            TreeNode<SourceFile> curDir = currentDir;
+            while (true) {
+                curDir.getData().removeSize(file.getData().getSize());
+                if (curDir.getParent() != null) {
+                    curDir = curDir.getParent();
+                } else break;
+            }
+
+            if (!isSilent) {
+                broadcastUpdate(toDelete.indexOf(file) + 1);
+            }
+        }
+        if (!isSilent) {
+            broadcastFinishedTask();
+        }
     }
 
     /**
@@ -347,73 +397,26 @@ public class SourceTransferService extends IntentService {
      * @param fileName      The name of the file to put
      * @param destDir       The destination of the file
      */
-    private void putFile(String newFilePath, String fileName, SourceFile destDir) {
+    private SourceFile putFile(String newFilePath, String fileName, SourceFile destDir) {
         switch (destDir.getSourceName()) {
             case Constants.Sources.LOCAL:
                 copyFileNative(newFilePath, destDir.getPath()+"/"+fileName);
-                break;
+                return new LocalFile(new File(destDir.getPath()+"/"+fileName));
             case Constants.Sources.DROPBOX:
-                DropboxFactory
+                return new DropboxFile(
+                        DropboxFactory
                         .getInstance()
-                        .uploadFile(newFilePath, destDir.getPath());
-                break;
+                        .uploadFile(newFilePath, destDir.getPath()));
             case Constants.Sources.GOOGLE_DRIVE:
-                GoogleDriveFactory
+                return new GoogleDriveFile(GoogleDriveFactory
                         .getInstance()
-                        .uploadFile(newFilePath, fileName, ((GoogleDriveFile)destDir).getDriveId());
-                break;
+                        .uploadFile(newFilePath, fileName, ((GoogleDriveFile)destDir).getDriveId()));
             case Constants.Sources.ONEDRIVE:
-                OneDriveFactory.getInstance().uploadFile(newFilePath, fileName, ((OneDriveFile)destDir).getDriveId());
-                break;
+                return  new OneDriveFile(OneDriveFactory
+                        .getInstance()
+                        .uploadFile(newFilePath, fileName, ((OneDriveFile)destDir).getDriveId()));
         }
-    }
-
-    /**
-     * Delete the selected files
-     */
-    private void delete(boolean isSilent) {
-        List<TreeNode<SourceFile>> toDelete = SelectedFilesManager.getInstance().getSelectedFiles();
-        TreeNode<SourceFile> currentDir = SelectedFilesManager.getInstance().getActiveDirectory();
-
-        if (!isSilent) broadcastShowDialog(getString(R.string.deleting), toDelete.size());
-        for (TreeNode<SourceFile> file : toDelete) {
-            switch (file.getData().getSourceName()) {
-                case Constants.Sources.LOCAL:
-                    deleteFileNative(file.getData().getPath());
-                    break;
-                case Constants.Sources.DROPBOX:
-                    DropboxFactory
-                            .getInstance()
-                            .deleteFile(file.getData().getPath());
-                    break;
-                case Constants.Sources.GOOGLE_DRIVE:
-                    GoogleDriveFactory
-                            .getInstance()
-                            .deleteFile(((GoogleDriveFile)file.getData()).getDriveId());
-                    break;
-                case Constants.Sources.ONEDRIVE:
-                    OneDriveFactory
-                            .getInstance()
-                            .deleteFile(((OneDriveFile)file.getData()).getDriveId());
-                    break;
-            }
-            currentDir.removeChild(file);
-
-            TreeNode<SourceFile> curDir = currentDir;
-            while (true) {
-                curDir.getData().removeSize(file.getData().getSize());
-                if (curDir.getParent() != null) {
-                    curDir = curDir.getParent();
-                } else break;
-            }
-
-            if (!isSilent) {
-                broadcastUpdate(toDelete.indexOf(file)+1);
-            }
-        }
-        if (!isSilent) {
-            broadcastFinishedTask();
-        }
+        return null;
     }
 
     /**
