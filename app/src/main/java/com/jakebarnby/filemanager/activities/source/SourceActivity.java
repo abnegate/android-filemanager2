@@ -157,6 +157,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
         TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
+        SourceTransferService.startClearLocalCache(this);
     }
 
     @Override
