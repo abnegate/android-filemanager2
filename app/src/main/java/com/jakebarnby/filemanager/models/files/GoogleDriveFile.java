@@ -24,7 +24,6 @@ public class GoogleDriveFile extends SourceFile {
         setDriveId(file.getId());
         setDirectory(file.getMimeType().equals(Constants.Sources.GOOGLE_DRIVE_FOLDER_MIME));
         setThumbnailLink(file.getHasThumbnail() ? file.getThumbnailLink() : file.getIconLink());
-        setCreatedTime(file.getCreatedTime().getValue());
         setModifiedTime(file.getModifiedTime().getValue());
         if (!isDirectory()) {
             setSize(file.getSize() == null? 0 : file.getSize());
