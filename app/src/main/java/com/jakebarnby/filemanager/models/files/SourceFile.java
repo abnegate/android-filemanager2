@@ -62,12 +62,6 @@ public abstract class SourceFile implements Serializable {
     public void setDirectory(boolean directory) {
         mIsDirectory = directory;
     }
-    public long getCreatedTime() {
-        return (long) mCreatedTime;
-    }
-    public void setCreatedTime(long mCreatedTime) {
-        this.mCreatedTime = mCreatedTime;
-    }
     public long getModifiedTime() {
         return (long) mModifiedTime;
     }
