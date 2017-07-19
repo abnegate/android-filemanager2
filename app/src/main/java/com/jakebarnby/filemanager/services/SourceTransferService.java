@@ -26,6 +26,7 @@ import com.jakebarnby.filemanager.util.TreeNode;
 import com.microsoft.graph.extensions.DriveItem;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,13 +46,13 @@ public class SourceTransferService extends IntentService {
     private static final String ACTION_CREATE_FOLDER = "com.jakebarnby.filemanager.services.action.CREATE_FOLDER";
     private static final String ACTION_RENAME = "com.jakebarnby.filemanager.services.action.RENAME";
     private static final String ACTION_OPEN = "com.jakebarnby.filemanager.services.action.OPEN";
+    private static final String ACTION_CLEAR_CACHE = "com.jakebarnby.filemanager.services.action.CLEAR_CACHE";
 
     public static final String EXTRA_CURRENT_COUNT = "com.jakebarnby.filemanager.services.extra.CURRENT_COUNT";
     public static final String EXTRA_TOTAL_COUNT = "com.jakebarnby.filemanager.services.extra.TOTAL_COUNT";
     public static final String EXTRA_CHILD_FILE = "com.jakebarnby.filemanager.services.action.EXTRA_CHILD_FILE";
-    private static final String EXTRA_SOURCE_DEST = "com.jakebarnby.filemanager.services.extra.SOURCE DESTINATION";
     public static final String EXTRA_DIALOG_TITLE = "com.jakebarnby.filemanager.services.extra.DIALOG_TITLE";
-    private static final String EXTRA_NAME = "com.jakebarnby.filemanager.services.extra.NAME";
+    private static final String EXTRA_NEW_NAME = "com.jakebarnby.filemanager.services.extra.NAME";
     private static final String EXTRA_TO_OPEN = "com.jakebarnby.filemanager.services.extra.TO_OPEN";
 
     static {
@@ -123,7 +124,7 @@ public class SourceTransferService extends IntentService {
     public static void startActionCreateFolder(Context context, String name) {
         Intent intent = new Intent(context, SourceTransferService.class);
         intent.setAction(ACTION_CREATE_FOLDER);
-        intent.putExtra(EXTRA_NAME, name);
+        intent.putExtra(EXTRA_NEW_NAME, name);
         context.startService(intent);
     }
 
@@ -135,7 +136,7 @@ public class SourceTransferService extends IntentService {
     public static void startActionRename(Context context, String newName) {
         Intent intent = new Intent(context, SourceTransferService.class);
         intent.setAction(ACTION_RENAME);
-        intent.putExtra(EXTRA_NAME, newName);
+        intent.putExtra(EXTRA_NEW_NAME, newName);
         context.startService(intent);
     }
 
@@ -151,18 +152,24 @@ public class SourceTransferService extends IntentService {
         context.startService(intent);
     }
 
+    public static void startClearLocalCache(Context context) {
+        Intent intent = new Intent(context, SourceTransferService.class);
+        intent.setAction(ACTION_CLEAR_CACHE);
+        context.startService(intent);
+    }
+
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final SourceFile toOpen = (SourceFile) intent.getSerializableExtra(EXTRA_TO_OPEN);
-            final String name = intent.getStringExtra(EXTRA_NAME);
+            final String newName = intent.getStringExtra(EXTRA_NEW_NAME);
             final String action = intent.getAction();
             switch (action) {
                 case ACTION_CREATE_FOLDER:
-                    createFolder(name);
+                    createFolder(newName);
                     break;
                 case ACTION_RENAME:
-                    rename(name);
+                    rename(newName);
                     break;
                 case ACTION_COPY:
                     copy(false);
@@ -176,9 +183,16 @@ public class SourceTransferService extends IntentService {
                 case ACTION_OPEN:
                     open(toOpen);
                     break;
+                case ACTION_CLEAR_CACHE:
+                    clearLocalCache();
+                    break;
             }
         }
         hideNotification();
+    }
+
+    private void clearLocalCache() {
+        deleteFileNative(getCacheDir().getPath());
     }
 
     /**
@@ -250,6 +264,7 @@ public class SourceTransferService extends IntentService {
                 break;
         }
         destDir.getData().setName(name);
+        destDir.getData().setPath(newPath);
         broadcastFinishedTask();
     }
 
