@@ -299,9 +299,9 @@ public class SourceTransferService extends IntentService {
         broadcastShowDialog(move ? getString(R.string.moving) : getString(R.string.copying), toCopy.size());
         for (TreeNode<SourceFile> file : toCopy) {
             String newFilePath = getFile(file.getData());
-            putFile(newFilePath, file.getData().getName(), destDir.getData());
+            SourceFile newFile = putFile(newFilePath, file.getData().getName(), destDir.getData());
 
-            destDir.addChild(file.getData());
+            destDir.addChild(newFile);
             TreeNode<SourceFile> curDir = destDir;
             while (true) {
                 curDir.getData().addSize(file.getData().getSize());
@@ -316,6 +316,54 @@ public class SourceTransferService extends IntentService {
             delete(true);
         }
         broadcastFinishedTask();
+    }
+
+    /**
+     * Delete the selected files
+     */
+    private void delete(boolean isSilent) {
+        List<TreeNode<SourceFile>> toDelete = SelectedFilesManager.getInstance().getSelectedFiles();
+        TreeNode<SourceFile> currentDir = SelectedFilesManager.getInstance().getActiveDirectory();
+
+        if (!isSilent) broadcastShowDialog(getString(R.string.deleting), toDelete.size());
+        for (TreeNode<SourceFile> file : toDelete) {
+            switch (file.getData().getSourceName()) {
+                case Constants.Sources.LOCAL:
+                    deleteFileNative(file.getData().getPath());
+                    break;
+                case Constants.Sources.DROPBOX:
+                    DropboxFactory
+                            .getInstance()
+                            .deleteFile(file.getData().getPath());
+                    break;
+                case Constants.Sources.GOOGLE_DRIVE:
+                    GoogleDriveFactory
+                            .getInstance()
+                            .deleteFile(((GoogleDriveFile) file.getData()).getDriveId());
+                    break;
+                case Constants.Sources.ONEDRIVE:
+                    OneDriveFactory
+                            .getInstance()
+                            .deleteFile(((OneDriveFile) file.getData()).getDriveId());
+                    break;
+            }
+            currentDir.removeChild(file);
+
+            TreeNode<SourceFile> curDir = currentDir;
+            while (true) {
+                curDir.getData().removeSize(file.getData().getSize());
+                if (curDir.getParent() != null) {
+                    curDir = curDir.getParent();
+                } else break;
+            }
+
+            if (!isSilent) {
+                broadcastUpdate(toDelete.indexOf(file) + 1);
+            }
+        }
+        if (!isSilent) {
+            broadcastFinishedTask();
+        }
     }
 
     /**
@@ -362,73 +410,26 @@ public class SourceTransferService extends IntentService {
      * @param fileName      The name of the file to put
      * @param destDir       The destination of the file
      */
-    private void putFile(String newFilePath, String fileName, SourceFile destDir) {
+    private SourceFile putFile(String newFilePath, String fileName, SourceFile destDir) {
         switch (destDir.getSourceName()) {
             case Constants.Sources.LOCAL:
                 copyFileNative(newFilePath, destDir.getPath()+"/"+fileName);
-                break;
+                return new LocalFile(new File(destDir.getPath()+"/"+fileName));
             case Constants.Sources.DROPBOX:
-                DropboxFactory
+                return new DropboxFile(
+                        DropboxFactory
                         .getInstance()
-                        .uploadFile(newFilePath, destDir.getPath());
-                break;
+                        .uploadFile(newFilePath, destDir.getPath()));
             case Constants.Sources.GOOGLE_DRIVE:
-                GoogleDriveFactory
+                return new GoogleDriveFile(GoogleDriveFactory
                         .getInstance()
-                        .uploadFile(newFilePath, fileName, ((GoogleDriveFile)destDir).getDriveId());
-                break;
+                        .uploadFile(newFilePath, fileName, ((GoogleDriveFile)destDir).getDriveId()));
             case Constants.Sources.ONEDRIVE:
-                OneDriveFactory.getInstance().uploadFile(newFilePath, fileName, ((OneDriveFile)destDir).getDriveId());
-                break;
+                return  new OneDriveFile(OneDriveFactory
+                        .getInstance()
+                        .uploadFile(newFilePath, fileName, ((OneDriveFile)destDir).getDriveId()));
         }
-    }
-
-    /**
-     * Delete the selected files
-     */
-    private void delete(boolean isSilent) {
-        List<TreeNode<SourceFile>> toDelete = SelectedFilesManager.getInstance().getSelectedFiles();
-        TreeNode<SourceFile> currentDir = SelectedFilesManager.getInstance().getActiveDirectory();
-
-        if (!isSilent) broadcastShowDialog(getString(R.string.deleting), toDelete.size());
-        for (TreeNode<SourceFile> file : toDelete) {
-            switch (file.getData().getSourceName()) {
-                case Constants.Sources.LOCAL:
-                    deleteFileNative(file.getData().getPath());
-                    break;
-                case Constants.Sources.DROPBOX:
-                    DropboxFactory
-                            .getInstance()
-                            .deleteFile(file.getData().getPath());
-                    break;
-                case Constants.Sources.GOOGLE_DRIVE:
-                    GoogleDriveFactory
-                            .getInstance()
-                            .deleteFile(((GoogleDriveFile)file.getData()).getDriveId());
-                    break;
-                case Constants.Sources.ONEDRIVE:
-                    OneDriveFactory
-                            .getInstance()
-                            .deleteFile(((OneDriveFile)file.getData()).getDriveId());
-                    break;
-            }
-            currentDir.removeChild(file);
-
-            TreeNode<SourceFile> curDir = currentDir;
-            while (true) {
-                curDir.getData().removeSize(file.getData().getSize());
-                if (curDir.getParent() != null) {
-                    curDir = curDir.getParent();
-                } else break;
-            }
-
-            if (!isSilent) {
-                broadcastUpdate(toDelete.indexOf(file)+1);
-            }
-        }
-        if (!isSilent) {
-            broadcastFinishedTask();
-        }
+        return null;
     }
 
     /**
