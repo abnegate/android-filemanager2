@@ -7,9 +7,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
+import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.SourceFragment;
+import com.jakebarnby.filemanager.glide.GlideApp;
 import com.jakebarnby.filemanager.managers.OneDriveFactory;
 import com.jakebarnby.filemanager.models.files.OneDriveFile;
 import com.jakebarnby.filemanager.models.files.SourceFile;
@@ -21,7 +25,6 @@ import com.microsoft.graph.core.IClientConfig;
 import com.microsoft.graph.extensions.DriveItem;
 import com.microsoft.graph.extensions.GraphServiceClient;
 import com.microsoft.graph.extensions.IDriveItemCollectionPage;
-import com.microsoft.graph.extensions.Thumbnail;
 import com.microsoft.identity.client.AuthenticationCallback;
 import com.microsoft.identity.client.AuthenticationResult;
 import com.microsoft.identity.client.MsalClientException;
@@ -58,6 +61,19 @@ public class OneDriveFragment extends SourceFragment {
         args.putString("TITLE", sourceName);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = super.onCreateView(inflater, container, savedInstanceState);
+
+        GlideApp
+                .with(mSourceLogo)
+                .load(R.drawable.ic_onedrive)
+                .centerCrop()
+                .into(mSourceLogo);
+
+        return view;
     }
 
     @Override
@@ -307,6 +323,7 @@ public class OneDriveFragment extends SourceFragment {
             initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
             setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
+            mSourceLogo.setVisibility(View.GONE);
         }
     }
 }

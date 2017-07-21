@@ -430,6 +430,7 @@ public class SourceTransferService extends IntentService {
         if (bundle != null) {
             intent.putExtras(bundle);
         }
+
         SelectedFilesManager.getInstance().getSelectedFiles().clear();
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
