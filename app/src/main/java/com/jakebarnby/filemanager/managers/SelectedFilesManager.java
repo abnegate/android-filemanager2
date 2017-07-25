@@ -1,5 +1,7 @@
 package com.jakebarnby.filemanager.managers;
 
+import android.util.SparseArray;
+
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.TreeNode;
 
@@ -13,8 +15,14 @@ import java.util.List;
 public class SelectedFilesManager {
 
     private static volatile  SelectedFilesManager sInstance;
-    private List<TreeNode<SourceFile>> mSelectedFiles = new ArrayList<>();
-    private TreeNode<SourceFile> mActiveDirectory;
+
+    private SparseArray<List<TreeNode<SourceFile>>> mSelectedFilesMap;
+    private SparseArray<TreeNode<SourceFile>> mActionableDirectories;
+
+    private SelectedFilesManager() {
+        mSelectedFilesMap = new SparseArray<>();
+        mActionableDirectories = new SparseArray<>();
+    }
 
     public static SelectedFilesManager getInstance() {
         if (sInstance == null) {
@@ -23,15 +31,23 @@ public class SelectedFilesManager {
         return sInstance;
     }
 
-    public List<TreeNode<SourceFile>> getSelectedFiles() {
-        return mSelectedFiles;
+    public List<TreeNode<SourceFile>> getSelectedFiles(int operationId) {
+        return mSelectedFilesMap.get(operationId);
     }
 
-    public TreeNode<SourceFile> getActiveDirectory() {
-        return mActiveDirectory;
+    public TreeNode<SourceFile> getActionableDirectory(int operationId) {
+        return mActionableDirectories.get(operationId);
     }
 
-    public void setActiveDirectory(TreeNode<SourceFile> mPasteDirectory) {
-        this.mActiveDirectory = mPasteDirectory;
+    public void addNewSelection() {
+        mSelectedFilesMap.put(getOperationCount()+1, new ArrayList<>());
+    }
+
+    public void addActionableDirectory(int operationId, TreeNode<SourceFile> actionableDir) {
+        mActionableDirectories.put(operationId, actionableDir);
+    }
+
+    public int getOperationCount() {
+        return mSelectedFilesMap.size();
     }
 }

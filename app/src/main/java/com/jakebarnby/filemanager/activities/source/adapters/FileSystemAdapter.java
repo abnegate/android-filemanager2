@@ -132,11 +132,13 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
             holder.mCheckbox.startAnimation(translate);
         }
 
-        if (SelectedFilesManager
-                .getInstance()
-                .getSelectedFiles()
-                .contains(mCurrentDirChildren.get(position))) {
-            holder.mCheckbox.setChecked(true);
+        if (SelectedFilesManager.getInstance().getOperationCount() > 0) {
+            if (SelectedFilesManager
+                    .getInstance()
+                    .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                    .contains(mCurrentDirChildren.get(position))) {
+                holder.mCheckbox.setChecked(true);
+            }
         }
         mSizeProvider.setView(holder.mPreviewImage);
     }

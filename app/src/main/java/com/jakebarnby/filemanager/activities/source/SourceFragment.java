@@ -124,6 +124,7 @@ public abstract class SourceFragment extends Fragment {
     public void setMultiSelectEnabled(boolean enabled) {
         if (enabled) {
             ((SourceActivity)getActivity()).toggleFloatingMenu(true);
+            SelectedFilesManager.getInstance().addNewSelection();
         }
         this.mMultiSelectEnabled = enabled;
         if (mRecycler.getAdapter() != null) {
@@ -220,18 +221,18 @@ public abstract class SourceFragment extends Fragment {
                 if (isChecked) {
                     SelectedFilesManager
                             .getInstance()
-                            .getSelectedFiles()
+                            .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
                             .add(file);
                 } else {
                     SelectedFilesManager
                             .getInstance()
-                            .getSelectedFiles()
+                            .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
                             .remove(file);
                 }
 
                 int size = SelectedFilesManager
                         .getInstance()
-                        .getSelectedFiles()
+                        .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
                         .size();
                 getActivity().setTitle(size + " selected");
                 //TODO: Set the Fragment tab title with selected count, e.g. LOCAL (3) DROPBOX (1)
@@ -243,7 +244,8 @@ public abstract class SourceFragment extends Fragment {
                     pushBreadcrumb(file);
                     mRecycler.getAdapter().notifyDataSetChanged();
                 } else {
-                    ((SourceActivity)getActivity()).setCurrentFileAction(SourceActivity.FileAction.OPEN);
+                    SelectedFilesManager.getInstance().addNewSelection();
+                    ((SourceActivity)getActivity()).addFileAction(SelectedFilesManager.getInstance().getOperationCount(), SourceActivity.FileAction.OPEN);
                     SourceTransferService.startActionOpen(getContext(), file.getData());
                 }
             }
@@ -261,12 +263,12 @@ public abstract class SourceFragment extends Fragment {
 
                 SelectedFilesManager
                         .getInstance()
-                        .getSelectedFiles()
+                        .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
                         .add(file);
 
                 int size = SelectedFilesManager
                         .getInstance()
-                        .getSelectedFiles()
+                        .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
                         .size();
                 getActivity().setTitle(size + " selected");
             }
