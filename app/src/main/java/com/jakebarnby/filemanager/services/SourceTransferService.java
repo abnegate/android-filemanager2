@@ -137,7 +137,6 @@ public class SourceTransferService extends Service {
                         break;
                 }
             }
-            hideNotification();
             stopSelf(startId);
         });
 
@@ -328,6 +327,11 @@ public class SourceTransferService extends Service {
 
         broadcastShowDialog(move ? getString(R.string.moving) : getString(R.string.copying), toCopy.size());
         for (TreeNode<SourceFile> file : toCopy) {
+            postNotification(
+                    getString(R.string.app_name),
+                    move ? String.format(getString(R.string.moving_count), toCopy.indexOf(file), toCopy.size()) :
+                           String.format(getString(R.string.copying_count), toCopy.indexOf(file), toCopy.size()));
+
             String newFilePath = getFile(file.getData());
             SourceFile newFile = putFile(newFilePath, file.getData().getName(), destDir.getData());
 
@@ -339,7 +343,6 @@ public class SourceTransferService extends Service {
                     curDir = curDir.getParent();
                 } else break;
             }
-            postNotification("File Manager", "Copying " + (toCopy.indexOf(file) + 1) + " of " + toCopy.size());
             broadcastUpdate(toCopy.indexOf(file) + 1);
         }
         if (move) {
@@ -357,6 +360,10 @@ public class SourceTransferService extends Service {
 
         if (!isSilent) broadcastShowDialog(getString(R.string.deleting), toDelete.size());
         for (TreeNode<SourceFile> file : toDelete) {
+            postNotification(
+                    getString(R.string.app_name),
+                    String.format(getString(R.string.copying_count), toDelete.indexOf(file), toDelete.size()));
+
             switch (file.getData().getSourceName()) {
                 case Constants.Sources.LOCAL:
                     deleteFileNative(file.getData().getPath());
