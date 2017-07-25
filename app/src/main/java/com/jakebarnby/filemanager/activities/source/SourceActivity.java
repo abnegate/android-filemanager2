@@ -240,7 +240,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 startCutAction();
                 break;
             case R.id.action_paste:
-                startParseAction();
+                startPasteAction();
                 break;
             case R.id.action_properties:
                 showPropertiesDialog();
@@ -310,7 +310,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     /**
      * Call {@link SourceTransferService} to begin copying the currently selected files
      */
-    private void startParseAction() {
+    private void startPasteAction() {
         if (!getActiveFragment().checkConnectionStatus()) return;
         if (mCurrentFileActions != null) {
             getActiveFragment().setMultiSelectEnabled(false);
