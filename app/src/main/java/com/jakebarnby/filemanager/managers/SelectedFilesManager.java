@@ -32,7 +32,7 @@ public class SelectedFilesManager {
     }
 
     public List<TreeNode<SourceFile>> getSelectedFiles(int operationId) {
-        return mSelectedFilesMap.get(operationId);
+        return mSelectedFilesMap.get(operationId-1);
     }
 
     public TreeNode<SourceFile> getActionableDirectory(int operationId) {
@@ -40,7 +40,7 @@ public class SelectedFilesManager {
     }
 
     public void addNewSelection() {
-        mSelectedFilesMap.put(getOperationCount()+1, new ArrayList<>());
+        mSelectedFilesMap.put(getOperationCount(), new ArrayList<>());
     }
 
     public void addActionableDirectory(int operationId, TreeNode<SourceFile> actionableDir) {

@@ -280,7 +280,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         } else {
             Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
         }
-        getActiveFragment().setMultiSelectEnabled(false);
+        for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
+            fragment.setMultiSelectEnabled(false);
+        }
     }
 
     /**
@@ -292,6 +294,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 .getInstance()
                 .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
                 .size() > 0) {
+
             mCurrentFileActions.put(SelectedFilesManager.getInstance().getOperationCount(), FileAction.DELETE);
 
             SelectedFilesManager.getInstance().addActionableDirectory(
@@ -302,6 +305,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             setTitle(getString(R.string.app_name));
             toggleFloatingMenu(false);
             SourceTransferService.startActionDelete(SourceActivity.this);
+            SelectedFilesManager.getInstance().addNewSelection();
         } else {
             Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
         }
@@ -325,6 +329,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             else if (mCurrentFileActions.get(SelectedFilesManager.getInstance().getOperationCount()) == FileAction.CUT) {
                 SourceTransferService.startActionCopy(SourceActivity.this, true);
             }
+            SelectedFilesManager.getInstance().addNewSelection();
         }
     }
 
@@ -401,7 +406,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      */
     private void showCreateFolderDialog() {
         if (!getActiveFragment().checkConnectionStatus()) return;
-        SelectedFilesManager.getInstance().addNewSelection();
         mCurrentFileActions.put(SelectedFilesManager.getInstance().getOperationCount(), FileAction.NEW_FOLDER);
         SelectedFilesManager.getInstance().addActionableDirectory(SelectedFilesManager.getInstance().getOperationCount(), getActiveDirectory());
         Bundle bundle = new Bundle();

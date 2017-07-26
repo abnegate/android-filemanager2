@@ -60,6 +60,7 @@ public class RenameDialog extends DialogFragment{
                 }
             }
             SourceTransferService.startActionRename(getContext(), newName);
+            SelectedFilesManager.getInstance().addNewSelection();
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         return builder.create();

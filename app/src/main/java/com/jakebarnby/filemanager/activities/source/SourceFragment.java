@@ -124,7 +124,6 @@ public abstract class SourceFragment extends Fragment {
     public void setMultiSelectEnabled(boolean enabled) {
         if (enabled) {
             ((SourceActivity)getActivity()).toggleFloatingMenu(true);
-            SelectedFilesManager.getInstance().addNewSelection();
         }
         this.mMultiSelectEnabled = enabled;
         if (mRecycler.getAdapter() != null) {
@@ -245,7 +244,7 @@ public abstract class SourceFragment extends Fragment {
                     mRecycler.getAdapter().notifyDataSetChanged();
                 } else {
                     SelectedFilesManager.getInstance().addNewSelection();
-                    ((SourceActivity)getActivity()).addFileAction(SelectedFilesManager.getInstance().getOperationCount(), SourceActivity.FileAction.OPEN);
+                    ((SourceActivity)getActivity()).addFileAction(SelectedFilesManager.getInstance().getOperationCount()-1, SourceActivity.FileAction.OPEN);
                     SourceTransferService.startActionOpen(getContext(), file.getData());
                 }
             }
@@ -260,6 +259,10 @@ public abstract class SourceFragment extends Fragment {
         return file -> {
             if (!mMultiSelectEnabled) {
                 setMultiSelectEnabled(true);
+
+                if (SelectedFilesManager.getInstance().getOperationCount() == 0) {
+                    SelectedFilesManager.getInstance().addNewSelection();
+                }
 
                 SelectedFilesManager
                         .getInstance()

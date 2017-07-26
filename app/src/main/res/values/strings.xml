@@ -48,4 +48,5 @@
     <string name="open_now">Would you like to open %s now?</string>
     <string name="moving_count">Moving %d of %d</string>
     <string name="copying_count">Copying %d of %d</string>
+    <string name="deleting_count">Deleting %d of %d</string>
 </resources>

@@ -107,7 +107,7 @@ public class SourceTransferService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Toast.makeText(this, "service starting + startId: " + startId, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "service starting + startId: " + String.valueOf(SelectedFilesManager.getInstance().getOperationCount()-1), Toast.LENGTH_SHORT).show();
         mThreadPool.execute(() -> {
             if (intent != null) {
                 final SourceFile toOpen = (SourceFile) intent.getSerializableExtra(EXTRA_TO_OPEN);
@@ -115,22 +115,22 @@ public class SourceTransferService extends Service {
                 final String action = intent.getAction();
                 switch (action) {
                     case ACTION_CREATE_FOLDER:
-                        createFolder(SelectedFilesManager.getInstance().getOperationCount(), newName);
+                        createFolder(SelectedFilesManager.getInstance().getOperationCount()-1, newName);
                         break;
                     case ACTION_RENAME:
-                        rename(SelectedFilesManager.getInstance().getOperationCount(), newName);
+                        rename(SelectedFilesManager.getInstance().getOperationCount()-1, newName);
                         break;
                     case ACTION_COPY:
-                        copy(SelectedFilesManager.getInstance().getOperationCount(), false);
+                        copy(SelectedFilesManager.getInstance().getOperationCount()-1, false);
                         break;
                     case ACTION_MOVE:
-                        copy(SelectedFilesManager.getInstance().getOperationCount(), true);
+                        copy(SelectedFilesManager.getInstance().getOperationCount()-1, true);
                         break;
                     case ACTION_DELETE:
-                        delete(SelectedFilesManager.getInstance().getOperationCount(), false);
+                        delete(SelectedFilesManager.getInstance().getOperationCount()-1, false);
                         break;
                     case ACTION_OPEN:
-                        open(SelectedFilesManager.getInstance().getOperationCount(), toOpen);
+                        open(SelectedFilesManager.getInstance().getOperationCount()-1, toOpen);
                         break;
                     case ACTION_CLEAR_CACHE:
                         clearLocalCache();
@@ -328,9 +328,10 @@ public class SourceTransferService extends Service {
         broadcastShowDialog(move ? getString(R.string.moving) : getString(R.string.copying), toCopy.size());
         for (TreeNode<SourceFile> file : toCopy) {
             postNotification(
+                    operationId,
                     getString(R.string.app_name),
-                    move ? String.format(getString(R.string.moving_count), toCopy.indexOf(file), toCopy.size()) :
-                           String.format(getString(R.string.copying_count), toCopy.indexOf(file), toCopy.size()));
+                    move ? String.format(getString(R.string.moving_count), toCopy.indexOf(file)+1, toCopy.size()) :
+                           String.format(getString(R.string.copying_count), toCopy.indexOf(file)+1, toCopy.size()));
 
             String newFilePath = getFile(file.getData());
             SourceFile newFile = putFile(newFilePath, file.getData().getName(), destDir.getData());
@@ -361,8 +362,9 @@ public class SourceTransferService extends Service {
         if (!isSilent) broadcastShowDialog(getString(R.string.deleting), toDelete.size());
         for (TreeNode<SourceFile> file : toDelete) {
             postNotification(
+                    operationId,
                     getString(R.string.app_name),
-                    String.format(getString(R.string.copying_count), toDelete.indexOf(file), toDelete.size()));
+                    String.format(getString(R.string.deleting_count), toDelete.indexOf(file)+1, toDelete.size()));
 
             switch (file.getData().getSourceName()) {
                 case Constants.Sources.LOCAL:
@@ -493,8 +495,12 @@ public class SourceTransferService extends Service {
             intent.putExtra(EXTRA_OPERATION_ID, operationId);
         }
 
-        SelectedFilesManager.getInstance().getSelectedFiles(operationId).clear();
+        if (SelectedFilesManager.getInstance().getSelectedFiles(operationId) != null) {
+            SelectedFilesManager.getInstance().getSelectedFiles(operationId).clear();
+        }
+
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        hideNotification(operationId);
     }
 
     /**
@@ -528,7 +534,7 @@ public class SourceTransferService extends Service {
      * @param title   Title for the notification
      * @param content Content body of the notification
      */
-    private void postNotification(String title, String content) {
+    private void postNotification(int operationId, String title, String content) {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
@@ -536,6 +542,8 @@ public class SourceTransferService extends Service {
                         .setContentText(content);
 
         Intent resultIntent = new Intent(this, SourceActivity.class);
+        //TODO: Get this in activity and open the associated directory
+        resultIntent.putExtra(EXTRA_OPERATION_ID, operationId);
 
         PendingIntent resultPendingIntent =
                 PendingIntent.getActivity(
@@ -546,17 +554,19 @@ public class SourceTransferService extends Service {
 
         mBuilder.setContentIntent(resultPendingIntent);
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(Constants.NOTIFICATION_ID, mBuilder.build());
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            notificationManager.notify(operationId, mBuilder.build());
+        }
     }
 
     /**
      * Removes the notification from the status bar
      */
-    private void hideNotification() {
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancel(Constants.NOTIFICATION_ID);
+    private void hideNotification(int operationId) {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            notificationManager.cancel(operationId);
+        }
     }
 }
