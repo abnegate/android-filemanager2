@@ -140,6 +140,10 @@ public abstract class SourceFragment extends Fragment {
         this.mCurrentDirectory = mCurrentDirectory;
     }
 
+    public void refreshRecycler() {
+        mRecycler.getAdapter().notifyDataSetChanged();
+    }
+
     /**
      * Checks if this source has a valid access token
      * @return  Whether there is a valid access token for this source

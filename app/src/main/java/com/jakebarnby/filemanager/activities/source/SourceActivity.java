@@ -392,6 +392,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             }
             return result;
         });
+
+        getActiveFragment().refreshRecycler();
     }
 
     /**
