@@ -5,6 +5,8 @@ import com.microsoft.graph.extensions.DriveItem;
 import com.microsoft.graph.extensions.Folder;
 import com.microsoft.graph.extensions.IGraphServiceClient;
 import com.microsoft.graph.extensions.ItemReference;
+import com.microsoft.graph.extensions.Quota;
+import com.microsoft.graph.http.GraphServiceException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -129,5 +131,21 @@ public class OneDriveFactory {
                 .getItems(itemId)
                 .buildRequest()
                 .patch(item);
+    }
+
+    public long getFreeSpace() {
+        try {
+            Quota quota = mGraphClient
+                    .getMe()
+                    .getDrive()
+                    .buildRequest()
+                    .select("quota")
+                    .get()
+                    .quota;
+            return quota.remaining;
+        } catch (GraphServiceException e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 }

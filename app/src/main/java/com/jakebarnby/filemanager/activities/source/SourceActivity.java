@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.design.internal.NavigationMenu;
@@ -42,6 +43,9 @@ import com.jakebarnby.filemanager.activities.source.dialogs.CreateFolderDialog;
 import com.jakebarnby.filemanager.activities.source.dialogs.PropertiesDialog;
 import com.jakebarnby.filemanager.activities.source.dialogs.RenameDialog;
 import com.jakebarnby.filemanager.activities.source.dialogs.ViewAsDialog;
+import com.jakebarnby.filemanager.managers.DropboxFactory;
+import com.jakebarnby.filemanager.managers.GoogleDriveFactory;
+import com.jakebarnby.filemanager.managers.OneDriveFactory;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.services.SourceTransferService;
@@ -50,6 +54,7 @@ import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import io.fabric.sdk.android.Fabric;
@@ -245,7 +250,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 startCutAction();
                 break;
             case R.id.action_paste:
-                startPasteAction();
+                doPasteChecks();
                 break;
             case R.id.action_properties:
                 showPropertiesDialog();
@@ -319,7 +324,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     /**
      * Call {@link SourceTransferService} to begin copying the currently selected files
      */
-    private void startPasteAction() {
+    private void doPasteChecks() {
         if (!getActiveFragment().checkConnectionStatus()) return;
 
         if (!getActiveFragment().isLoggedIn()) {
@@ -329,11 +334,17 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             Snackbar.make(mViewPager, R.string.source_not_loaded, Snackbar.LENGTH_LONG).show();
             return;
         }
+        
+        startFreeSpaceCheck(success -> {
+            if (success) {
+                startPasteAction();
+            } else {
+                showNotEnoughSpaceDialog(getActiveFragment().getSourceName());
+            }
+        });
+    }
 
-        if (!doFreeSpaceCheck()) {
-            return;
-        }
-
+    private void startPasteAction() {
         if (mCurrentFileActions != null) {
             getActiveFragment().setMultiSelectEnabled(false);
             setTitle(getString(R.string.app_name));
@@ -354,20 +365,14 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         }
     }
 
-    boolean doFreeSpaceCheck() {
+    void startFreeSpaceCheck(Callback callback) {
         long copySize = 0;
         for(TreeNode<SourceFile> file: SelectedFilesManager.getInstance().getSelectedFiles(
-                SelectedFilesManager.getInstance().getOperationCount()
-        )) {
+                SelectedFilesManager.getInstance().getOperationCount())) {
             copySize+=file.getData().getSize();
         }
-
-        long freeSpace = Utils.getFreeSpace(Environment.getExternalStorageDirectory());
-        if (freeSpace < copySize) {
-            showNotEnoughSpaceDialog();
-            return false;
-        }
-        return true;
+        String curSourceName = getActiveFragment().getSourceName();
+        new SpaceCheckerTask(this, curSourceName, copySize, callback).execute();
     }
 
     /**
@@ -443,7 +448,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     /**
      * Show a dialog informing the user the device does not have enough free space
      */
-    private void showNotEnoughSpaceDialog() {
+    private void showNotEnoughSpaceDialog(String sourceName) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getString(R.string.error));
         builder.setMessage(getString(R.string.err_no_free_space));
@@ -683,6 +688,47 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 getActiveFragment().popBreadcrumb();
         } else {
             super.onBackPressed();
+        }
+    }
+
+    interface Callback {
+        void complete(boolean success);
+    }
+
+    public static class SpaceCheckerTask extends AsyncTask<Void, Void, Boolean> {
+
+        private WeakReference<Context>  context;
+        private String                  sourceName;
+        private long                    copySize;
+        private Callback                callback;
+
+        public SpaceCheckerTask(Context context, String sourceName, long copySize, Callback callback) {
+            this.context = new WeakReference<>(context);
+            this.sourceName = sourceName;
+            this.copySize = copySize;
+            this.callback = callback;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            switch (sourceName) {
+                case Constants.Sources.LOCAL:
+                    return (Utils.getFreeSpace(Environment.getExternalStorageDirectory()) > copySize);
+                case Constants.Sources.DROPBOX:
+                    return (DropboxFactory.getInstance().getFreeSpace() > copySize);
+                case Constants.Sources.GOOGLE_DRIVE:
+                    return (GoogleDriveFactory.getInstance().getFreeSpace() > copySize);
+                case Constants.Sources.ONEDRIVE:
+                    return (OneDriveFactory.getInstance().getFreeSpace() > copySize);
+            }
+
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            super.onPostExecute(result);
+            callback.complete(result);
         }
     }
 }
