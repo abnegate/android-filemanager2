@@ -50,7 +50,8 @@
             </intent-filter>
         </activity>
 
-        <service android:name="com.jakebarnby.filemanager.services.SourceTransferService"/>
+        <service
+            android:name="com.jakebarnby.filemanager.services.SourceTransferService"/>
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -60,8 +61,14 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
-
         </provider>
+
+        <service
+            android:name=".services.FirebaseNotificationService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

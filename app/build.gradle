@@ -69,8 +69,12 @@ dependencies {
     implementation 'com.dropbox.core:dropbox-core-sdk:3.0.3'
     implementation 'com.squareup.okhttp3:okhttp:3.8.0'
 
+    //Firebase
+    implementation 'com.google.android.gms:play-services-auth:11.0.4'
+    implementation 'com.google.firebase:firebase-core:11.0.4'
+    implementation 'com.google.firebase:firebase-crash:11.0.4'
+    implementation 'com.google.firebase:firebase-messaging:11.0.4'
     //Google Drive
-    implementation 'com.google.android.gms:play-services-auth:11.0.2'
     implementation "com.google.api-client:google-api-client-android:${project.googleApiVersion}"
     implementation "com.google.apis:google-api-services-drive:v3-rev75-${project.googleApiVersion}"
 
