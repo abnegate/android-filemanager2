@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -52,6 +53,7 @@ public abstract class SourceFragment extends Fragment {
     protected FileSystemGridAdapter mFileSystemGridAdapter;
     protected ProgressBar           mProgressBar;
     protected Button                mConnectButton;
+    protected ImageView             mSourceLogo;
     protected View                  mDivider;
 
     private LinearLayout            mBreadcrumbBar;
@@ -76,8 +78,11 @@ public abstract class SourceFragment extends Fragment {
         mProgressBar = rootView.findViewById(R.id.animation_view);
         mDivider = rootView.findViewById(R.id.divider);
         mConnectButton = rootView.findViewById(R.id.btn_connect);
+        mSourceLogo = rootView.findViewById(R.id.image_source_logo);
+
         if (hasToken(getSourceName())) {
             mConnectButton.setVisibility(View.GONE);
+            mSourceLogo.setVisibility(View.GONE);
         }
         mConnectButton.setOnClickListener(v -> {
             if (Utils.isConnectionReady(SourceFragment.this.getContext())) {

@@ -5,7 +5,9 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
@@ -16,14 +18,14 @@ import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
+import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.SourceFragment;
+import com.jakebarnby.filemanager.glide.GlideApp;
 import com.jakebarnby.filemanager.managers.DropboxFactory;
 import com.jakebarnby.filemanager.models.files.DropboxFile;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
-
-import java.util.Comparator;
 
 /**
  * Created by Jake on 5/31/2017.
@@ -45,6 +47,19 @@ public class DropboxFragment extends SourceFragment {
         args.putString("TITLE", sourceName);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = super.onCreateView(inflater, container, savedInstanceState);
+
+        GlideApp
+                .with(mSourceLogo)
+                .load(R.drawable.ic_dropbox)
+                .centerCrop()
+                .into(mSourceLogo);
+
+        return view;
     }
 
     @Override
@@ -203,6 +218,7 @@ public class DropboxFragment extends SourceFragment {
 
             setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
+            mSourceLogo.setVisibility(View.GONE);
         }
     }
 }

@@ -10,11 +10,14 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.SourceActivity;
 import com.jakebarnby.filemanager.activities.source.SourceFragment;
+import com.jakebarnby.filemanager.glide.GlideApp;
 import com.jakebarnby.filemanager.models.files.LocalFile;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
@@ -41,6 +44,19 @@ public class LocalFragment extends SourceFragment {
         args.putString("TITLE", sourceName);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = super.onCreateView(inflater, container, savedInstanceState);
+
+        GlideApp
+                .with(mSourceLogo)
+                .load(R.mipmap.ic_launcher)
+                .centerCrop()
+                .into(mSourceLogo);
+
+        return view;
     }
 
     @Override
@@ -129,6 +145,7 @@ public class LocalFragment extends SourceFragment {
             ((SourceActivity)getActivity()).setActiveDirectory(fileTree);
             setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
+            mSourceLogo.setVisibility(View.GONE);
         }
     }
 

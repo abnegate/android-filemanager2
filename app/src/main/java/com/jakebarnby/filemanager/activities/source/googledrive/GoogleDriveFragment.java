@@ -13,7 +13,9 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
@@ -29,6 +31,7 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.SourceFragment;
+import com.jakebarnby.filemanager.glide.GlideApp;
 import com.jakebarnby.filemanager.managers.GoogleDriveFactory;
 import com.jakebarnby.filemanager.models.files.GoogleDriveFile;
 import com.jakebarnby.filemanager.models.files.SourceFile;
@@ -66,6 +69,19 @@ public class GoogleDriveFragment extends SourceFragment {
         args.putString("TITLE", sourceName);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = super.onCreateView(inflater, container, savedInstanceState);
+
+        GlideApp
+                .with(mSourceLogo)
+                .load(R.drawable.ic_googledrive)
+                .centerCrop()
+                .into(mSourceLogo);
+
+        return view;
     }
 
     @Override
@@ -270,6 +286,7 @@ public class GoogleDriveFragment extends SourceFragment {
             initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
             setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
+            mSourceLogo.setVisibility(View.GONE);
         }
 
         @Override
