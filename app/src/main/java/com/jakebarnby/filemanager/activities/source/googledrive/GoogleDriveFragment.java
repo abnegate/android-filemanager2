@@ -162,6 +162,7 @@ public class GoogleDriveFragment extends SourceFragment {
                         prefs.edit().putString(Constants.SharedPrefs.GOOGLE_ACCOUNT_NAME, accountName).apply();
                         mCredential.setSelectedAccountName(accountName);
                         getResultsFromApi();
+                        setLoggedIn(true);
                     }
                 }
                 break;
