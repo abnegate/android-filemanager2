@@ -42,11 +42,11 @@ import java.util.List;
 public class OneDriveFragment extends SourceFragment {
 
     public static final String      TAG = "ONEDRIVE";
-    final static String             CLIENT_ID = "019d333e-3e7f-4c04-a214-f12602dd5b10";
+    private final static String     CLIENT_ID = "019d333e-3e7f-4c04-a214-f12602dd5b10";
     private static final String[]   SCOPES = {"https://graph.microsoft.com/Files.ReadWrite"};
 
     private PublicClientApplication mClient;
-    private AuthenticationResult mAuthResult;
+    private AuthenticationResult    mAuthResult;
 
     /**
      * Return a new instance of this Fragment
