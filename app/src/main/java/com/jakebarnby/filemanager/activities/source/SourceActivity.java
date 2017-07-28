@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.internal.NavigationMenu;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -329,6 +330,10 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             return;
         }
 
+        if (!doFreeSpaceCheck()) {
+            return;
+        }
+
         if (mCurrentFileActions != null) {
             getActiveFragment().setMultiSelectEnabled(false);
             setTitle(getString(R.string.app_name));
@@ -347,6 +352,22 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             }
             SelectedFilesManager.getInstance().addNewSelection();
         }
+    }
+
+    boolean doFreeSpaceCheck() {
+        long copySize = 0;
+        for(TreeNode<SourceFile> file: SelectedFilesManager.getInstance().getSelectedFiles(
+                SelectedFilesManager.getInstance().getOperationCount()
+        )) {
+            copySize+=file.getData().getSize();
+        }
+
+        long freeSpace = Utils.getFreeSpace(Environment.getExternalStorageDirectory());
+        if (freeSpace < copySize) {
+            showNotEnoughSpaceDialog();
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -417,6 +438,21 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      */
     private void showViewAsDialog() {
         new ViewAsDialog().show(getSupportFragmentManager(), "ViewAs");
+    }
+
+    /**
+     * Show a dialog informing the user the device does not have enough free space
+     */
+    private void showNotEnoughSpaceDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.error));
+        builder.setMessage(getString(R.string.err_no_free_space));
+
+        builder.setPositiveButton(getString(R.string.ok), (dialog, which) ->
+                dialog.dismiss()
+        );
+
+        builder.create().show();
     }
 
     /**

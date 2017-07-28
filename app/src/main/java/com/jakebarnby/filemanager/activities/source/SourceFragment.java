@@ -251,6 +251,9 @@ public abstract class SourceFragment extends Fragment {
                     pushBreadcrumb(file);
                     mRecycler.getAdapter().notifyDataSetChanged();
                 } else {
+                    if (!((SourceActivity) getActivity()).doFreeSpaceCheck()) {
+                        return;
+                    }
                     SelectedFilesManager.getInstance().addNewSelection();
                     ((SourceActivity)getActivity()).addFileAction(SelectedFilesManager.getInstance().getOperationCount()-1, SourceActivity.FileAction.OPEN);
                     SourceTransferService.startActionOpen(getContext(), file.getData());

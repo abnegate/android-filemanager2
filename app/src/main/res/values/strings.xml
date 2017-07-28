@@ -51,4 +51,5 @@
     <string name="deleting_count">Deleting %d of %d</string>
     <string name="source_not_logged_in">Not logged in yet.</string>
     <string name="source_not_loaded">Not loaded yet.</string>
+    <string name="err_no_free_space">Not enough free space on device.</string>
 </resources>
