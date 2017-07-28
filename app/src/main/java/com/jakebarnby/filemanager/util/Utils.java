@@ -10,6 +10,8 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.os.Environment;
+import android.os.StatFs;
 import android.support.design.widget.Snackbar;
 import android.view.Display;
 import android.view.View;
@@ -107,15 +109,6 @@ public class Utils {
 
     /**
      *
-     * @param dp
-     * @return
-     */
-    public static int dpToPx(int dp) {
-        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
-    }
-
-    /**
-     *
      * @param context
      * @return
      */
@@ -159,5 +152,16 @@ public class Utils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    /**
+     * Get the free space available in the given file
+     * @param dir   The dir to check free space of
+     * @return      Amount of bytes free in file
+     */
+    public static long getFreeSpace(File dir) {
+        return new StatFs(dir.getAbsolutePath())
+                .getAvailableBytes();
     }
 }
