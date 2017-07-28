@@ -140,6 +140,10 @@ public abstract class SourceFragment extends Fragment {
         this.mCurrentDirectory = mCurrentDirectory;
     }
 
+    public void refreshRecycler() {
+        mRecycler.getAdapter().notifyDataSetChanged();
+    }
+
     /**
      * Checks if this source has a valid access token
      * @return  Whether there is a valid access token for this source
@@ -220,18 +224,18 @@ public abstract class SourceFragment extends Fragment {
                 if (isChecked) {
                     SelectedFilesManager
                             .getInstance()
-                            .getSelectedFiles()
+                            .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
                             .add(file);
                 } else {
                     SelectedFilesManager
                             .getInstance()
-                            .getSelectedFiles()
+                            .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
                             .remove(file);
                 }
 
                 int size = SelectedFilesManager
                         .getInstance()
-                        .getSelectedFiles()
+                        .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
                         .size();
                 getActivity().setTitle(size + " selected");
                 //TODO: Set the Fragment tab title with selected count, e.g. LOCAL (3) DROPBOX (1)
@@ -243,7 +247,8 @@ public abstract class SourceFragment extends Fragment {
                     pushBreadcrumb(file);
                     mRecycler.getAdapter().notifyDataSetChanged();
                 } else {
-                    ((SourceActivity)getActivity()).setCurrentFileAction(SourceActivity.FileAction.OPEN);
+                    SelectedFilesManager.getInstance().addNewSelection();
+                    ((SourceActivity)getActivity()).addFileAction(SelectedFilesManager.getInstance().getOperationCount()-1, SourceActivity.FileAction.OPEN);
                     SourceTransferService.startActionOpen(getContext(), file.getData());
                 }
             }
@@ -259,14 +264,18 @@ public abstract class SourceFragment extends Fragment {
             if (!mMultiSelectEnabled) {
                 setMultiSelectEnabled(true);
 
+                if (SelectedFilesManager.getInstance().getOperationCount() == 0) {
+                    SelectedFilesManager.getInstance().addNewSelection();
+                }
+
                 SelectedFilesManager
                         .getInstance()
-                        .getSelectedFiles()
+                        .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
                         .add(file);
 
                 int size = SelectedFilesManager
                         .getInstance()
-                        .getSelectedFiles()
+                        .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
                         .size();
                 getActivity().setTitle(size + " selected");
             }

@@ -36,7 +36,7 @@ public class RenameDialog extends DialogFragment{
         EditText input = view.findViewById(R.id.text_rename);
         String name = SelectedFilesManager
                 .getInstance()
-                .getSelectedFiles()
+                .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
                 .get(0)
                 .getData()
                 .getName();
@@ -60,6 +60,7 @@ public class RenameDialog extends DialogFragment{
                 }
             }
             SourceTransferService.startActionRename(getContext(), newName);
+            SelectedFilesManager.getInstance().addNewSelection();
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         return builder.create();

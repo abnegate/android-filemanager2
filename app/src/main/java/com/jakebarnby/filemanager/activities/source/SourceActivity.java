@@ -20,6 +20,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -59,6 +60,7 @@ import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_U
 import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_CHILD_FILE;
 import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_CURRENT_COUNT;
 import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_DIALOG_TITLE;
+import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_OPERATION_ID;
 import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_TOTAL_COUNT;
 
 public class SourceActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
@@ -66,7 +68,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private SourcesPagerAdapter         mSourcesPagerAdapter;
     private ViewPager                   mViewPager;
     private TreeNode<SourceFile>        mActiveDirectory;
-    private FileAction                  mCurrentFileAction;
+    private SparseArray<FileAction>     mCurrentFileActions;
     private BroadcastReceiver           mBroadcastReciever;
     private ProgressDialog              mDialog;
     private FabSpeedDial                mFabMenu;
@@ -93,8 +95,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         return mSourcesPagerAdapter.getFragments().get(mViewPager.getCurrentItem());
     }
 
-    public void setCurrentFileAction(FileAction mCurrentFileAction) {
-        this.mCurrentFileAction = mCurrentFileAction;
+    public void addFileAction(int operationId, FileAction fileAction) {
+        this.mCurrentFileActions.put(operationId, fileAction);
     }
 
     @Override
@@ -119,12 +121,16 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             }
         };
 
+        mCurrentFileActions = new SparseArray<>();
+
         mFabMenu = findViewById(R.id.fab_speed_dial);
         mFabMenu.setMenuListener(new SimpleMenuListenerAdapter() {
             @SuppressLint("RestrictedApi")
             @Override
             public boolean onPrepareMenu(NavigationMenu navigationMenu) {
-                if (SelectedFilesManager.getInstance().getSelectedFiles().size() == 0) {
+                if (SelectedFilesManager
+                        .getInstance()
+                        .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount()).size() == 0) {
                     Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
                     return false;
                 }
@@ -132,10 +138,14 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                         .radius(17)
                         .sampling(1)
                         .onto(mBlurWrapper);
-                if (mCurrentFileAction == null) {
+
+                if (mCurrentFileActions.get(SelectedFilesManager.getInstance().getOperationCount()) == null) {
                     navigationMenu.findItem(R.id.action_paste).setVisible(false);
                 }
-                if  (SelectedFilesManager.getInstance().getSelectedFiles().size() > 1) {
+                if  (SelectedFilesManager
+                        .getInstance()
+                        .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                        .size() > 1) {
                     navigationMenu.findItem(R.id.action_rename).setVisible(false);
                 }
                 return super.onPrepareMenu(navigationMenu);
@@ -230,7 +240,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 startCutAction();
                 break;
             case R.id.action_paste:
-                startParseAction();
+                startPasteAction();
                 break;
             case R.id.action_properties:
                 showPropertiesDialog();
@@ -245,8 +255,11 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      *
      */
     private void startCutAction() {
-        if (SelectedFilesManager.getInstance().getSelectedFiles().size() > 0) {
-            mCurrentFileAction = FileAction.CUT;
+        if (SelectedFilesManager
+                .getInstance()
+                .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                .size() > 0) {
+            mCurrentFileActions.put(SelectedFilesManager.getInstance().getOperationCount(), FileAction.CUT);
             Snackbar.make(mViewPager, getString(R.string.cut), Snackbar.LENGTH_SHORT).show();
         } else {
             Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
@@ -258,13 +271,18 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      *
      */
     private void startCopyAction() {
-        if (SelectedFilesManager.getInstance().getSelectedFiles().size() > 0) {
-            mCurrentFileAction = FileAction.COPY;
+        if (SelectedFilesManager
+                .getInstance()
+                .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                .size() > 0) {
+            mCurrentFileActions.put(SelectedFilesManager.getInstance().getOperationCount(), FileAction.COPY);
             Snackbar.make(mViewPager, getString(R.string.copied), Snackbar.LENGTH_SHORT).show();
         } else {
             Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
         }
-        getActiveFragment().setMultiSelectEnabled(false);
+        for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
+            fragment.setMultiSelectEnabled(false);
+        }
     }
 
     /**
@@ -272,10 +290,22 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      */
     private void startDeleteAction() {
         if (!getActiveFragment().checkConnectionStatus()) return;
-        if (SelectedFilesManager.getInstance().getSelectedFiles().size() > 0) {
-            mCurrentFileAction = FileAction.DELETE;
-            SelectedFilesManager.getInstance().setActiveDirectory(getActiveDirectory());
+        if (SelectedFilesManager
+                .getInstance()
+                .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                .size() > 0) {
+
+            mCurrentFileActions.put(SelectedFilesManager.getInstance().getOperationCount(), FileAction.DELETE);
+
+            SelectedFilesManager.getInstance().addActionableDirectory(
+                    SelectedFilesManager.getInstance().getOperationCount(), getActiveDirectory()
+            );
+
+            getActiveFragment().setMultiSelectEnabled(false);
+            setTitle(getString(R.string.app_name));
+            toggleFloatingMenu(false);
             SourceTransferService.startActionDelete(SourceActivity.this);
+            SelectedFilesManager.getInstance().addNewSelection();
         } else {
             Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
         }
@@ -284,15 +314,22 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     /**
      * Call {@link SourceTransferService} to begin copying the currently selected files
      */
-    private void startParseAction() {
+    private void startPasteAction() {
         if (!getActiveFragment().checkConnectionStatus()) return;
-        if (mCurrentFileAction != null) {
-            SelectedFilesManager.getInstance().setActiveDirectory(getActiveDirectory());
-            if (mCurrentFileAction == FileAction.COPY)
+        if (mCurrentFileActions != null) {
+            getActiveFragment().setMultiSelectEnabled(false);
+            setTitle(getString(R.string.app_name));
+            toggleFloatingMenu(false);
+
+            SelectedFilesManager.getInstance().addActionableDirectory(
+                    SelectedFilesManager.getInstance().getOperationCount(), getActiveDirectory());
+
+            if (mCurrentFileActions.get(SelectedFilesManager.getInstance().getOperationCount()) == FileAction.COPY)
                 SourceTransferService.startActionCopy(SourceActivity.this, false);
-            else if (mCurrentFileAction == FileAction.CUT) {
+            else if (mCurrentFileActions.get(SelectedFilesManager.getInstance().getOperationCount()) == FileAction.CUT) {
                 SourceTransferService.startActionCopy(SourceActivity.this, true);
             }
+            SelectedFilesManager.getInstance().addNewSelection();
         }
     }
 
@@ -304,12 +341,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void handleIntent(Intent intent) {
         String action = intent.getAction();
         switch (action) {
-            case ACTION_ADD_CHILD:
-                addChildToActiveDirectory(intent);
-                break;
-            case ACTION_REMOVE_CHILD:
-                removeChildFromActiveDirectory(intent);
-                break;
             case ACTION_COMPLETE:
                 completeServiceAction(intent);
                 break;
@@ -325,15 +356,16 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * Called when {@link SourceTransferService} broadcasts that it has completed a background action
      */
     private void completeServiceAction(Intent intent) {
+        int operationId = intent.getIntExtra(EXTRA_OPERATION_ID, 0);
         String path = intent.getStringExtra(Constants.FILE_PATH_KEY);
 
-        switch(mCurrentFileAction) {
+        switch(mCurrentFileActions.get(operationId)) {
             case CUT:
             case COPY:
             case DELETE:
             case RENAME:
             case NEW_FOLDER:
-                completeTreeModification();
+                completeTreeModification(operationId);
                 break;
             case OPEN:
                 startOpenFile(path);
@@ -345,28 +377,23 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
         }
-
-        mCurrentFileAction = null;
     }
 
     /**
      * Complete a service action that modified the file tree
+     * @param operationId
      */
-    private void completeTreeModification() {
-        for (SourceFragment fragment : mSourcesPagerAdapter.getFragments()) {
-            fragment.setMultiSelectEnabled(false);
-        }
-
-        setTitle(getString(R.string.app_name));
-        toggleFloatingMenu(false);
-        SelectedFilesManager.getInstance().getSelectedFiles().clear();
-        TreeNode.sortTree(SelectedFilesManager.getInstance().getActiveDirectory(), (node1, node2) -> {
+    private void completeTreeModification(int operationId) {
+        SelectedFilesManager.getInstance().getSelectedFiles(operationId).clear();
+        TreeNode.sortTree(SelectedFilesManager.getInstance().getActionableDirectory(operationId), (node1, node2) -> {
             int result = Boolean.valueOf(!node1.getData().isDirectory()).compareTo(!node2.getData().isDirectory());
             if (result == 0) {
                 result = node1.getData().getName().toLowerCase().compareTo(node2.getData().getName().toLowerCase());
             }
             return result;
         });
+
+        getActiveFragment().refreshRecycler();
     }
 
     /**
@@ -381,9 +408,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      */
     private void showCreateFolderDialog() {
         if (!getActiveFragment().checkConnectionStatus()) return;
-
-        mCurrentFileAction = FileAction.NEW_FOLDER;
-        SelectedFilesManager.getInstance().setActiveDirectory(getActiveDirectory());
+        mCurrentFileActions.put(SelectedFilesManager.getInstance().getOperationCount(), FileAction.NEW_FOLDER);
+        SelectedFilesManager.getInstance().addActionableDirectory(SelectedFilesManager.getInstance().getOperationCount(), getActiveDirectory());
         Bundle bundle = new Bundle();
         bundle.putString(Constants.DIALOG_TITLE_KEY, getString(R.string.create_folder));
         CreateFolderDialog dialog = new CreateFolderDialog();
@@ -397,9 +423,16 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void showRenameDialog() {
         if (!getActiveFragment().checkConnectionStatus()) return;
 
-        mCurrentFileAction = FileAction.RENAME;
-        SelectedFilesManager.getInstance().setActiveDirectory(getActiveDirectory());
-        int size = SelectedFilesManager.getInstance().getSelectedFiles().size();
+        getActiveFragment().setMultiSelectEnabled(false);
+        setTitle(getString(R.string.app_name));
+        toggleFloatingMenu(false);
+
+        mCurrentFileActions.put(SelectedFilesManager.getInstance().getOperationCount(), FileAction.RENAME);
+        SelectedFilesManager.getInstance().addActionableDirectory(SelectedFilesManager.getInstance().getOperationCount(), getActiveDirectory());
+        int size = SelectedFilesManager
+                .getInstance()
+                .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                .size();
         if (size == 0) {
             Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
             return;
@@ -419,32 +452,14 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * Shows a dialog displaying properties about the selected files and/or folders
      */
     private void showPropertiesDialog() {
-        int size = SelectedFilesManager.getInstance().getSelectedFiles().size();
+        int size = SelectedFilesManager.getInstance().getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount()).size();
         if (size == 0) {
             Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
             setTitle(getString(R.string.app_name));
-            SelectedFilesManager.getInstance().getSelectedFiles().clear();
+            SelectedFilesManager.getInstance().getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount()).clear();
         } else {
             new PropertiesDialog().show(getSupportFragmentManager(), "Properties");
         }
-    }
-
-    /**
-     * Add a child stored in the given intent to the active directory
-     * @param intent
-     */
-    private void addChildToActiveDirectory(Intent intent) {
-        TreeNode<SourceFile> file = (TreeNode<SourceFile>) intent.getSerializableExtra(EXTRA_CHILD_FILE);
-        getActiveDirectory().addChild(file);
-    }
-
-    /**
-     * Remove a child stored in the given intent in the active directory
-     * @param intent
-     */
-    private void removeChildFromActiveDirectory(Intent intent) {
-        TreeNode<SourceFile> file = (TreeNode<SourceFile>) intent.getSerializableExtra(EXTRA_CHILD_FILE);
-        getActiveDirectory().removeChild(file);
     }
 
     /**
@@ -607,7 +622,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             getActiveFragment().setMultiSelectEnabled(false);
             toggleFloatingMenu(false);
             setTitle(R.string.app_name);
-            SelectedFilesManager.getInstance().getSelectedFiles().clear();
+            SelectedFilesManager.getInstance().getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount()).clear();
             if (getActiveDirectory().getParent() != null) {
                 return;
             }

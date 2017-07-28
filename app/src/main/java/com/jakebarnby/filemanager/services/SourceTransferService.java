@@ -1,13 +1,20 @@
 package com.jakebarnby.filemanager.services;
 
-import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.widget.Toast;
 
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.jakebarnby.filemanager.R;
@@ -26,14 +33,15 @@ import com.jakebarnby.filemanager.util.TreeNode;
 import com.microsoft.graph.extensions.DriveItem;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Created by Jake on 6/6/2017.
  */
 
-public class SourceTransferService extends IntentService {
+public class SourceTransferService extends Service {
     public static final String ACTION_COMPLETE = "com.jakebarnby.filemanager.services.action.COMPLETE";
     public static final String ACTION_SHOW_DIALOG = "com.jakebarnby.filemanager.services.action.SHOW_DIALOG";
     public static final String ACTION_UPDATE_DIALOG = "com.jakebarnby.filemanager.services.action.UPDATE_DIALOG";
@@ -54,6 +62,9 @@ public class SourceTransferService extends IntentService {
     public static final String EXTRA_DIALOG_TITLE = "com.jakebarnby.filemanager.services.extra.DIALOG_TITLE";
     private static final String EXTRA_NEW_NAME = "com.jakebarnby.filemanager.services.extra.NAME";
     private static final String EXTRA_TO_OPEN = "com.jakebarnby.filemanager.services.extra.TO_OPEN";
+    public static final String EXTRA_OPERATION_ID = "com.jakebarnby.filemanager.services.SourceTransferService.extra.OPERATION_ID";
+
+    private Executor mThreadPool;
 
     static {
         System.loadLibrary("io-lib");
@@ -89,11 +100,58 @@ public class SourceTransferService extends IntentService {
      */
     public native int renameFolderNative(String oldPath, String newPath);
 
-    /**
-     * Create a new instance
-     */
-    public SourceTransferService() {
-        super("SourceTransferService");
+    @Override
+    public void onCreate() {
+        mThreadPool = Executors.newCachedThreadPool();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Toast.makeText(this, "service starting + startId: " + String.valueOf(SelectedFilesManager.getInstance().getOperationCount()-1), Toast.LENGTH_SHORT).show();
+        mThreadPool.execute(() -> {
+            if (intent != null) {
+                final SourceFile toOpen = (SourceFile) intent.getSerializableExtra(EXTRA_TO_OPEN);
+                final String newName = intent.getStringExtra(EXTRA_NEW_NAME);
+                final String action = intent.getAction();
+                switch (action) {
+                    case ACTION_CREATE_FOLDER:
+                        createFolder(SelectedFilesManager.getInstance().getOperationCount()-1, newName);
+                        break;
+                    case ACTION_RENAME:
+                        rename(SelectedFilesManager.getInstance().getOperationCount()-1, newName);
+                        break;
+                    case ACTION_COPY:
+                        copy(SelectedFilesManager.getInstance().getOperationCount()-1, false);
+                        break;
+                    case ACTION_MOVE:
+                        copy(SelectedFilesManager.getInstance().getOperationCount()-1, true);
+                        break;
+                    case ACTION_DELETE:
+                        delete(SelectedFilesManager.getInstance().getOperationCount()-1, false);
+                        break;
+                    case ACTION_OPEN:
+                        open(SelectedFilesManager.getInstance().getOperationCount()-1, toOpen);
+                        break;
+                    case ACTION_CLEAR_CACHE:
+                        clearLocalCache();
+                        break;
+                }
+            }
+            stopSelf(startId);
+        });
+
+        // If we get killed, after returning from here, restart
+        return START_REDELIVER_INTENT;
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public void onDestroy() {
+        Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -158,49 +216,17 @@ public class SourceTransferService extends IntentService {
         context.startService(intent);
     }
 
-    @Override
-    protected void onHandleIntent(Intent intent) {
-        if (intent != null) {
-            final SourceFile toOpen = (SourceFile) intent.getSerializableExtra(EXTRA_TO_OPEN);
-            final String newName = intent.getStringExtra(EXTRA_NEW_NAME);
-            final String action = intent.getAction();
-            switch (action) {
-                case ACTION_CREATE_FOLDER:
-                    createFolder(newName);
-                    break;
-                case ACTION_RENAME:
-                    rename(newName);
-                    break;
-                case ACTION_COPY:
-                    copy(false);
-                    break;
-                case ACTION_MOVE:
-                    copy(true);
-                    break;
-                case ACTION_DELETE:
-                    delete(false);
-                    break;
-                case ACTION_OPEN:
-                    open(toOpen);
-                    break;
-                case ACTION_CLEAR_CACHE:
-                    clearLocalCache();
-                    break;
-            }
-        }
-        hideNotification();
-    }
-
     private void clearLocalCache() {
         deleteFileNative(getCacheDir().getPath());
     }
 
     /**
      * Create a new folder in the given directory with the given name
+     * @param operationId
      * @param name              The name for the new folder
      */
-    private void createFolder(String name) {
-        TreeNode<SourceFile> destDir = SelectedFilesManager.getInstance().getActiveDirectory();
+    private void createFolder(int operationId, String name) {
+        TreeNode<SourceFile> destDir = SelectedFilesManager.getInstance().getActionableDirectory(operationId);
         SourceFile newFile = null;
         switch(destDir.getData().getSourceName()) {
             case Constants.Sources.LOCAL:
@@ -227,20 +253,22 @@ public class SourceTransferService extends IntentService {
                 break;
         }
         destDir.addChild(newFile);
-        broadcastFinishedTask();
+        broadcastFinishedTask(operationId);
     }
 
     /**
      * Renames the selected file or folder to the given name
+     * @param operationId
      * @param name       The new name of the file or folder
      */
-    private void rename(String name) {
-        TreeNode<SourceFile> destDir = SelectedFilesManager.getInstance().getSelectedFiles().get(0);
+    private void rename(int operationId, String name) {
+        TreeNode<SourceFile> destDir = SelectedFilesManager.getInstance().getSelectedFiles(operationId).get(0);
         String oldPath = null;
         String newPath = null;
         if (destDir.getData().getPath() != null) {
             oldPath = destDir.getData().getPath();
-            newPath = destDir.getData().getPath().substring(0, destDir.getData().getPath().lastIndexOf(File.separator) + 1) + name;
+            newPath = destDir.getData().getPath()
+                    .substring(0, destDir.getData().getPath().lastIndexOf(File.separator) + 1) + name;
         }
 
         switch(destDir.getData().getSourceName()) {
@@ -265,14 +293,15 @@ public class SourceTransferService extends IntentService {
         }
         destDir.getData().setName(name);
         destDir.getData().setPath(newPath);
-        broadcastFinishedTask();
+        broadcastFinishedTask(operationId);
     }
 
     /**
      * Open the given {@link SourceFile}. If it is a remote file, dowload it first
+     * @param operationId
      * @param toOpen
      */
-    private void open(SourceFile toOpen) {
+    private void open(int operationId, SourceFile toOpen) {
         broadcastShowDialog(getString(R.string.opening), 0);
 
         String cachePath = getCacheDir().getPath()+File.separator;
@@ -286,18 +315,24 @@ public class SourceTransferService extends IntentService {
 
         Bundle bundle = new Bundle();
         bundle.putString(Constants.FILE_PATH_KEY, filePath);
-        broadcastFinishedTask(bundle);
+        broadcastFinishedTask(operationId, bundle);
     }
 
     /**
      * Copy the selected files to the given destination
      */
-    private void copy(boolean move) {
-        List<TreeNode<SourceFile>> toCopy = SelectedFilesManager.getInstance().getSelectedFiles();
-        TreeNode<SourceFile> destDir = SelectedFilesManager.getInstance().getActiveDirectory();
+    private void copy(int operationId, boolean move) {
+        List<TreeNode<SourceFile>> toCopy = SelectedFilesManager.getInstance().getSelectedFiles(operationId);
+        TreeNode<SourceFile> destDir = SelectedFilesManager.getInstance().getActionableDirectory(operationId);
 
         broadcastShowDialog(move ? getString(R.string.moving) : getString(R.string.copying), toCopy.size());
         for (TreeNode<SourceFile> file : toCopy) {
+            postNotification(
+                    operationId,
+                    getString(R.string.app_name),
+                    move ? String.format(getString(R.string.moving_count), toCopy.indexOf(file)+1, toCopy.size()) :
+                           String.format(getString(R.string.copying_count), toCopy.indexOf(file)+1, toCopy.size()));
+
             String newFilePath = getFile(file.getData());
             SourceFile newFile = putFile(newFilePath, file.getData().getName(), destDir.getData());
 
@@ -309,24 +344,28 @@ public class SourceTransferService extends IntentService {
                     curDir = curDir.getParent();
                 } else break;
             }
-            postNotification("File Manager", "Copying " + (toCopy.indexOf(file) + 1) + " of " + toCopy.size());
             broadcastUpdate(toCopy.indexOf(file) + 1);
         }
         if (move) {
-            delete(true);
+            delete(operationId, true);
         }
-        broadcastFinishedTask();
+        broadcastFinishedTask(operationId);
     }
 
     /**
      * Delete the selected files
      */
-    private void delete(boolean isSilent) {
-        List<TreeNode<SourceFile>> toDelete = SelectedFilesManager.getInstance().getSelectedFiles();
-        TreeNode<SourceFile> currentDir = SelectedFilesManager.getInstance().getActiveDirectory();
+    private void delete(int operationId, boolean isSilent) {
+        List<TreeNode<SourceFile>> toDelete = SelectedFilesManager.getInstance().getSelectedFiles(operationId);
+        TreeNode<SourceFile> currentDir = SelectedFilesManager.getInstance().getActionableDirectory(operationId);
 
         if (!isSilent) broadcastShowDialog(getString(R.string.deleting), toDelete.size());
         for (TreeNode<SourceFile> file : toDelete) {
+            postNotification(
+                    operationId,
+                    getString(R.string.app_name),
+                    String.format(getString(R.string.deleting_count), toDelete.indexOf(file)+1, toDelete.size()));
+
             switch (file.getData().getSourceName()) {
                 case Constants.Sources.LOCAL:
                     deleteFileNative(file.getData().getPath());
@@ -362,7 +401,7 @@ public class SourceTransferService extends IntentService {
             }
         }
         if (!isSilent) {
-            broadcastFinishedTask();
+            broadcastFinishedTask(operationId);
         }
     }
 
@@ -433,21 +472,35 @@ public class SourceTransferService extends IntentService {
     }
 
     /**
-     * Notifies the activity that this operation is finished
+     * Notifies the hosting activity that an operation has completed successfully
+     * @param operationId   The id of the operation
      */
-    private void broadcastFinishedTask() {
-        broadcastFinishedTask(null);
+    private void broadcastFinishedTask(int operationId) {
+        broadcastFinishedTask(operationId, null);
     }
 
-    private void broadcastFinishedTask(Bundle bundle) {
+    /**
+     * Notifies the hosting activity that an operation has completed successfully
+     * @param operationId   The id of the operation
+     * @param bundle        The
+     */
+    private void broadcastFinishedTask(int operationId, Bundle bundle) {
         Intent intent = new Intent();
         intent.setAction(ACTION_COMPLETE);
 
         if (bundle != null) {
+            bundle.putInt(EXTRA_OPERATION_ID, operationId);
             intent.putExtras(bundle);
+        } else {
+            intent.putExtra(EXTRA_OPERATION_ID, operationId);
         }
-        SelectedFilesManager.getInstance().getSelectedFiles().clear();
+
+        if (SelectedFilesManager.getInstance().getSelectedFiles(operationId) != null) {
+            SelectedFilesManager.getInstance().getSelectedFiles(operationId).clear();
+        }
+
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        hideNotification(operationId);
     }
 
     /**
@@ -481,7 +534,7 @@ public class SourceTransferService extends IntentService {
      * @param title   Title for the notification
      * @param content Content body of the notification
      */
-    private void postNotification(String title, String content) {
+    private void postNotification(int operationId, String title, String content) {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.mipmap.ic_launcher)
@@ -489,6 +542,8 @@ public class SourceTransferService extends IntentService {
                         .setContentText(content);
 
         Intent resultIntent = new Intent(this, SourceActivity.class);
+        //TODO: Get this in activity and open the associated directory
+        resultIntent.putExtra(EXTRA_OPERATION_ID, operationId);
 
         PendingIntent resultPendingIntent =
                 PendingIntent.getActivity(
@@ -499,17 +554,19 @@ public class SourceTransferService extends IntentService {
 
         mBuilder.setContentIntent(resultPendingIntent);
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(Constants.NOTIFICATION_ID, mBuilder.build());
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            notificationManager.notify(operationId, mBuilder.build());
+        }
     }
 
     /**
      * Removes the notification from the status bar
      */
-    private void hideNotification() {
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancel(Constants.NOTIFICATION_ID);
+    private void hideNotification(int operationId) {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            notificationManager.cancel(operationId);
+        }
     }
 }

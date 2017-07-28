@@ -33,7 +33,7 @@ public class PropertiesDialog extends DialogFragment {
         TextView sizeText = view.findViewById(R.id.text_size);
         TextView modifiedTimeText = view.findViewById(R.id.text_modifiedTime);
 
-        List<TreeNode<SourceFile>> selected = SelectedFilesManager.getInstance().getSelectedFiles();
+        List<TreeNode<SourceFile>> selected = SelectedFilesManager.getInstance().getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount());
 
         if (selected.size() > 1) {
             float totalSize = 0.0f;
