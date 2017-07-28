@@ -18,7 +18,9 @@ import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
+import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.SourceFragment;
+import com.jakebarnby.filemanager.glide.GlideApp;
 import com.jakebarnby.filemanager.managers.DropboxFactory;
 import com.jakebarnby.filemanager.models.files.DropboxFile;
 import com.jakebarnby.filemanager.models.files.SourceFile;
@@ -50,12 +52,12 @@ public class DropboxFragment extends SourceFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
-//
-//        GlideApp
-//                .with(mSourceLogo)
-//                .load(R.drawable.ic_dropbox)
-//                .centerCrop()
-//                .into(mSourceLogo);
+
+        GlideApp
+                .with(mSourceLogo)
+                .load(R.drawable.ic_dropbox)
+                .centerCrop()
+                .into(mSourceLogo);
 
         return view;
     }
