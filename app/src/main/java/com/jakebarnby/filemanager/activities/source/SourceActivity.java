@@ -31,6 +31,9 @@ import android.view.animation.TranslateAnimation;
 import android.webkit.MimeTypeMap;
 import android.widget.RelativeLayout;
 
+import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.ndk.CrashlyticsNdk;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.adapters.FileSystemAdapter;
 import com.jakebarnby.filemanager.activities.source.adapters.SourcesPagerAdapter;
@@ -48,16 +51,14 @@ import com.jakebarnby.filemanager.util.Utils;
 import java.io.File;
 import java.util.List;
 
+import io.fabric.sdk.android.Fabric;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
 import jp.wasabeef.blurry.Blurry;
 
-import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_ADD_CHILD;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_COMPLETE;
-import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_REMOVE_CHILD;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_SHOW_DIALOG;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_UPDATE_DIALOG;
-import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_CHILD_FILE;
 import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_CURRENT_COUNT;
 import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_DIALOG_TITLE;
 import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_OPERATION_ID;
@@ -103,6 +104,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_source);
+        Fabric.with(this, new Crashlytics(), new CrashlyticsNdk(), new Answers());
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -175,8 +177,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     protected void onResume() {
         super.onResume();
         IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_ADD_CHILD);
-        filter.addAction(ACTION_REMOVE_CHILD);
         filter.addAction(ACTION_SHOW_DIALOG);
         filter.addAction(ACTION_UPDATE_DIALOG);
         filter.addAction(ACTION_COMPLETE);
