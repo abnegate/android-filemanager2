@@ -130,8 +130,7 @@ public class OneDriveFragment extends SourceFragment {
 
             OneDriveFactory
                     .getInstance()
-                    .setGraphClient(
-                            new GraphServiceClient
+                    .setGraphClient(new GraphServiceClient
                                     .Builder()
                                     .fromConfig(mClientConfig)
                                     .buildClient());
@@ -165,7 +164,8 @@ public class OneDriveFragment extends SourceFragment {
         String accessToken = prefs.getString("onedrive-access-token", null);
         if (mAuthResult != null) {
             if (accessToken == null || !mAuthResult.getAccessToken().equals(accessToken)) {
-                prefs.edit().putString("onedrive-access-token", mAuthResult.getAccessToken()).apply();
+                accessToken = mAuthResult.getAccessToken();
+                prefs.edit().putString("onedrive-access-token", accessToken).apply();
             } else {
                 if (!isLoggedIn()) {
                     authenticateSource();
