@@ -65,20 +65,19 @@ public class GoogleDriveFactory {
         File file = new File(filePath);
         com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
 
-        MimeTypeMap map = MimeTypeMap.getSingleton();
-        fileMetadata.setParents(Collections.singletonList(parentId));
-        fileMetadata.setMimeType(map.getMimeTypeFromExtension(Utils.fileExt(filePath)));
-        fileMetadata.setHasThumbnail(true);
-        fileMetadata.setName(fileName);
-
         MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
         String mimeType = mimeTypeMap.getMimeTypeFromExtension(Utils.fileExt(filePath));
+
+        fileMetadata.setParents(Collections.singletonList(parentId));
+        fileMetadata.setMimeType(mimeType);
+        fileMetadata.setHasThumbnail(true);
+        fileMetadata.setName(fileName);
 
         FileContent googleFile = new FileContent(mimeType, file);
         try {
             return mService.files()
                     .create(fileMetadata, googleFile)
-                    .setFields("id")
+                    .setFields("name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime")
                     .execute();
         } catch (IOException e) {
             e.printStackTrace();

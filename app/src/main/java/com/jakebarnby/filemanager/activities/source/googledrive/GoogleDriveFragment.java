@@ -218,7 +218,7 @@ public class GoogleDriveFragment extends SourceFragment {
                         .getService()
                         .files()
                         .get(paths[0])
-                        .setFields("name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime,createdTime")
+                        .setFields("name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime")
                         .execute();
                 SourceFile rootSourceFile = new GoogleDriveFile(rootFile);
                 rootFileTreeNode = new TreeNode<>(rootSourceFile);
@@ -246,7 +246,7 @@ public class GoogleDriveFragment extends SourceFragment {
                     .files()
                     .list()
                     .setQ(String.format("'%s' in parents", currentDirectory.getId()))
-                    .setFields("files(name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime,createdTime)")
+                    .setFields("files(name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime)")
                     .execute();
             List<File> files = fileList.getFiles();
             long dirSize = 0L;
