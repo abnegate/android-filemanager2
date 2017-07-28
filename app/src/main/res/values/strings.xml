@@ -40,8 +40,8 @@
     <string name="properties">Properties</string>
     <string name="sizeDisplay">%.2f MB</string>
     <string name="greater_than"><![CDATA[>]]></string>
-    <string name="no_connection">No connection available, check your internet and try again</string>
-    <string name="no_app_available">No installed apps can open this file</string>
+    <string name="no_connection">No connection available, check your internet and try again.</string>
+    <string name="no_app_available">No installed apps can open this file.</string>
     <string name="no">No</string>
     <string name="yes">Yes</string>
     <string name="file_ready">File Ready</string>
@@ -49,4 +49,6 @@
     <string name="moving_count">Moving %d of %d</string>
     <string name="copying_count">Copying %d of %d</string>
     <string name="deleting_count">Deleting %d of %d</string>
+    <string name="source_not_logged_in">Not logged in yet.</string>
+    <string name="source_not_loaded">Not loaded yet.</string>
 </resources>

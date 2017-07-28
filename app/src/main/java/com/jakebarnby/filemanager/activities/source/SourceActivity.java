@@ -85,7 +85,11 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     public TreeNode<SourceFile> getActiveDirectory() {
-        return mActiveDirectory;
+        if (mActiveDirectory != null) {
+            return mActiveDirectory;
+        } else {
+            return getActiveFragment().getCurrentDirectory();
+        }
     }
 
     public void setActiveDirectory(TreeNode<SourceFile> currentDirectory) {
@@ -316,6 +320,15 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      */
     private void startPasteAction() {
         if (!getActiveFragment().checkConnectionStatus()) return;
+
+        if (!getActiveFragment().isLoggedIn()) {
+            Snackbar.make(mViewPager, R.string.source_not_logged_in, Snackbar.LENGTH_LONG).show();
+            return;
+        }else if (!getActiveFragment().isFilesLoaded()) {
+            Snackbar.make(mViewPager, R.string.source_not_loaded, Snackbar.LENGTH_LONG).show();
+            return;
+        }
+
         if (mCurrentFileActions != null) {
             getActiveFragment().setMultiSelectEnabled(false);
             setTitle(getString(R.string.app_name));
@@ -324,9 +337,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             SelectedFilesManager.getInstance().addActionableDirectory(
                     SelectedFilesManager.getInstance().getOperationCount(), getActiveDirectory());
 
-            if (mCurrentFileActions.get(SelectedFilesManager.getInstance().getOperationCount()) == FileAction.COPY)
+            FileAction curAction =
+                    mCurrentFileActions.get(SelectedFilesManager.getInstance().getOperationCount());
+
+            if (curAction == FileAction.COPY)
                 SourceTransferService.startActionCopy(SourceActivity.this, false);
-            else if (mCurrentFileActions.get(SelectedFilesManager.getInstance().getOperationCount()) == FileAction.CUT) {
+            else if (curAction == FileAction.CUT) {
                 SourceTransferService.startActionCopy(SourceActivity.this, true);
             }
             SelectedFilesManager.getInstance().addNewSelection();

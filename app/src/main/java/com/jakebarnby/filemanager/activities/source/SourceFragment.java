@@ -46,7 +46,6 @@ public abstract class SourceFragment extends Fragment {
     private boolean                 mLoggedIn;
     private boolean                 mFilesLoaded;
     private boolean                 mMultiSelectEnabled;
-    private boolean                 mIsReload;
 
     protected RecyclerView          mRecycler;
     protected FileSystemListAdapter mFileSystemListAdapter;
@@ -338,7 +337,7 @@ public abstract class SourceFragment extends Fragment {
     protected boolean checkConnectionStatus() {
         if (!getSourceName().equals(Constants.Sources.LOCAL)) {
             if (!Utils.isConnectionReady(getContext())) {
-                Snackbar.make(getView(), R.string.no_connection, Snackbar.LENGTH_LONG).show();
+                Snackbar.make(mRecycler, R.string.no_connection, Snackbar.LENGTH_LONG).show();
                 return false;
             }
         }
