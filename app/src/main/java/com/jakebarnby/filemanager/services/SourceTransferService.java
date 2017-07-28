@@ -6,15 +6,9 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
-import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.widget.Toast;
 
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.jakebarnby.filemanager.R;
@@ -45,8 +39,6 @@ public class SourceTransferService extends Service {
     public static final String ACTION_COMPLETE = "com.jakebarnby.filemanager.services.action.COMPLETE";
     public static final String ACTION_SHOW_DIALOG = "com.jakebarnby.filemanager.services.action.SHOW_DIALOG";
     public static final String ACTION_UPDATE_DIALOG = "com.jakebarnby.filemanager.services.action.UPDATE_DIALOG";
-    public static final String ACTION_ADD_CHILD = "com.jakebarnby.filemanager.services.action.ADD_CHILD";
-    public static final String ACTION_REMOVE_CHILD = "com.jakebarnby.filemanager.services.action.REMOVE_CHILD";
 
     private static final String ACTION_COPY = "com.jakebarnby.filemanager.services.action.COPY";
     private static final String ACTION_MOVE = "com.jakebarnby.filemanager.services.action.MOVE";
@@ -56,13 +48,12 @@ public class SourceTransferService extends Service {
     private static final String ACTION_OPEN = "com.jakebarnby.filemanager.services.action.OPEN";
     private static final String ACTION_CLEAR_CACHE = "com.jakebarnby.filemanager.services.action.CLEAR_CACHE";
 
+    public static final String EXTRA_OPERATION_ID = "com.jakebarnby.filemanager.services.extra.OPERATION_ID";
     public static final String EXTRA_CURRENT_COUNT = "com.jakebarnby.filemanager.services.extra.CURRENT_COUNT";
     public static final String EXTRA_TOTAL_COUNT = "com.jakebarnby.filemanager.services.extra.TOTAL_COUNT";
-    public static final String EXTRA_CHILD_FILE = "com.jakebarnby.filemanager.services.action.EXTRA_CHILD_FILE";
     public static final String EXTRA_DIALOG_TITLE = "com.jakebarnby.filemanager.services.extra.DIALOG_TITLE";
     private static final String EXTRA_NEW_NAME = "com.jakebarnby.filemanager.services.extra.NAME";
     private static final String EXTRA_TO_OPEN = "com.jakebarnby.filemanager.services.extra.TO_OPEN";
-    public static final String EXTRA_OPERATION_ID = "com.jakebarnby.filemanager.services.SourceTransferService.extra.OPERATION_ID";
 
     private Executor mThreadPool;
 
@@ -107,7 +98,6 @@ public class SourceTransferService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Toast.makeText(this, "service starting + startId: " + String.valueOf(SelectedFilesManager.getInstance().getOperationCount()-1), Toast.LENGTH_SHORT).show();
         mThreadPool.execute(() -> {
             if (intent != null) {
                 final SourceFile toOpen = (SourceFile) intent.getSerializableExtra(EXTRA_TO_OPEN);
@@ -147,11 +137,6 @@ public class SourceTransferService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
-
-    @Override
-    public void onDestroy() {
-        Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
     }
 
     /**
