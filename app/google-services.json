@@ -1,7 +1,9 @@
 {
   "project_info": {
     "project_number": "50712246132",
-    "project_id": "file-manager-4c1f2"
+    "firebase_url": "https://file-manager-4c1f2.firebaseio.com",
+    "project_id": "file-manager-4c1f2",
+    "storage_bucket": "file-manager-4c1f2.appspot.com"
   },
   "client": [
     {
@@ -13,11 +15,31 @@
       },
       "oauth_client": [
         {
-          "client_id": "50712246132-5sbprorm5fifdqg8vk95bb1m5sr58a40.apps.googleusercontent.com",
+          "client_id": "50712246132-7sca562ca65ra24b1ki3fq4t1ot2hq2a.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.jakebarnby.filemanager",
             "certificate_hash": "56cabd9161a913e351f15e7e2a30ece204d807ef"
+          }
+        },
+        {
+          "client_id": "50712246132-83jp2jon1a2i1q568en3da29llqsh54d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jakebarnby.filemanager",
+            "certificate_hash": "aa582f8ffab217167d950100e4939e868a9880a3"
+          }
+        },
+        {
+          "client_id": "50712246132-0k1qfahsg70qt6sarlfdjt9fq584fvg1.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "50712246132-5sbprorm5fifdqg8vk95bb1m5sr58a40.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jakebarnby.filemanager",
+            "certificate_hash": "df0464ff3e02c9bddf0c9c9e371ef8f75d3ef9f7"
           }
         },
         {
@@ -27,6 +49,12 @@
       ],
       "api_key": [
         {
+          "current_key": "AIzaSyB4jo3ug7fhFYYUhq3sHNg5foKPrQtbcvA"
+        },
+        {
+          "current_key": "AIzaSyCiahrEEZK3suLw_Cd8T3gfR5EKUuNsBSg"
+        },
+        {
           "current_key": "AIzaSyBDNcb3xdmjM3jiGSuw7fKC98lpEVfwZaE"
         }
       ],
@@ -35,11 +63,16 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "50712246132-0k1qfahsg70qt6sarlfdjt9fq584fvg1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
-          "status": 1
+          "status": 2
         }
       }
     }
