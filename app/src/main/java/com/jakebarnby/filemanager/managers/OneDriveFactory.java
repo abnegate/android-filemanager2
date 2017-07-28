@@ -1,18 +1,21 @@
 package com.jakebarnby.filemanager.managers;
+import android.util.Log;
+
 import com.jakebarnby.filemanager.util.Utils;
+import com.microsoft.graph.concurrency.ChunkedUploadProvider;
+import com.microsoft.graph.concurrency.IProgressCallback;
 import com.microsoft.graph.core.ClientException;
 import com.microsoft.graph.extensions.DriveItem;
+import com.microsoft.graph.extensions.DriveItemUploadableProperties;
 import com.microsoft.graph.extensions.Folder;
 import com.microsoft.graph.extensions.IGraphServiceClient;
-import com.microsoft.graph.extensions.ItemReference;
+import com.microsoft.graph.extensions.UploadSession;
+import com.microsoft.graph.http.GraphServiceException;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * Created by Jake on 6/9/2017.
@@ -75,15 +78,37 @@ public class OneDriveFactory {
             byte[] buffer = new byte[(int)file.length()];
             in.read(buffer);
 
-            return mGraphClient
+            DriveItemUploadableProperties properties = new DriveItemUploadableProperties();
+            properties.name = fileName;
+
+            UploadSession uploadSession = mGraphClient
                     .getMe()
                     .getDrive()
                     .getItems(parentId)
                     .getChildren(fileName)
-                    .getContent()
+                    .getCreateUploadSession(properties)
                     .buildRequest()
-                    .put(buffer);
-        } catch (IOException e) {
+                    .post();
+
+            ChunkedUploadProvider provider = new ChunkedUploadProvider(uploadSession, mGraphClient, in, in.available(), DriveItem.class);
+            provider.upload(null, new IProgressCallback() {
+                @Override
+                public void progress(long current, long max) {
+                    Log.d("ONE DRIVE UPLOAD", current+"/"+max);
+                }
+
+                @Override
+                public void success(Object o) {
+                    Log.d("ONE DRIVE UPLOAD", "COMPLETE" + o.toString());
+                }
+
+                @Override
+                public void failure(ClientException ex) {
+                    ex.printStackTrace();
+                    Log.e("ONE DRIVE UPLOAD", "FAILURE: " + ex.getLocalizedMessage());
+                }
+            });
+        } catch (IOException | GraphServiceException e) {
             e.printStackTrace();
         }
         return null;
