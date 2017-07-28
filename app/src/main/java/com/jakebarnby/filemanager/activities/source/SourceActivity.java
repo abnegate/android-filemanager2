@@ -623,16 +623,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             toggleFloatingMenu(false);
             setTitle(R.string.app_name);
             SelectedFilesManager.getInstance().getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount()).clear();
-            if (getActiveDirectory().getParent() != null) {
-                return;
-            }
-        } else if (getActiveDirectory().getParent() != null) {
+        } else if (getActiveFragment().isLoggedIn() && getActiveDirectory().getParent() != null) {
                 getActiveFragment().setCurrentDirectory(getActiveDirectory().getParent());
                 ((FileSystemAdapter) getActiveFragment().mRecycler.getAdapter()).setCurrentDirectory(getActiveDirectory().getParent());
                 setActiveDirectory(getActiveDirectory().getParent());
                 getActiveFragment().mRecycler.getAdapter().notifyDataSetChanged();
                 getActiveFragment().popBreadcrumb();
-                return;
         } else {
             super.onBackPressed();
         }

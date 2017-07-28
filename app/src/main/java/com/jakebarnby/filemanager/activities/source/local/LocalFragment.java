@@ -177,6 +177,7 @@ public class LocalFragment extends SourceFragment {
                         Constants.RequestCodes.STORAGE_PERMISSIONS);
             }
         } else {
+            setLoggedIn(true);
             loadSource();
         }
     }
