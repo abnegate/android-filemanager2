@@ -471,7 +471,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * @param message   The message to display in the snackbar.
      */
     private void showSnackbar(String message) {
-        Snackbar.make(mViewPager, message, Snackbar.LENGTH_LONG);
+        Snackbar.make(mViewPager, message, Snackbar.LENGTH_LONG).show();
     }
 
     /**
