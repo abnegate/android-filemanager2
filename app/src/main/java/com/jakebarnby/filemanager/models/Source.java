@@ -40,6 +40,14 @@ public class Source {
         this.mFreeSpace = mFreeSpace;
     }
 
+    public void decreaseFreeSpace(long amount) {
+        this.mFreeSpace -= amount;
+    }
+
+    public void increaseFreeSpace(long amount) {
+        this.mFreeSpace += amount;
+    }
+
     public boolean isLoggedIn() {
         return mLoggedIn;
     }

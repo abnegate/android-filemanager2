@@ -22,6 +22,7 @@ import com.jakebarnby.filemanager.models.files.LocalFile;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
+import com.jakebarnby.filemanager.util.Utils;
 
 import java.io.File;
 
@@ -97,6 +98,7 @@ public class LocalFragment extends SourceFragment {
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
             getSource().setCurrentDirectory(rootFileTreeNode);
+            getSource().setFreeSpace(Utils.getFreeSpace(Environment.getExternalStorageDirectory()));
             return parseFileSystem(files[0]);
         }
 
