@@ -87,7 +87,7 @@ public abstract class SourceFragment extends Fragment {
             if (Utils.isConnectionReady(SourceFragment.this.getContext())) {
                 authenticateSource();
             } else {
-                Snackbar.make(rootView, R.string.no_connection, Snackbar.LENGTH_LONG).show();
+                Snackbar.make(rootView, R.string.err_no_connection, Snackbar.LENGTH_LONG).show();
             }
         });
         return rootView;
@@ -341,7 +341,7 @@ public abstract class SourceFragment extends Fragment {
     protected boolean checkConnectionStatus() {
         if (!getSourceName().equals(Constants.Sources.LOCAL)) {
             if (!Utils.isConnectionReady(getContext())) {
-                Snackbar.make(mRecycler, R.string.no_connection, Snackbar.LENGTH_LONG).show();
+                Snackbar.make(mRecycler, R.string.err_no_connection, Snackbar.LENGTH_LONG).show();
                 return false;
             }
         }
