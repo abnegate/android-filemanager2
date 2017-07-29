@@ -11,6 +11,7 @@ public class Source {
 
     private String                  mSourceName;
     private TreeNode<SourceFile>    mCurrentDirectory;
+    private long                    mFreeSpace;
     private boolean                 mLoggedIn;
     private boolean                 mFilesLoaded;
     private boolean                 mMultiSelectEnabled;
@@ -29,6 +30,14 @@ public class Source {
 
     public void setCurrentDirectory(TreeNode<SourceFile> mCurrentDirectory) {
         this.mCurrentDirectory = mCurrentDirectory;
+    }
+
+    public long getFreeSpace() {
+        return mFreeSpace;
+    }
+
+    public void setFreeSpace(long mFreeSpace) {
+        this.mFreeSpace = mFreeSpace;
     }
 
     public boolean isLoggedIn() {

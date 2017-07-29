@@ -19,7 +19,7 @@ allprojects {
 }
 
 project.ext {
-    supportLibVersion = '26.0.0-beta2'
+    supportLibVersion = '26.0.0'
     googleApiVersion = '1.22.0'
     appName = "filemanager"
 }
