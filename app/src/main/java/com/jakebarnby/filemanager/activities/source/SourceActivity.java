@@ -11,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.design.internal.NavigationMenu;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -42,9 +41,11 @@ import com.jakebarnby.filemanager.activities.source.dialogs.CreateFolderDialog;
 import com.jakebarnby.filemanager.activities.source.dialogs.PropertiesDialog;
 import com.jakebarnby.filemanager.activities.source.dialogs.RenameDialog;
 import com.jakebarnby.filemanager.activities.source.dialogs.ViewAsDialog;
+import com.jakebarnby.filemanager.listeners.OnSpaceCheckListener;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.services.SourceTransferService;
+import com.jakebarnby.filemanager.tasks.SpaceCheckerTask;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
@@ -76,6 +77,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private FabSpeedDial                mFabMenu;
     private RelativeLayout              mBlurWrapper;
 
+    /**
+     * Possible file actions
+     */
     public enum FileAction {
         COPY,
         CUT,
@@ -85,6 +89,10 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         OPEN
     }
 
+    /**
+     * Get the top level active directory. This should be the directory visible to the user
+     * @return  The top level active directory.
+     */
     public TreeNode<SourceFile> getActiveDirectory() {
         if (mActiveDirectory != null) {
             return mActiveDirectory;
@@ -93,14 +101,27 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         }
     }
 
+    /**
+     * Set the top level active directory
+     * @param currentDirectory  The directory to set as active
+     */
     public void setActiveDirectory(TreeNode<SourceFile> currentDirectory) {
         this.mActiveDirectory = currentDirectory;
     }
 
+    /**
+     * Gets the fragment currently visible to the user
+     * @return  The fragment currently visible to the user
+     */
     public SourceFragment getActiveFragment() {
         return mSourcesPagerAdapter.getFragments().get(mViewPager.getCurrentItem());
     }
 
+    /**
+     * Add an operation action to the file actions collection
+     * @param operationId   The ID of the operation to add an action for
+     * @param fileAction    The action to perform on the given operation ID
+     */
     public void addFileAction(int operationId, FileAction fileAction) {
         this.mCurrentFileActions.put(operationId, fileAction);
     }
@@ -138,7 +159,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 if (SelectedFilesManager
                         .getInstance()
                         .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount()).size() == 0) {
-                    Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
+                    showSnackbar(getString(R.string.err_no_selection));
                     return false;
                 }
                 Blurry.with(SourceActivity.this)
@@ -229,7 +250,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     /**
      * Handles menu clicks from the fab action menu
-     *
      * @param menuItem The selected item
      */
     private void handleFabMenuItemSelected(MenuItem menuItem) {
@@ -245,7 +265,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 startCutAction();
                 break;
             case R.id.action_paste:
-                startPasteAction();
+                doPasteChecks();
                 break;
             case R.id.action_properties:
                 showPropertiesDialog();
@@ -257,7 +277,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     /**
-     *
+     * Check if there are enough files selected and start a cut action
+     * otherwise throw a snackbar with error message
      */
     private void startCutAction() {
         if (SelectedFilesManager
@@ -265,15 +286,16 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
                 .size() > 0) {
             mCurrentFileActions.put(SelectedFilesManager.getInstance().getOperationCount(), FileAction.CUT);
-            Snackbar.make(mViewPager, getString(R.string.cut), Snackbar.LENGTH_SHORT).show();
+            showSnackbar(getString(R.string.cut));
         } else {
-            Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
+            showSnackbar(getString(R.string.err_no_selection));
         }
         getActiveFragment().setMultiSelectEnabled(false);
     }
 
     /**
-     *
+     * Check if there are enough files selected and start a copy action
+     * otherwise throw a snackbar with error message
      */
     private void startCopyAction() {
         if (SelectedFilesManager
@@ -281,9 +303,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
                 .size() > 0) {
             mCurrentFileActions.put(SelectedFilesManager.getInstance().getOperationCount(), FileAction.COPY);
-            Snackbar.make(mViewPager, getString(R.string.copied), Snackbar.LENGTH_SHORT).show();
+            showSnackbar(getString(R.string.copied));
         } else {
-            Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
+            showSnackbar(getString(R.string.err_no_selection));
         }
         for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
             fragment.setMultiSelectEnabled(false);
@@ -291,7 +313,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     /**
-     *
+     * Check if there are enough files selected and start a delete action
+     * otherwise throw a snackbar with error message
      */
     private void startDeleteAction() {
         if (!getActiveFragment().checkConnectionStatus()) return;
@@ -312,28 +335,55 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             SourceTransferService.startActionDelete(SourceActivity.this);
             SelectedFilesManager.getInstance().addNewSelection();
         } else {
-            Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
+            showSnackbar(getString(R.string.err_no_selection));
         }
     }
 
     /**
-     * Call {@link SourceTransferService} to begin copying the currently selected files
+     * Check if the active source is connected, logged in, loaded and has enough free space.
+     * If so, start a paste action via {@link SourceTransferService};
+     * Otherwise show a snackbar with the error message
      */
-    private void startPasteAction() {
+    private void doPasteChecks() {
         if (!getActiveFragment().checkConnectionStatus()) return;
 
         if (!getActiveFragment().isLoggedIn()) {
-            Snackbar.make(mViewPager, R.string.source_not_logged_in, Snackbar.LENGTH_LONG).show();
+            showSnackbar(getString(R.string.err_not_logged_in));
             return;
         }else if (!getActiveFragment().isFilesLoaded()) {
-            Snackbar.make(mViewPager, R.string.source_not_loaded, Snackbar.LENGTH_LONG).show();
+            showSnackbar(getString(R.string.err_not_loaded));
             return;
         }
+        
+        startFreeSpaceCheck(success -> {
+            if (success) {
+                startPasteAction();
+            } else {
+                showSnackbar(String.format(
+                        getString(R.string.err_no_free_space),
+                        getActiveFragment().getSourceName().toLowerCase()));
+            }
+        });
+    }
 
-        if (!doFreeSpaceCheck()) {
-            return;
+    /**
+     * Run a {@link SpaceCheckerTask} calling back to the passed listener with success or failure
+     * @param listener  The listener to callback with success or failure when the task completes
+     */
+    void startFreeSpaceCheck(OnSpaceCheckListener listener) {
+        long copySize = 0;
+        for(TreeNode<SourceFile> file: SelectedFilesManager.getInstance().getSelectedFiles(
+                SelectedFilesManager.getInstance().getOperationCount())) {
+            copySize+=file.getData().getSize();
         }
+        String curSourceName = getActiveFragment().getSourceName();
+        new SpaceCheckerTask(curSourceName, copySize, listener).execute();
+    }
 
+    /**
+     * Start a paste action via {@link SourceTransferService}
+     */
+    private void startPasteAction() {
         if (mCurrentFileActions != null) {
             getActiveFragment().setMultiSelectEnabled(false);
             setTitle(getString(R.string.app_name));
@@ -354,25 +404,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         }
     }
 
-    boolean doFreeSpaceCheck() {
-        long copySize = 0;
-        for(TreeNode<SourceFile> file: SelectedFilesManager.getInstance().getSelectedFiles(
-                SelectedFilesManager.getInstance().getOperationCount()
-        )) {
-            copySize+=file.getData().getSize();
-        }
-
-        long freeSpace = Utils.getFreeSpace(Environment.getExternalStorageDirectory());
-        if (freeSpace < copySize) {
-            showNotEnoughSpaceDialog();
-            return false;
-        }
-        return true;
-    }
-
     /**
      * Called when a broadcasted intent is recieved
-     *
      * @param intent The broadcasted intent
      */
     private void handleIntent(Intent intent) {
@@ -434,25 +467,18 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     /**
-     * Shows a dialog allowing a user to choose a grid or list layout for displaying files
+     * Show a snackbar with the given message.
+     * @param message   The message to display in the snackbar.
      */
-    private void showViewAsDialog() {
-        new ViewAsDialog().show(getSupportFragmentManager(), "ViewAs");
+    private void showSnackbar(String message) {
+        Snackbar.make(mViewPager, message, Snackbar.LENGTH_LONG).show();
     }
 
     /**
-     * Show a dialog informing the user the device does not have enough free space
+     * Shows a dialog allowing a user to choose a grid or list layout for displaying files.
      */
-    private void showNotEnoughSpaceDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(getString(R.string.error));
-        builder.setMessage(getString(R.string.err_no_free_space));
-
-        builder.setPositiveButton(getString(R.string.ok), (dialog, which) ->
-                dialog.dismiss()
-        );
-
-        builder.create().show();
+    private void showViewAsDialog() {
+        new ViewAsDialog().show(getSupportFragmentManager(), "ViewAs");
     }
 
     /**
@@ -486,10 +512,10 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
                 .size();
         if (size == 0) {
-            Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
+            showSnackbar(getString(R.string.err_no_selection));
             return;
         } else if (size > 1) {
-            Snackbar.make(mViewPager, getString(R.string.too_many_selected), Snackbar.LENGTH_LONG).show();
+            showSnackbar(getString(R.string.err_too_many_selected));
             return;
         }
 
@@ -506,9 +532,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void showPropertiesDialog() {
         int size = SelectedFilesManager.getInstance().getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount()).size();
         if (size == 0) {
-            Snackbar.make(mViewPager, getString(R.string.no_selection), Snackbar.LENGTH_LONG).show();
-            setTitle(getString(R.string.app_name));
-            SelectedFilesManager.getInstance().getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount()).clear();
+            showSnackbar(getString(R.string.err_no_selection));
         } else {
             new PropertiesDialog().show(getSupportFragmentManager(), "Properties");
         }
@@ -596,7 +620,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     /**
      * Attempts to open a file by finding it's mimetype then opening a compatible application
-     *
      * @param filePath  The absolute path of the file to open
      */
     private void viewFileInExternalApp(String filePath) {
@@ -617,13 +640,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         if (resolveInfo.size() > 0) {
             startActivity(intent);
         } else {
-            Snackbar.make(mViewPager, R.string.no_app_available, Snackbar.LENGTH_LONG).show();
+            Snackbar.make(mViewPager, R.string.err_no_app_available, Snackbar.LENGTH_LONG).show();
         }
     }
 
     /**
      * Toggles the floating action context menu
-     *
      * @param enabled   Whether the menu should enabled or not
      */
     public void toggleFloatingMenu(boolean enabled) {
@@ -676,11 +698,11 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             setTitle(R.string.app_name);
             SelectedFilesManager.getInstance().getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount()).clear();
         } else if (getActiveFragment().isLoggedIn() && getActiveDirectory().getParent() != null) {
-                getActiveFragment().setCurrentDirectory(getActiveDirectory().getParent());
-                ((FileSystemAdapter) getActiveFragment().mRecycler.getAdapter()).setCurrentDirectory(getActiveDirectory().getParent());
-                setActiveDirectory(getActiveDirectory().getParent());
-                getActiveFragment().mRecycler.getAdapter().notifyDataSetChanged();
-                getActiveFragment().popBreadcrumb();
+            getActiveFragment().setCurrentDirectory(getActiveDirectory().getParent());
+            ((FileSystemAdapter) getActiveFragment().mRecycler.getAdapter()).setCurrentDirectory(getActiveDirectory().getParent());
+            setActiveDirectory(getActiveDirectory().getParent());
+            getActiveFragment().mRecycler.getAdapter().notifyDataSetChanged();
+            getActiveFragment().popBreadcrumb();
         } else {
             super.onBackPressed();
         }

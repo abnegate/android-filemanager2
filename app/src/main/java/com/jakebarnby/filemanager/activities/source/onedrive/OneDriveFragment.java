@@ -184,7 +184,7 @@ public class OneDriveFragment extends SourceFragment {
     }
 
     /**
-     * Callback method for acquireTokenSilent calls
+     * OnSpaceCheckCompleteListener method for acquireTokenSilent calls
      * Looks if tokens are in the cache (refreshes if necessary and if we don't forceRefresh)
      * else errors that we need to do an interactive request.
      *
@@ -221,7 +221,7 @@ public class OneDriveFragment extends SourceFragment {
     }
 
     /**
-     * Callback used for interactive request.  If succeeds we use the access
+     * OnSpaceCheckCompleteListener used for interactive request.  If succeeds we use the access
      * token to call the Microsoft Graph. Does not check cache
      *
      * @return

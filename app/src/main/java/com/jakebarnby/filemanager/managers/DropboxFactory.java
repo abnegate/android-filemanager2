@@ -2,12 +2,15 @@ package com.jakebarnby.filemanager.managers;
 
 import android.util.Log;
 
+import com.dropbox.core.DbxApiException;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.WriteMode;
+import com.dropbox.core.v2.users.SpaceAllocation;
+import com.dropbox.core.v2.users.SpaceUsage;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -124,5 +127,27 @@ public class DropboxFactory {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public long getFreeSpace() {
+        try {
+            SpaceUsage usage = getClient().users().getSpaceUsage();
+            long used = usage.getUsed();
+            long max = 0;
+
+            SpaceAllocation alloc = usage.getAllocation();
+            if (alloc.isIndividual()) {
+                max += alloc.getIndividualValue().getAllocated();
+            }
+
+            if (alloc.isTeam()) {
+                max += alloc.getTeamValue().getAllocated();
+            }
+
+            return max-used;
+        } catch (DbxException e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 }

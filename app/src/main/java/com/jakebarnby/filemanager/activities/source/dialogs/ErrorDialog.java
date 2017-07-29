@@ -21,7 +21,7 @@ public class ErrorDialog extends DialogFragment {
         String message = getArguments().getString(Constants.ERROR_MESSAGE_KEY);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(getString(R.string.error));
+        builder.setTitle(getString(R.string.err_generic));
         builder.setMessage(message);
         builder.setPositiveButton("OK",(dialog,which)-> dialog.dismiss());
         builder.setNegativeButton("Cancel",(dialog,which)->dialog.dismiss());

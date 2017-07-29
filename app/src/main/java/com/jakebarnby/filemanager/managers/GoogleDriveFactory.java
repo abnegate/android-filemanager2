@@ -4,6 +4,7 @@ import android.webkit.MimeTypeMap;
 
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.About;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.Utils;
 
@@ -136,5 +137,21 @@ public class GoogleDriveFactory {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public long getFreeSpace() {
+        try {
+            About.StorageQuota quota = mService
+                    .about()
+                    .get()
+                    .setFields("storageQuota")
+                    .execute()
+                    .getStorageQuota();
+
+            return quota.getLimit() - quota.getUsage();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 }

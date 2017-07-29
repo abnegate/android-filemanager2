@@ -135,7 +135,7 @@ public class GoogleDriveFragment extends SourceFragment {
             } else if (mCredential != null && mCredential.getSelectedAccountName() == null) {
                 startActivityForResult(mCredential.newChooseAccountIntent(), ACCOUNT_PICKER);
             } else if (!Utils.isConnectionReady(getContext())) {
-                Snackbar.make(mRecycler, R.string.no_connection, Snackbar.LENGTH_LONG).show();
+                Snackbar.make(mRecycler, R.string.err_no_connection, Snackbar.LENGTH_LONG).show();
             } else {
                 loadSource();
             }
