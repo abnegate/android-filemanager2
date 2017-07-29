@@ -39,9 +39,8 @@ public class LocalFragment extends SourceFragment {
      */
     public static SourceFragment newInstance(String sourceName) {
         SourceFragment fragment = new LocalFragment();
-        fragment.setSourceName(sourceName);
         Bundle args = new Bundle();
-        args.putString("TITLE", sourceName);
+        args.putString(Constants.FRAGMENT_TITLE, sourceName);
         fragment.setArguments(args);
         return fragment;
     }
@@ -72,7 +71,7 @@ public class LocalFragment extends SourceFragment {
 
     @Override
     protected void loadSource() {
-        if (!isFilesLoaded()) {
+        if (!getSource().isFilesLoaded()) {
             new LocalFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Environment.getExternalStorageDirectory());
         }
     }
@@ -97,7 +96,7 @@ public class LocalFragment extends SourceFragment {
             SourceFile rootSourceFile = new LocalFile(rootFile);
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
-            setCurrentDirectory(rootFileTreeNode);
+            getSource().setCurrentDirectory(rootFileTreeNode);
             return parseFileSystem(files[0]);
         }
 
@@ -140,10 +139,9 @@ public class LocalFragment extends SourceFragment {
                 return result;
             });
             pushBreadcrumb(fileTree);
-            setFileTreeRoot(fileTree);
             initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
-            ((SourceActivity)getActivity()).setActiveDirectory(fileTree);
-            setFilesLoaded(true);
+            ((SourceActivity)getActivity()).getSourceManager().setActiveDirectory(fileTree);
+            getSource().setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
             mSourceLogo.setVisibility(View.GONE);
         }
@@ -177,7 +175,7 @@ public class LocalFragment extends SourceFragment {
                         Constants.RequestCodes.STORAGE_PERMISSIONS);
             }
         } else {
-            setLoggedIn(true);
+            getSource().setLoggedIn(true);
             loadSource();
         }
     }
@@ -189,7 +187,7 @@ public class LocalFragment extends SourceFragment {
             case Constants.RequestCodes.STORAGE_PERMISSIONS: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     loadSource();
-                    setLoggedIn(true);
+                    getSource().setLoggedIn(true);
                 } else if (!shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
                     Snackbar.make(mRecycler, R.string.storage_permission, Snackbar.LENGTH_LONG)
                             .setAction(R.string.action_settings, v -> showAppDetails())

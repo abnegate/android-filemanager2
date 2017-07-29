@@ -49,7 +49,7 @@ public class RenameDialog extends DialogFragment{
 
         builder.setView(view);
         builder.setPositiveButton("OK", (dialog, which) -> {
-            TreeNode<SourceFile> activeDirectory = ((SourceActivity)getActivity()).getActiveDirectory();
+            TreeNode<SourceFile> activeDirectory = ((SourceActivity)getActivity()).getSourceManager().getActiveDirectory();
             String newName = name.lastIndexOf('.') > 0 ?
                     input.getText().toString()+name.substring(name.lastIndexOf('.')) :
                     input.getText().toString();

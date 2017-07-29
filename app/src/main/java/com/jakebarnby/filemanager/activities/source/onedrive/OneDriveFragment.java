@@ -56,7 +56,6 @@ public class OneDriveFragment extends SourceFragment {
      */
     public static SourceFragment newInstance(String sourceName) {
         SourceFragment fragment = new OneDriveFragment();
-        fragment.setSourceName(sourceName);
         Bundle args = new Bundle();
         args.putString("TITLE", sourceName);
         fragment.setArguments(args);
@@ -92,7 +91,7 @@ public class OneDriveFragment extends SourceFragment {
     protected void authenticateSource() {
         mConnectButton.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.VISIBLE);
-        if (!isLoggedIn()) {
+        if (!getSource().isLoggedIn()) {
             List<User> users;
             try {
                 users = mClient.getUsers();
@@ -121,7 +120,7 @@ public class OneDriveFragment extends SourceFragment {
 
     @Override
     protected void loadSource() {
-        if (!isFilesLoaded() && mAuthResult != null) {
+        if (!getSource().isFilesLoaded() && mAuthResult != null) {
             if (!checkConnectionStatus()) return;
             final IClientConfig mClientConfig = DefaultClientConfig
                     .createWithAuthenticationProvider(iHttpRequest -> {
@@ -167,7 +166,7 @@ public class OneDriveFragment extends SourceFragment {
                 accessToken = mAuthResult.getAccessToken();
                 prefs.edit().putString("onedrive-access-token", accessToken).apply();
             } else {
-                if (!isLoggedIn()) {
+                if (!getSource().isLoggedIn()) {
                     authenticateSource();
                 } else {
                     loadSource();
@@ -175,7 +174,7 @@ public class OneDriveFragment extends SourceFragment {
             }
         }
         if (accessToken != null) {
-            if (!isLoggedIn()) {
+            if (!getSource().isLoggedIn()) {
                 authenticateSource();
             } else {
                 loadSource();
@@ -196,7 +195,7 @@ public class OneDriveFragment extends SourceFragment {
             public void onSuccess(AuthenticationResult authenticationResult) {
                 Log.d(TAG, "Successfully authenticated");
                 mAuthResult = authenticationResult;
-                setLoggedIn(true);
+                getSource().setLoggedIn(true);
                 checkForAccessToken();
             }
 
@@ -233,7 +232,7 @@ public class OneDriveFragment extends SourceFragment {
                 Log.d(TAG, "Successfully authenticated");
                 Log.d(TAG, "ID Token: " + authenticationResult.getIdToken());
                 mAuthResult = authenticationResult;
-                setLoggedIn(true);
+                getSource().setLoggedIn(true);
                 checkForAccessToken();
             }
 
@@ -267,7 +266,7 @@ public class OneDriveFragment extends SourceFragment {
             rootSourceFile.setDirectory(true);
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
-            setCurrentDirectory(rootFileTreeNode);
+            getSource().setCurrentDirectory(rootFileTreeNode);
             return parseFileTree(driveItems[0]);
         }
 
@@ -319,9 +318,8 @@ public class OneDriveFragment extends SourceFragment {
                 return result;
             });
             pushBreadcrumb(fileTree);
-            setFileTreeRoot(fileTree);
             initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
-            setFilesLoaded(true);
+            getSource().setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
             mSourceLogo.setVisibility(View.GONE);
         }

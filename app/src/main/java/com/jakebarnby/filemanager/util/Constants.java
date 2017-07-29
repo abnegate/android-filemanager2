@@ -12,6 +12,7 @@ public class Constants {
     public static final String ERROR_MESSAGE_KEY = "ERROR_MESSAGE";
     public static final String FILE_PATH_KEY = "FILE_PATH";
     public static final java.lang.String NAME_KEY = "NAME_KEY";
+    public static final String FRAGMENT_TITLE = "TITLE";
 
     public class Sources {
         public static final String CALLBACK_URL = "https://google.com";
