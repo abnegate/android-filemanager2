@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -29,6 +30,7 @@ import com.jakebarnby.filemanager.activities.source.adapters.FileSystemAdapter;
 import com.jakebarnby.filemanager.activities.source.adapters.FileSystemGridAdapter;
 import com.jakebarnby.filemanager.activities.source.adapters.FileSystemListAdapter;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
+import com.jakebarnby.filemanager.models.Source;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.services.SourceTransferService;
 import com.jakebarnby.filemanager.util.Constants;
@@ -40,12 +42,7 @@ import com.jakebarnby.filemanager.util.Utils;
  */
 public abstract class SourceFragment extends Fragment {
 
-    private String                  mSourceName;
-    private TreeNode<SourceFile>    mRootFileTreeNode;
-    private TreeNode<SourceFile>    mCurrentDirectory;
-    private boolean                 mLoggedIn;
-    private boolean                 mFilesLoaded;
-    private boolean                 mMultiSelectEnabled;
+    private Source                  mSource;
 
     protected RecyclerView          mRecycler;
     protected FileSystemListAdapter mFileSystemListAdapter;
@@ -59,14 +56,18 @@ public abstract class SourceFragment extends Fragment {
     private HorizontalScrollView    mBreadcrumbWrapper;
 
     /**
-     * Authenticate the current source
+     * Authenticate the current mSource
      */
     protected abstract void authenticateSource();
 
     /**
-     * Load the current source
+     * Load the current mSource
      */
     protected abstract void loadSource();
+
+    public Source getSource() {
+        return mSource;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -78,8 +79,9 @@ public abstract class SourceFragment extends Fragment {
         mDivider = rootView.findViewById(R.id.divider);
         mConnectButton = rootView.findViewById(R.id.btn_connect);
         mSourceLogo = rootView.findViewById(R.id.image_source_logo);
+        mSource = new Source(getArguments().getString(Constants.FRAGMENT_TITLE));
 
-        if (hasToken(getSourceName())) {
+        if (hasToken(mSource.getSourceName())) {
             mConnectButton.setVisibility(View.GONE);
             mSourceLogo.setVisibility(View.GONE);
         }
@@ -93,64 +95,27 @@ public abstract class SourceFragment extends Fragment {
         return rootView;
     }
 
-    public void setSourceName(String sourceName) {
-        this.mSourceName = sourceName;
-    }
-
-    public String getSourceName() {
-        return mSourceName;
-    }
-
-    public void setFileTreeRoot(TreeNode<SourceFile> mFileTree) {
-        this.mRootFileTreeNode = mFileTree;
-    }
-
-    public boolean isLoggedIn() {
-        return mLoggedIn;
-    }
-
-    public void setLoggedIn(boolean loggedIn) {
-        this.mLoggedIn = loggedIn;
-    }
-
-    public boolean isFilesLoaded() {
-        return mFilesLoaded;
-    }
-
-    public void setFilesLoaded(boolean mFilesLoaded) {
-        this.mFilesLoaded = mFilesLoaded;
-    }
-
-    public boolean isMultiSelectEnabled() {
-        return mMultiSelectEnabled;
-    }
-
     public void setMultiSelectEnabled(boolean enabled) {
         if (enabled) {
             ((SourceActivity)getActivity()).toggleFloatingMenu(true);
         }
-        this.mMultiSelectEnabled = enabled;
+        this.mSource.setMultiSelectEnabled(enabled);
         if (mRecycler.getAdapter() != null) {
             ((FileSystemAdapter) mRecycler.getAdapter()).setMultiSelectEnabled(enabled);
             mRecycler.getAdapter().notifyDataSetChanged();
         }
     }
 
-    public TreeNode<SourceFile>  getCurrentDirectory() {
-        return mCurrentDirectory;
-    }
-
-    public void setCurrentDirectory(TreeNode<SourceFile>  mCurrentDirectory) {
-        this.mCurrentDirectory = mCurrentDirectory;
-    }
-
+    /**
+     * Reload the {@link RecyclerView}
+     */
     public void refreshRecycler() {
         mRecycler.getAdapter().notifyDataSetChanged();
     }
 
     /**
-     * Checks if this source has a valid access token
-     * @return  Whether there is a valid access token for this source
+     * Checks if this mSource has a valid access token
+     * @return  Whether there is a valid access token for this mSource
      */
     protected boolean hasToken(String sourceName) {
         SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
@@ -184,8 +149,8 @@ public abstract class SourceFragment extends Fragment {
     }
 
     /**
-     * Initialize the UI for this source
-     * @param file                  The root file of the source
+     * Initialize the UI for this mSource
+     * @param file                  The root file of the mSource
      * @param onClickListener       The click listener for files and folders
      * @param onLongClickListener   The long click listener for files and folders
      */
@@ -224,7 +189,7 @@ public abstract class SourceFragment extends Fragment {
      */
     protected FileSystemAdapter.OnFileClickedListener createOnClickListener() {
         return (file, isChecked, position) -> {
-            if (mMultiSelectEnabled) {
+            if (mSource.isMultiSelectEnabled()) {
                 if (isChecked) {
                     SelectedFilesManager
                             .getInstance()
@@ -246,8 +211,8 @@ public abstract class SourceFragment extends Fragment {
             } else {
                 if (file.getData().isDirectory()) {
                     ((FileSystemAdapter) mRecycler.getAdapter()).setCurrentDirectory(file);
-                    setCurrentDirectory(file);
-                    ((SourceActivity)getActivity()).setActiveDirectory(file);
+                    mSource.setCurrentDirectory(file);
+                    ((SourceActivity)getActivity()).getSourceManager().setActiveDirectory(file);
                     pushBreadcrumb(file);
                     mRecycler.getAdapter().notifyDataSetChanged();
                 } else {
@@ -255,9 +220,18 @@ public abstract class SourceFragment extends Fragment {
 //                            !getSourceName().equals(Constants.Sources.LOCAL)) {
 //                        return;
 //                    }
-                    SelectedFilesManager.getInstance().addNewSelection();
-                    ((SourceActivity)getActivity()).addFileAction(SelectedFilesManager.getInstance().getOperationCount()-1, SourceActivity.FileAction.OPEN);
-                    SourceTransferService.startActionOpen(getContext(), file.getData());
+
+                    if (Utils.getFreeSpace(Environment.getExternalStorageDirectory()) > file.getData().getSize()) {
+                        SelectedFilesManager.getInstance().addNewSelection();
+                        ((SourceActivity)getActivity()).getSourceManager().addFileAction(
+                                SelectedFilesManager.getInstance().getOperationCount()-1,
+                                SourceActivity.FileAction.OPEN);
+                        SourceTransferService.startActionOpen(getContext(), file.getData());
+                    } else {
+                        Snackbar.make(mRecycler,
+                                String.format(getString(R.string.err_no_free_space), file.getData().getSourceName()),
+                                Snackbar.LENGTH_LONG).show();
+                    }
                 }
             }
         };
@@ -269,7 +243,7 @@ public abstract class SourceFragment extends Fragment {
      */
     protected FileSystemAdapter.OnFileLongClickedListener createOnLongClickListener() {
         return file -> {
-            if (!mMultiSelectEnabled) {
+            if (!mSource.isMultiSelectEnabled()) {
                 setMultiSelectEnabled(true);
 
                 if (SelectedFilesManager.getInstance().getOperationCount() == 0) {
@@ -313,12 +287,12 @@ public abstract class SourceFragment extends Fragment {
             for (int i = 0; i < diff; i++) popBreadcrumb();
 
             String name = crumbText.getText().toString();
-            if (getCurrentDirectory().getData().getName().equals(name)) return;
-            TreeNode<SourceFile> selectedParent = TreeNode.findParent(getCurrentDirectory(), name);
+            if (mSource.getCurrentDirectory().getData().getName().equals(name)) return;
+            TreeNode<SourceFile> selectedParent = TreeNode.findParent(mSource.getCurrentDirectory(), name);
 
-            ((SourceActivity)getActivity()).setActiveDirectory(selectedParent);
+            ((SourceActivity)getActivity()).getSourceManager().setActiveDirectory(selectedParent);
             ((FileSystemAdapter)mRecycler.getAdapter()).setCurrentDirectory(selectedParent);
-            setCurrentDirectory(selectedParent);
+            mSource.setCurrentDirectory(selectedParent);
             mRecycler.getAdapter().notifyDataSetChanged();
         });
         mBreadcrumbWrapper.postDelayed(() ->
@@ -339,7 +313,7 @@ public abstract class SourceFragment extends Fragment {
      * If performing an action on a non-local directory, check internet and
      */
     protected boolean checkConnectionStatus() {
-        if (!getSourceName().equals(Constants.Sources.LOCAL)) {
+        if (!mSource.getSourceName().equals(Constants.Sources.LOCAL)) {
             if (!Utils.isConnectionReady(getContext())) {
                 Snackbar.make(mRecycler, R.string.err_no_connection, Snackbar.LENGTH_LONG).show();
                 return false;

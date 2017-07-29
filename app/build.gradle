@@ -62,7 +62,6 @@ android {
 
 configurations {
     implementation.exclude(group: 'org.apache.httpcomponents', module: 'httpclient')
-    implementation.exclude group: 'com.google.firebase', module: 'firebase-analytics'
 }
 
 dependencies {
@@ -88,8 +87,8 @@ dependencies {
     //Firebase
     implementation 'com.google.android.gms:play-services-auth:11.0.4'
     implementation 'com.google.firebase:firebase-core:11.0.4'
-    implementation 'com.google.firebase:firebase-crash:11.0.4'
     implementation 'com.google.firebase:firebase-messaging:11.0.4'
+
     //Google Drive
     implementation "com.google.api-client:google-api-client-android:${project.googleApiVersion}"
     implementation "com.google.apis:google-api-services-drive:v3-rev75-${project.googleApiVersion}"
@@ -98,9 +97,6 @@ dependencies {
     implementation project(':msal')
     implementation('com.microsoft.graph:msgraph-sdk-android:1.2.+')
     implementation('com.google.code.gson:gson:2.3.1')
-
-    //Animations
-    implementation 'com.airbnb.android:lottie:2.0.0-rc2'
 
     //FAB Menu Button
     implementation 'io.github.yavski:fab-speed-dial:1.0.6'

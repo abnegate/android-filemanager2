@@ -49,7 +49,7 @@ public class CreateFolderDialog extends DialogFragment {
         builder.setView(frame);
 
         builder.setPositiveButton("OK", (dialog, which) -> {
-            TreeNode<SourceFile> activeDirectory = ((SourceActivity)getActivity()).getActiveDirectory();
+            TreeNode<SourceFile> activeDirectory = ((SourceActivity)getActivity()).getSourceManager().getActiveDirectory();
             String name = input.getText().toString();
 
             for(TreeNode<SourceFile> file: activeDirectory.getChildren()) {

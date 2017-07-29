@@ -42,9 +42,8 @@ public class DropboxFragment extends SourceFragment {
      */
     public static SourceFragment newInstance(String sourceName) {
         SourceFragment fragment = new DropboxFragment();
-        fragment.setSourceName(sourceName);
         Bundle args = new Bundle();
-        args.putString("TITLE", sourceName);
+        args.putString(Constants.FRAGMENT_TITLE, sourceName);
         fragment.setArguments(args);
         return fragment;
     }
@@ -64,7 +63,7 @@ public class DropboxFragment extends SourceFragment {
 
     @Override
     protected void authenticateSource() {
-        if (!hasToken(getSourceName())) {
+        if (!hasToken(getSource().getSourceName())) {
             Auth.startOAuth2Authentication(getActivity(), Constants.Sources.Keys.DROPBOX_CLIENT_ID);
             Log.d("Jake", "Hit with token: " + Auth.getOAuth2Token());
         }
@@ -75,12 +74,12 @@ public class DropboxFragment extends SourceFragment {
      * @param accessToken The access token for this dropbox session
      */
     private void setupClient(String accessToken) {
-        if (!isLoggedIn()) {
+        if (!getSource().isLoggedIn()) {
             DbxRequestConfig requestConfig = DbxRequestConfig.newBuilder("FileManagerAndroid/1.0")
                     .withHttpRequestor(new OkHttp3Requestor(OkHttp3Requestor.defaultOkHttpClient()))
                     .build();
             DropboxFactory.getInstance().setClient(new DbxClientV2(requestConfig, accessToken));
-            setLoggedIn(true);
+            getSource().setLoggedIn(true);
         }
     }
 
@@ -104,7 +103,7 @@ public class DropboxFragment extends SourceFragment {
                 loadSource();
             }
         } else {
-            if (!isLoggedIn()) {
+            if (!getSource().isLoggedIn()) {
                 setupClient(accessToken);
             }
             loadSource();
@@ -113,7 +112,7 @@ public class DropboxFragment extends SourceFragment {
 
     @Override
     protected void loadSource() {
-        if (!isFilesLoaded()) {
+        if (!getSource().isFilesLoaded()) {
             if (!checkConnectionStatus()) return;
             new DropboxFileSystemLoader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
         }
@@ -139,7 +138,7 @@ public class DropboxFragment extends SourceFragment {
             rootSourceFile.setDirectory(true);
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
-            setCurrentDirectory(rootFileTreeNode);
+            getSource().setCurrentDirectory(rootFileTreeNode);
 
 
             ListFolderResult result = null;
@@ -213,10 +212,9 @@ public class DropboxFragment extends SourceFragment {
                 return result;
             });
             pushBreadcrumb(fileTree);
-            setFileTreeRoot(fileTree);
             initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
 
-            setFilesLoaded(true);
+            getSource().setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
             mSourceLogo.setVisibility(View.GONE);
         }

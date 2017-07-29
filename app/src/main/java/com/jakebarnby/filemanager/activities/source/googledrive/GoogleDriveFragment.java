@@ -64,7 +64,6 @@ public class GoogleDriveFragment extends SourceFragment {
      */
     public static SourceFragment newInstance(String sourceName) {
         SourceFragment fragment = new GoogleDriveFragment();
-        fragment.setSourceName(sourceName);
         Bundle args = new Bundle();
         args.putString("TITLE", sourceName);
         fragment.setArguments(args);
@@ -99,7 +98,7 @@ public class GoogleDriveFragment extends SourceFragment {
 
     @Override
     public void onResume() {
-        if (!isLoggedIn()) {
+        if (!getSource().isLoggedIn()) {
             authGoogleSilent();
         }
         super.onResume();
@@ -121,7 +120,7 @@ public class GoogleDriveFragment extends SourceFragment {
         if (accountName != null) {
             mCredential.setSelectedAccountName(accountName);
             getResultsFromApi();
-            setLoggedIn(true);
+            getSource().setLoggedIn(true);
         }
     }
 
@@ -129,7 +128,7 @@ public class GoogleDriveFragment extends SourceFragment {
      * Attempt to call the API, after verifying that all the preconditions are satisfied
      */
     private void getResultsFromApi() {
-        if (!isLoggedIn()) {
+        if (!getSource().isLoggedIn()) {
             if (!Utils.isGooglePlayServicesAvailable(getContext())) {
                 Utils.acquireGooglePlayServices(getActivity());
             } else if (mCredential != null && mCredential.getSelectedAccountName() == null) {
@@ -144,7 +143,7 @@ public class GoogleDriveFragment extends SourceFragment {
 
     @Override
     protected void loadSource() {
-        if (!isFilesLoaded()) {
+        if (!getSource().isFilesLoaded()) {
             if (!checkConnectionStatus()) return;
             new GoogleDriveFileSystemLoader(mCredential).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "root");
         }
@@ -178,7 +177,7 @@ public class GoogleDriveFragment extends SourceFragment {
                         prefs.edit().putString(Constants.SharedPrefs.GOOGLE_ACCOUNT_NAME, accountName).apply();
                         mCredential.setSelectedAccountName(accountName);
                         getResultsFromApi();
-                        setLoggedIn(true);
+                        getSource().setLoggedIn(true);
                     }
                 }
                 break;
@@ -223,7 +222,7 @@ public class GoogleDriveFragment extends SourceFragment {
                 SourceFile rootSourceFile = new GoogleDriveFile(rootFile);
                 rootFileTreeNode = new TreeNode<>(rootSourceFile);
                 currentLevelNode = rootFileTreeNode;
-                setCurrentDirectory(rootFileTreeNode);
+                getSource().setCurrentDirectory(rootFileTreeNode);
 
                 return parseDirectory(rootFile);
             } catch (Exception e) {
@@ -282,9 +281,8 @@ public class GoogleDriveFragment extends SourceFragment {
                 return result;
             });
             pushBreadcrumb(fileTree);
-            setFileTreeRoot(fileTree);
             initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
-            setFilesLoaded(true);
+            getSource().setFilesLoaded(true);
             mProgressBar.setVisibility(View.GONE);
             mSourceLogo.setVisibility(View.GONE);
         }
