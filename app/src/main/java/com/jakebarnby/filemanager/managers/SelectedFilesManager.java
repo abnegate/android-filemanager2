@@ -50,4 +50,13 @@ public class SelectedFilesManager {
     public int getOperationCount() {
         return mSelectedFilesMap.size();
     }
+
+    public long getCurrentCopySize() {
+        long copySize = 0;
+        for(TreeNode<SourceFile> file: SelectedFilesManager.getInstance().getSelectedFiles(
+                SelectedFilesManager.getInstance().getOperationCount())) {
+            copySize+=file.getData().getSize();
+        }
+        return copySize;
+    }
 }

@@ -223,6 +223,7 @@ public class GoogleDriveFragment extends SourceFragment {
                 rootFileTreeNode = new TreeNode<>(rootSourceFile);
                 currentLevelNode = rootFileTreeNode;
                 getSource().setCurrentDirectory(rootFileTreeNode);
+                getSource().setFreeSpace(GoogleDriveFactory.getInstance().getFreeSpace());
 
                 return parseDirectory(rootFile);
             } catch (Exception e) {

@@ -41,12 +41,10 @@ import com.jakebarnby.filemanager.activities.source.dialogs.CreateFolderDialog;
 import com.jakebarnby.filemanager.activities.source.dialogs.PropertiesDialog;
 import com.jakebarnby.filemanager.activities.source.dialogs.RenameDialog;
 import com.jakebarnby.filemanager.activities.source.dialogs.ViewAsDialog;
-import com.jakebarnby.filemanager.listeners.OnSpaceCheckListener;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.models.SourceManager;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.services.SourceTransferService;
-import com.jakebarnby.filemanager.tasks.SpaceCheckerTask;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
@@ -309,6 +307,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             setTitle(getString(R.string.app_name));
             toggleFloatingMenu(false);
             SourceTransferService.startActionDelete(SourceActivity.this);
+            getActiveFragment()
+                    .getSource()
+                    .increaseFreeSpace(SelectedFilesManager.getInstance().getCurrentCopySize());
             SelectedFilesManager.getInstance().addNewSelection();
         } else {
             showSnackbar(getString(R.string.err_no_selection));
@@ -330,36 +331,24 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             showSnackbar(getString(R.string.err_not_loaded));
             return;
         }
-        
-        startFreeSpaceCheck(success -> {
-            if (success) {
-                startPasteAction();
-            } else {
-                showSnackbar(String.format(
-                        getString(R.string.err_no_free_space),
-                        getActiveFragment().getSource().getSourceName().toLowerCase()));
-            }
-        });
-    }
 
-    /**
-     * Run a {@link SpaceCheckerTask} calling back to the passed listener with success or failure
-     * @param listener  The listener to callback with success or failure when the task completes
-     */
-    void startFreeSpaceCheck(OnSpaceCheckListener listener) {
-        long copySize = 0;
-        for(TreeNode<SourceFile> file: SelectedFilesManager.getInstance().getSelectedFiles(
-                SelectedFilesManager.getInstance().getOperationCount())) {
-            copySize+=file.getData().getSize();
+        long copySize = SelectedFilesManager
+                .getInstance()
+                .getCurrentCopySize();
+
+        if (copySize < getActiveFragment().getSource().getFreeSpace()) {
+            startPasteAction(copySize);
+        } else {
+            showSnackbar(String.format(
+                    getString(R.string.err_no_free_space),
+                    getActiveFragment().getSource().getSourceName().toLowerCase()));
         }
-        String curSourceName = getActiveFragment().getSource().getSourceName();
-        new SpaceCheckerTask(curSourceName, copySize, listener).execute();
     }
 
     /**
      * Start a paste action via {@link SourceTransferService}
      */
-    private void startPasteAction() {
+    private void startPasteAction(long copySize) {
         if (mSourceManager.getFileAction(
                 SelectedFilesManager.getInstance().getOperationCount()) != null) {
             getActiveFragment().setMultiSelectEnabled(false);
@@ -379,6 +368,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 SourceTransferService.startActionCopy(SourceActivity.this, true);
             }
             SelectedFilesManager.getInstance().addNewSelection();
+            getActiveFragment().getSource().decreaseFreeSpace(copySize);
         }
     }
 
