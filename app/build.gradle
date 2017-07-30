@@ -109,6 +109,9 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC0'
     implementation "com.github.bumptech.glide:recyclerview-integration:4.0.0-RC0@aar"
 
+    //CirclePercentProgressBar
+    implementation 'com.dinuscxj:circleprogressbar:1.1.1'
+
     //Crashlytics
     api('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true
