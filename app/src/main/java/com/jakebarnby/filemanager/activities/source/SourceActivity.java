@@ -1,6 +1,7 @@
 package com.jakebarnby.filemanager.activities.source;
 
 import android.annotation.SuppressLint;
+import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -19,8 +20,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,12 +38,14 @@ import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.ndk.CrashlyticsNdk;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.adapters.FileSystemAdapter;
-import com.jakebarnby.filemanager.activities.source.adapters.SourcesPagerAdapter;
+import com.jakebarnby.filemanager.activities.source.adapters.SourcePagerAdapter;
+import com.jakebarnby.filemanager.activities.source.adapters.SourceUsageAdapter;
 import com.jakebarnby.filemanager.activities.source.dialogs.CreateFolderDialog;
 import com.jakebarnby.filemanager.activities.source.dialogs.PropertiesDialog;
 import com.jakebarnby.filemanager.activities.source.dialogs.RenameDialog;
 import com.jakebarnby.filemanager.activities.source.dialogs.ViewAsDialog;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
+import com.jakebarnby.filemanager.models.Source;
 import com.jakebarnby.filemanager.models.SourceManager;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.services.SourceTransferService;
@@ -50,6 +54,7 @@ import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import io.fabric.sdk.android.Fabric;
@@ -69,7 +74,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     private SourceManager               mSourceManager;
 
-    private SourcesPagerAdapter         mSourcesPagerAdapter;
+    private SourcePagerAdapter mSourcesPagerAdapter;
     private ViewPager                   mViewPager;
     private BroadcastReceiver           mBroadcastReciever;
     private ProgressDialog              mDialog;
@@ -111,7 +116,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         setSupportActionBar(toolbar);
 
         mSourceManager = new SourceManager();;
-        mSourcesPagerAdapter = new SourcesPagerAdapter(getSupportFragmentManager());
+        mSourcesPagerAdapter = new SourcePagerAdapter(getSupportFragmentManager());
         mViewPager = findViewById(R.id.view_pager);
         mBlurWrapper = findViewById(R.id.wrapper);
         mViewPager.setAdapter(mSourcesPagerAdapter);
@@ -214,7 +219,14 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             case R.id.action_multi_select:
                 if (!getActiveFragment().getSource().isMultiSelectEnabled()) {
                     getActiveFragment().setMultiSelectEnabled(true);
+
+                    if (SelectedFilesManager.getInstance().getOperationCount() == 0) {
+                        SelectedFilesManager.getInstance().addNewSelection();
+                    }
                 }
+                break;
+            case R.id.action_storage_usage:
+                showUsageDialog();
                 break;
             default:
                 break;
@@ -564,6 +576,30 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         }
     }
 
+    private void showUsageDialog() {
+        List<Source> sources = new ArrayList<>();
+        for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
+            if (fragment.getSource().isFilesLoaded()) {
+                sources.add(fragment.getSource());
+            }
+        }
+        SourceUsageAdapter adapter = new SourceUsageAdapter(sources);
+
+        View view = getLayoutInflater().inflate(R.layout.dialog_source_usage, null);
+        RecyclerView rv = view.findViewById(R.id.rv_source_usage);
+        rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        rv.setAdapter(adapter);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder
+                .setTitle(R.string.dialog_title_usage)
+                .setNegativeButton(R.string.close, (dialog, which) -> dialog.dismiss())
+                .setView(view)
+                .create()
+                .show();
+    }
+
     /**
      * Open a file at the given path. If the open operation was finished in the background,
      * inform user file is ready to open with a dialog. Otherwise open the file immediately.
@@ -651,6 +687,17 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             }
         });
         mFabMenu.startAnimation(translate);
+    }
+
+    /**
+     * Initializes recyclerviews for all logged in fragments due to a view layout change (Grid <-> List)
+     */
+    public void initAllRecyclers() {
+        for (SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
+            if (fragment.getSource().isFilesLoaded()) {
+                fragment.initRecyclerView();
+            }
+        }
     }
 
     @Override

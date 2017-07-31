@@ -1,55 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <RelativeLayout
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_source_usage"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:orientation="horizontal">
-        <com.dinuscxj.progressbar.CircleProgressBar
-            android:id="@+id/prg_circle_local"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="30dp"
-            android:progress="130"
-            app:background_color="@android:color/transparent"
-            app:draw_progress_text="true"
-            app:line_count="40"
-            app:line_width="4sp"
-            app:progress_background_color="@color/light_gray"
-            app:progress_end_color="@color/colorPrimary"
-            app:progress_start_color="@color/colorAccent"
-            app:progress_stroke_width="3dp"
-            app:progress_text_color="@color/colorAccent"
-            app:progress_text_size="14sp"
-            app:style="solid_line"/>
-
-
-        <TextView
-            android:id="@+id/txt_source_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/prg_circle_local"
-            android:layout_marginStart="40dp"
-            android:layout_marginTop="35dp"
-            android:text="Source"
-            android:textSize="24sp"/>
-
-        <TextView
-            android:id="@+id/txt_space_consumption"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/prg_circle_local"
-            android:layout_below="@id/txt_source_title"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="40dp"
-            android:text="14.45 / 20 GB used"
-            android:textSize="12sp"/>
-    </RelativeLayout>
-
-
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:overScrollMode="never"
+        android:requiresFadingEdge="vertical">
+    </android.support.v7.widget.RecyclerView>
 </LinearLayout>

@@ -216,12 +216,8 @@ public abstract class SourceFragment extends Fragment {
                     pushBreadcrumb(file);
                     mRecycler.getAdapter().notifyDataSetChanged();
                 } else {
-//                    if (!((SourceActivity) getActivity()).startFreeSpaceCheck() &&
-//                            !getSourceName().equals(Constants.Sources.LOCAL)) {
-//                        return;
-//                    }
-
-                    if (Utils.getFreeSpace(Environment.getExternalStorageDirectory()) > file.getData().getSize()) {
+                    if (Utils.getStorageStats(Environment.getExternalStorageDirectory())
+                            .getFreeSpace() > file.getData().getSize()) {
                         SelectedFilesManager.getInstance().addNewSelection();
                         ((SourceActivity)getActivity()).getSourceManager().addFileAction(
                                 SelectedFilesManager.getInstance().getOperationCount()-1,

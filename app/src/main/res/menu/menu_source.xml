@@ -15,6 +15,10 @@
         android:title="@string/action_viewas"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_storage_usage"
+        android:title="@string/menu_storage_usage"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_settings"
         android:title="@string/action_settings"
         app:showAsAction="never" />

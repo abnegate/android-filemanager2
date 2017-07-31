@@ -3,22 +3,16 @@ package com.jakebarnby.filemanager.util;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.Point;
-import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
-import android.os.Environment;
 import android.os.StatFs;
-import android.support.design.widget.Snackbar;
 import android.view.Display;
-import android.view.View;
 import android.view.WindowManager;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.jakebarnby.filemanager.models.SourceStorageStats;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -160,8 +154,13 @@ public class Utils {
      * @param dir   The dir to check free space of
      * @return      Amount of bytes free in file
      */
-    public static long getFreeSpace(File dir) {
-        return new StatFs(dir.getAbsolutePath())
-                .getAvailableBytes();
+    public static SourceStorageStats getStorageStats(File dir) {
+        StatFs fileSystem = new StatFs(dir.getAbsolutePath());
+
+        SourceStorageStats info = new SourceStorageStats();
+        info.setFreeSpace(fileSystem.getAvailableBytes());
+        info.setTotalSpace(fileSystem.getTotalBytes());
+        info.setUsedSpace(fileSystem.getTotalBytes() - fileSystem.getAvailableBytes());
+        return info;
     }
 }
