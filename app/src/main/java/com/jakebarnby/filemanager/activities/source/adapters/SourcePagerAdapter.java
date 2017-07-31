@@ -18,11 +18,11 @@ import java.util.List;
  * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
  * one of the sections/tabs/pages.
  */
-public class SourcesPagerAdapter extends FragmentPagerAdapter {
+public class SourcePagerAdapter extends FragmentPagerAdapter {
 
     private List<SourceFragment> fragments = new ArrayList<>();
 
-    public SourcesPagerAdapter(FragmentManager fm) {
+    public SourcePagerAdapter(FragmentManager fm) {
         super(fm);
         fragments.add(LocalFragment.newInstance(Constants.Sources.LOCAL));
         fragments.add(DropboxFragment.newInstance(Constants.Sources.DROPBOX));

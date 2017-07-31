@@ -1,20 +1,17 @@
 package com.jakebarnby.filemanager.managers;
+import com.jakebarnby.filemanager.models.SourceStorageStats;
 import com.jakebarnby.filemanager.util.Utils;
 import com.microsoft.graph.core.ClientException;
 import com.microsoft.graph.extensions.DriveItem;
 import com.microsoft.graph.extensions.Folder;
 import com.microsoft.graph.extensions.IGraphServiceClient;
-import com.microsoft.graph.extensions.ItemReference;
 import com.microsoft.graph.extensions.Quota;
 import com.microsoft.graph.http.GraphServiceException;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * Created by Jake on 6/9/2017.
@@ -133,7 +130,7 @@ public class OneDriveFactory {
                 .patch(item);
     }
 
-    public long getFreeSpace() {
+    public SourceStorageStats getStorageStats() {
         try {
             Quota quota = mGraphClient
                     .getMe()
@@ -142,10 +139,16 @@ public class OneDriveFactory {
                     .select("quota")
                     .get()
                     .quota;
-            return quota.remaining;
+
+            SourceStorageStats info = new SourceStorageStats();
+            info.setTotalSpace(quota.total);
+            info.setUsedSpace(quota.used);
+            info.setFreeSpace(quota.remaining);
+
+            return info;
         } catch (GraphServiceException e) {
             e.printStackTrace();
         }
-        return -1;
+        return null;
     }
 }
