@@ -1,5 +1,6 @@
 package com.jakebarnby.filemanager.managers;
 import com.jakebarnby.filemanager.models.SourceStorageStats;
+import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.Utils;
 import com.microsoft.graph.core.ClientException;
 import com.microsoft.graph.extensions.DriveItem;
@@ -69,7 +70,7 @@ public class OneDriveFactory {
      */
     public DriveItem uploadFile(String filePath, String fileName, String parentId) {
         File file = new File(filePath);
-        
+
         try(FileInputStream in = new FileInputStream(file)) {
             byte[] buffer = new byte[(int)file.length()];
             in.read(buffer);
@@ -78,7 +79,7 @@ public class OneDriveFactory {
                     .getMe()
                     .getDrive()
                     .getItems(parentId)
-                    .getChildren(fileName)
+                    .getChildren(transformFileName(fileName))
                     .getContent()
                     .buildRequest()
                     .put(buffer);
@@ -150,5 +151,13 @@ public class OneDriveFactory {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private String transformFileName(String fileName) {
+        String newName = fileName.replaceAll(Constants.Sources.ONEDRIVE_INVALID_CHARS, "%20");
+        if (newName.length() > Constants.MAX_FILENAME_LENGTH) {
+            newName = newName.substring(0, Constants.MAX_FILENAME_LENGTH);
+        }
+        return newName;
     }
 }

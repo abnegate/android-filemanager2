@@ -10,6 +10,7 @@ public class Constants {
     public static final String ERROR_MESSAGE_KEY = "ERROR_MESSAGE";
     public static final String FILE_PATH_KEY = "FILE_PATH";
     public static final String FRAGMENT_TITLE = "TITLE";
+    public static final int MAX_FILENAME_LENGTH = 255;
 
     public static final double BYTES_TO_GIGABYTE = 1073741824d;
 
@@ -21,6 +22,8 @@ public class Constants {
 
         public static final String GOOGLE_DRIVE_FOLDER_MIME = "application/vnd.google-apps.folder";
 
+        public static final String ONEDRIVE_INVALID_CHARS = "[\\/:*?\"<>|#% ]";
+        
         public class Keys {
             public static final String DROPBOX_CLIENT_ID       = "rse09cxjnnn2yc1";
         }
