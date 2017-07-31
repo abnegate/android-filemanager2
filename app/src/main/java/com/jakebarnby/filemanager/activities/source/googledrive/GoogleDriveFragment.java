@@ -223,7 +223,7 @@ public class GoogleDriveFragment extends SourceFragment {
                 rootFileTreeNode = new TreeNode<>(rootSourceFile);
                 currentLevelNode = rootFileTreeNode;
                 getSource().setCurrentDirectory(rootFileTreeNode);
-                getSource().setQuotaInfo(GoogleDriveFactory.getInstance().getQuotaInfo());
+                getSource().setQuotaInfo(GoogleDriveFactory.getInstance().getStorageStats());
 
                 return parseDirectory(rootFile);
             } catch (Exception e) {

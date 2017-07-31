@@ -5,7 +5,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -13,7 +12,6 @@ import com.dinuscxj.progressbar.CircleProgressBar;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.models.Source;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -31,7 +29,7 @@ public class SourceUsageAdapter extends RecyclerView.Adapter<SourceUsageAdapter.
 
     @Override
     public UsageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View inflatedView = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_source_usage, parent, false);
+        View inflatedView = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_source_usage_list, parent, false);
         return new SourceUsageAdapter.UsageViewHolder(inflatedView);
     }
 

@@ -267,7 +267,7 @@ public class OneDriveFragment extends SourceFragment {
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
             getSource().setCurrentDirectory(rootFileTreeNode);
-            getSource().setQuotaInfo(OneDriveFactory.getInstance().getQuotaInfo());
+            getSource().setQuotaInfo(OneDriveFactory.getInstance().getStorageStats());
 
             return parseFileTree(driveItems[0]);
         }

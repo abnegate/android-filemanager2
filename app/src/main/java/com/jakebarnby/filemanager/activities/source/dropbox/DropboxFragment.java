@@ -139,7 +139,7 @@ public class DropboxFragment extends SourceFragment {
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
             getSource().setCurrentDirectory(rootFileTreeNode);
-            getSource().setQuotaInfo(DropboxFactory.getInstance().getQuotaInfo());
+            getSource().setQuotaInfo(DropboxFactory.getInstance().getStorageStats());
 
             ListFolderResult result = null;
             try {
