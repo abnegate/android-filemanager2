@@ -1,20 +1,17 @@
 package com.jakebarnby.filemanager.managers;
+import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.Utils;
 import com.microsoft.graph.core.ClientException;
 import com.microsoft.graph.extensions.DriveItem;
 import com.microsoft.graph.extensions.Folder;
 import com.microsoft.graph.extensions.IGraphServiceClient;
-import com.microsoft.graph.extensions.ItemReference;
 import com.microsoft.graph.extensions.Quota;
 import com.microsoft.graph.http.GraphServiceException;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * Created by Jake on 6/9/2017.
@@ -72,7 +69,7 @@ public class OneDriveFactory {
      */
     public DriveItem uploadFile(String filePath, String fileName, String parentId) {
         File file = new File(filePath);
-        
+
         try(FileInputStream in = new FileInputStream(file)) {
             byte[] buffer = new byte[(int)file.length()];
             in.read(buffer);
@@ -81,7 +78,7 @@ public class OneDriveFactory {
                     .getMe()
                     .getDrive()
                     .getItems(parentId)
-                    .getChildren(fileName)
+                    .getChildren(transformFileName(fileName))
                     .getContent()
                     .buildRequest()
                     .put(buffer);
@@ -147,5 +144,13 @@ public class OneDriveFactory {
             e.printStackTrace();
         }
         return -1;
+    }
+
+    private String transformFileName(String fileName) {
+        String newName = fileName.replaceAll(Constants.Sources.ONEDRIVE_INVALID_CHARS, "%20");
+        if (newName.length() > Constants.MAX_FILENAME_LENGTH) {
+            newName = newName.substring(0, Constants.MAX_FILENAME_LENGTH);
+        }
+        return newName;
     }
 }
