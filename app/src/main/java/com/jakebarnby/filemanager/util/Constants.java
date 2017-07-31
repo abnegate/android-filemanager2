@@ -40,4 +40,8 @@ public class Constants {
         public static final String GOOGLE_ACCOUNT_NAME = "GOOGLE_ACCOUNT_NAME";
         public static final String GOOGLE_ACCESS_TOKEN = "googledrive-access-token";
     }
+
+    public class Animation {
+        public static final int PROGRESS_DURATION = 1200;
+    }
 }

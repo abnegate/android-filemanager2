@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.dinuscxj.progressbar.CircleProgressBar;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.models.Source;
+import com.jakebarnby.filemanager.util.Constants;
 
 import java.util.List;
 import java.util.Locale;
@@ -63,7 +64,7 @@ public class SourceUsageAdapter extends RecyclerView.Adapter<SourceUsageAdapter.
             bar.setProgress(progress);
 
         });
-        animator.setDuration(1500);
+        animator.setDuration(Constants.Animation.PROGRESS_DURATION);
         animator.start();
     }
 
