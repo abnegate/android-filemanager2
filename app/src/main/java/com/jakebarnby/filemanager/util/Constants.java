@@ -22,7 +22,7 @@ public class Constants {
 
         public static final String GOOGLE_DRIVE_FOLDER_MIME = "application/vnd.google-apps.folder";
 
-        public static final String ONEDRIVE_INVALID_CHARS = "[\\/:*?\"<>|#% ]";
+        public static final String ONEDRIVE_INVALID_CHARS = "[\\/:*?\"<>|#%() ]";
         
         public class Keys {
             public static final String DROPBOX_CLIENT_ID       = "rse09cxjnnn2yc1";

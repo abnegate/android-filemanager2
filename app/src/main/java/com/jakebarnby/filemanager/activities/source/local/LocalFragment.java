@@ -98,7 +98,7 @@ public class LocalFragment extends SourceFragment {
             rootFileTreeNode = new TreeNode<>(rootSourceFile);
             currentLevelNode = rootFileTreeNode;
             getSource().setCurrentDirectory(rootFileTreeNode);
-            getSource().setQuotaInfo(Utils.getStorageStats(Environment.getExternalStorageDirectory()));
+            getSource().setQuotaInfo(Utils.getLocalStorageStats(Environment.getExternalStorageDirectory()));
             return parseFileSystem(files[0]);
         }
 

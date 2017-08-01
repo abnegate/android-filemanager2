@@ -66,11 +66,13 @@ configurations {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:1.10.19'
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
         exclude group: 'com.google.code.findbugs'
     })
-    testCompile 'junit:junit:4.12'
 
     //Android
     implementation 'com.android.support:multidex:1.0.2'
@@ -95,7 +97,7 @@ dependencies {
 
     //OneDrive
     implementation project(':msal')
-    implementation('com.microsoft.graph:msgraph-sdk-android:1.2.+')
+    implementation('com.microsoft.graph:msgraph-sdk-android:1.3.2')
     implementation('com.google.code.gson:gson:2.3.1')
 
     //FAB Menu Button

@@ -13,11 +13,13 @@ import android.view.WindowManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.jakebarnby.filemanager.models.SourceStorageStats;
+import com.jakebarnby.filemanager.models.files.SourceFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Locale;
 
 /**
  * Created by Jake on 6/6/2017.
@@ -154,7 +156,7 @@ public class Utils {
      * @param dir   The dir to check free space of
      * @return      Amount of bytes free in file
      */
-    public static SourceStorageStats getStorageStats(File dir) {
+    public static SourceStorageStats getLocalStorageStats(File dir) {
         StatFs fileSystem = new StatFs(dir.getAbsolutePath());
 
         SourceStorageStats info = new SourceStorageStats();
@@ -163,4 +165,34 @@ public class Utils {
         info.setUsedSpace(fileSystem.getTotalBytes() - fileSystem.getAvailableBytes());
         return info;
     }
-}
+
+    public static String generateUniqueFilename(String newName, TreeNode<SourceFile> actionableDir) {
+        boolean stripExtension = newName.lastIndexOf('.') != -1;
+        String name = stripExtension ?
+                newName.substring(0, newName.lastIndexOf('.')):
+                newName;
+
+        String finalName = name;
+
+        int copyCount = 0;
+        for(int i = 0; i < actionableDir.getChildren().size(); i++) {
+            SourceFile curFile = actionableDir.getChildren().get(i).getData();
+            String curFileName = curFile.getName().lastIndexOf('.') != -1 ?
+                    curFile.getName().substring(0, curFile.getName().lastIndexOf('.')) :
+                    curFile.getName();
+            if (curFileName.equalsIgnoreCase(finalName)) {
+                copyCount++;
+
+                boolean isOneDrive = actionableDir.getData().getSourceName().equals(Constants.Sources.ONEDRIVE);
+                finalName = String.format(Locale.getDefault(),
+                        isOneDrive ? "%s %d" : "%s (%d)",
+                        name,
+                        copyCount);
+                i = -1;
+            }
+        }
+
+        return stripExtension ?
+                finalName + newName.substring(newName.lastIndexOf('.')) :
+                finalName;
+    }}

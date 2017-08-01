@@ -115,7 +115,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mSourceManager = new SourceManager();;
+        mSourceManager = new SourceManager();
         mSourcesPagerAdapter = new SourcePagerAdapter(getSupportFragmentManager());
         mViewPager = findViewById(R.id.view_pager);
         mBlurWrapper = findViewById(R.id.wrapper);

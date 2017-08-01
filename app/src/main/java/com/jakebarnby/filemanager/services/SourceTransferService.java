@@ -24,6 +24,7 @@ import com.jakebarnby.filemanager.models.files.OneDriveFile;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
+import com.jakebarnby.filemanager.util.Utils;
 import com.microsoft.graph.extensions.DriveItem;
 
 import java.io.File;
@@ -315,11 +316,13 @@ public class SourceTransferService extends Service {
             postNotification(
                     operationId,
                     getString(R.string.app_name),
-                    move ? String.format(getString(R.string.moving_count), toCopy.indexOf(file)+1, toCopy.size()) :
-                           String.format(getString(R.string.copying_count), toCopy.indexOf(file)+1, toCopy.size()));
+                     String.format(move ? getString(R.string.moving_count) : getString(R.string.copying_count),
+                             toCopy.indexOf(file)+1,
+                             toCopy.size()));
 
             String newFilePath = getFile(file.getData());
-            SourceFile newFile = putFile(newFilePath, file.getData().getName(), destDir.getData());
+            String newName = Utils.generateUniqueFilename(file.getData().getName(), destDir);
+            SourceFile newFile = putFile(newFilePath, newName, destDir.getData());
 
             destDir.addChild(newFile);
             TreeNode<SourceFile> curDir = destDir;
@@ -336,6 +339,8 @@ public class SourceTransferService extends Service {
         }
         broadcastFinishedTask(operationId);
     }
+
+
 
     /**
      * Delete the selected files
