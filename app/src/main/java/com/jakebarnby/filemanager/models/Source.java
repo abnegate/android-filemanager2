@@ -1,14 +1,18 @@
 package com.jakebarnby.filemanager.models;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
+import com.jakebarnby.filemanager.util.Utils;
 
 /**
  * Created by Jake on 7/29/2017.
  */
 
-public class Source {
+public abstract class Source {
 
     private String                  mSourceName;
     private TreeNode<SourceFile>    mCurrentDirectory;
@@ -19,8 +23,21 @@ public class Source {
     private boolean                 mFilesLoaded;
     private boolean                 mMultiSelectEnabled;
 
-    public Source(String sourceName) {
+    protected SourceListener          mSourceListener;
+    /**
+     * Authenticate the current mSource
+     */
+    public abstract void authenticateSource(Context context);
+
+    /**
+     * Load the current mSource
+     */
+    public abstract void loadSource(Context context);
+
+
+    public Source(String sourceName, SourceListener listener) {
         this.mSourceName = sourceName;
+        this.mSourceListener = listener;
     }
 
     public String getSourceName() {
@@ -108,4 +125,29 @@ public class Source {
     public void setMultiSelectEnabled(boolean mMultiSelectEnabled) {
         this.mMultiSelectEnabled = mMultiSelectEnabled;
     }
+
+
+    /**
+     * Checks if this mSource has a valid access token
+     * @return  Whether there is a valid access token for this mSource
+     */
+    public boolean hasToken(Context context, String sourceName) {
+        SharedPreferences prefs = context.getSharedPreferences(Constants.SharedPrefs.PREFS, Context.MODE_PRIVATE);
+        String accessToken = prefs.getString(sourceName + "-access-token", null);
+        return accessToken != null;
+    }
+
+    /**
+     * If performing an action on a non-local directory, check internet
+     */
+    public boolean checkConnectionActive(Context context) {
+        if (!getSourceName().equals(Constants.Sources.LOCAL)) {
+            if (!Utils.isConnectionReady(context)) {
+                mSourceListener.onNoConnection();
+                return false;
+            }
+        }
+        return true;
+    }
 }
+

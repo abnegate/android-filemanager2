@@ -1,7 +1,6 @@
 package com.jakebarnby.filemanager.activities.source;
 
 import android.annotation.SuppressLint;
-import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -303,28 +302,29 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * otherwise throw a snackbar with error message
      */
     private void startDeleteAction() {
-        if (!getActiveFragment().checkConnectionStatus()) return;
-        if (SelectedFilesManager
-                .getInstance()
-                .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
-                .size() > 0) {
+        if (getActiveFragment().getSource().checkConnectionActive(this)) {
+            if (SelectedFilesManager
+                    .getInstance()
+                    .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                    .size() > 0) {
 
-            mSourceManager.addFileAction(SelectedFilesManager.getInstance().getOperationCount(), FileAction.DELETE);
+                mSourceManager.addFileAction(SelectedFilesManager.getInstance().getOperationCount(), FileAction.DELETE);
 
-            SelectedFilesManager.getInstance().addActionableDirectory(
-                    SelectedFilesManager.getInstance().getOperationCount(),
-                    mSourceManager.getActiveDirectory());
+                SelectedFilesManager.getInstance().addActionableDirectory(
+                        SelectedFilesManager.getInstance().getOperationCount(),
+                        mSourceManager.getActiveDirectory());
 
-            getActiveFragment().setMultiSelectEnabled(false);
-            setTitle(getString(R.string.app_name));
-            toggleFloatingMenu(false);
-            SourceTransferService.startActionDelete(SourceActivity.this);
-            getActiveFragment()
-                    .getSource()
-                    .increaseFreeSpace(SelectedFilesManager.getInstance().getCurrentCopySize());
-            SelectedFilesManager.getInstance().addNewSelection();
-        } else {
-            showSnackbar(getString(R.string.err_no_selection));
+                getActiveFragment().setMultiSelectEnabled(false);
+                setTitle(getString(R.string.app_name));
+                toggleFloatingMenu(false);
+                SourceTransferService.startActionDelete(SourceActivity.this);
+                getActiveFragment()
+                        .getSource()
+                        .increaseFreeSpace(SelectedFilesManager.getInstance().getCurrentCopySize());
+                SelectedFilesManager.getInstance().addNewSelection();
+            } else {
+                showSnackbar(getString(R.string.err_no_selection));
+            }
         }
     }
 
@@ -334,26 +334,27 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * Otherwise show a snackbar with the error message
      */
     private void doPasteChecks() {
-        if (!getActiveFragment().checkConnectionStatus()) return;
+        if (getActiveFragment().getSource().checkConnectionActive(this)) {
 
-        if (!getActiveFragment().getSource().isLoggedIn()) {
-            showSnackbar(getString(R.string.err_not_logged_in));
-            return;
-        }else if (!getActiveFragment().getSource().isFilesLoaded()) {
-            showSnackbar(getString(R.string.err_not_loaded));
-            return;
-        }
+            if (!getActiveFragment().getSource().isLoggedIn()) {
+                showSnackbar(getString(R.string.err_not_logged_in));
+                return;
+            } else if (!getActiveFragment().getSource().isFilesLoaded()) {
+                showSnackbar(getString(R.string.err_not_loaded));
+                return;
+            }
 
-        long copySize = SelectedFilesManager
-                .getInstance()
-                .getCurrentCopySize();
+            long copySize = SelectedFilesManager
+                    .getInstance()
+                    .getCurrentCopySize();
 
-        if (copySize < getActiveFragment().getSource().getFreeSpace()) {
-            startPasteAction(copySize);
-        } else {
-            showSnackbar(String.format(
-                    getString(R.string.err_no_free_space),
-                    getActiveFragment().getSource().getSourceName().toLowerCase()));
+            if (copySize < getActiveFragment().getSource().getFreeSpace()) {
+                startPasteAction(copySize);
+            } else {
+                showSnackbar(String.format(
+                        getString(R.string.err_no_free_space),
+                        getActiveFragment().getSource().getSourceName().toLowerCase()));
+            }
         }
     }
 
@@ -465,55 +466,57 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * Shows a dialog asking for a new folder name which creates the folder on completion
      */
     private void showCreateFolderDialog() {
-        if (!getActiveFragment().checkConnectionStatus()) return;
+        if (getActiveFragment().getSource().checkConnectionActive(this)) {
 
-        mSourceManager.addFileAction(
-                SelectedFilesManager.getInstance().getOperationCount(),
-                FileAction.NEW_FOLDER);
-        SelectedFilesManager.getInstance().addActionableDirectory(
-                SelectedFilesManager.getInstance().getOperationCount(),
-                mSourceManager.getActiveDirectory());
+            mSourceManager.addFileAction(
+                    SelectedFilesManager.getInstance().getOperationCount(),
+                    FileAction.NEW_FOLDER);
+            SelectedFilesManager.getInstance().addActionableDirectory(
+                    SelectedFilesManager.getInstance().getOperationCount(),
+                    mSourceManager.getActiveDirectory());
 
-        Bundle bundle = new Bundle();
-        bundle.putString(Constants.DIALOG_TITLE_KEY, getString(R.string.create_folder));
-        CreateFolderDialog dialog = new CreateFolderDialog();
-        dialog.setArguments(bundle);
-        dialog.show(getSupportFragmentManager(), "CreateFolder");
+            Bundle bundle = new Bundle();
+            bundle.putString(Constants.DIALOG_TITLE_KEY, getString(R.string.create_folder));
+            CreateFolderDialog dialog = new CreateFolderDialog();
+            dialog.setArguments(bundle);
+            dialog.show(getSupportFragmentManager(), "CreateFolder");
+        }
     }
 
     /**
      * Shows a dialog allowing the user to rename a file or folder
      */
     private void showRenameDialog() {
-        if (!getActiveFragment().checkConnectionStatus()) return;
+        if (getActiveFragment().getSource().checkConnectionActive(this)) {
 
-        getActiveFragment().setMultiSelectEnabled(false);
-        setTitle(getString(R.string.app_name));
-        toggleFloatingMenu(false);
+            getActiveFragment().setMultiSelectEnabled(false);
+            setTitle(getString(R.string.app_name));
+            toggleFloatingMenu(false);
 
-        mSourceManager.addFileAction(
-                SelectedFilesManager.getInstance().getOperationCount(),
-                FileAction.RENAME);
-        SelectedFilesManager.getInstance().addActionableDirectory(
-                SelectedFilesManager.getInstance().getOperationCount(),
-                mSourceManager.getActiveDirectory());
+            mSourceManager.addFileAction(
+                    SelectedFilesManager.getInstance().getOperationCount(),
+                    FileAction.RENAME);
+            SelectedFilesManager.getInstance().addActionableDirectory(
+                    SelectedFilesManager.getInstance().getOperationCount(),
+                    mSourceManager.getActiveDirectory());
 
-        int size = SelectedFilesManager.getInstance().getSelectedFiles(
-                SelectedFilesManager.getInstance().getOperationCount()).size();
+            int size = SelectedFilesManager.getInstance().getSelectedFiles(
+                    SelectedFilesManager.getInstance().getOperationCount()).size();
 
-        if (size == 0) {
-            showSnackbar(getString(R.string.err_no_selection));
-            return;
-        } else if (size > 1) {
-            showSnackbar(getString(R.string.err_too_many_selected));
-            return;
+            if (size == 0) {
+                showSnackbar(getString(R.string.err_no_selection));
+                return;
+            } else if (size > 1) {
+                showSnackbar(getString(R.string.err_too_many_selected));
+                return;
+            }
+
+            Bundle bundle = new Bundle();
+            bundle.putString(Constants.DIALOG_TITLE_KEY, getString(R.string.rename));
+            RenameDialog dialog = new RenameDialog();
+            dialog.setArguments(bundle);
+            dialog.show(getSupportFragmentManager(), "Rename");
         }
-
-        Bundle bundle = new Bundle();
-        bundle.putString(Constants.DIALOG_TITLE_KEY, getString(R.string.rename));
-        RenameDialog dialog = new RenameDialog();
-        dialog.setArguments(bundle);
-        dialog.show(getSupportFragmentManager(), "Rename");
     }
 
     /**

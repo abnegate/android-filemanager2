@@ -42,6 +42,7 @@ public class Constants {
     public class SharedPrefs {
         public static final String GOOGLE_ACCOUNT_NAME = "GOOGLE_ACCOUNT_NAME";
         public static final String GOOGLE_ACCESS_TOKEN = "googledrive-access-token";
+        public static final String PREFS = "PREFS";
     }
 
     public class Animation {

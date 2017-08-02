@@ -1,14 +1,19 @@
 package com.jakebarnby.filemanager.activities.source;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -29,8 +34,14 @@ import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.activities.source.adapters.FileSystemAdapter;
 import com.jakebarnby.filemanager.activities.source.adapters.FileSystemGridAdapter;
 import com.jakebarnby.filemanager.activities.source.adapters.FileSystemListAdapter;
+import com.jakebarnby.filemanager.activities.source.googledrive.GoogleDriveFragment;
+import com.jakebarnby.filemanager.activities.source.local.LocalFragment;
+import com.jakebarnby.filemanager.activities.source.onedrive.OneDriveFragment;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
+import com.jakebarnby.filemanager.models.GoogleDriveSource;
+import com.jakebarnby.filemanager.models.OneDriveSource;
 import com.jakebarnby.filemanager.models.Source;
+import com.jakebarnby.filemanager.models.SourceListener;
 import com.jakebarnby.filemanager.models.files.SourceFile;
 import com.jakebarnby.filemanager.services.SourceTransferService;
 import com.jakebarnby.filemanager.util.Constants;
@@ -40,9 +51,9 @@ import com.jakebarnby.filemanager.util.Utils;
 /**
  * A placeholder fragment containing a simple view.
  */
-public abstract class SourceFragment extends Fragment {
+public abstract class SourceFragment extends Fragment implements SourceListener {
 
-    private Source                  mSource;
+    protected Source                  mSource;
 
     protected RecyclerView          mRecycler;
     protected FileSystemListAdapter mFileSystemListAdapter;
@@ -54,16 +65,6 @@ public abstract class SourceFragment extends Fragment {
 
     private LinearLayout            mBreadcrumbBar;
     private HorizontalScrollView    mBreadcrumbWrapper;
-
-    /**
-     * Authenticate the current mSource
-     */
-    protected abstract void authenticateSource();
-
-    /**
-     * Load the current mSource
-     */
-    protected abstract void loadSource();
 
     public Source getSource() {
         return mSource;
@@ -79,15 +80,22 @@ public abstract class SourceFragment extends Fragment {
         mDivider = rootView.findViewById(R.id.divider);
         mConnectButton = rootView.findViewById(R.id.btn_connect);
         mSourceLogo = rootView.findViewById(R.id.image_source_logo);
-        mSource = new Source(getArguments().getString(Constants.FRAGMENT_TITLE));
 
-        if (hasToken(mSource.getSourceName())) {
+        //TODO: To be set from each fragment passing this as the listener
+        //mSource = new Source(getArguments().getString(Constants.FRAGMENT_TITLE), this);
+
+        if (getSource().hasToken(getContext(), getSource().getSourceName())) {
             mConnectButton.setVisibility(View.GONE);
             mSourceLogo.setVisibility(View.GONE);
         }
+
         mConnectButton.setOnClickListener(v -> {
-            if (Utils.isConnectionReady(SourceFragment.this.getContext())) {
-                authenticateSource();
+            if (Utils.isConnectionReady(getContext())) {
+                if (this instanceof OneDriveFragment) {
+                    ((OneDriveSource)getSource()).authenticateSource(this);
+                } else {
+                    getSource().authenticateSource(getContext());
+                }
             } else {
                 Snackbar.make(rootView, R.string.err_no_connection, Snackbar.LENGTH_LONG).show();
             }
@@ -104,23 +112,6 @@ public abstract class SourceFragment extends Fragment {
             ((FileSystemAdapter) mRecycler.getAdapter()).setMultiSelectEnabled(enabled);
             mRecycler.getAdapter().notifyDataSetChanged();
         }
-    }
-
-    /**
-     * Reload the {@link RecyclerView}
-     */
-    public void refreshRecycler() {
-        mRecycler.getAdapter().notifyDataSetChanged();
-    }
-
-    /**
-     * Checks if this mSource has a valid access token
-     * @return  Whether there is a valid access token for this mSource
-     */
-    protected boolean hasToken(String sourceName) {
-        SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
-        String accessToken = prefs.getString(sourceName + "-access-token", null);
-        return accessToken != null;
     }
 
     /**
@@ -173,14 +164,10 @@ public abstract class SourceFragment extends Fragment {
     }
 
     /**
-     * Opens the app details page for this app
+     * Reload the {@link RecyclerView}
      */
-    protected void showAppDetails() {
-        Intent intent = new Intent();
-        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        Uri uri = Uri.fromParts("package", "com.jakebarnby.filemanager", null);
-        intent.setData(uri);
-        startActivity(intent);
+    public void refreshRecycler() {
+        mRecycler.getAdapter().notifyDataSetChanged();
     }
 
     /**
@@ -305,16 +292,108 @@ public abstract class SourceFragment extends Fragment {
         mBreadcrumbBar.removeViewAt(mBreadcrumbBar.getChildCount()-1);
     }
 
-    /**
-     * If performing an action on a non-local directory, check internet and
-     */
-    protected boolean checkConnectionStatus() {
-        if (!mSource.getSourceName().equals(Constants.Sources.LOCAL)) {
-            if (!Utils.isConnectionReady(getContext())) {
-                Snackbar.make(mRecycler, R.string.err_no_connection, Snackbar.LENGTH_LONG).show();
-                return false;
+    @Override
+    public void onLoadStarted() {
+        mConnectButton.setVisibility(View.GONE);
+        mProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onLoadAborted() {
+        mConnectButton.setVisibility(View.VISIBLE);
+        mProgressBar.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onLoadComplete(TreeNode<SourceFile> fileTree) {
+        pushBreadcrumb(fileTree);
+        initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
+        ((SourceActivity) getActivity()).getSourceManager().setActiveDirectory(fileTree);
+        mProgressBar.setVisibility(View.GONE);
+        mSourceLogo.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onNoConnection() {
+        Snackbar.make(mRecycler, R.string.err_no_connection, Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onAuthenticationComplete(boolean success) {
+
+    }
+
+    @Override
+    public void onCheckPermissions(String permissionToCheck, int requestCode) {
+        int permissionCheck = ContextCompat.checkSelfPermission(getActivity(), permissionToCheck);
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            if (shouldShowRequestPermissionRationale(permissionToCheck)) {
+                showPermissionRationaleDialog();
+            } else {
+                requestPermissions(new String[]{permissionToCheck}, requestCode);
+            }
+        } else {
+            if (this instanceof LocalFragment) {
+                getSource().setLoggedIn(true);
+                getSource().loadSource(getContext());
+            } else if (this instanceof GoogleDriveFragment) {
+                ((GoogleDriveSource)mSource).authGoogle(this);
             }
         }
-        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case Constants.RequestCodes.STORAGE_PERMISSIONS: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mSource.loadSource(getContext());
+                    getSource().setLoggedIn(true);
+                } else if (!shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    Snackbar.make(mRecycler, R.string.storage_permission, Snackbar.LENGTH_LONG)
+                            .setAction(R.string.action_settings, v -> showAppDetails())
+                            .show();
+                }
+                break;
+            }
+
+            case Constants.RequestCodes.ACCOUNTS_PERMISSIONS: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (this instanceof GoogleDriveFragment) {
+                        ((GoogleDriveSource)mSource).authGoogle(this);
+                    }
+                } else if (!shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    Snackbar.make(mRecycler, R.string.contacts_permission, Snackbar.LENGTH_LONG)
+                            .setAction(R.string.action_settings, v -> showAppDetails())
+                            .show();
+                }
+                break;
+            }
+        }
+    }
+
+    /**
+     * Show a dialog explaining why local storage permission is necessary
+     */
+    protected void showPermissionRationaleDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity()).setMessage(R.string.dialog_message);
+        builder.setPositiveButton("OK", (dialog, which) -> requestPermissions(
+                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                Constants.RequestCodes.STORAGE_PERMISSIONS));
+
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    /**
+     * Opens the app details page for this app
+     */
+    protected void showAppDetails() {
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", "com.jakebarnby.filemanager", null);
+        intent.setData(uri);
+        startActivity(intent);
     }
 }
