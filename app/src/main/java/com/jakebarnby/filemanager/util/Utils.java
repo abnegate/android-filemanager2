@@ -8,7 +8,7 @@ import android.os.StatFs;
 import android.view.Display;
 import android.view.WindowManager;
 
-import com.jakebarnby.filemanager.models.SourceStorageStats;
+import com.jakebarnby.filemanager.sources.models.SourceStorageStats;
 
 import java.io.File;
 import java.io.FileOutputStream;

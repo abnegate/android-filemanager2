@@ -12,7 +12,7 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.jakebarnby.filemanager.R;
-import com.jakebarnby.filemanager.activities.source.SourceActivity;
+import com.jakebarnby.filemanager.sources.SourceActivity;
 
 /**
  * Created by jakebarnby on 28/07/17.

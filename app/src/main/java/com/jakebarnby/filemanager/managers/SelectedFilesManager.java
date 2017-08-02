@@ -2,7 +2,7 @@ package com.jakebarnby.filemanager.managers;
 
 import android.util.SparseArray;
 
-import com.jakebarnby.filemanager.models.files.SourceFile;
+import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.util.TreeNode;
 
 import java.util.ArrayList;
