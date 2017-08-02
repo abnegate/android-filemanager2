@@ -53,7 +53,7 @@ public class OneDriveFragment extends SourceFragment {
     @Override
     public void onResume() {
         super.onResume();
-        ((OneDriveSource)getSource()).checkForAccessToken(getContext());
+        ((OneDriveSource)getSource()).checkForAccessToken(this);
     }
 
     @Override

@@ -47,9 +47,7 @@ public class OneDriveSource extends Source {
     }
 
     @Override
-    public void authenticateSource(Context context) {
-
-    }
+    public void authenticateSource(Context context) {}
 
     public PublicClientApplication getClient() {
         return mClient;
@@ -63,17 +61,12 @@ public class OneDriveSource extends Source {
             try {
                 users = mClient.getUsers();
                 if (users != null && users.size() == 1) {
-                    mClient.acquireTokenSilentAsync(SCOPES, users.get(0), getAuthSilentCallback(fragment.getContext()));
+                    mClient.acquireTokenSilentAsync(SCOPES, users.get(0), getAuthSilentCallback(fragment));
                 } else {
-                    mClient.acquireToken(fragment, SCOPES, getAuthInteractiveCallback(fragment.getContext()));
+                    mClient.acquireToken(fragment, SCOPES, getAuthInteractiveCallback(fragment));
                 }
-            } catch (MsalClientException e) {
-                Log.d(TAG, "MSAL Exception Generated while getting users: " + e.toString());
-                mSourceListener.onLoadAborted();
-
-            } catch (IndexOutOfBoundsException e) {
-                Log.d(TAG, "User at this position does not exist: " + e.toString());
-                mSourceListener.onLoadAborted();
+            } catch (MsalClientException | IndexOutOfBoundsException e) {
+                mSourceListener.onLoadError(e.getMessage());
             }
         }
     }
@@ -83,9 +76,9 @@ public class OneDriveSource extends Source {
         if (!isFilesLoaded() && mAuthResult != null) {
             if (!checkConnectionActive(context)) return;
             final IClientConfig mClientConfig = DefaultClientConfig
-                    .createWithAuthenticationProvider(iHttpRequest -> {
-                        iHttpRequest.addHeader("Authorization", String.format("Bearer %s", mAuthResult.getAccessToken()));
-                    });
+                    .createWithAuthenticationProvider(request ->
+                            request.addHeader("Authorization", String.format("Bearer %s", mAuthResult.getAccessToken()))
+                    );
 
             OneDriveFactory
                     .getInstance()
@@ -105,12 +98,12 @@ public class OneDriveSource extends Source {
                         @Override
                         public void success(DriveItem driveItem) {
                             new OneDriveLoaderTask(OneDriveSource.this, mSourceListener, driveItem)
-                                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
                         }
 
                         @Override
                         public void failure(final ClientException ex) {
-                            // Handle failure
+                            mSourceListener.onLoadAborted();
                         }
                     });
         }
@@ -120,8 +113,8 @@ public class OneDriveSource extends Source {
     /**
      * Check for a valid access token and store it in shared preferences if found, then load the source
      */
-    public void checkForAccessToken(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(Constants.SharedPrefs.PREFS, Context.MODE_PRIVATE);
+    public void checkForAccessToken(Fragment fragment) {
+        SharedPreferences prefs = fragment.getContext().getSharedPreferences(Constants.SharedPrefs.PREFS, Context.MODE_PRIVATE);
         String accessToken = prefs.getString("onedrive-access-token", null);
         if (mAuthResult != null) {
             if (accessToken == null || !mAuthResult.getAccessToken().equals(accessToken)) {
@@ -129,17 +122,17 @@ public class OneDriveSource extends Source {
                 prefs.edit().putString("onedrive-access-token", accessToken).apply();
             } else {
                 if (!isLoggedIn()) {
-                    authenticateSource(context);
+                    authenticateSource(fragment);
                 } else {
-                    loadSource(context);
+                    loadSource(fragment.getContext());
                 }
             }
         }
         if (accessToken != null) {
             if (!isLoggedIn()) {
-                authenticateSource(context);
+                authenticateSource(fragment);
             } else {
-                loadSource(context);
+                loadSource(fragment.getContext());
             }
         }
     }
@@ -152,29 +145,23 @@ public class OneDriveSource extends Source {
      *
      * @return
      */
-    private AuthenticationCallback getAuthSilentCallback(Context context) {
+    private AuthenticationCallback getAuthSilentCallback(Fragment fragment) {
         return new AuthenticationCallback() {
             @Override
             public void onSuccess(AuthenticationResult authenticationResult) {
                 mAuthResult = authenticationResult;
                 setLoggedIn(true);
-                checkForAccessToken(context);
+                checkForAccessToken(fragment);
             }
 
             @Override
             public void onError(MsalException exception) {
-                if (exception instanceof MsalClientException) {
-                    mSourceListener.onLoadAborted();
-                } else if (exception instanceof MsalServiceException) {
-                    mSourceListener.onLoadAborted();
-                } else if (exception instanceof MsalUiRequiredException) {
-                    mSourceListener.onLoadAborted();
-                }
+                mSourceListener.onLoadError(exception.getErrorCode() + " "  + exception.getMessage());
             }
 
             @Override
             public void onCancel() {
-                Log.d(TAG, "User cancelled login.");
+                mSourceListener.onLoadAborted();
             }
         };
     }
@@ -185,27 +172,23 @@ public class OneDriveSource extends Source {
      *
      * @return
      */
-    private AuthenticationCallback getAuthInteractiveCallback(Context context) {
+    private AuthenticationCallback getAuthInteractiveCallback(Fragment fragment) {
         return new AuthenticationCallback() {
             @Override
             public void onSuccess(AuthenticationResult authenticationResult) {
                 mAuthResult = authenticationResult;
                 setLoggedIn(true);
-                checkForAccessToken(context);
+                checkForAccessToken(fragment);
             }
 
             @Override
             public void onError(MsalException exception) {
-                if (exception instanceof MsalClientException) {
-                    mSourceListener.onLoadAborted();
-                } else if (exception instanceof MsalServiceException) {
-                    mSourceListener.onLoadAborted();
-                }
+                mSourceListener.onLoadError(exception.getErrorCode() + " " +    exception.getMessage());
             }
 
             @Override
             public void onCancel() {
-                Log.d(TAG, "User cancelled login.");
+                mSourceListener.onLoadAborted();
             }
         };
     }
