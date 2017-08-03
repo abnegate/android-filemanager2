@@ -1,7 +1,5 @@
 package com.jakebarnby.filemanager.sources.dropbox;
 
-import android.os.AsyncTask;
-
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
@@ -24,7 +22,7 @@ public class DropboxLoaderTask extends LoaderTask {
     }
 
     @Override
-    public Object initRootNode(String path) {
+    protected Object initRootNode(String path) {
         SourceFile rootSourceFile = new DropboxFile(new Metadata(path));
         rootSourceFile.setDirectory(true);
         mRootTreeNode = new TreeNode<>(rootSourceFile);
@@ -47,7 +45,7 @@ public class DropboxLoaderTask extends LoaderTask {
     }
 
     @Override
-    public TreeNode<SourceFile> readFileTree(Object rootObject) {
+    protected TreeNode<SourceFile> readFileTree(Object rootObject) {
         if (rootObject != null && rootObject instanceof ListFolderResult) {
             ListFolderResult node = (ListFolderResult)rootObject;
 

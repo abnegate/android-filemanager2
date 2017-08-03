@@ -13,7 +13,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -31,18 +30,18 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import com.jakebarnby.filemanager.R;
+import com.jakebarnby.filemanager.managers.SelectedFilesManager;
+import com.jakebarnby.filemanager.services.SourceTransferService;
+import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFragment;
+import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveSource;
+import com.jakebarnby.filemanager.sources.local.LocalFragment;
+import com.jakebarnby.filemanager.sources.models.Source;
+import com.jakebarnby.filemanager.sources.models.SourceFile;
+import com.jakebarnby.filemanager.sources.onedrive.OneDriveFragment;
+import com.jakebarnby.filemanager.sources.onedrive.OneDriveSource;
 import com.jakebarnby.filemanager.ui.adapters.FileSystemAdapter;
 import com.jakebarnby.filemanager.ui.adapters.FileSystemGridAdapter;
 import com.jakebarnby.filemanager.ui.adapters.FileSystemListAdapter;
-import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFragment;
-import com.jakebarnby.filemanager.sources.local.LocalFragment;
-import com.jakebarnby.filemanager.sources.onedrive.OneDriveFragment;
-import com.jakebarnby.filemanager.managers.SelectedFilesManager;
-import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveSource;
-import com.jakebarnby.filemanager.sources.onedrive.OneDriveSource;
-import com.jakebarnby.filemanager.sources.models.Source;
-import com.jakebarnby.filemanager.sources.models.SourceFile;
-import com.jakebarnby.filemanager.services.SourceTransferService;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
@@ -234,11 +233,19 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                 //TODO: Set the Fragment tab title with selected count, e.g. LOCAL (3) DROPBOX (1)
             } else {
                 if (file.getData().isDirectory()) {
+                    getSource().getCurrentDirectory().getData().
+                            setPositionToRestore(((LinearLayoutManager)mRecycler.getLayoutManager()).findFirstVisibleItemPosition());
+
                     ((FileSystemAdapter) mRecycler.getAdapter()).setCurrentDirectory(file);
+
                     mSource.setCurrentDirectory(file);
+
                     ((SourceActivity)getActivity()).getSourceManager().setActiveDirectory(file);
+
                     pushBreadcrumb(file);
+
                     mRecycler.getAdapter().notifyDataSetChanged();
+
                 } else {
                     if (Utils.getStorageStats(Environment.getExternalStorageDirectory())
                             .getFreeSpace() > file.getData().getSize()) {
@@ -310,11 +317,17 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
             if (mSource.getCurrentDirectory().getData().getName().equals(name)) return;
             TreeNode<SourceFile> selectedParent = TreeNode.findParent(mSource.getCurrentDirectory(), name);
 
+            int previousPosition = selectedParent.getData().getPositionToRestore();
+            if (previousPosition != -1) {
+                ((LinearLayoutManager)mRecycler.getLayoutManager()).scrollToPositionWithOffset(previousPosition, 0);
+            }
+
             ((SourceActivity)getActivity()).getSourceManager().setActiveDirectory(selectedParent);
             ((FileSystemAdapter)mRecycler.getAdapter()).setCurrentDirectory(selectedParent);
             mSource.setCurrentDirectory(selectedParent);
             mRecycler.getAdapter().notifyDataSetChanged();
         });
+
         mBreadcrumbWrapper.postDelayed(() ->
                 mBreadcrumbWrapper.fullScroll(HorizontalScrollView.FOCUS_RIGHT),
                 50L);

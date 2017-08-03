@@ -1,11 +1,5 @@
 package com.jakebarnby.filemanager.sources.models;
 
-import android.net.Uri;
-
-import com.dropbox.core.v2.files.Metadata;
-import com.google.api.services.drive.model.File;
-import com.microsoft.graph.extensions.DriveItem;
-
 import java.io.Serializable;
 
 /**
@@ -21,6 +15,7 @@ public abstract class SourceFile implements Serializable {
     private long            mSize;
     private long            mCreatedTime;
     private long            mModifiedTime;
+    private int             mPositionToRestore = -1;
 
     public String getPath() {
         return mPath;
@@ -67,5 +62,11 @@ public abstract class SourceFile implements Serializable {
     }
     public void setModifiedTime(long mModifiedTime) {
         this.mModifiedTime = mModifiedTime;
+    }
+    public int getPositionToRestore() {
+        return mPositionToRestore;
+    }
+    public void setPositionToRestore(int mPositionToRestore) {
+        this.mPositionToRestore = mPositionToRestore;
     }
 }

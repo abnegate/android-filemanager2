@@ -735,6 +735,11 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         } else if (getActiveFragment().getSource().isLoggedIn() &&
                 activeDir.getParent() != null) {
 
+            int previousPosition = activeDir.getParent().getData().getPositionToRestore();
+            if (previousPosition != -1) {
+                ((LinearLayoutManager)getActiveFragment().mRecycler.getLayoutManager()).scrollToPositionWithOffset(previousPosition, 0);
+            }
+
             getActiveFragment()
                     .getSource()
                     .setCurrentDirectory(activeDir.getParent());
