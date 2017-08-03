@@ -1,8 +1,6 @@
 package com.jakebarnby.filemanager.util;
 
-import android.support.annotation.NonNull;
-
-import com.jakebarnby.filemanager.models.files.SourceFile;
+import com.jakebarnby.filemanager.sources.models.SourceFile;
 
 import java.io.Serializable;
 import java.util.ArrayList;
