@@ -4,8 +4,6 @@ package com.jakebarnby.filemanager.sources.googledrive;
  * Created by Jake on 8/2/2017.
  */
 
-import android.os.AsyncTask;
-
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -39,7 +37,7 @@ public class GoogleDriveLoaderTask extends LoaderTask {
     }
 
     @Override
-    public Object initRootNode(String path) {
+    protected Object initRootNode(String path) {
         File rootFile = null;
         try {
             rootFile = GoogleDriveFactory
@@ -61,7 +59,7 @@ public class GoogleDriveLoaderTask extends LoaderTask {
     }
 
         @Override
-    public TreeNode<SourceFile> readFileTree(Object rootObject) {
+        protected TreeNode<SourceFile> readFileTree(Object rootObject) {
         if (rootObject != null && rootObject instanceof File) {
             File node = (File)rootObject;
             FileList fileList = null;

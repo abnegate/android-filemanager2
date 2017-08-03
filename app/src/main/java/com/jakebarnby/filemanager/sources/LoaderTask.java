@@ -18,8 +18,8 @@ public abstract class LoaderTask extends AsyncTask<String, Void, TreeNode<Source
     protected Source                  mSource;
     protected SourceListener          mListener;
 
-    public abstract Object initRootNode(String path);
-    public abstract TreeNode<SourceFile> readFileTree(Object rootObject);
+    protected abstract Object initRootNode(String path);
+    protected abstract TreeNode<SourceFile> readFileTree(Object rootObject);
 
     public LoaderTask(Source source, SourceListener listener) {
         this.mSource = source;

@@ -24,7 +24,7 @@ public class OneDriveLoaderTask extends LoaderTask {
     }
 
     @Override
-    public Object initRootNode(String path) {
+    protected Object initRootNode(String path) {
         SourceFile rootSourceFile = new OneDriveFile(mRootDriveItem);
         rootSourceFile.setDirectory(true);
         mRootTreeNode = new TreeNode<>(rootSourceFile);
@@ -35,7 +35,7 @@ public class OneDriveLoaderTask extends LoaderTask {
     }
 
     @Override
-    public TreeNode<SourceFile> readFileTree(Object rootObject) {
+    protected TreeNode<SourceFile> readFileTree(Object rootObject) {
         if (rootObject != null && rootObject instanceof DriveItem) {
             DriveItem node = (DriveItem)rootObject;
             IDriveItemCollectionPage items = OneDriveFactory

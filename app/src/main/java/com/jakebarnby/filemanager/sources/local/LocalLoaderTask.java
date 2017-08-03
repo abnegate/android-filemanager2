@@ -22,7 +22,7 @@ public class LocalLoaderTask extends LoaderTask {
     }
 
     @Override
-    public Object initRootNode(String path) {
+    protected Object initRootNode(String path) {
         File rootFile = new File(path);
         SourceFile rootSourceFile = new LocalFile(rootFile);
         mRootTreeNode = new TreeNode<>(rootSourceFile);
@@ -33,7 +33,7 @@ public class LocalLoaderTask extends LoaderTask {
     }
 
     @Override
-    public TreeNode<SourceFile> readFileTree(Object rootObject) {
+    protected TreeNode<SourceFile> readFileTree(Object rootObject) {
         if (rootObject != null && rootObject instanceof File) {
             File node = (File)rootObject;
             File listFile[] = node.listFiles();
