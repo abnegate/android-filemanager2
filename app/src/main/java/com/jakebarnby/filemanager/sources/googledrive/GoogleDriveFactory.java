@@ -112,7 +112,7 @@ public class GoogleDriveFactory {
             return mService
                     .files()
                     .create(fileMetadata)
-                    .setFields("id")
+                    .setFields("name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime")
                     .execute();
         } catch (IOException e) {
             e.printStackTrace();
