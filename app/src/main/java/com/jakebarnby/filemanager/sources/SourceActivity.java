@@ -55,6 +55,7 @@ import com.jakebarnby.filemanager.util.Utils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import io.fabric.sdk.android.Fabric;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
@@ -298,30 +299,39 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     /**
-     * Check if there are enough files selected and start a delete action
-     * otherwise throw a snackbar with error message
+     * Check if there are enough files selected then show a confirmation dialog and start a delete action
+     *  or do nothing otherwise throw a snackbar with error message
      */
     private void startDeleteAction() {
         if (getActiveFragment().getSource().checkConnectionActive(this)) {
-            if (SelectedFilesManager
+
+            int size = SelectedFilesManager
                     .getInstance()
                     .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
-                    .size() > 0) {
+                    .size();
 
-                mSourceManager.addFileAction(SelectedFilesManager.getInstance().getOperationCount(), FileAction.DELETE);
+            if (size > 0) {
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.warning)
+                        .setMessage(String.format(Locale.getDefault(), getString(R.string.dialog_delete_confirm), size))
+                        .setNegativeButton(R.string.no, (dialog, which) -> dialog.dismiss())
+                        .setPositiveButton(R.string.yes, (dialog, which) -> {
+                            mSourceManager.addFileAction(SelectedFilesManager.getInstance().getOperationCount(), FileAction.DELETE);
 
-                SelectedFilesManager.getInstance().addActionableDirectory(
-                        SelectedFilesManager.getInstance().getOperationCount(),
-                        mSourceManager.getActiveDirectory());
+                            SelectedFilesManager.getInstance().addActionableDirectory(
+                                    SelectedFilesManager.getInstance().getOperationCount(),
+                                    mSourceManager.getActiveDirectory());
 
-                getActiveFragment().setMultiSelectEnabled(false);
-                setTitle(getString(R.string.app_name));
-                toggleFloatingMenu(false);
-                SourceTransferService.startActionDelete(SourceActivity.this);
-                getActiveFragment()
-                        .getSource()
-                        .increaseFreeSpace(SelectedFilesManager.getInstance().getCurrentCopySize());
-                SelectedFilesManager.getInstance().addNewSelection();
+                            getActiveFragment().setMultiSelectEnabled(false);
+                            setTitle(getString(R.string.app_name));
+                            toggleFloatingMenu(false);
+                            SourceTransferService.startActionDelete(SourceActivity.this);
+                            getActiveFragment()
+                                    .getSource()
+                                    .increaseFreeSpace(SelectedFilesManager.getInstance().getCurrentCopySize());
+                            SelectedFilesManager.getInstance().addNewSelection();
+                        })
+                        .create().show();
             } else {
                 showSnackbar(getString(R.string.err_no_selection));
             }
