@@ -57,4 +57,5 @@
     <string name="close">Close</string>
     <string name="warning">Warning</string>
     <string name="dialog_delete_confirm">Are you sure you want to delete %d files?</string>
+    <string name="logout">Logout</string>
 </resources>

@@ -35,6 +35,8 @@ public abstract class Source {
      */
     public abstract void loadSource(Context context);
 
+    public abstract void logout();
+
 
     public Source(String sourceName, SourceListener listener) {
         this.mSourceName = sourceName;
