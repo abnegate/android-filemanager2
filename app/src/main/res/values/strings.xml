@@ -55,4 +55,6 @@
     <string name="menu_storage_usage">Storage Usage</string>
     <string name="dialog_title_usage">Storage Usage</string>
     <string name="close">Close</string>
+    <string name="dialog_delete_confirm">Are you sure you want to delete %d files?</string>
+    <string name="warning">Warning</string>
 </resources>

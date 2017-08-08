@@ -51,7 +51,7 @@ import com.jakebarnby.filemanager.util.Utils;
  */
 public abstract class SourceFragment extends Fragment implements SourceListener {
 
-    protected Source                  mSource;
+    protected Source                mSource;
 
     protected RecyclerView          mRecycler;
     protected FileSystemListAdapter mFileSystemListAdapter;
@@ -68,6 +68,10 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
         return mSource;
     }
 
+    public void setSource(Source source) {
+        this.mSource = source;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_source, container, false);
@@ -78,9 +82,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
         mDivider = rootView.findViewById(R.id.divider);
         mConnectButton = rootView.findViewById(R.id.btn_connect);
         mSourceLogo = rootView.findViewById(R.id.image_source_logo);
-
-        //TODO: To be set from each fragment passing this as the listener
-        //mSource = new Source(getArguments().getString(Constants.FRAGMENT_TITLE), this);
+        mSource.setSourceListener(this);
 
         if (getSource().hasToken(getContext(), getSource().getSourceName())) {
             mConnectButton.setVisibility(View.GONE);

@@ -12,24 +12,14 @@ import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.drive.DriveScopes;
-import com.google.api.services.drive.model.File;
-import com.google.api.services.drive.model.FileList;
 import com.jakebarnby.filemanager.sources.models.Source;
-import com.jakebarnby.filemanager.sources.SourceListener;
-import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
-import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 import static com.jakebarnby.filemanager.util.Constants.RequestCodes.ACCOUNT_PICKER;
 
@@ -42,8 +32,8 @@ public class GoogleDriveSource extends Source {
     private static final String[] SCOPES = {DriveScopes.DRIVE};
     private GoogleAccountCredential mCredential;
 
-    public GoogleDriveSource(String sourceName, SourceListener listener) {
-        super(sourceName, listener);
+    public GoogleDriveSource(String sourceName) {
+        super(sourceName);
     }
 
     @Override

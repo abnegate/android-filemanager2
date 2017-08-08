@@ -6,13 +6,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 
 import com.jakebarnby.filemanager.sources.models.Source;
-import com.jakebarnby.filemanager.sources.SourceListener;
-import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
-import com.jakebarnby.filemanager.util.TreeNode;
-import com.jakebarnby.filemanager.util.Utils;
-
-import java.io.File;
 
 /**
  * Created by jakebarnby on 2/08/17.
@@ -20,8 +14,8 @@ import java.io.File;
 
 public class LocalSource extends Source {
 
-    public LocalSource(String sourceName, SourceListener listener) {
-        super(sourceName, listener);
+    public LocalSource(String sourceName) {
+        super(sourceName);
     }
 
     @Override

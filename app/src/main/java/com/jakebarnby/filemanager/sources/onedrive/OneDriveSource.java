@@ -4,26 +4,19 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 
 import com.jakebarnby.filemanager.sources.models.Source;
-import com.jakebarnby.filemanager.sources.SourceListener;
-import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
-import com.jakebarnby.filemanager.util.TreeNode;
 import com.microsoft.graph.concurrency.ICallback;
 import com.microsoft.graph.core.ClientException;
 import com.microsoft.graph.core.DefaultClientConfig;
 import com.microsoft.graph.core.IClientConfig;
 import com.microsoft.graph.extensions.DriveItem;
 import com.microsoft.graph.extensions.GraphServiceClient;
-import com.microsoft.graph.extensions.IDriveItemCollectionPage;
 import com.microsoft.identity.client.AuthenticationCallback;
 import com.microsoft.identity.client.AuthenticationResult;
 import com.microsoft.identity.client.MsalClientException;
 import com.microsoft.identity.client.MsalException;
-import com.microsoft.identity.client.MsalServiceException;
-import com.microsoft.identity.client.MsalUiRequiredException;
 import com.microsoft.identity.client.PublicClientApplication;
 import com.microsoft.identity.client.User;
 
@@ -42,8 +35,8 @@ public class OneDriveSource extends Source {
     private PublicClientApplication mClient;
     private AuthenticationResult mAuthResult;
 
-    public OneDriveSource(String sourceName, SourceListener listener) {
-        super(sourceName, listener);
+    public OneDriveSource(String sourceName) {
+        super(sourceName);
     }
 
     @Override

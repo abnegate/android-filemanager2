@@ -13,6 +13,7 @@ import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.util.Constants;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -24,8 +25,8 @@ public class SourceUsageAdapter extends RecyclerView.Adapter<SourceUsageAdapter.
 
     private List<Source> mSources;
 
-    public SourceUsageAdapter(List<Source> sources) {
-        mSources = sources;
+    public SourceUsageAdapter(Collection<Source> sources) {
+        mSources = (List<Source>) sources;
     }
 
     @Override

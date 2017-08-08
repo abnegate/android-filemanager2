@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.SourceFragment;
 import com.jakebarnby.filemanager.glide.GlideApp;
+import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.util.Constants;
 
 /**
@@ -23,18 +24,18 @@ public class OneDriveFragment extends SourceFragment {
      * @param sourceName The name of the source controlled by this fragment
      * @return A new instance of this fragment
      */
-    public static SourceFragment newInstance(String sourceName) {
+    public static SourceFragment newInstance(Source source) {
         SourceFragment fragment = new OneDriveFragment();
         Bundle args = new Bundle();
-        args.putString("TITLE", sourceName);
+        args.putString("TITLE", source.getSourceName());
         fragment.setArguments(args);
+        fragment.setSource(source);
         return fragment;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mSource = new OneDriveSource(Constants.Sources.ONEDRIVE, this);
     }
 
     @Override

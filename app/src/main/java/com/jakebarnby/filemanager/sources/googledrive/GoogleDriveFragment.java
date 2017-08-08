@@ -9,8 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.jakebarnby.filemanager.R;
-import com.jakebarnby.filemanager.sources.SourceFragment;
 import com.jakebarnby.filemanager.glide.GlideApp;
+import com.jakebarnby.filemanager.sources.SourceFragment;
+import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.util.Constants;
 
 import static android.app.Activity.RESULT_OK;
@@ -29,18 +30,18 @@ public class GoogleDriveFragment extends SourceFragment {
      * @param sourceName The name of the source controlled by this fragment
      * @return A new instance of this fragment
      */
-    public static SourceFragment newInstance(String sourceName) {
+    public static SourceFragment newInstance(Source source) {
         SourceFragment fragment = new GoogleDriveFragment();
         Bundle args = new Bundle();
-        args.putString("TITLE", sourceName);
+        args.putString("TITLE", source.getSourceName());
         fragment.setArguments(args);
+        fragment.setSource(source);
         return fragment;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mSource = new GoogleDriveSource(Constants.Sources.GOOGLE_DRIVE, this);
         ((GoogleDriveSource)getSource()).setCredential(getContext());
     }
 

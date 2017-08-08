@@ -35,6 +35,9 @@ public abstract class Source {
      */
     public abstract void loadSource(Context context);
 
+    public Source(String sourceName) {
+        this.mSourceName = sourceName;
+    }
 
     public Source(String sourceName, SourceListener listener) {
         this.mSourceName = sourceName;
@@ -125,6 +128,14 @@ public abstract class Source {
 
     public void setMultiSelectEnabled(boolean mMultiSelectEnabled) {
         this.mMultiSelectEnabled = mMultiSelectEnabled;
+    }
+
+    public SourceListener getSourceListener() {
+        return mSourceListener;
+    }
+
+    public void setSourceListener(SourceListener mSourceListener) {
+        this.mSourceListener = mSourceListener;
     }
 
     /**

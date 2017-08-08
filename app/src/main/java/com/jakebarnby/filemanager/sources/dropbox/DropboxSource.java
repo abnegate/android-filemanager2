@@ -4,20 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 
-import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.android.Auth;
 import com.dropbox.core.http.OkHttp3Requestor;
 import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.files.FolderMetadata;
-import com.dropbox.core.v2.files.ListFolderResult;
-import com.dropbox.core.v2.files.Metadata;
 import com.jakebarnby.filemanager.sources.models.Source;
-import com.jakebarnby.filemanager.sources.SourceListener;
-import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
-import com.jakebarnby.filemanager.util.TreeNode;
 
 /**
  * Created by jakebarnby on 2/08/17.
@@ -25,8 +17,8 @@ import com.jakebarnby.filemanager.util.TreeNode;
 
 public class DropboxSource extends Source {
 
-    public DropboxSource(String sourceName, SourceListener listener) {
-        super(sourceName, listener);
+    public DropboxSource(String sourceName) {
+        super(sourceName);
     }
 
     @Override

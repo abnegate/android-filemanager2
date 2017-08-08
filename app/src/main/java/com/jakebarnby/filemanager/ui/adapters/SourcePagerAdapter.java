@@ -8,11 +8,13 @@ import com.jakebarnby.filemanager.sources.SourceFragment;
 import com.jakebarnby.filemanager.sources.dropbox.DropboxFragment;
 import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFragment;
 import com.jakebarnby.filemanager.sources.local.LocalFragment;
+import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.onedrive.OneDriveFragment;
 import com.jakebarnby.filemanager.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -22,20 +24,16 @@ public class SourcePagerAdapter extends FragmentPagerAdapter {
 
     private List<SourceFragment> fragments = new ArrayList<>();
 
-    public SourcePagerAdapter(FragmentManager fm) {
+    public SourcePagerAdapter(FragmentManager fm, Map<String, Source> sources) {
         super(fm);
-        fragments.add(LocalFragment.newInstance(Constants.Sources.LOCAL));
-        fragments.add(DropboxFragment.newInstance(Constants.Sources.DROPBOX));
-        fragments.add(GoogleDriveFragment.newInstance(Constants.Sources.GOOGLE_DRIVE));
-        fragments.add(OneDriveFragment.newInstance(Constants.Sources.ONEDRIVE));
+        fragments.add(LocalFragment.newInstance(sources.get(Constants.Sources.LOCAL)));
+        fragments.add(DropboxFragment.newInstance(sources.get(Constants.Sources.DROPBOX)));
+        fragments.add(GoogleDriveFragment.newInstance(sources.get(Constants.Sources.GOOGLE_DRIVE)));
+        fragments.add(OneDriveFragment.newInstance(sources.get(Constants.Sources.ONEDRIVE)));
     }
 
     public List<SourceFragment> getFragments() {
         return fragments;
-    }
-
-    public void addFragment(SourceFragment fragment) {
-        fragments.add(fragment);
     }
 
     @Override
