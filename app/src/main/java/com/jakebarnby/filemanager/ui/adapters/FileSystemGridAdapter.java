@@ -17,8 +17,8 @@ import com.jakebarnby.filemanager.util.TreeNode;
 
 public class FileSystemGridAdapter extends FileSystemAdapter {
 
-    public FileSystemGridAdapter(TreeNode<SourceFile> rootNode, RequestBuilder<Drawable> requestBuilder, ViewPreloadSizeProvider sizeProvider) {
-        super(rootNode, requestBuilder, sizeProvider);
+    public FileSystemGridAdapter(TreeNode<SourceFile> rootNode) {
+        super(rootNode);
     }
 
     @Override

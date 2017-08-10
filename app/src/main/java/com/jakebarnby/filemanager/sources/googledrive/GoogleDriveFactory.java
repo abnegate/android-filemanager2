@@ -1,5 +1,7 @@
 package com.jakebarnby.filemanager.sources.googledrive;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.webkit.MimeTypeMap;
 
 import com.google.api.client.http.FileContent;
@@ -106,7 +108,7 @@ public class GoogleDriveFactory {
     public com.google.api.services.drive.model.File createFolder(String name, String parentId) {
         com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
         fileMetadata.setName(name);
-        fileMetadata.setMimeType(Constants.GOOGLE_DRIVE_FOLDER_MIME);
+        fileMetadata.setMimeType(Constants.Sources.GOOGLE_DRIVE_FOLDER_MIME);
         fileMetadata.setParents(Collections.singletonList(parentId));
         try {
             return mService
@@ -118,6 +120,12 @@ public class GoogleDriveFactory {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void logout(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
+        prefs.edit().putString(Constants.Prefs.GOOGLE_TOKEN_KEY, null).apply();
+        prefs.edit().putString(Constants.Prefs.GOOGLE_NAME_KEY, null).apply();
     }
 
     /**

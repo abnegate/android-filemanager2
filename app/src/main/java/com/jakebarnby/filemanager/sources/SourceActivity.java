@@ -31,12 +31,14 @@ import android.view.animation.OvershootInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.webkit.MimeTypeMap;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.ndk.CrashlyticsNdk;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.ui.adapters.FileSystemAdapter;
+import com.jakebarnby.filemanager.ui.adapters.SourceLogoutAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourcePagerAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourceUsageAdapter;
 import com.jakebarnby.filemanager.ui.dialogs.CreateFolderDialog;
@@ -217,21 +219,27 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 showCreateFolderDialog();
                 break;
             case R.id.action_multi_select:
-                if (!getActiveFragment().getSource().isMultiSelectEnabled()) {
-                    getActiveFragment().setMultiSelectEnabled(true);
-
-                    if (SelectedFilesManager.getInstance().getOperationCount() == 0) {
-                        SelectedFilesManager.getInstance().addNewSelection();
-                    }
-                }
+                handleMenuMultiSelect();
                 break;
             case R.id.action_storage_usage:
                 showUsageDialog();
                 break;
+            case R.id.action_logout:
+                showLogoutDialog();
             default:
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void handleMenuMultiSelect() {
+        if (!getActiveFragment().getSource().isMultiSelectEnabled()) {
+            getActiveFragment().setMultiSelectEnabled(true);
+
+            if (SelectedFilesManager.getInstance().getOperationCount() == 0) {
+                SelectedFilesManager.getInstance().addNewSelection();
+            }
+        }
     }
 
     /**
@@ -573,21 +581,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         mDialog.show();
     }
 
-    /**
-     * Update the progress of the {@link ProgressDialog} if it is showing
-     *
-     * @param intent The broadcasted intent with update extras
-     */
-    private void updateProgressDialog(Intent intent) {
-        if (mDialog != null && mDialog.isShowing()) {
-            if (mDialog.isIndeterminate()) {
-                mDialog.setIndeterminate(false);
-            }
-            int currentCount = intent.getIntExtra(EXTRA_CURRENT_COUNT, 0);
-            mDialog.setProgress(currentCount);
-        }
-    }
-
     private void showUsageDialog() {
         List<Source> sources = new ArrayList<>();
         for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
@@ -610,6 +603,51 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 .setView(view)
                 .create()
                 .show();
+    }
+
+    private void showLogoutDialog() {
+        List<Source> sources = new ArrayList<>();
+        for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
+            if (fragment.getSource().isFilesLoaded() &&
+                    !fragment.getSource().getSourceName().equals(Constants.Sources.LOCAL)) {
+                sources.add(fragment.getSource());
+            }
+        }
+        SourceLogoutAdapter adapter = new SourceLogoutAdapter(sources);
+
+        View view = getLayoutInflater().inflate(R.layout.dialog_source_logout, null);
+        RecyclerView rv = view.findViewById(R.id.rv_source_logout);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        if (sources.isEmpty()) {
+            builder.setMessage(R.string.no_connected_sources);
+        } else {
+            rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+            rv.setAdapter(adapter);
+            builder.setView(view);
+        }
+
+        builder
+                .setTitle(R.string.dialog_title_logout)
+                .setNegativeButton(R.string.close, (dialog, which) -> dialog.dismiss())
+                .create()
+                .show();
+    }
+
+    /**
+     * Update the progress of the {@link ProgressDialog} if it is showing
+     *
+     * @param intent The broadcasted intent with update extras
+     */
+    private void updateProgressDialog(Intent intent) {
+        if (mDialog != null && mDialog.isShowing()) {
+            if (mDialog.isIndeterminate()) {
+                mDialog.setIndeterminate(false);
+            }
+            int currentCount = intent.getIntExtra(EXTRA_CURRENT_COUNT, 0);
+            mDialog.setProgress(currentCount);
+        }
     }
 
     /**

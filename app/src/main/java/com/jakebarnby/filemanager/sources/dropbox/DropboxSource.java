@@ -4,20 +4,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 
-import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.android.Auth;
 import com.dropbox.core.http.OkHttp3Requestor;
 import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.files.FolderMetadata;
-import com.dropbox.core.v2.files.ListFolderResult;
-import com.dropbox.core.v2.files.Metadata;
+import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.SourceListener;
-import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
-import com.jakebarnby.filemanager.util.TreeNode;
 
 /**
  * Created by jakebarnby on 2/08/17.
@@ -27,6 +21,7 @@ public class DropboxSource extends Source {
 
     public DropboxSource(String sourceName, SourceListener listener) {
         super(sourceName, listener);
+        setLogoId(R.drawable.ic_dropbox);
     }
 
     @Override
@@ -41,6 +36,16 @@ public class DropboxSource extends Source {
         if (!isFilesLoaded()) {
             if (!checkConnectionActive(context)) return;
             new DropboxLoaderTask(this, mSourceListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        }
+    }
+
+    @Override
+    public void logout(Context context) {
+        if (isLoggedIn()) {
+            DropboxFactory.getInstance().logout(context);
+            setLoggedIn(false);
+            setFilesLoaded(false);
+            mSourceListener.onLogout();
         }
     }
 
@@ -62,7 +67,7 @@ public class DropboxSource extends Source {
      * Check for a valid access token and store it in shared preferences if found, then load the source
      */
     public void checkForAccessToken(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(Constants.SharedPrefs.PREFS, Context.MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
         String accessToken = prefs.getString("dropbox-access-token", null);
         if (accessToken == null) {
             accessToken = Auth.getOAuth2Token();

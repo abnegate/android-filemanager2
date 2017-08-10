@@ -1,5 +1,8 @@
 package com.jakebarnby.filemanager.sources.dropbox;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.dropbox.core.DbxException;
@@ -11,6 +14,7 @@ import com.dropbox.core.v2.files.WriteMode;
 import com.dropbox.core.v2.users.SpaceAllocation;
 import com.dropbox.core.v2.users.SpaceUsage;
 import com.jakebarnby.filemanager.sources.models.SourceStorageStats;
+import com.jakebarnby.filemanager.util.Constants;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -125,6 +129,20 @@ public class DropboxFactory {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void logout(Context context) {
+            AsyncTask.execute(() -> {
+                try {
+                    getClient().auth().tokenRevoke();
+                    setClient(null);
+                } catch (DbxException e) {
+                    e.printStackTrace();
+                }
+            });
+
+            SharedPreferences prefs = context.getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
+            prefs.edit().putString(Constants.Prefs.DROPBOX_TOKEN_KEY, null).apply();
     }
 
     public SourceStorageStats getStorageStats() {

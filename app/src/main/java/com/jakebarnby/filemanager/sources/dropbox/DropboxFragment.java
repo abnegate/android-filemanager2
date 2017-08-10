@@ -39,19 +39,6 @@ public class DropboxFragment extends SourceFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-
-        GlideApp
-                .with(mSourceLogo)
-                .load(R.drawable.ic_dropbox)
-                .centerCrop()
-                .into(mSourceLogo);
-
-        return view;
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         ((DropboxSource)getSource()).checkForAccessToken(getContext());

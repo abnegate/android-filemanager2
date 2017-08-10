@@ -10,4 +10,5 @@ public interface SourceListener {
     void onLoadAborted();
     void onLoadError(String errorMessage);
     void onLoadComplete(TreeNode<SourceFile> rootFile);
+    void onLogout();
 }

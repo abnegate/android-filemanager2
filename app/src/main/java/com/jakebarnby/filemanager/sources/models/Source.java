@@ -2,6 +2,7 @@ package com.jakebarnby.filemanager.sources.models;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.annotation.DrawableRes;
 
 import com.jakebarnby.filemanager.sources.SourceListener;
 import com.jakebarnby.filemanager.util.Constants;
@@ -25,6 +26,9 @@ public abstract class Source {
 
     protected SourceListener        mSourceListener;
 
+    @DrawableRes
+    private int                     mLogoId;
+
     /**
      * Authenticate the current mSource
      */
@@ -34,6 +38,8 @@ public abstract class Source {
      * Load the current mSource
      */
     public abstract void loadSource(Context context);
+
+    public abstract void logout(Context context);
 
 
     public Source(String sourceName, SourceListener listener) {
@@ -132,7 +138,7 @@ public abstract class Source {
      * @return  Whether there is a valid access token for this mSource
      */
     public boolean hasToken(Context context, String sourceName) {
-        SharedPreferences prefs = context.getSharedPreferences(Constants.SharedPrefs.PREFS, Context.MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
         String accessToken = prefs.getString(sourceName + "-access-token", null);
         return accessToken != null;
     }
@@ -148,6 +154,14 @@ public abstract class Source {
             }
         }
         return true;
+    }
+
+    public int getLogoId() {
+        return mLogoId;
+    }
+
+    public void setLogoId(@DrawableRes int logoId) {
+        this.mLogoId = logoId;
     }
 }
 

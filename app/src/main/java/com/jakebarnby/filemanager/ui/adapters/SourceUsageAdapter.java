@@ -30,15 +30,13 @@ public class SourceUsageAdapter extends RecyclerView.Adapter<SourceUsageAdapter.
 
     @Override
     public UsageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View inflatedView = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_source_usage_list, parent, false);
-        return new SourceUsageAdapter.UsageViewHolder(inflatedView);
+        View inflatedView = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_usage_list, parent, false);
+        return new UsageViewHolder(inflatedView);
     }
 
     @Override
     public void onBindViewHolder(UsageViewHolder holder, int position) {
-        holder.mSourceName.setText(mSources.get(position).getSourceName());
-        holder.mSourceUsage.setText(getUsageString(position));
-        simulateProgress(holder.mPercentBar, (int) mSources.get(position).getUsedSpacePercent());
+        holder.bindHolder(mSources.get(position));
     }
 
     @Override
@@ -46,38 +44,45 @@ public class SourceUsageAdapter extends RecyclerView.Adapter<SourceUsageAdapter.
         return mSources.size();
     }
 
-    private String getUsageString(int position) {
-        double usedGb = mSources.get(position).getUsedSpaceGB();
-        double totalGb = mSources.get(position).getTotalSpaceGB();
+    static class UsageViewHolder extends RecyclerView.ViewHolder {
 
-        return String.format(
-                Locale.getDefault(),
-                "%.2f / %.2f GB",
-                usedGb,
-                totalGb);
-    }
-
-    private void simulateProgress(ProgressBar bar, int maxPercent) {
-        ValueAnimator animator = ValueAnimator.ofInt(0, maxPercent);
-        animator.addUpdateListener(animation -> {
-            int progress = (int) animation.getAnimatedValue();
-            bar.setProgress(progress);
-
-        });
-        animator.setDuration(Constants.Animation.PROGRESS_DURATION);
-        animator.start();
-    }
-
-    public static class UsageViewHolder extends RecyclerView.ViewHolder {
         private CircleProgressBar   mPercentBar;
         private TextView            mSourceName;
         private TextView            mSourceUsage;
 
-        public UsageViewHolder(View itemView) {
+        UsageViewHolder(View itemView) {
             super(itemView);
-            mPercentBar = itemView.findViewById(R.id.prg_usage);
-            mSourceName = itemView.findViewById(R.id.txt_source_title);
-            mSourceUsage = itemView.findViewById(R.id.txt_space_consumption);
+            mPercentBar     = itemView.findViewById(R.id.prg_usage);
+            mSourceName     = itemView.findViewById(R.id.txt_source_title);
+            mSourceUsage    = itemView.findViewById(R.id.txt_space_consumption);
+        }
+
+        void bindHolder(Source source) {
+            mSourceName.setText(String.format("%s%s", source.getSourceName().substring(0, 1), source.getSourceName().substring(1).toLowerCase()));
+            mSourceUsage.setText(constructUsageString(source));
+            simulateProgress(mPercentBar, source.getUsedSpacePercent());
+        }
+
+        private String constructUsageString(Source source) {
+            double usedGb = source.getUsedSpaceGB();
+            double totalGb = source.getTotalSpaceGB();
+
+            return String.format(
+                    Locale.getDefault(),
+                    "%.2f / %.2f GB",
+                    usedGb,
+                    totalGb);
+        }
+
+        private void simulateProgress(ProgressBar bar, int maxPercent) {
+            ValueAnimator animator = ValueAnimator.ofInt(0, maxPercent);
+            animator.addUpdateListener(animation -> {
+                int progress = (int) animation.getAnimatedValue();
+                bar.setProgress(progress);
+
+            });
+            animator.setDuration(Constants.Animation.PROGRESS_DURATION);
+            animator.start();
         }
     }
 }

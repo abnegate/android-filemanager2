@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Environment;
 
+import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.SourceListener;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
@@ -22,6 +23,7 @@ public class LocalSource extends Source {
 
     public LocalSource(String sourceName, SourceListener listener) {
         super(sourceName, listener);
+        setLogoId(R.mipmap.ic_launcher);
     }
 
     @Override
@@ -35,5 +37,10 @@ public class LocalSource extends Source {
             new LocalLoaderTask(this, mSourceListener)
                     .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Environment.getExternalStorageDirectory().getAbsolutePath());
         }
+    }
+
+    @Override
+    public void logout(Context context) {
+
     }
 }
