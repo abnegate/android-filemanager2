@@ -17,10 +17,8 @@ import com.jakebarnby.filemanager.util.TreeNode;
 
 public class FileSystemListAdapter extends FileSystemAdapter {
 
-    public FileSystemListAdapter(TreeNode<SourceFile> rootNode,
-                                 RequestBuilder<Drawable> requestBuilder,
-                                 ViewPreloadSizeProvider sizeProvider) {
-        super(rootNode, requestBuilder, sizeProvider);
+    public FileSystemListAdapter(TreeNode<SourceFile> rootNode) {
+        super(rootNode);
     }
 
     @Override

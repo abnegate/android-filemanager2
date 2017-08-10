@@ -34,36 +34,18 @@ import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOption
 
 public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.FileViewHolder> {
 
-    private static final long               FADE_DURATION = 1000L;
-    private static final long               TRANSLATE_DURATION = 700L;
-
-    private TreeNode<SourceFile>            mParentDir;
     private List<TreeNode<SourceFile>>      mCurrentDirChildren;
     private OnFileClickedListener           mOnClickListener;
     private OnFileLongClickedListener       mOnLongClickListener;
     private boolean                         mMultiSelectEnabled;
-    private TreeNode<SourceFile>            mRootTreeNode;
-    private TreeNode<SourceFile>            mCurrentDir;
-    private int                             mLastPosition = -1;
-    private AnimationSet                    mAnimationSet;
-
-    private RequestBuilder<Drawable>        mRequestBuilder;
-    private ViewPreloadSizeProvider         mSizeProvider;
 
     /**
      * Create a new FileSystemAdapter instance with the given root tree node
      *
      * @param rootNode     The root node of the file tree
-     * @param sizeProvider
      */
-    public FileSystemAdapter(TreeNode<SourceFile> rootNode,
-                             RequestBuilder<Drawable> requestBuilder,
-                             ViewPreloadSizeProvider sizeProvider) {
-        mRootTreeNode = rootNode;
-        mRequestBuilder = requestBuilder;
-        mSizeProvider = sizeProvider;
-        mAnimationSet = new AnimationSet(false);
-        setCurrentDirectory(mRootTreeNode);
+    public FileSystemAdapter(TreeNode<SourceFile> rootNode) {
+        setCurrentDirectory(rootNode);
     }
 
     /**
@@ -81,107 +63,12 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
      * @param currentDir Directory to set as current
      */
     public void setCurrentDirectory(TreeNode<SourceFile> currentDir) {
-        setCurrentDirectory(currentDir.getParent(), currentDir.getChildren());
-        mCurrentDir = currentDir;
-    }
-
-    /**
-     * Set the current directory including it's children and parent
-     *
-     * @param parent   The parent of the directory to set as current
-     * @param children The children of the directory to set as current
-     */
-    public void setCurrentDirectory(TreeNode<SourceFile> parent, List<TreeNode<SourceFile>> children) {
-        mParentDir = parent;
-        mCurrentDirChildren = children;
-    }
-
-    public ListPreloader.PreloadSizeProvider<TreeNode<SourceFile>> getSizeProvider() {
-        return mSizeProvider;
+        mCurrentDirChildren = currentDir.getChildren();
     }
 
     @Override
     public void onBindViewHolder(FileViewHolder holder, int position) {
-        String name = mCurrentDirChildren.get(position).getData().getName();
-        if (mCurrentDirChildren.get(position).getData().isDirectory()) {
-            holder.mText.setText(name);
-            holder.mPreviewImage.setImageResource(R.drawable.ic_folder);
-        } else {
-            if (name.lastIndexOf('.') > 0) {
-                holder.mText.setText(name.substring(0, name.lastIndexOf('.')));
-            } else {
-                holder.mText.setText(name);
-            }
-            setThumbnail(holder, position);
-        }
-
-        if (!mMultiSelectEnabled) {
-            holder.mCheckbox.setChecked(false);
-            holder.mCheckbox.setVisibility(View.GONE);
-        } else {
-            holder.mCheckbox.setVisibility(View.VISIBLE);
-        }
-
-        if (mMultiSelectEnabled && holder.mCheckbox.getVisibility() == View.VISIBLE) {
-            TranslateAnimation translate = new TranslateAnimation(-500f, 0.0f, 0.0f, 0.0f);
-            translate.setInterpolator(new DecelerateInterpolator(3.0f));
-            translate.setDuration(400);
-            holder.mCheckbox.startAnimation(translate);
-        }
-
-        if (SelectedFilesManager.getInstance().getOperationCount() > 0) {
-            if (SelectedFilesManager
-                    .getInstance()
-                    .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
-                    .contains(mCurrentDirChildren.get(position))) {
-                holder.mCheckbox.setChecked(true);
-            }
-        }
-        mSizeProvider.setView(holder.mPreviewImage);
-    }
-
-    /**
-     * Sets the thumbnail for this item
-     *
-     * @param holder   {@link RecyclerView.ViewHolder} to set the thumbnail for
-     * @param position Position of this item in the adapter
-     */
-    private void setThumbnail(FileViewHolder holder, int position) {
-        GlideApp
-                .with(holder.itemView)
-                .load(mCurrentDir.getData().getSourceName().equals(Constants.Sources.LOCAL) ?
-                        new File(mCurrentDirChildren.get(position).getData().getThumbnailLink()) :
-                        mCurrentDirChildren.get(position).getData().getThumbnailLink())
-                .error(R.mipmap.ic_launcher_round)
-                .placeholder(R.mipmap.ic_launcher_round)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .transition(withCrossFade())
-                .override(100, 100)
-                .thumbnail(0.2f)
-                .circleCrop()
-                .into(holder.mPreviewImage);
-    }
-
-    /**
-     * @param viewToAnimate
-     * @param position
-     */
-    private void setAnimation(View viewToAnimate, int position) {
-        if (position > mLastPosition) {
-            final int screenHeight = Utils.getScreenHeight(viewToAnimate.getContext());
-            TranslateAnimation translate = new TranslateAnimation(0.0f, 0.0f, screenHeight, 0.0f);
-            translate.setInterpolator(new DecelerateInterpolator(3.0f));
-            translate.setDuration(TRANSLATE_DURATION);
-
-            AlphaAnimation alpha = new AlphaAnimation(0.0f, 1.0f);
-            alpha.setInterpolator(new DecelerateInterpolator(2.0f));
-            alpha.setDuration(FADE_DURATION);
-
-            mAnimationSet.addAnimation(alpha);
-            mAnimationSet.addAnimation(translate);
-            viewToAnimate.startAnimation(mAnimationSet);
-            mLastPosition = position;
-        }
+        holder.bindHolder(mCurrentDirChildren.get(position));
     }
 
     @Override
@@ -205,6 +92,68 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
 
             mCheckbox.setOnClickListener(v -> mOnClickListener.OnClick(
                     mCurrentDirChildren.get(getAdapterPosition()), mCheckbox.isChecked(), getAdapterPosition()));
+        }
+
+        /**
+         *
+         * @param currentDir
+         */
+        void bindHolder(TreeNode<SourceFile> currentDir) {
+            String name = currentDir.getData().getName();
+            if (currentDir.getData().isDirectory()) {
+                mText.setText(name);
+                mPreviewImage.setImageResource(R.drawable.ic_folder);
+            } else {
+                if (name.lastIndexOf('.') > 0) {
+                    mText.setText(name.substring(0, name.lastIndexOf('.')));
+                } else {
+                    mText.setText(name);
+                }
+                setThumbnail(currentDir);
+            }
+
+            if (!mMultiSelectEnabled) {
+                mCheckbox.setChecked(false);
+                mCheckbox.setVisibility(View.GONE);
+            } else {
+                mCheckbox.setVisibility(View.VISIBLE);
+            }
+
+            if (mMultiSelectEnabled && mCheckbox.getVisibility() == View.VISIBLE) {
+                TranslateAnimation translate = new TranslateAnimation(-500f, 0.0f, 0.0f, 0.0f);
+                translate.setInterpolator(new DecelerateInterpolator(3.0f));
+                translate.setDuration(400);
+                mCheckbox.startAnimation(translate);
+            }
+
+            if (SelectedFilesManager.getInstance().getOperationCount() > 0) {
+                if (SelectedFilesManager
+                        .getInstance()
+                        .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                        .contains(currentDir)) {
+                    mCheckbox.setChecked(true);
+                }
+            }
+        }
+
+        /**
+         *
+         * @param currentDir
+         */
+        private void setThumbnail(TreeNode<SourceFile> currentDir) {
+            GlideApp
+                    .with(itemView)
+                    .load(currentDir.getData().getSourceName().equals(Constants.Sources.LOCAL) ?
+                            new File(currentDir.getData().getThumbnailLink()) :
+                            currentDir.getData().getThumbnailLink())
+                    .error(R.mipmap.ic_launcher_round)
+                    .placeholder(R.mipmap.ic_launcher_round)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .transition(withCrossFade())
+                    .override(100, 100)
+                    .thumbnail(0.2f)
+                    .circleCrop()
+                    .into(mPreviewImage);
         }
 
         /**

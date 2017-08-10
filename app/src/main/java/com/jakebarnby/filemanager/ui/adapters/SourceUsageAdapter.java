@@ -31,7 +31,7 @@ public class SourceUsageAdapter extends RecyclerView.Adapter<SourceUsageAdapter.
     @Override
     public UsageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View inflatedView = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_usage_list, parent, false);
-        return new SourceUsageAdapter.UsageViewHolder(inflatedView);
+        return new UsageViewHolder(inflatedView);
     }
 
     @Override
@@ -45,6 +45,7 @@ public class SourceUsageAdapter extends RecyclerView.Adapter<SourceUsageAdapter.
     }
 
     static class UsageViewHolder extends RecyclerView.ViewHolder {
+
         private CircleProgressBar   mPercentBar;
         private TextView            mSourceName;
         private TextView            mSourceUsage;
@@ -56,13 +57,13 @@ public class SourceUsageAdapter extends RecyclerView.Adapter<SourceUsageAdapter.
             mSourceUsage    = itemView.findViewById(R.id.txt_space_consumption);
         }
 
-        public void bindHolder(Source source) {
-            mSourceName.setText(source.getSourceName());
-            mSourceUsage.setText(getUsageString(source));
-            simulateProgress(mPercentBar, (int) source.getUsedSpacePercent());
+        void bindHolder(Source source) {
+            mSourceName.setText(String.format("%s%s", source.getSourceName().substring(0, 1), source.getSourceName().substring(1).toLowerCase()));
+            mSourceUsage.setText(constructUsageString(source));
+            simulateProgress(mPercentBar, source.getUsedSpacePercent());
         }
 
-        private String getUsageString(Source source) {
+        private String constructUsageString(Source source) {
             double usedGb = source.getUsedSpaceGB();
             double totalGb = source.getTotalSpaceGB();
 

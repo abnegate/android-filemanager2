@@ -4,26 +4,21 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 
+import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.SourceListener;
-import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
-import com.jakebarnby.filemanager.util.TreeNode;
 import com.microsoft.graph.concurrency.ICallback;
 import com.microsoft.graph.core.ClientException;
 import com.microsoft.graph.core.DefaultClientConfig;
 import com.microsoft.graph.core.IClientConfig;
 import com.microsoft.graph.extensions.DriveItem;
 import com.microsoft.graph.extensions.GraphServiceClient;
-import com.microsoft.graph.extensions.IDriveItemCollectionPage;
 import com.microsoft.identity.client.AuthenticationCallback;
 import com.microsoft.identity.client.AuthenticationResult;
 import com.microsoft.identity.client.MsalClientException;
 import com.microsoft.identity.client.MsalException;
-import com.microsoft.identity.client.MsalServiceException;
-import com.microsoft.identity.client.MsalUiRequiredException;
 import com.microsoft.identity.client.PublicClientApplication;
 import com.microsoft.identity.client.User;
 
@@ -35,33 +30,35 @@ import java.util.List;
 
 public class OneDriveSource extends Source {
 
-    public static final String      TAG = "ONEDRIVE";
-    private final static String     CLIENT_ID = "019d333e-3e7f-4c04-a214-f12602dd5b10";
+    private static final String     CLIENT_ID = "019d333e-3e7f-4c04-a214-f12602dd5b10";
     private static final String[]   SCOPES = {"https://graph.microsoft.com/Files.ReadWrite"};
 
-    private PublicClientApplication mClient;
-    private AuthenticationResult mAuthResult;
+    private PublicClientApplication     mClient;
+    private AuthenticationResult    mAuthResult;
 
     public OneDriveSource(String sourceName, SourceListener listener) {
         super(sourceName, listener);
+        setLogoId(R.drawable.ic_onedrive);
     }
-
-    @Override
-    public void authenticateSource(Context context) {}
 
     public PublicClientApplication getClient() {
         return mClient;
     }
 
+    @Override
+    public void authenticateSource(Context context) {}
+
     public void authenticateSource(Fragment fragment) {
         mClient = new PublicClientApplication(fragment.getContext(), CLIENT_ID);
         mSourceListener.onLoadStarted();
         if (!isLoggedIn()) {
-            List<User> users;
             try {
-                users = mClient.getUsers();
-                if (users != null && users.size() == 1) {
-                    mClient.acquireTokenSilentAsync(SCOPES, users.get(0), getAuthSilentCallback(fragment));
+                SharedPreferences prefs = fragment.getContext().getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
+                String accessToken = prefs.getString(Constants.Prefs.ONEDRIVE_TOKEN_KEY, null);
+                String userId = prefs.getString(Constants.Prefs.ONEDRIVE_NAME_KEY, null);
+
+                if (accessToken != null && userId != null) {
+                    mClient.acquireTokenSilentAsync(SCOPES, mClient.getUser(userId), getAuthSilentCallback(fragment));
                 } else {
                     mClient.acquireToken(fragment, SCOPES, getAuthInteractiveCallback(fragment));
                 }
@@ -109,17 +106,29 @@ public class OneDriveSource extends Source {
         }
     }
 
+    @Override
+    public void logout(Context context) {
+        if (isLoggedIn()) {
+            OneDriveFactory.getInstance().logout(context);
+            setLoggedIn(false);
+            setFilesLoaded(false);
+            mAuthResult = null;
+            mSourceListener.onLogout();
+        }
+    }
 
     /**
      * Check for a valid access token and store it in shared preferences if found, then load the source
      */
     public void checkForAccessToken(Fragment fragment) {
-        SharedPreferences prefs = fragment.getContext().getSharedPreferences(Constants.SharedPrefs.PREFS, Context.MODE_PRIVATE);
-        String accessToken = prefs.getString("onedrive-access-token", null);
+        SharedPreferences prefs = fragment.getContext().getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
+        String accessToken = prefs.getString(Constants.Prefs.ONEDRIVE_TOKEN_KEY, null);
         if (mAuthResult != null) {
             if (accessToken == null || !mAuthResult.getAccessToken().equals(accessToken)) {
                 accessToken = mAuthResult.getAccessToken();
-                prefs.edit().putString("onedrive-access-token", accessToken).apply();
+                String userId = mAuthResult.getUser().getUserIdentifier();
+                prefs.edit().putString(Constants.Prefs.ONEDRIVE_TOKEN_KEY, accessToken).apply();
+                prefs.edit().putString(Constants.Prefs.ONEDRIVE_NAME_KEY, userId).apply();
             } else {
                 if (!isLoggedIn()) {
                     authenticateSource(fragment);

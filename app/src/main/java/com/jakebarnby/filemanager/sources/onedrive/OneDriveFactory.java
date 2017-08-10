@@ -1,4 +1,7 @@
 package com.jakebarnby.filemanager.sources.onedrive;
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import com.jakebarnby.filemanager.sources.models.SourceStorageStats;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.Utils;
@@ -155,9 +158,15 @@ public class OneDriveFactory {
 
     private String transformFileName(String fileName) {
         String newName = fileName.replaceAll(Constants.Sources.ONEDRIVE_INVALID_CHARS, "%20");
-        if (newName.length() > Constants.MAX_FILENAME_LENGTH) {
-            newName = newName.substring(0, Constants.MAX_FILENAME_LENGTH);
+        if (newName.length() > Constants.Sources.MAX_FILENAME_LENGTH) {
+            newName = newName.substring(0, Constants.Sources.MAX_FILENAME_LENGTH);
         }
         return newName;
+    }
+
+    public void logout(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
+        prefs.edit().putString(Constants.Prefs.ONEDRIVE_TOKEN_KEY, null).commit();
+        prefs.edit().putString(Constants.Prefs.ONEDRIVE_NAME_KEY, null).commit();
     }
 }

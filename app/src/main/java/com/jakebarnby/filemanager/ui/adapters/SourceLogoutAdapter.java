@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jakebarnby.filemanager.R;
+import com.jakebarnby.filemanager.glide.GlideApp;
 import com.jakebarnby.filemanager.sources.models.Source;
 
 import java.util.List;
@@ -27,21 +28,21 @@ public class SourceLogoutAdapter extends RecyclerView.Adapter<SourceLogoutAdapte
 
     @Override
     public LogoutViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_logout_list, parent);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_logout_list, parent, false);
         return new LogoutViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(LogoutViewHolder holder, int position) {
-        holder.bindHolder(mSources.get(position));
+        holder.bindHolder(mSources, position);
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return mSources.size();
     }
 
-    static class LogoutViewHolder extends RecyclerView.ViewHolder {
+    class LogoutViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView   mLogo;
         private TextView    mSourceName;
@@ -54,12 +55,23 @@ public class SourceLogoutAdapter extends RecyclerView.Adapter<SourceLogoutAdapte
             this.mLogout        = itemView.findViewById(R.id.btn_logout);
         }
 
-        public void bindHolder(Source source) {
-            mSourceName.setText(source.getSourceName());
+        void bindHolder(List<Source> sources, int position) {
+            Source source = sources.get(position);
+
+            GlideApp
+                    .with(mLogo)
+                    .load(source.getLogoId())
+                    .centerCrop()
+                    .into(mLogo);
+
+            mSourceName.setText(String.format("%s%s", source.getSourceName().substring(0, 1), source.getSourceName().substring(1).toLowerCase()));
             mLogout.setText(source.isLoggedIn() ? R.string.logout : R.string.connect);
             mLogout.setOnClickListener((view -> {
                 if (source.isLoggedIn()) {
-                    source.logout();
+                    source.logout(view.getContext());
+                    sources.remove(source);
+                    notifyItemRemoved(position);
+
                 } else {
                     source.authenticateSource(mLogo.getContext());
                 }

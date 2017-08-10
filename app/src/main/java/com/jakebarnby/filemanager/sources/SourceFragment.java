@@ -30,6 +30,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import com.jakebarnby.filemanager.R;
+import com.jakebarnby.filemanager.glide.GlideApp;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.services.SourceTransferService;
 import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFragment;
@@ -37,6 +38,7 @@ import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveSource;
 import com.jakebarnby.filemanager.sources.local.LocalFragment;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
+import com.jakebarnby.filemanager.sources.models.SourceManager;
 import com.jakebarnby.filemanager.sources.onedrive.OneDriveFragment;
 import com.jakebarnby.filemanager.sources.onedrive.OneDriveSource;
 import com.jakebarnby.filemanager.ui.adapters.FileSystemAdapter;
@@ -51,7 +53,7 @@ import com.jakebarnby.filemanager.util.Utils;
  */
 public abstract class SourceFragment extends Fragment implements SourceListener {
 
-    protected Source                  mSource;
+    protected Source                mSource;
 
     protected RecyclerView          mRecycler;
     protected FileSystemListAdapter mFileSystemListAdapter;
@@ -79,9 +81,6 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
         mConnectButton = rootView.findViewById(R.id.btn_connect);
         mSourceLogo = rootView.findViewById(R.id.image_source_logo);
 
-        //TODO: To be set from each fragment passing this as the listener
-        //mSource = new Source(getArguments().getString(Constants.FRAGMENT_TITLE), this);
-
         if (getSource().hasToken(getContext(), getSource().getSourceName())) {
             mConnectButton.setVisibility(View.GONE);
             mSourceLogo.setVisibility(View.GONE);
@@ -98,6 +97,13 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                 Snackbar.make(rootView, R.string.err_no_connection, Snackbar.LENGTH_LONG).show();
             }
         });
+
+        GlideApp
+                .with(mSourceLogo)
+                .load(getSource().getLogoId())
+                .centerCrop()
+                .into(mSourceLogo);
+
         return rootView;
     }
 
@@ -124,8 +130,10 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
         pushBreadcrumb(fileTree);
         initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
 
-        if (this instanceof LocalFragment) {
-            ((SourceActivity) getActivity()).getSourceManager().setActiveDirectory(fileTree);
+        SourceManager sourceManager = ((SourceActivity) getActivity()).getSourceManager();
+
+        if (sourceManager.getActiveDirectory() == null) {
+            sourceManager.setActiveDirectory(fileTree);
         }
 
         mProgressBar.setVisibility(View.GONE);
@@ -133,11 +141,20 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
     }
 
     @Override
+    public void onLogout() {
+        mRecycler.setVisibility(View.GONE);
+        mDivider.setVisibility(View.GONE);
+        mBreadcrumbWrapper.setVisibility(View.GONE);
+        mSourceLogo.setVisibility(View.VISIBLE);
+        mConnectButton.setVisibility(View.VISIBLE);
+        mProgressBar.setVisibility(View.GONE);
+        popAllBreadCrumbs();
+    }
+
+    @Override
     public void onNoConnection() {
         Snackbar.make(mRecycler, R.string.err_no_connection, Snackbar.LENGTH_LONG).show();
     }
-
-
 
     public void setMultiSelectEnabled(boolean enabled) {
         if (enabled) {
@@ -172,7 +189,9 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
         if (mRecycler.getAdapter() != null) {
             mRecycler.getAdapter().notifyDataSetChanged();
         }
+        mRecycler.setVisibility(View.VISIBLE);
         mDivider.setVisibility(View.VISIBLE);
+        mBreadcrumbWrapper.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -184,15 +203,11 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
     protected void initAdapters(TreeNode<SourceFile> file,
                                 FileSystemAdapter.OnFileClickedListener onClickListener,
                                 FileSystemAdapter.OnFileLongClickedListener onLongClickListener) {
-        mFileSystemListAdapter = new FileSystemListAdapter(file,
-                                                           Glide.with(this).asDrawable(),
-                                                           new ViewPreloadSizeProvider());
+        mFileSystemListAdapter = new FileSystemListAdapter(file);
         mFileSystemListAdapter.setOnClickListener(onClickListener);
         mFileSystemListAdapter.setOnLongClickListener(onLongClickListener);
 
-        mFileSystemGridAdapter = new FileSystemGridAdapter(file,
-                                                           Glide.with(this).asDrawable(),
-                                                           new ViewPreloadSizeProvider());
+        mFileSystemGridAdapter = new FileSystemGridAdapter(file);
         mFileSystemGridAdapter.setOnClickListener(onClickListener);
         mFileSystemGridAdapter.setOnLongClickListener(onLongClickListener);
 
@@ -303,6 +318,8 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                 .setVisibility(directory.getParent() == null ? View.GONE : View.VISIBLE);
 
         TextView text = crumbLayout.findViewById(R.id.crumb_text);
+
+        // If this is the root node set the text to the source name instead of file name
         text.setText(directory.getParent() == null ?
                 directory.getData().getSourceName().substring(0,1).toUpperCase() + directory.getData().getSourceName().substring(1).toLowerCase():
                 directory.getData().getName());
@@ -340,6 +357,13 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
      */
     protected void popBreadcrumb() {
         mBreadcrumbBar.removeViewAt(mBreadcrumbBar.getChildCount()-1);
+    }
+
+    /**
+     * Pop all breadcrumbs in the stack
+     */
+    protected  void popAllBreadCrumbs() {
+        mBreadcrumbBar.removeAllViews();
     }
 
     @Override

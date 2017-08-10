@@ -58,4 +58,7 @@
     <string name="warning">Warning</string>
     <string name="dialog_delete_confirm">Are you sure you want to delete %d files?</string>
     <string name="logout">Logout</string>
+    <string name="dialog_title_logout">Logout</string>
+    <string name="action_logout">Logout</string>
+    <string name="no_connected_sources">No sources are currently connected.</string>
 </resources>

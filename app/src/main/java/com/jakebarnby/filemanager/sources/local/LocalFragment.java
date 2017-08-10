@@ -39,19 +39,6 @@ public class LocalFragment extends SourceFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-
-        GlideApp
-                .with(mSourceLogo)
-                .load(R.mipmap.ic_launcher)
-                .centerCrop()
-                .into(mSourceLogo);
-
-        return view;
-    }
-
-    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         onCheckPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Constants.RequestCodes.STORAGE_PERMISSIONS);

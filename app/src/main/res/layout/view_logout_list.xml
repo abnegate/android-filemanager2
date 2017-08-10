@@ -5,30 +5,28 @@
 
     <ImageView
         android:id="@+id/img_logo_logout"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginStart="40dp"
-        android:src="@mipmap/ic_launcher"/>
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="20dp" />
 
     <TextView
         android:id="@+id/txt_source_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toEndOf="@id/img_logo_logout"
         android:layout_marginStart="20dp"
-        android:text="Source name"
-        android:textSize="16sp"/>
+        android:layout_toEndOf="@id/img_logo_logout"
+        android:textSize="16sp" />
 
     <Button
         android:id="@+id/btn_logout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="40dp"
-        android:background="@color/colorPrimaryDark"
-        android:text="Logout"
-        android:textColor="@android:color/white"/>
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="20dp"
+        android:background="@android:color/transparent"
+        android:textColor="@color/colorAccent" />
 
 </RelativeLayout>
