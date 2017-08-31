@@ -21,9 +21,11 @@ import java.util.List;
 public class SourceLogoutAdapter extends RecyclerView.Adapter<SourceLogoutAdapter.LogoutViewHolder> {
 
     private List<Source> mSources;
+    private LogoutListener mListener;
 
-    public SourceLogoutAdapter(List<Source> sources) {
+    public SourceLogoutAdapter(List<Source> sources, LogoutListener listener) {
         this.mSources = sources;
+        this.mListener = listener;
     }
 
     @Override
@@ -70,12 +72,20 @@ public class SourceLogoutAdapter extends RecyclerView.Adapter<SourceLogoutAdapte
                 if (source.isLoggedIn()) {
                     source.logout(view.getContext());
                     sources.remove(source);
-                    notifyItemRemoved(position);
+                    notifyDataSetChanged();
 
+                    if (sources.size() == 0) {
+                        mListener.onLastLogout();
+                    }
                 } else {
                     source.authenticateSource(mLogo.getContext());
                 }
             }));
         }
+    }
+
+    @FunctionalInterface
+    public interface LogoutListener {
+        void onLastLogout();
     }
 }

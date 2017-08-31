@@ -55,6 +55,7 @@ import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
 
 import java.io.File;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -485,6 +486,15 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      */
     private void showCreateFolderDialog() {
         if (getActiveFragment().getSource().checkConnectionActive(this)) {
+
+            if (!getActiveFragment().getSource().isLoggedIn()) {
+                showSnackbar(getString(R.string.err_not_logged_in));
+                return;
+            } else if (!getActiveFragment().getSource().isFilesLoaded()) {
+                showSnackbar(getString(R.string.err_not_loaded));
+                return;
+            }
+
             mSourceManager.addFileAction(
                     SelectedFilesManager.getInstance().getOperationCount(),
                     FileAction.NEW_FOLDER);
@@ -613,26 +623,24 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 sources.add(fragment.getSource());
             }
         }
-        SourceLogoutAdapter adapter = new SourceLogoutAdapter(sources);
+        AlertDialog logoutDialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_title_logout)
+                .setNegativeButton(R.string.close, (dialog, which) -> dialog.dismiss())
+                .create();
 
+        SourceLogoutAdapter adapter = new SourceLogoutAdapter(sources, logoutDialog::dismiss);
         View view = getLayoutInflater().inflate(R.layout.dialog_source_logout, null);
         RecyclerView rv = view.findViewById(R.id.rv_source_logout);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
         if (sources.isEmpty()) {
-            builder.setMessage(R.string.no_connected_sources);
+            logoutDialog.setMessage(getString(R.string.no_connected_sources));
         } else {
             rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
             rv.setAdapter(adapter);
-            builder.setView(view);
+            logoutDialog.setView(view);
         }
 
-        builder
-                .setTitle(R.string.dialog_title_logout)
-                .setNegativeButton(R.string.close, (dialog, which) -> dialog.dismiss())
-                .create()
-                .show();
+        logoutDialog.show();
     }
 
     /**

@@ -83,7 +83,6 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
 
         if (getSource().hasToken(getContext(), getSource().getSourceName())) {
             mConnectButton.setVisibility(View.GONE);
-            mSourceLogo.setVisibility(View.GONE);
         }
 
         mConnectButton.setOnClickListener(v -> {

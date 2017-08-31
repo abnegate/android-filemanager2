@@ -55,7 +55,8 @@ public class DropboxSource extends Source {
      */
     public void setupClient(String accessToken) {
         if (!isLoggedIn()) {
-            DbxRequestConfig requestConfig = DbxRequestConfig.newBuilder("FileManagerAndroid/1.0")
+            DbxRequestConfig requestConfig = DbxRequestConfig
+                    .newBuilder("FileManagerAndroid/1.0")
                     .withHttpRequestor(new OkHttp3Requestor(OkHttp3Requestor.defaultOkHttpClient()))
                     .build();
             DropboxFactory.getInstance().setClient(new DbxClientV2(requestConfig, accessToken));
@@ -68,19 +69,19 @@ public class DropboxSource extends Source {
      */
     public void checkForAccessToken(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
-        String accessToken = prefs.getString("dropbox-access-token", null);
+        String accessToken = prefs.getString(Constants.Prefs.DROPBOX_TOKEN_KEY, null);
         if (accessToken == null) {
             accessToken = Auth.getOAuth2Token();
             if (accessToken != null) {
-                prefs.edit().putString("dropbox-access-token", accessToken).apply();
+                prefs.edit().putString(Constants.Prefs.DROPBOX_TOKEN_KEY, accessToken).apply();
                 setupClient(accessToken);
                 loadSource(context);
             }
         } else {
             if (!isLoggedIn()) {
                 setupClient(accessToken);
+                loadSource(context);
             }
-            loadSource(context);
         }
     }
 }

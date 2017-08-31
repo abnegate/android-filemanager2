@@ -136,13 +136,13 @@ public class DropboxFactory {
                 try {
                     getClient().auth().tokenRevoke();
                     setClient(null);
+
+                    SharedPreferences prefs = context.getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
+                    prefs.edit().putString(Constants.Prefs.DROPBOX_TOKEN_KEY, null).apply();
                 } catch (DbxException e) {
                     e.printStackTrace();
                 }
             });
-
-            SharedPreferences prefs = context.getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
-            prefs.edit().putString(Constants.Prefs.DROPBOX_TOKEN_KEY, null).apply();
     }
 
     public SourceStorageStats getStorageStats() {

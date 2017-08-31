@@ -139,7 +139,7 @@ public abstract class Source {
      */
     public boolean hasToken(Context context, String sourceName) {
         SharedPreferences prefs = context.getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
-        String accessToken = prefs.getString(sourceName + "-access-token", null);
+        String accessToken = prefs.getString(sourceName.toLowerCase() + "-access-token", null);
         return accessToken != null;
     }
 

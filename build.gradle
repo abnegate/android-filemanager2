@@ -6,7 +6,7 @@ buildscript {
         maven { url 'https://maven.google.com' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.0-beta1'
+        classpath 'com.android.tools.build:gradle:3.0.0-beta3'
         classpath 'com.google.gms:google-services:3.1.0'
     }
 }
@@ -19,8 +19,9 @@ allprojects {
 }
 
 project.ext {
-    supportLibVersion = '26.0.0'
+    supportLibVersion = '26.0.1'
     googleApiVersion = '1.22.0'
+    firebaseVersion = '11.2.0'
     appName = "filemanager"
 }
 

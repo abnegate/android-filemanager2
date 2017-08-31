@@ -6,15 +6,12 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.text.InputType;
 import android.util.TypedValue;
-import android.view.ViewGroup;
+import android.view.View;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
-import com.jakebarnby.filemanager.sources.SourceActivity;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.services.SourceTransferService;
 import com.jakebarnby.filemanager.util.Constants;
@@ -31,22 +28,9 @@ public class CreateFolderDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(getArguments().getString(Constants.DIALOG_TITLE_KEY));
 
-        final FrameLayout frame = new FrameLayout(getContext());
-        final EditText input = new EditText(getContext());
-        input.setHint(getString(R.string.new_folder_name));
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        input.setMaxLines(1);
-
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-
-        int px = dpToPx(20);
-        params.setMargins(px,px,px,px);
-        input.setLayoutParams(params);
-
-        frame.addView(input);
-        builder.setView(frame);
+        View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_create_folder, null);
+        EditText input = view.findViewById(R.id.txt_new_folder_name);
+        builder.setView(view);
 
         builder.setPositiveButton("OK", (dialog, which) -> {
             TreeNode<SourceFile> activeDirectory =
