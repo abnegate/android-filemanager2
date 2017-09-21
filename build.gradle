@@ -19,9 +19,9 @@ allprojects {
 }
 
 project.ext {
-    supportLibVersion = '26.0.1'
+    supportLibVersion = '26.1.0'
     googleApiVersion = '1.22.0'
-    firebaseVersion = '11.2.0'
+    playServicesVersion = '11.4.0'
     appName = "filemanager"
 }
 

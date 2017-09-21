@@ -89,9 +89,9 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.8.0'
 
     //Firebase
-    implementation "com.google.android.gms:play-services-auth:${project.firebaseVersion}"
-    implementation "com.google.firebase:firebase-core:${project.firebaseVersion}"
-    implementation "com.google.firebase:firebase-messaging:${project.firebaseVersion}"
+    implementation "com.google.android.gms:play-services-auth:${project.playServicesVersion}"
+    implementation "com.google.firebase:firebase-core:${project.playServicesVersion}"
+    implementation "com.google.firebase:firebase-messaging:${project.playServicesVersion}"
 
     //Google Drive
     implementation "com.google.api-client:google-api-client-android:${project.googleApiVersion}"
