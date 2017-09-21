@@ -41,7 +41,6 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
 
     /**
      * Create a new FileSystemAdapter instance with the given root tree node
-     *
      * @param rootNode     The root node of the file tree
      */
     public FileSystemAdapter(TreeNode<SourceFile> rootNode) {
@@ -50,7 +49,6 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
 
     /**
      * Toggle multi-select mode
-     *
      * @param mMultiSelectEnabled Whether mdoe is enabled or disabled
      */
     public void setMultiSelectEnabled(boolean mMultiSelectEnabled) {
@@ -59,7 +57,6 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
 
     /**
      * Set the current directory based of the given current directory
-     *
      * @param currentDir Directory to set as current
      */
     public void setCurrentDirectory(TreeNode<SourceFile> currentDir) {
@@ -133,6 +130,15 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
                         .contains(currentDir)) {
                     mCheckbox.setChecked(true);
                 }
+            }
+
+            List<TreeNode<SourceFile>> currentSelection =
+                    SelectedFilesManager.getInstance().getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount());
+
+            if (currentSelection != null && currentSelection.contains(currentDir)) {
+                mCheckbox.setChecked(true);
+            } else {
+                mCheckbox.setChecked(false);
             }
         }
 
