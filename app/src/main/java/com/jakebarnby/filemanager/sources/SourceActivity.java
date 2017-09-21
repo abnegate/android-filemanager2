@@ -25,6 +25,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.OvershootInterpolator;
@@ -37,6 +38,7 @@ import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.ndk.CrashlyticsNdk;
 import com.jakebarnby.filemanager.R;
+import com.jakebarnby.filemanager.sources.local.LocalFragment;
 import com.jakebarnby.filemanager.ui.adapters.FileSystemAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourceLogoutAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourcePagerAdapter;
@@ -82,7 +84,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private BroadcastReceiver           mBroadcastReciever;
     private ProgressDialog              mDialog;
     private FabSpeedDial                mFabMenu;
-    private RelativeLayout              mBlurWrapper;
+    private ViewGroup                   mBlurWrapper;
 
     /**
      * Possible file actions
@@ -120,6 +122,15 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
         mSourceManager = new SourceManager();;
         mSourcesPagerAdapter = new SourcePagerAdapter(getSupportFragmentManager());
+
+        String[] paths = Utils.getExternalStorageDirectories(this);
+        if (paths.length > 0) {
+            for (int i = 0; i < paths.length; i++){
+                String[] split = paths[i].split("/");
+                mSourcesPagerAdapter.getFragments().add(i+1, LocalFragment.newInstance(split[split.length-1], paths[i]));
+            }
+        }
+
         mViewPager = findViewById(R.id.view_pager);
         mBlurWrapper = findViewById(R.id.wrapper);
         mViewPager.setAdapter(mSourcesPagerAdapter);
@@ -138,12 +149,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             @SuppressLint("RestrictedApi")
             @Override
             public boolean onPrepareMenu(NavigationMenu navigationMenu) {
-                if (SelectedFilesManager
-                        .getInstance()
-                        .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount()).size() == 0) {
-                    showSnackbar(getString(R.string.err_no_selection));
-                    return false;
-                }
                 Blurry.with(SourceActivity.this)
                         .radius(17)
                         .sampling(1)

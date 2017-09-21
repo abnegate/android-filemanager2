@@ -28,7 +28,7 @@ public class LocalLoaderTask extends LoaderTask {
         mRootTreeNode = new TreeNode<>(rootSourceFile);
         mCurrentNode = mRootTreeNode;
         mSource.setCurrentDirectory(mRootTreeNode);
-        mSource.setQuotaInfo(Utils.getStorageStats(Environment.getExternalStorageDirectory()));
+        mSource.setQuotaInfo(Utils.getStorageStats(new File(path)));
         return rootFile;
     }
 

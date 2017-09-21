@@ -21,8 +21,11 @@ import java.io.File;
 
 public class LocalSource extends Source {
 
-    public LocalSource(String sourceName, SourceListener listener) {
+    private String rootPath;
+
+    public LocalSource(String sourceName, String rootPath, SourceListener listener) {
         super(sourceName, listener);
+        this.rootPath = rootPath;
         setLogoId(R.mipmap.ic_launcher);
     }
 
@@ -35,7 +38,7 @@ public class LocalSource extends Source {
     public void loadSource(Context context) {
         if (!isFilesLoaded()) {
             new LocalLoaderTask(this, mSourceListener)
-                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Environment.getExternalStorageDirectory().getAbsolutePath());
+                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, rootPath);
         }
     }
 

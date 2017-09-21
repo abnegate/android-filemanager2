@@ -4,7 +4,11 @@ import android.content.Context;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
+import android.os.Environment;
 import android.os.StatFs;
+import android.support.v4.os.EnvironmentCompat;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -14,6 +18,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Jake on 6/6/2017.
@@ -119,5 +125,82 @@ public class Utils {
         info.setTotalSpace(fileSystem.getTotalBytes());
         info.setUsedSpace(fileSystem.getTotalBytes() - fileSystem.getAvailableBytes());
         return info;
+    }
+
+    /**
+     * Returns external storage paths (directory of external memory card) as array of Strings
+     * @param context   Context for resources
+     * @return          Array of external storage paths
+     */
+    public static String[] getExternalStorageDirectories(Context context) {
+
+        List<String> results = new ArrayList<>();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { //Method 1 for KitKat & above
+            File[] externalDirs = context.getExternalFilesDirs(null);
+
+            for (File file : externalDirs) {
+                if (file == null) continue;
+                String path = file.getPath().split("/Android")[0];
+
+                boolean addPath = false;
+
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    addPath = Environment.isExternalStorageRemovable(file);
+                }
+                else{
+                    addPath = Environment.MEDIA_MOUNTED.equals(EnvironmentCompat.getStorageState(file));
+                }
+
+                if(addPath){
+                    results.add(path);
+                }
+            }
+        }
+
+        if(results.isEmpty()) {
+            String output = "";
+            try {
+                final Process process = new ProcessBuilder().command("mount | grep /dev/block/vold")
+                        .redirectErrorStream(true).start();
+                process.waitFor();
+                final InputStream is = process.getInputStream();
+                final byte[] buffer = new byte[1024];
+                while (is.read(buffer) != -1) {
+                    output = output + new String(buffer);
+                }
+                is.close();
+            } catch (final Exception e) {
+                e.printStackTrace();
+            }
+            if(!output.trim().isEmpty()) {
+                String devicePoints[] = output.split("\n");
+                for(String voldPoint: devicePoints) {
+                    results.add(voldPoint.split(" ")[2]);
+                }
+            }
+        }
+
+        // Remove paths which may not be external memory card
+//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            for (int i = 0; i < results.size(); i++) {
+//                if (!results.get(i).toLowerCase().matches(".*[0-9a-f]{4}[-][0-9a-f]{4}")) {
+//                    Log.d(LOG_TAG, results.get(i) + " might not be extSDcard");
+//                    results.remove(i--);
+//                }
+//            }
+//        } else {
+//            for (int i = 0; i < results.size(); i++) {
+//                if (!results.get(i).toLowerCase().contains("ext") && !results.get(i).toLowerCase().contains("sdcard")) {
+//                    Log.d(LOG_TAG, results.get(i)+" might not be extSDcard");
+//                    results.remove(i--);
+//                }
+//            }
+//        }
+
+        String[] storageDirectories = new String[results.size()];
+        for(int i=0; i<results.size(); ++i) storageDirectories[i] = results.get(i);
+
+        return storageDirectories;
     }
 }

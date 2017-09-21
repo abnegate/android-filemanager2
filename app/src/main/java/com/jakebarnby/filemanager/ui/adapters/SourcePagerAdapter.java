@@ -1,5 +1,6 @@
 package com.jakebarnby.filemanager.ui.adapters;
 
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -10,6 +11,7 @@ import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFragment;
 import com.jakebarnby.filemanager.sources.local.LocalFragment;
 import com.jakebarnby.filemanager.sources.onedrive.OneDriveFragment;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,7 @@ public class SourcePagerAdapter extends FragmentPagerAdapter {
 
     public SourcePagerAdapter(FragmentManager fm) {
         super(fm);
-        fragments.add(LocalFragment.newInstance(Constants.Sources.LOCAL));
+        fragments.add(LocalFragment.newInstance(Constants.Sources.LOCAL, Environment.getExternalStorageDirectory().getPath()));
         fragments.add(DropboxFragment.newInstance(Constants.Sources.DROPBOX));
         fragments.add(GoogleDriveFragment.newInstance(Constants.Sources.GOOGLE_DRIVE));
         fragments.add(OneDriveFragment.newInstance(Constants.Sources.ONEDRIVE));
