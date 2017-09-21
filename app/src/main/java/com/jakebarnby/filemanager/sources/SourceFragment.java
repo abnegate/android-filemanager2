@@ -244,7 +244,6 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                         .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
                         .size();
                 getActivity().setTitle(size + " selected");
-                //TODO: Set the Fragment tab title with selected count, e.g. LOCAL (3) DROPBOX (1)
             } else {
                 if (file.getData().isDirectory()) {
                     getSource().getCurrentDirectory().getData().

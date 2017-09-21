@@ -117,8 +117,7 @@ public class TreeNode<T extends Serializable> implements Serializable {
     public boolean equals(Object obj) {
         if (obj == null) return false;
         if (obj instanceof TreeNode){
-            boolean equal = ((TreeNode) obj).getData().equals(data);
-            return equal;
+            return data.equals(((TreeNode) obj).getData());
         }
         return false;
     }

@@ -72,7 +72,6 @@ public class DropboxFactory {
     public FileMetadata uploadFile(String fileUri, String destPath) {
         File localFile = new File(fileUri);
         if (localFile.exists()) {
-            //FIXME: This doesn't ensure the name is a valid dropbox file name
             try (InputStream inputStream = new FileInputStream(localFile)) {
                 return getClient()
                         .files()
