@@ -34,10 +34,11 @@ public class TreeNode<T extends Serializable> implements Serializable {
      *
      * @param data
      */
-    public void addChild(T data) {
+    public TreeNode<T> addChild(T data) {
         TreeNode<T> newChild = new TreeNode<>(data);
         newChild.setParent(this);
         children.add(newChild);
+        return newChild;
     }
 
     /**
