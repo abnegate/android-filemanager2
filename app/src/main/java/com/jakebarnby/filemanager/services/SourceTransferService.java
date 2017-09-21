@@ -215,7 +215,7 @@ public class SourceTransferService extends Service {
      * @param isSilent      Whether to show visual progress for this operation
      */
     private TreeNode<SourceFile> createFolder(TreeNode<SourceFile> destDir, int operationId, String name, boolean isSilent) {
-        broadcastShowDialog(getString(R.string.dialog_creating_folder), 0);
+        if (!isSilent) broadcastShowDialog(getString(R.string.dialog_creating_folder), 0);
         SourceFile newFile = null;
         switch(destDir.getData().getSourceName()) {
             case Constants.Sources.LOCAL:
