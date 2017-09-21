@@ -105,7 +105,10 @@ public class SourceTransferService extends Service {
                 final String action = intent.getAction();
                 switch (action) {
                     case ACTION_CREATE_FOLDER:
-                        createFolder(SelectedFilesManager.getInstance().getOperationCount()-1, newName);
+                        createFolder(SelectedFilesManager.getInstance().getActionableDirectory(SelectedFilesManager.getInstance().getOperationCount()-1),
+                                SelectedFilesManager.getInstance().getOperationCount()-1,
+                                newName,
+                                false);
                         break;
                     case ACTION_RENAME:
                         rename(SelectedFilesManager.getInstance().getOperationCount()-1, newName);
@@ -209,9 +212,9 @@ public class SourceTransferService extends Service {
      * Create a new folder in the given directory with the given name
      * @param operationId
      * @param name              The name for the new folder
+     * @param isSilent
      */
-    private void createFolder(int operationId, String name) {
-        TreeNode<SourceFile> destDir = SelectedFilesManager.getInstance().getActionableDirectory(operationId);
+    private TreeNode<SourceFile> createFolder(TreeNode<SourceFile> destDir, int operationId, String name, boolean isSilent) {
         SourceFile newFile = null;
         switch(destDir.getData().getSourceName()) {
             case Constants.Sources.LOCAL:
@@ -237,8 +240,9 @@ public class SourceTransferService extends Service {
                 newFile = new OneDriveFile(onedriveFile);
                 break;
         }
-        destDir.addChild(newFile);
-        broadcastFinishedTask(operationId);
+        TreeNode<SourceFile> newFolder = destDir.addChild(newFile);
+        if (!isSilent) broadcastFinishedTask(operationId);
+        return newFolder;
     }
 
     /**
@@ -310,31 +314,48 @@ public class SourceTransferService extends Service {
         List<TreeNode<SourceFile>> toCopy = SelectedFilesManager.getInstance().getSelectedFiles(operationId);
         TreeNode<SourceFile> destDir = SelectedFilesManager.getInstance().getActionableDirectory(operationId);
 
+        postNotification(
+                operationId,
+                getString(R.string.app_name),
+                move ? String.format(getString(R.string.moving_count), 1, toCopy.size()) :
+                        String.format(getString(R.string.copying_count), 1, toCopy.size()));
+
         broadcastShowDialog(move ? getString(R.string.moving) : getString(R.string.copying), toCopy.size());
-        for (TreeNode<SourceFile> file : toCopy) {
-            postNotification(
-                    operationId,
-                    getString(R.string.app_name),
-                    move ? String.format(getString(R.string.moving_count), toCopy.indexOf(file)+1, toCopy.size()) :
-                           String.format(getString(R.string.copying_count), toCopy.indexOf(file)+1, toCopy.size()));
-
-            String newFilePath = getFile(file.getData());
-            SourceFile newFile = putFile(newFilePath, file.getData().getName(), destDir.getData());
-
-            destDir.addChild(newFile);
-            TreeNode<SourceFile> curDir = destDir;
-            while (true) {
-                curDir.getData().addSize(file.getData().getSize());
-                if (curDir.getParent() != null) {
-                    curDir = curDir.getParent();
-                } else break;
-            }
-            broadcastUpdate(toCopy.indexOf(file) + 1);
-        }
+        recurseCopy(toCopy, destDir, operationId, move, 0);
         if (move) {
             delete(operationId, true);
         }
         broadcastFinishedTask(operationId);
+    }
+
+    private void recurseCopy(List<TreeNode<SourceFile>> toCopy, TreeNode<SourceFile> destDir, int operationId, boolean move, int depth) {
+        for (TreeNode<SourceFile> file : toCopy) {
+            if (file.getData().isDirectory()) {
+                TreeNode<SourceFile> newFolder = createFolder(destDir, operationId, file.getData().getName(), true);
+                recurseCopy(file.getChildren(), newFolder, operationId, move, depth+1);
+            } else {
+                String newFilePath = getFile(file.getData());
+                SourceFile newFile = putFile(newFilePath, file.getData().getName(), destDir.getData());
+
+                destDir.addChild(newFile);
+                TreeNode<SourceFile> curDir = destDir;
+                while (true) {
+                    curDir.getData().addSize(file.getData().getSize());
+                    if (curDir.getParent() != null) {
+                        curDir = curDir.getParent();
+                    } else break;
+                }
+            }
+
+            if (depth == 0) {
+                broadcastUpdate(toCopy.indexOf(file) + 1);
+                postNotification(
+                        operationId,
+                        getString(R.string.app_name),
+                        move ? String.format(getString(R.string.moving_count), toCopy.indexOf(file) + 1, toCopy.size()) :
+                                String.format(getString(R.string.copying_count), toCopy.indexOf(file) + 1, toCopy.size()));
+            }
+        }
     }
 
     /**
