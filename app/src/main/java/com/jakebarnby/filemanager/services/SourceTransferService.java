@@ -62,7 +62,7 @@ public class SourceTransferService extends Service {
     }
 
     /**
-     * Calls into native io-lib and copies the file at the given path to the given destination
+     * Calls native io-lib and copies the file at the given path to the given destination
      * @param sourcePath            The path of the file to copy
      * @param destinationPath       The destination of the file to copy
      * @return                      0 for success, otherwise operation failed
@@ -70,24 +70,24 @@ public class SourceTransferService extends Service {
     public native int copyFileNative(String sourcePath, String destinationPath);
 
     /**
-     * Calls into native io-lib and deletes the file at the given path to the given destination
+     * Calls native io-lib and deletes the file at the given path to the given destination
      * @param sourcePath    The path of the file to delete
      * @return              0 for success, otherwise operation failed
      */
     public native int deleteFileNative(String sourcePath);
 
     /**
-     *
-     * @param newPath
-     * @return
+     * Calls native io-lib and creates a new folder
+     * @param newPath   The name of the folder to create
+     * @return          0 for success, otherwise operation failed
      */
     public native int createFolderNative(String newPath);
 
     /**
-     *
-     * @param oldPath
-     * @param newPath
-     * @return
+     * Calls native io-lib and renames the given file or folder to the given new name
+     * @param oldPath   The previous path to the file or folder
+     * @param newPath   The new path to the file or folder
+     * @return          0 for success, otherwise operation failed
      */
     public native int renameFolderNative(String oldPath, String newPath);
 
@@ -144,8 +144,8 @@ public class SourceTransferService extends Service {
 
     /**
      * Start the service for a copy or cut action with the given file.
-     * @param context       Context for resources
-     * @param move          Whether the files should be deleted after copying
+     * @param context   Context for resources
+     * @param move      Whether the files should be deleted after copying
      */
     public static void startActionCopy(Context context, boolean move) {
         Intent intent = new Intent(context, SourceTransferService.class);
@@ -165,7 +165,7 @@ public class SourceTransferService extends Service {
 
     /**
      * Start the service for a new folder action
-     * @param context           Context for resources
+     * @param context   Context for resources
      */
     public static void startActionCreateFolder(Context context, String name) {
         Intent intent = new Intent(context, SourceTransferService.class);
@@ -176,8 +176,8 @@ public class SourceTransferService extends Service {
 
     /**
      * Start the service for a rename action
-     * @param context Context for resources
-     * @param newName The new name for the file or folder
+     * @param context   Context for resources
+     * @param newName   The new name for the file or folder
      */
     public static void startActionRename(Context context, String newName) {
         Intent intent = new Intent(context, SourceTransferService.class);
@@ -188,8 +188,8 @@ public class SourceTransferService extends Service {
 
     /**
      * Start the service for an open file action
-     * @param context Context for resources
-     * @param toOpen  The file to open
+     * @param context   Context for resources
+     * @param toOpen    The file to open
      */
     public static void startActionOpen(Context context, SourceFile toOpen) {
         Intent intent = new Intent(context, SourceTransferService.class);
@@ -210,11 +210,12 @@ public class SourceTransferService extends Service {
 
     /**
      * Create a new folder in the given directory with the given name
-     * @param operationId
-     * @param name              The name for the new folder
-     * @param isSilent
+     * @param operationId   Id of the operation
+     * @param name          The name for the new folder
+     * @param isSilent      Whether to show visual progress for this operation
      */
     private TreeNode<SourceFile> createFolder(TreeNode<SourceFile> destDir, int operationId, String name, boolean isSilent) {
+        broadcastShowDialog(getString(R.string.dialog_creating_folder), 0);
         SourceFile newFile = null;
         switch(destDir.getData().getSourceName()) {
             case Constants.Sources.LOCAL:
@@ -247,10 +248,11 @@ public class SourceTransferService extends Service {
 
     /**
      * Renames the selected file or folder to the given name
-     * @param operationId
-     * @param name       The new name of the file or folder
+     * @param operationId   Id of the operation
+     * @param name          The new name of the file or folder
      */
     private void rename(int operationId, String name) {
+        broadcastShowDialog(getString(R.string.dialog_renaming), 0);
         TreeNode<SourceFile> destDir = SelectedFilesManager.getInstance().getSelectedFiles(operationId).get(0);
         String oldPath = null;
         String newPath = null;
@@ -287,8 +289,8 @@ public class SourceTransferService extends Service {
 
     /**
      * Open the given {@link SourceFile}. If it is a remote file, dowload it first
-     * @param operationId
-     * @param toOpen
+     * @param operationId   Id of the operation
+     * @param toOpen        The file to open
      */
     private void open(int operationId, SourceFile toOpen) {
         broadcastShowDialog(getString(R.string.opening), 0);
@@ -308,7 +310,8 @@ public class SourceTransferService extends Service {
     }
 
     /**
-     * Copy the selected files to the given destination
+     * Copy or move the selected files to the given destination, if moving, delete the original files after
+     * @param move  Whether this is a move or copt operation
      */
     private void copy(int operationId, boolean move) {
         List<TreeNode<SourceFile>> toCopy = SelectedFilesManager.getInstance().getSelectedFiles(operationId);
@@ -328,6 +331,14 @@ public class SourceTransferService extends Service {
         broadcastFinishedTask(operationId);
     }
 
+    /**
+     * Recursively copy or move the given collection of files and/or folders to the given destionation
+     * @param toCopy        The collection of files and/or folders to copy
+     * @param destDir       The destination of the operation
+     * @param operationId   Id of the operation
+     * @param move          Whether this a move or copy operation
+     * @param depth
+     */
     private void recurseCopy(List<TreeNode<SourceFile>> toCopy, TreeNode<SourceFile> destDir, int operationId, boolean move, int depth) {
         for (TreeNode<SourceFile> file : toCopy) {
             if (file.getData().isDirectory()) {
@@ -360,12 +371,14 @@ public class SourceTransferService extends Service {
 
     /**
      * Delete the selected files
+     * @param operationId   Id of the operation
+     * @param isSilent      Whether to show visual progress for this operation
      */
     private void delete(int operationId, boolean isSilent) {
         List<TreeNode<SourceFile>> toDelete = SelectedFilesManager.getInstance().getSelectedFiles(operationId);
         TreeNode<SourceFile> currentDir = SelectedFilesManager.getInstance().getActionableDirectory(operationId);
 
-        if (!isSilent) broadcastShowDialog(getString(R.string.deleting), toDelete.size());
+        if (!isSilent) broadcastShowDialog(getString(R.string.dialog_deleting), toDelete.size());
         for (TreeNode<SourceFile> file : toDelete) {
             postNotification(
                     operationId,
@@ -488,7 +501,7 @@ public class SourceTransferService extends Service {
     /**
      * Notifies the hosting activity that an operation has completed successfully
      * @param operationId   The id of the operation
-     * @param bundle        The
+     * @param bundle        The bundle to deliver to the activityy
      */
     private void broadcastFinishedTask(int operationId, Bundle bundle) {
         Intent intent = new Intent();
