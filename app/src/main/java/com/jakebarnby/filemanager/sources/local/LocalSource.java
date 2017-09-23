@@ -9,6 +9,7 @@ import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.SourceListener;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
+import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
@@ -24,7 +25,7 @@ public class LocalSource extends Source {
     private String rootPath;
 
     public LocalSource(String sourceName, String rootPath, SourceListener listener) {
-        super(sourceName, listener);
+        super(SourceType.LOCAL, sourceName, listener);
         this.rootPath = rootPath;
         setLogoId(R.mipmap.ic_launcher);
     }

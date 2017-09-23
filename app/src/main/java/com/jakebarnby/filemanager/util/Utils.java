@@ -181,23 +181,6 @@ public class Utils {
             }
         }
 
-        // Remove paths which may not be external memory card
-//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            for (int i = 0; i < results.size(); i++) {
-//                if (!results.get(i).toLowerCase().matches(".*[0-9a-f]{4}[-][0-9a-f]{4}")) {
-//                    Log.d(LOG_TAG, results.get(i) + " might not be extSDcard");
-//                    results.remove(i--);
-//                }
-//            }
-//        } else {
-//            for (int i = 0; i < results.size(); i++) {
-//                if (!results.get(i).toLowerCase().contains("ext") && !results.get(i).toLowerCase().contains("sdcard")) {
-//                    Log.d(LOG_TAG, results.get(i)+" might not be extSDcard");
-//                    results.remove(i--);
-//                }
-//            }
-//        }
-
         String[] storageDirectories = new String[results.size()];
         for(int i=0; i<results.size(); ++i) storageDirectories[i] = results.get(i);
 

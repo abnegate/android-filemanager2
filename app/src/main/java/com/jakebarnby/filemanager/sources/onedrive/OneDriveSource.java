@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.SourceListener;
+import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
 import com.microsoft.graph.concurrency.ICallback;
 import com.microsoft.graph.core.ClientException;
@@ -37,7 +38,7 @@ public class OneDriveSource extends Source {
     private AuthenticationResult    mAuthResult;
 
     public OneDriveSource(String sourceName, SourceListener listener) {
-        super(sourceName, listener);
+        super(SourceType.REMOTE, sourceName, listener);
         setLogoId(R.drawable.ic_onedrive);
     }
 

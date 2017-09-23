@@ -24,7 +24,7 @@ public class LocalLoaderTask extends LoaderTask {
     @Override
     protected Object initRootNode(String path) {
         File rootFile = new File(path);
-        SourceFile rootSourceFile = new LocalFile(rootFile);
+        SourceFile rootSourceFile = new LocalFile(rootFile, mSource.getSourceName());
         mRootTreeNode = new TreeNode<>(rootSourceFile);
         mCurrentNode = mRootTreeNode;
         mSource.setCurrentDirectory(mRootTreeNode);
@@ -40,7 +40,7 @@ public class LocalLoaderTask extends LoaderTask {
             long dirSize = 0L;
             if (listFile != null && listFile.length > 0) {
                 for (File file : listFile) {
-                    SourceFile sourceFile = new LocalFile(file);
+                    SourceFile sourceFile = new LocalFile(file, mSource.getSourceName());
                     if (file.isDirectory()) {
                         mCurrentNode.addChild(sourceFile);
                         mCurrentNode = mCurrentNode.getChildren().get(mCurrentNode.getChildren().size() - 1);

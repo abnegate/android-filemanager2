@@ -10,10 +10,10 @@ public abstract class SourceFile implements Serializable {
     private String          mPath;
     private String          mName;
     private String          mSourceName;
+    private SourceType      mSourceType;
     private String          mThumbnailLink;
     private boolean         mIsDirectory;
     private long            mSize;
-    private long            mCreatedTime;
     private long            mModifiedTime;
     private int             mPositionToRestore = -1;
 
@@ -34,6 +34,12 @@ public abstract class SourceFile implements Serializable {
     }
     public void setSourceName(String mSourceName) {
         this.mSourceName = mSourceName;
+    }
+    public SourceType getSourceType() {
+        return mSourceType;
+    }
+    public void setSourceType(SourceType mSourceType) {
+        this.mSourceType = mSourceType;
     }
     public String getThumbnailLink() {
         return mThumbnailLink;

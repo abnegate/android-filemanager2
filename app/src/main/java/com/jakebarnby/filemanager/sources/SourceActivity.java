@@ -39,6 +39,7 @@ import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.ndk.CrashlyticsNdk;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.local.LocalFragment;
+import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.ui.adapters.FileSystemAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourceLogoutAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourcePagerAdapter;
@@ -67,6 +68,13 @@ import io.github.yavski.fabspeeddial.FabSpeedDial;
 import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
 import jp.wasabeef.blurry.Blurry;
 
+import static android.content.Intent.ACTION_MEDIA_BAD_REMOVAL;
+import static android.content.Intent.ACTION_MEDIA_MOUNTED;
+import static android.content.Intent.ACTION_MEDIA_REMOVED;
+import static android.content.Intent.ACTION_MEDIA_UNMOUNTED;
+import static android.content.Intent.ACTION_UMS_CONNECTED;
+import static android.hardware.usb.UsbManager.ACTION_USB_DEVICE_ATTACHED;
+import static android.hardware.usb.UsbManager.ACTION_USB_DEVICE_DETACHED;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_COMPLETE;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_SHOW_DIALOG;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_UPDATE_DIALOG;
@@ -120,16 +128,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mSourceManager = new SourceManager();;
+        mSourceManager = new SourceManager();
         mSourcesPagerAdapter = new SourcePagerAdapter(getSupportFragmentManager());
-
-        String[] paths = Utils.getExternalStorageDirectories(this);
-        if (paths.length > 0) {
-            for (int i = 0; i < paths.length; i++){
-                String[] split = paths[i].split("/");
-                mSourcesPagerAdapter.getFragments().add(i+1, LocalFragment.newInstance(split[split.length-1], paths[i]));
-            }
-        }
+        addLocalSources();
 
         mViewPager = findViewById(R.id.view_pager);
         mBlurWrapper = findViewById(R.id.wrapper);
@@ -152,6 +153,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 Blurry.with(SourceActivity.this)
                         .radius(17)
                         .sampling(1)
+                        .async()
+                        .animate(500)
                         .onto(mBlurWrapper);
 
                 if (mSourceManager.getFileAction(SelectedFilesManager.getInstance().getOperationCount()) == null) {
@@ -193,16 +196,17 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         filter.addAction(ACTION_SHOW_DIALOG);
         filter.addAction(ACTION_UPDATE_DIALOG);
         filter.addAction(ACTION_COMPLETE);
-        LocalBroadcastManager
-                .getInstance(this)
-                .registerReceiver(mBroadcastReciever, filter);
+        filter.addAction(ACTION_MEDIA_MOUNTED);
+        filter.addAction(ACTION_MEDIA_REMOVED);
+        filter.addAction(ACTION_MEDIA_UNMOUNTED);
+        filter.addAction(ACTION_MEDIA_BAD_REMOVAL);
+        filter.addDataScheme("file");
+        registerReceiver(mBroadcastReciever, filter);
     }
 
     @Override
     protected void onPause() {
-        LocalBroadcastManager
-                .getInstance(this)
-                .unregisterReceiver(mBroadcastReciever);
+        unregisterReceiver(mBroadcastReciever);
         super.onPause();
     }
 
@@ -238,6 +242,60 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         return super.onOptionsItemSelected(item);
     }
 
+    private void addLocalSource(String path) {
+        String[] split = path.split("/");
+        String rootDirTitle = split[split.length-1];
+
+        int indexToInsert = 0;
+        for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
+            if (fragment.getSource().getSourceType() == SourceType.LOCAL) indexToInsert++;
+        }
+
+        mSourcesPagerAdapter.getFragments().add(indexToInsert, LocalFragment.newInstance(rootDirTitle, path));
+        mSourcesPagerAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * Check all external storage sources and add any that are not already added
+     */
+    private void addLocalSources() {
+        String[] paths = Utils.getExternalStorageDirectories(getApplicationContext());
+        if (paths.length > 0) {
+            for (int i = 0; i < paths.length; i++){
+                String[] split = paths[i].split("/");
+                String rootDirTitle = split[split.length-1];
+
+                boolean alreadyAdded = false;
+                for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
+                    if (fragment.getSource() != null && fragment.getSource().getSourceName().equals(rootDirTitle)) {
+                        alreadyAdded = true;
+                        break;
+                    }
+                }
+
+                if (alreadyAdded) continue;
+                mSourcesPagerAdapter.getFragments().add(i+1, LocalFragment.newInstance(rootDirTitle, paths[i]));
+            }
+            mSourcesPagerAdapter.notifyDataSetChanged();
+        }
+    }
+
+    /**
+     * Remove a local source fragment
+     * @param sourcePath    The root path of the source
+     */
+    private void removeLocalSource(String sourcePath) {
+        for (SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
+            if (sourcePath.contains(fragment.getSource().getSourceName())) {
+                mSourcesPagerAdapter.getFragments().remove(fragment);
+            }
+        }
+        mSourcesPagerAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * Enabled multiselect if it is not already enabled and add a new selection
+     */
     private void handleMenuMultiSelect() {
         if (!getActiveFragment().getSource().isMultiSelectEnabled()) {
             getActiveFragment().setMultiSelectEnabled(true);
@@ -273,6 +331,35 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             case R.id.action_delete:
                 startDeleteAction();
                 break;
+        }
+    }
+
+    /**
+     * Called when a broadcasted intent is recieved
+     * @param intent The broadcasted intent
+     */
+    private void handleIntent(Intent intent) {
+        String action = intent.getAction();
+        if (action != null) {
+            switch (action) {
+                case ACTION_COMPLETE:
+                    completeServiceAction(intent);
+                    break;
+                case ACTION_SHOW_DIALOG:
+                    showProgressDialog(intent);
+                    break;
+                case ACTION_UPDATE_DIALOG:
+                    updateProgressDialog(intent);
+                    break;
+                case ACTION_MEDIA_MOUNTED:
+                    addLocalSource(intent.getDataString().replace("file://", ""));
+                    break;
+                //case ACTION_USB_DEVICE_DETACHED:
+                case ACTION_MEDIA_BAD_REMOVAL:
+                //case ACTION_MEDIA_REMOVED:
+                    removeLocalSource(intent.getDataString());
+                    break;
+            }
         }
     }
 
@@ -359,6 +446,11 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      */
     private void doPasteChecks() {
         if (getActiveFragment().getSource().checkConnectionActive(this)) {
+            if (getActiveFragment().getSource().getSourceType() == SourceType.LOCAL &&
+                    !getActiveFragment().getSource().getSourceName().equals(Constants.Sources.LOCAL)) {
+                showSnackbar(getString(R.string.err_no_ext_write));
+                return;
+            }
 
             if (!getActiveFragment().getSource().isLoggedIn()) {
                 showSnackbar(getString(R.string.err_not_logged_in));
@@ -406,24 +498,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             }
             SelectedFilesManager.getInstance().addNewSelection();
             getActiveFragment().getSource().decreaseFreeSpace(copySize);
-        }
-    }
-
-    /**
-     * Called when a broadcasted intent is recieved
-     * @param intent The broadcasted intent
-     */
-    private void handleIntent(Intent intent) {
-        String action = intent.getAction();
-        switch (action) {
-            case ACTION_COMPLETE:
-                completeServiceAction(intent);
-                break;
-            case ACTION_SHOW_DIALOG:
-                showProgressDialog(intent);
-                break;
-            case ACTION_UPDATE_DIALOG:
-                updateProgressDialog(intent);
         }
     }
 

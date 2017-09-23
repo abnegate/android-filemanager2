@@ -4,6 +4,7 @@ import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 
 import com.jakebarnby.filemanager.sources.SourceFragment;
 import com.jakebarnby.filemanager.sources.dropbox.DropboxFragment;
@@ -20,7 +21,7 @@ import java.util.List;
  * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
  * one of the sections/tabs/pages.
  */
-public class SourcePagerAdapter extends FragmentPagerAdapter {
+public class SourcePagerAdapter extends FragmentStatePagerAdapter {
 
     private List<SourceFragment> fragments = new ArrayList<>();
 
@@ -36,13 +37,14 @@ public class SourcePagerAdapter extends FragmentPagerAdapter {
         return fragments;
     }
 
-    public void addFragment(SourceFragment fragment) {
-        fragments.add(fragment);
-    }
-
     @Override
     public Fragment getItem(int position) {
         return fragments.get(position);
+    }
+
+    @Override
+    public int getItemPosition(Object object) {
+        return POSITION_NONE;
     }
 
     @Override

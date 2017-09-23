@@ -36,7 +36,9 @@ public class LocalFragment extends SourceFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mSource = new LocalSource(Constants.Sources.LOCAL, getArguments().getString(Constants.LOCAL_ROOT), this);
+        String name = getArguments().getString(Constants.FRAGMENT_TITLE);
+        String rootPath = getArguments().getString(Constants.LOCAL_ROOT);
+        mSource = new LocalSource(name, rootPath, this);
     }
 
     @Override

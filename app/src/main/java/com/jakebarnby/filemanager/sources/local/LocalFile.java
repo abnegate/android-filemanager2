@@ -1,6 +1,7 @@
 package com.jakebarnby.filemanager.sources.local;
 
 import com.jakebarnby.filemanager.sources.models.SourceFile;
+import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
 
 import java.io.File;
@@ -11,10 +12,11 @@ import java.io.File;
 
 public class LocalFile extends SourceFile {
 
-    public LocalFile(File file) {
+    public LocalFile(File file, String sourceName) {
         setPath(file.getPath());
         setName(file.getName());
-        setSourceName(Constants.Sources.LOCAL);
+        setSourceType(SourceType.LOCAL);
+        setSourceName(sourceName);
         setDirectory(file.isDirectory());
         setSize(file.length());
         setThumbnailLink(file.getAbsolutePath());

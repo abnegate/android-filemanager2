@@ -3,6 +3,7 @@ package com.jakebarnby.filemanager.sources.googledrive;
 
 import com.google.api.services.drive.model.File;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
+import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
 
 /**
@@ -19,6 +20,7 @@ public class GoogleDriveFile extends SourceFile {
         }
         setDriveId(file.getId());
         setName(file.getName());
+        setSourceType(SourceType.REMOTE);
         setSourceName(Constants.Sources.GOOGLE_DRIVE);
         setDriveId(file.getId());
         setDirectory(file.getMimeType().equals(Constants.Sources.GOOGLE_DRIVE_FOLDER_MIME));
