@@ -64,4 +64,6 @@
     <string name="warning">Warning</string>
     <string name="yes">Yes</string>
     <string name="zero">0</string>
+    <string name="search_hint">Search files and folders</string>
+    <string name="search">Search</string>
 </resources>

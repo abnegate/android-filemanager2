@@ -2,6 +2,7 @@ package com.jakebarnby.filemanager.sources;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,12 +16,12 @@ import android.support.design.internal.NavigationMenu;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.FileProvider;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,8 +31,6 @@ import android.view.animation.Animation;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.webkit.MimeTypeMap;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
@@ -55,7 +54,6 @@ import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
 
 import java.io.File;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -77,12 +75,13 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     private SourceManager               mSourceManager;
 
-    private SourcePagerAdapter mSourcesPagerAdapter;
+    private SourcePagerAdapter          mSourcesPagerAdapter;
     private ViewPager                   mViewPager;
     private BroadcastReceiver           mBroadcastReciever;
     private ProgressDialog              mDialog;
     private FabSpeedDial                mFabMenu;
-    private RelativeLayout              mBlurWrapper;
+    private ViewGroup                   mBlurWrapper;
+    private SearchView                  mSearchView;
 
     /**
      * Possible file actions
@@ -202,8 +201,26 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        String action = intent.getAction();
+
+        if (action != null) {
+            switch (intent.getAction()) {
+                default:
+                    super.onNewIntent(intent);
+                    handleIntent(intent);
+                    break;
+            }
+        }
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_source, menu);
+
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         return true;
     }
 
@@ -211,6 +228,10 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
+            case R.id.action_search:
+                mSearchView.setIconified(!mSearchView.isActivated());
+                break;
+
             case R.id.action_settings:
                 break;
             case R.id.action_viewas:
@@ -269,6 +290,21 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 startDeleteAction();
                 break;
         }
+    }
+
+    /**
+    private void handleIntent(Intent intent) {
+        String action = intent.getAction();
+        if (action != null) {
+            switch (action) {
+                case ACTION_SEARCH:
+                    doSearch(intent.getStringExtra(SearchManager.QUERY));
+            }
+        }
+    }
+
+    private void doSearch(String query) {
+
     }
 
     /**
