@@ -211,6 +211,25 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        String action = intent.getAction();
+
+        if (action != null) {
+            switch (intent.getAction()) {
+                case ACTION_MEDIA_MOUNTED:
+                case ACTION_MEDIA_BAD_REMOVAL:
+                    handleIntent(intent);
+                    break;
+                case ACTION_USB_DEVICE_ATTACHED:
+                    break;
+                default:
+                    super.onNewIntent(intent);
+                    break;
+            }
+        }
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_source, menu);
         return true;
@@ -285,9 +304,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * @param sourcePath    The root path of the source
      */
     private void removeLocalSource(String sourcePath) {
-        for (SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
-            if (sourcePath.contains(fragment.getSource().getSourceName())) {
-                mSourcesPagerAdapter.getFragments().remove(fragment);
+        for (int i = 0; i < mSourcesPagerAdapter.getFragments().size(); i++) {
+            if (sourcePath.contains(mSourcesPagerAdapter.getFragments().get(i).getSource().getSourceName())) {
+                mSourcesPagerAdapter.getFragments().remove(i);
             }
         }
         mSourcesPagerAdapter.notifyDataSetChanged();
@@ -354,9 +373,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 case ACTION_MEDIA_MOUNTED:
                     addLocalSource(intent.getDataString().replace("file://", ""));
                     break;
-                //case ACTION_USB_DEVICE_DETACHED:
+                case ACTION_USB_DEVICE_DETACHED:
                 case ACTION_MEDIA_BAD_REMOVAL:
-                //case ACTION_MEDIA_REMOVED:
+                case ACTION_MEDIA_REMOVED:
                     removeLocalSource(intent.getDataString());
                     break;
             }
