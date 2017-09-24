@@ -10,6 +10,7 @@ public class Constants {
     public static final String FRAGMENT_TITLE = "TITLE";
     public static final double BYTES_TO_GIGABYTE = 1073741824d;
     public static final String LOCAL_ROOT = "ROOT_PATH";
+    public static final String ALL = "All";
 
     public class Sources {
         public static final String LOCAL = "LOCAL";

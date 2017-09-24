@@ -22,6 +22,7 @@
     <string name="dialog_message">Local storage permission is needed to browse files on your device.</string>
     <string name="dialog_renaming">Renaming…</string>
     <string name="dialog_title_logout">Connected Sources</string>
+    <string name="dialog_title_results">Search Results</string>
     <string name="dialog_title_usage">Storage Usage</string>
     <string name="err_generic">Error</string>
     <string name="err_no_app_available">No installed apps can open this file.</string>
@@ -51,12 +52,16 @@
     <string name="new_folder_name">New folder name</string>
     <string name="no">No</string>
     <string name="no_connected_sources">No sources are currently connected.</string>
+    <string name="no_results">No search results.</string>
     <string name="ok">OK</string>
     <string name="open_now">Would you like to open %s now?</string>
     <string name="opening">Opening..</string>
     <string name="path">Path</string>
     <string name="properties">Properties</string>
     <string name="rename">Rename</string>
+    <string name="search">Search</string>
+    <string name="search_hint">Search files and folders</string>
+    <string name="search_results">Search Results</string>
     <string name="selected_item_count">%1$d selected</string>
     <string name="size">Size</string>
     <string name="sizeDisplay">%.2f MB</string>

@@ -27,10 +27,14 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+                <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
 
             <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
+
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable"/>
         </activity>
 
         <activity android:name="com.microsoft.identity.client.BrowserTabActivity">
@@ -44,8 +48,7 @@
         </activity>
         <activity
             android:name="com.dropbox.core.android.AuthActivity"
-            android:configChanges="orientation|keyboard"
-            android:launchMode="singleTask">
+            android:configChanges="orientation|keyboard">
             <intent-filter>
                 <data android:scheme="db-rse09cxjnnn2yc1" />
 
@@ -68,6 +71,10 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <provider android:name=".sources.search.SuggestionProvider"
+            android:authorities="com.jakebarnby.filemanager.sources.search.SuggestionProvider"
+            android:exported="false"/>
 
         <service
             android:name=".services.FirebaseNotificationService">

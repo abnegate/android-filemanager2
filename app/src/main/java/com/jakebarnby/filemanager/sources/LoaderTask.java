@@ -48,6 +48,7 @@ public abstract class LoaderTask extends AsyncTask<String, Void, TreeNode<Source
             }
             return result;
         });
+        mSource.setRootNode(fileTree);
         mSource.setFilesLoaded(true);
         mListener.onLoadComplete(fileTree);
     }

@@ -2,6 +2,7 @@ package com.jakebarnby.filemanager.sources;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.SearchRecentSuggestions;
 import android.support.design.internal.NavigationMenu;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -21,18 +23,21 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.webkit.MimeTypeMap;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
@@ -41,6 +46,7 @@ import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.local.LocalFragment;
 import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.ui.adapters.FileSystemAdapter;
+import com.jakebarnby.filemanager.ui.adapters.SearchResultAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourceLogoutAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourcePagerAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourceUsageAdapter;
@@ -58,8 +64,8 @@ import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
 
 import java.io.File;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -75,6 +81,7 @@ import static android.content.Intent.ACTION_MEDIA_UNMOUNTED;
 import static android.content.Intent.ACTION_UMS_CONNECTED;
 import static android.hardware.usb.UsbManager.ACTION_USB_DEVICE_ATTACHED;
 import static android.hardware.usb.UsbManager.ACTION_USB_DEVICE_DETACHED;
+import static android.content.Intent.ACTION_SEARCH;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_COMPLETE;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_SHOW_DIALOG;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_UPDATE_DIALOG;
@@ -83,16 +90,17 @@ import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_DI
 import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_OPERATION_ID;
 import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_TOTAL_COUNT;
 
-public class SourceActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
+public class SourceActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener, SearchView.OnQueryTextListener {
 
     private SourceManager               mSourceManager;
 
-    private SourcePagerAdapter mSourcesPagerAdapter;
+    private SourcePagerAdapter          mSourcesPagerAdapter;
     private ViewPager                   mViewPager;
     private BroadcastReceiver           mBroadcastReciever;
     private ProgressDialog              mDialog;
     private FabSpeedDial                mFabMenu;
     private ViewGroup                   mBlurWrapper;
+    private SearchView                  mSearchView;
 
     /**
      * Possible file actions
@@ -212,26 +220,17 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     @Override
     protected void onNewIntent(Intent intent) {
-        String action = intent.getAction();
-
-        if (action != null) {
-            switch (intent.getAction()) {
-                case ACTION_MEDIA_MOUNTED:
-                case ACTION_MEDIA_BAD_REMOVAL:
-                    handleIntent(intent);
-                    break;
-                case ACTION_USB_DEVICE_ATTACHED:
-                    break;
-                default:
-                    super.onNewIntent(intent);
-                    break;
-            }
-        }
+        handleIntent(intent);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_source, menu);
+
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        mSearchView.setOnQueryTextListener(this);
         return true;
     }
 
@@ -315,6 +314,16 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     /**
      * Enabled multiselect if it is not already enabled and add a new selection
      */
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        return false;
+    }
+
     private void handleMenuMultiSelect() {
         if (!getActiveFragment().getSource().isMultiSelectEnabled()) {
             getActiveFragment().setMultiSelectEnabled(true);
@@ -378,8 +387,89 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 case ACTION_MEDIA_REMOVED:
                     removeLocalSource(intent.getDataString());
                     break;
+                case ACTION_SEARCH:
+                    doSearch(intent.getStringExtra(SearchManager.QUERY));
             }
         }
+    }
+
+    /**
+     * Search all files and folders for the given query string
+     * @param query     Name of the file or folder to find
+     */
+    private void doSearch(String query) {
+        List<TreeNode<SourceFile>> allResults = new ArrayList<>();
+        List<String> sourceNames = new ArrayList<>();
+
+        for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
+            allResults.addAll(TreeNode.searchTree(fragment.getSource().getRootNode(), query));
+            sourceNames.add(fragment.getSource().getSourceName().substring(0,1)+fragment.getSource().getSourceName().substring(1).toLowerCase());
+        }
+        Collections.sort(allResults, (t1, t2) -> t1.getData().getName().toLowerCase().compareTo(t2.getData().getName().toLowerCase()));
+
+        AlertDialog searchDialog = new AlertDialog.Builder(this)
+                .setNegativeButton(R.string.close, (dialog, which) -> dialog.dismiss())
+                .create();
+
+        SearchResultAdapter adapter = new SearchResultAdapter(allResults, toOpen -> {
+            List<SourceFragment> fragments = mSourcesPagerAdapter.getFragments();
+            for (int i= 0; i < mSourcesPagerAdapter.getFragments().size(); i++) {
+                if (fragments.get(i).getSource().getSourceName().equals(toOpen.getData().getSourceName())) {
+                    if (searchDialog.isShowing()) {
+                        searchDialog.dismiss();
+                    }
+
+                    mViewPager.setCurrentItem(i, true);
+
+                    TreeNode<SourceFile> newDir = toOpen.getData().isDirectory() ? toOpen : toOpen.getParent();
+                    getActiveFragment().getSource().setCurrentDirectory(newDir);
+                    ((FileSystemAdapter)getActiveFragment().mRecycler.getAdapter()).setCurrentDirectory(newDir);
+                    mSourceManager.setActiveDirectory(newDir);
+
+                    getActiveFragment().popAllBreadCrumbs();
+                    getActiveFragment().pushAllBreadCrumbs(newDir);
+                    getActiveFragment().mRecycler.getAdapter().notifyDataSetChanged();
+                    getActiveFragment().mRecycler.requestFocus();
+                }
+            }
+        });
+
+        View view = getLayoutInflater().inflate(R.layout.dialog_search_results, null);
+        RecyclerView rv = view.findViewById(R.id.rv_search_results);
+
+        if (allResults.isEmpty()) {
+            searchDialog.setMessage(getString(R.string.no_results));
+        } else {
+            rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+            rv.setAdapter(adapter);
+            searchDialog.setView(view);
+        }
+
+        ArrayAdapter<String> arrayadapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
+        arrayadapter.add(Constants.ALL);
+        arrayadapter.addAll(sourceNames);
+        arrayadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        Spinner spn = view.findViewById(R.id.spn_sources);
+        spn.setAdapter(arrayadapter);
+        spn.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String selected = (String) adapterView.getItemAtPosition(i);
+                if (selected.equals(Constants.ALL)) {
+                    adapter.resetDataset();
+                    adapter.notifyDataSetChanged();
+                } else {
+                    adapter.removeAllSourceExcept(selected.toUpperCase());
+                    adapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        searchDialog.show();
     }
 
     /**
