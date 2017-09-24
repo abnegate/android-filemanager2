@@ -122,7 +122,7 @@ public class TreeNode<T extends Serializable> implements Serializable {
 
     private static void searchTree(TreeNode<SourceFile> currentNode, String childToFind, List<TreeNode<SourceFile>> results) {
         if (currentNode != null) {
-            if (currentNode.getData().getName().contains(childToFind)) {
+            if (currentNode.getData().getName().toLowerCase().contains(childToFind.toLowerCase())) {
                 results.add(currentNode);
             }
 
@@ -130,10 +130,8 @@ public class TreeNode<T extends Serializable> implements Serializable {
                 for (TreeNode<SourceFile> child : currentNode.getChildren()) {
                     if (child.getData().isDirectory()) {
                         searchTree(child, childToFind, results);
-                    } else {
-                        if (currentNode.getData().getName().contains(childToFind)) {
-                            results.add(currentNode);
-                        }
+                    } else if (child.getData().getName().toLowerCase().contains(childToFind.toLowerCase())) {
+                        results.add(child);
                     }
                 }
             }

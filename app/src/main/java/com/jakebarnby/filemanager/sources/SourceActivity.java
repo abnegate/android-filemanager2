@@ -60,6 +60,7 @@ import com.jakebarnby.filemanager.util.Utils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -311,17 +312,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * @param query     Name of the file or folder to find
      */
     private void doSearch(String query) {
-        SearchRecentSuggestions suggestions = new SearchRecentSuggestions(
-                this,
-                SuggestionProvider.AUTHORITY,
-                SuggestionProvider.MODE);
-        suggestions.saveRecentQuery(query, null);
-
         List<TreeNode<SourceFile>> allResults = new ArrayList<>();
 
         for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
             allResults.addAll(TreeNode.searchTree(fragment.getSource().getRootNode(), query));
         }
+        Collections.sort(allResults, (t1, t2) -> t1.getData().getName().toLowerCase().compareTo(t2.getData().getName().toLowerCase()));
 
         AlertDialog searchDialog = new AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_title_results)
@@ -335,13 +331,17 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                     if (searchDialog.isShowing()) {
                         searchDialog.dismiss();
                     }
+
                     mViewPager.setCurrentItem(i, true);
-                    getActiveFragment().getSource().setCurrentDirectory(toOpen);
-                    ((FileSystemAdapter)getActiveFragment().mRecycler.getAdapter()).setCurrentDirectory(toOpen);
-                    mSourceManager.setActiveDirectory(toOpen);
+
+                    TreeNode<SourceFile> newDir = toOpen.getData().isDirectory() ? toOpen : toOpen.getParent();
+                    getActiveFragment().getSource().setCurrentDirectory(newDir);
+                    ((FileSystemAdapter)getActiveFragment().mRecycler.getAdapter()).setCurrentDirectory(newDir);
+                    mSourceManager.setActiveDirectory(newDir);
 
                     getActiveFragment().popAllBreadCrumbs();
-                    getActiveFragment().pushAllBreadCrumbs(toOpen);
+                    getActiveFragment().pushAllBreadCrumbs(newDir);
+                    getActiveFragment().mRecycler.getAdapter().notifyDataSetChanged();
                 }
             }
         });
