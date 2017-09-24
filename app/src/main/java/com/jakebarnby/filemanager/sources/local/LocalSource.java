@@ -9,6 +9,7 @@ import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.SourceListener;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
+import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
@@ -21,8 +22,11 @@ import java.io.File;
 
 public class LocalSource extends Source {
 
-    public LocalSource(String sourceName, SourceListener listener) {
-        super(sourceName, listener);
+    private String rootPath;
+
+    public LocalSource(String sourceName, String rootPath, SourceListener listener) {
+        super(SourceType.LOCAL, sourceName, listener);
+        this.rootPath = rootPath;
         setLogoId(R.mipmap.ic_launcher);
     }
 
@@ -35,7 +39,7 @@ public class LocalSource extends Source {
     public void loadSource(Context context) {
         if (!isFilesLoaded()) {
             new LocalLoaderTask(this, mSourceListener)
-                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, Environment.getExternalStorageDirectory().getAbsolutePath());
+                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, rootPath);
         }
     }
 

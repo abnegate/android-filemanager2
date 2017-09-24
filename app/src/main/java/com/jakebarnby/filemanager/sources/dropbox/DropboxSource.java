@@ -11,7 +11,9 @@ import com.dropbox.core.v2.DbxClientV2;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.SourceListener;
+import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
+
 
 /**
  * Created by jakebarnby on 2/08/17.
@@ -20,7 +22,7 @@ import com.jakebarnby.filemanager.util.Constants;
 public class DropboxSource extends Source {
 
     public DropboxSource(String sourceName, SourceListener listener) {
-        super(sourceName, listener);
+        super(SourceType.REMOTE, sourceName, listener);
         setLogoId(R.drawable.ic_dropbox);
     }
 

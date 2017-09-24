@@ -3,6 +3,7 @@ package com.jakebarnby.filemanager.sources.dropbox;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.Metadata;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
+import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
 
 /**
@@ -18,6 +19,7 @@ public class DropboxFile extends SourceFile {
             setPath("");
         }
         setName(file.getName());
+        setSourceType(SourceType.REMOTE);
         setSourceName(Constants.Sources.DROPBOX);
         setDirectory(file instanceof FolderMetadata);
     }

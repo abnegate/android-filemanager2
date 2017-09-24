@@ -16,6 +16,7 @@ import com.jakebarnby.filemanager.util.Utils;
 public abstract class Source {
 
     private String                  mSourceName;
+    private SourceType              mSourceType;
     private TreeNode<SourceFile>    mCurrentDirectory;
     private long                    mTotalSpace;
     private long                    mUsedSpace;
@@ -42,13 +43,22 @@ public abstract class Source {
     public abstract void logout(Context context);
 
 
-    public Source(String sourceName, SourceListener listener) {
+    public Source(SourceType type, String sourceName, SourceListener listener) {
+        this.mSourceType = type;
         this.mSourceName = sourceName;
         this.mSourceListener = listener;
     }
 
     public String getSourceName() {
         return mSourceName;
+    }
+
+    public SourceType getSourceType() {
+        return mSourceType;
+    }
+
+    public void setSourceType(SourceType mSourceType) {
+        this.mSourceType = mSourceType;
     }
 
     public TreeNode<SourceFile> getCurrentDirectory() {

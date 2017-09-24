@@ -24,10 +24,11 @@ public class LocalFragment extends SourceFragment {
      * @param sourceName The name of the source controlled by this fragment
      * @return A new instance of this fragment
      */
-    public static SourceFragment newInstance(String sourceName) {
+    public static SourceFragment newInstance(String sourceName, String rootPath) {
         SourceFragment fragment = new LocalFragment();
         Bundle args = new Bundle();
         args.putString(Constants.FRAGMENT_TITLE, sourceName);
+        args.putString(Constants.LOCAL_ROOT, rootPath);
         fragment.setArguments(args);
         return fragment;
     }
@@ -35,7 +36,9 @@ public class LocalFragment extends SourceFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mSource = new LocalSource(Constants.Sources.LOCAL, this);
+        String name = getArguments().getString(Constants.FRAGMENT_TITLE);
+        String rootPath = getArguments().getString(Constants.LOCAL_ROOT);
+        mSource = new LocalSource(name, rootPath, this);
     }
 
     @Override

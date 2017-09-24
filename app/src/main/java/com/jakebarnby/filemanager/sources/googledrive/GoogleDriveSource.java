@@ -17,6 +17,7 @@ import com.google.api.services.drive.DriveScopes;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.SourceListener;
+import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.Utils;
 
@@ -35,7 +36,7 @@ public class GoogleDriveSource extends Source {
     private GoogleAccountCredential mCredential;
 
     public GoogleDriveSource(String sourceName, SourceListener listener) {
-        super(sourceName, listener);
+        super(SourceType.REMOTE, sourceName, listener);
         setLogoId(R.drawable.ic_googledrive);
     }
 

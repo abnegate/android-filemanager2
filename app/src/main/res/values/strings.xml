@@ -26,6 +26,7 @@
     <string name="err_generic">Error</string>
     <string name="err_no_app_available">No installed apps can open this file.</string>
     <string name="err_no_connection">No connection available, check your internet and try again.</string>
+    <string name="err_no_ext_write">Cannot copy to external storage due to limitations of Android System.</string>
     <string name="err_no_free_space">Not enough free space on %s.</string>
     <string name="err_no_selection">No files or folders selected.</string>
     <string name="err_not_loaded">Not loaded yet.</string>

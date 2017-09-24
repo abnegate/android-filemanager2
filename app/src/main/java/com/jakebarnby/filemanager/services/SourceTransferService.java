@@ -15,6 +15,7 @@ import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.SourceActivity;
 import com.jakebarnby.filemanager.sources.dropbox.DropboxFactory;
 import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFactory;
+import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.sources.onedrive.OneDriveFactory;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.sources.dropbox.DropboxFile;
@@ -217,11 +218,8 @@ public class SourceTransferService extends Service {
     private TreeNode<SourceFile> createFolder(TreeNode<SourceFile> destDir, int operationId, String name, boolean isSilent) {
         if (!isSilent) broadcastShowDialog(getString(R.string.dialog_creating_folder), 0);
         SourceFile newFile = null;
-        switch(destDir.getData().getSourceName()) {
-            case Constants.Sources.LOCAL:
-                createFolderNative(destDir.getData().getPath()+File.separator+name);
-                newFile = new LocalFile(new File(destDir.getData().getPath()+File.separator+name));
-                break;
+
+        switch (destDir.getData().getSourceName()) {
             case Constants.Sources.DROPBOX:
                 FolderMetadata dropboxFile = DropboxFactory
                         .getInstance()
@@ -231,15 +229,21 @@ public class SourceTransferService extends Service {
             case Constants.Sources.GOOGLE_DRIVE:
                 com.google.api.services.drive.model.File googleFile = GoogleDriveFactory
                         .getInstance()
-                        .createFolder(name, ((GoogleDriveFile)destDir.getData()).getDriveId());
+                        .createFolder(name, ((GoogleDriveFile) destDir.getData()).getDriveId());
                 newFile = new GoogleDriveFile(googleFile);
                 break;
             case Constants.Sources.ONEDRIVE:
                 DriveItem onedriveFile = OneDriveFactory
                         .getInstance()
-                        .createFolder(name, ((OneDriveFile)destDir.getData()).getDriveId());
+                        .createFolder(name, ((OneDriveFile) destDir.getData()).getDriveId());
                 newFile = new OneDriveFile(onedriveFile);
                 break;
+            default:
+                if (destDir.getData().getSourceType() == SourceType.LOCAL) {
+                    createFolderNative(destDir.getData().getPath() + File.separator + name);
+                    newFile = new LocalFile(new File(destDir.getData().getPath() + File.separator + name), destDir.getData().getSourceName());
+                    break;
+                }
         }
         TreeNode<SourceFile> newFolder = destDir.addChild(newFile);
         if (!isSilent) broadcastFinishedTask(operationId);
@@ -263,9 +267,6 @@ public class SourceTransferService extends Service {
         }
 
         switch(destDir.getData().getSourceName()) {
-            case Constants.Sources.LOCAL:
-                renameFolderNative(oldPath, newPath);
-                break;
             case Constants.Sources.DROPBOX:
                 DropboxFactory
                         .getInstance()
@@ -281,6 +282,11 @@ public class SourceTransferService extends Service {
                         .getInstance()
                         .rename(name, ((OneDriveFile)destDir.getData()).getDriveId());
                 break;
+            default:
+                if (destDir.getData().getSourceType() == SourceType.LOCAL) {
+                    renameFolderNative(oldPath, newPath);
+                    break;
+                }
         }
         destDir.getData().setName(name);
         destDir.getData().setPath(newPath);
@@ -386,9 +392,6 @@ public class SourceTransferService extends Service {
                     String.format(getString(R.string.deleting_count), toDelete.indexOf(file)+1, toDelete.size()));
 
             switch (file.getData().getSourceName()) {
-                case Constants.Sources.LOCAL:
-                    deleteFileNative(file.getData().getPath());
-                    break;
                 case Constants.Sources.DROPBOX:
                     DropboxFactory
                             .getInstance()
@@ -404,6 +407,11 @@ public class SourceTransferService extends Service {
                             .getInstance()
                             .deleteFile(((OneDriveFile) file.getData()).getDriveId());
                     break;
+                default:
+                    if (currentDir.getData().getSourceType() == SourceType.LOCAL) {
+                        deleteFileNative(file.getData().getPath());
+                        break;
+                    }
             }
             currentDir.removeChild(file);
 
@@ -433,9 +441,6 @@ public class SourceTransferService extends Service {
         String newFilePath = null;
         String destPath = getCacheDir().getPath()+File.separator+file.getName();
         switch (file.getSourceName()) {
-            case Constants.Sources.LOCAL:
-                newFilePath = file.getPath();
-                break;
             case Constants.Sources.DROPBOX:
                 File newFile = DropboxFactory
                         .getInstance()
@@ -458,6 +463,12 @@ public class SourceTransferService extends Service {
                     newFilePath = oneDriveFile.getPath();
                 }
                 break;
+            default:
+                if (file.getSourceType() == SourceType.LOCAL) {
+                    newFilePath = file.getPath();
+                    break;
+                }
+
         }
         return newFilePath;
     }
@@ -470,10 +481,7 @@ public class SourceTransferService extends Service {
      */
     private SourceFile putFile(String newFilePath, String fileName, SourceFile destDir) {
         switch (destDir.getSourceName()) {
-            case Constants.Sources.LOCAL:
-                copyFileNative(newFilePath, destDir.getPath()+"/"+fileName);
-                return new LocalFile(new File(destDir.getPath()+"/"+fileName));
-            case Constants.Sources.DROPBOX:
+           case Constants.Sources.DROPBOX:
                 return new DropboxFile(
                         DropboxFactory
                         .getInstance()
@@ -486,6 +494,11 @@ public class SourceTransferService extends Service {
                 return  new OneDriveFile(OneDriveFactory
                         .getInstance()
                         .uploadFile(newFilePath, fileName, ((OneDriveFile)destDir).getDriveId()));
+            default:
+                if (destDir.getSourceType() == SourceType.LOCAL) {
+                    copyFileNative(newFilePath, destDir.getPath()+"/"+fileName);
+                    return new LocalFile(new File(destDir.getPath()+"/"+fileName), destDir.getSourceName());
+                }
         }
         return null;
     }

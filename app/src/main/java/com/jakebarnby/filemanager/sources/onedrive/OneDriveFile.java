@@ -1,6 +1,7 @@
 package com.jakebarnby.filemanager.sources.onedrive;
 
 import com.jakebarnby.filemanager.sources.models.SourceFile;
+import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
 import com.microsoft.graph.extensions.DriveItem;
 
@@ -16,6 +17,7 @@ public class OneDriveFile extends SourceFile {
         setPath(file.webUrl);
         setDriveId(file.id);
         setName(file.name);
+        setSourceType(SourceType.REMOTE);
         setSourceName(Constants.Sources.ONEDRIVE);
         setDirectory(file.folder != null);
         setSize(file.size);
