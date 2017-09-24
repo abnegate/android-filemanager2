@@ -200,21 +200,24 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     @Override
     protected void onResume() {
         super.onResume();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_SHOW_DIALOG);
-        filter.addAction(ACTION_UPDATE_DIALOG);
-        filter.addAction(ACTION_COMPLETE);
-        filter.addAction(ACTION_MEDIA_MOUNTED);
-        filter.addAction(ACTION_MEDIA_REMOVED);
-        filter.addAction(ACTION_MEDIA_UNMOUNTED);
-        filter.addAction(ACTION_MEDIA_BAD_REMOVAL);
-        filter.addDataScheme("file");
-        registerReceiver(mBroadcastReciever, filter);
+        IntentFilter filterLocal = new IntentFilter();
+        filterLocal.addAction(ACTION_SHOW_DIALOG);
+        filterLocal.addAction(ACTION_UPDATE_DIALOG);
+        filterLocal.addAction(ACTION_COMPLETE);
+        getApplicationContext().registerReceiver(mBroadcastReciever, filterLocal);
+
+        IntentFilter filterSystem = new IntentFilter();
+        filterSystem.addAction(ACTION_MEDIA_MOUNTED);
+        filterSystem.addAction(ACTION_MEDIA_REMOVED);
+        filterSystem.addAction(ACTION_MEDIA_UNMOUNTED);
+        filterSystem.addAction(ACTION_MEDIA_BAD_REMOVAL);
+        filterSystem.addDataScheme("file");
+        getApplicationContext().registerReceiver(mBroadcastReciever, filterSystem);
     }
 
     @Override
     protected void onPause() {
-        unregisterReceiver(mBroadcastReciever);
+        getApplicationContext().unregisterReceiver(mBroadcastReciever);
         super.onPause();
     }
 

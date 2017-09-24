@@ -531,7 +531,7 @@ public class SourceTransferService extends Service {
             SelectedFilesManager.getInstance().getSelectedFiles(operationId).clear();
         }
 
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        getApplicationContext().sendBroadcast(intent);
         hideNotification(operationId);
     }
 
@@ -545,8 +545,7 @@ public class SourceTransferService extends Service {
         intent.setAction(ACTION_SHOW_DIALOG);
         intent.putExtra(EXTRA_DIALOG_TITLE, title);
         intent.putExtra(EXTRA_TOTAL_COUNT, totalCount);
-        LocalBroadcastManager.getInstance(this)
-                .sendBroadcast(intent);
+        getApplicationContext().sendBroadcast(intent);
     }
 
     /**
@@ -557,8 +556,7 @@ public class SourceTransferService extends Service {
         Intent intent = new Intent();
         intent.setAction(ACTION_UPDATE_DIALOG);
         intent.putExtra(EXTRA_CURRENT_COUNT, currentCount);
-        LocalBroadcastManager.getInstance(this)
-                .sendBroadcast(intent);
+        getApplicationContext().sendBroadcast(intent);
     }
 
     /**
