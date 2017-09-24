@@ -8,6 +8,7 @@ import android.os.StatFs;
 import android.view.Display;
 import android.view.WindowManager;
 
+import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.SourceStorageStats;
 
 import java.io.File;
@@ -119,5 +120,18 @@ public class Utils {
         info.setTotalSpace(fileSystem.getTotalBytes());
         info.setUsedSpace(fileSystem.getTotalBytes() - fileSystem.getAvailableBytes());
         return info;
+    }
+
+    public static int resolveLogoId(String sourceName) {
+        switch (sourceName) {
+            case Constants.Sources.DROPBOX:
+                return R.drawable.ic_dropbox;
+            case Constants.Sources.GOOGLE_DRIVE:
+                return R.drawable.ic_googledrive;
+            case Constants.Sources.ONEDRIVE:
+                return R.drawable.ic_onedrive;
+            default:
+                return R.mipmap.ic_launcher;
+        }
     }
 }

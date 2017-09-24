@@ -60,12 +60,7 @@ public class SourceLogoutAdapter extends RecyclerView.Adapter<SourceLogoutAdapte
         void bindHolder(List<Source> sources, int position) {
             Source source = sources.get(position);
 
-            GlideApp
-                    .with(mLogo)
-                    .load(source.getLogoId())
-                    .centerCrop()
-                    .into(mLogo);
-
+            mLogo.setImageResource(source.getLogoId());
             mSourceName.setText(String.format("%s%s", source.getSourceName().substring(0, 1), source.getSourceName().substring(1).toLowerCase()));
             mLogout.setText(source.isLoggedIn() ? R.string.logout : R.string.connect);
             mLogout.setOnClickListener((view -> {

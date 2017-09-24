@@ -16,6 +16,7 @@ import com.jakebarnby.filemanager.util.Utils;
 public abstract class Source {
 
     private String                  mSourceName;
+    private TreeNode<SourceFile>    mRootNode;
     private TreeNode<SourceFile>    mCurrentDirectory;
     private long                    mTotalSpace;
     private long                    mUsedSpace;
@@ -57,6 +58,14 @@ public abstract class Source {
 
     public void setCurrentDirectory(TreeNode<SourceFile> mCurrentDirectory) {
         this.mCurrentDirectory = mCurrentDirectory;
+    }
+
+    public TreeNode<SourceFile> getRootNode() {
+        return mRootNode;
+    }
+
+    public void setRootNode(TreeNode<SourceFile> mRootNode) {
+        this.mRootNode = mRootNode;
     }
 
     public void setQuotaInfo(SourceStorageStats info) {

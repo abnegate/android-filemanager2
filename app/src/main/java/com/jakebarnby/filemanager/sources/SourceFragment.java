@@ -48,6 +48,8 @@ import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
 
+import java.util.Stack;
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -97,12 +99,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
             }
         });
 
-        GlideApp
-                .with(mSourceLogo)
-                .load(getSource().getLogoId())
-                .centerCrop()
-                .into(mSourceLogo);
-
+        mSourceLogo.setImageResource(getSource().getLogoId());
         return rootView;
     }
 
@@ -348,6 +345,21 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                 50L);
         mBreadcrumbBar.addView(crumbLayout);
         crumbLayout.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.breadcrumb_overshoot_z));
+    }
+
+    protected void pushAllBreadCrumbs(TreeNode<SourceFile> directory) {
+        Stack<TreeNode<SourceFile>> breadCrumbs = new Stack<>();
+        TreeNode<SourceFile> root = directory;
+
+        breadCrumbs.push(root);
+        while (root.getParent() != null) {
+            root = root.getParent();
+            breadCrumbs.push(root);
+        }
+
+        while(breadCrumbs.size() > 0) {
+            pushBreadcrumb(breadCrumbs.pop());
+        }
     }
 
     /**

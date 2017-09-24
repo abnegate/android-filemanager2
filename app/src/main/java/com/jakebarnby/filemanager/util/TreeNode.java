@@ -114,6 +114,32 @@ public class TreeNode<T extends Serializable> implements Serializable {
         } else return currentNode;
     }
 
+    public static List<TreeNode<SourceFile>> searchTree(TreeNode<SourceFile> currentNode, String childToFind) {
+        List<TreeNode<SourceFile>> results = new ArrayList<>();
+        searchTree(currentNode, childToFind, results);
+        return results;
+    }
+
+    private static void searchTree(TreeNode<SourceFile> currentNode, String childToFind, List<TreeNode<SourceFile>> results) {
+        if (currentNode != null) {
+            if (currentNode.getData().getName().contains(childToFind)) {
+                results.add(currentNode);
+            }
+
+            if (currentNode.getChildren() != null) {
+                for (TreeNode<SourceFile> child : currentNode.getChildren()) {
+                    if (child.getData().isDirectory()) {
+                        searchTree(child, childToFind, results);
+                    } else {
+                        if (currentNode.getData().getName().contains(childToFind)) {
+                            results.add(currentNode);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) return false;

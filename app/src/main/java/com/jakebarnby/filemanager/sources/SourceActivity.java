@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.SearchRecentSuggestions;
 import android.support.design.internal.NavigationMenu;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -38,7 +39,9 @@ import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.ndk.CrashlyticsNdk;
 import com.jakebarnby.filemanager.R;
+import com.jakebarnby.filemanager.sources.search.SuggestionProvider;
 import com.jakebarnby.filemanager.ui.adapters.FileSystemAdapter;
+import com.jakebarnby.filemanager.ui.adapters.SearchResultAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourceLogoutAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourcePagerAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourceUsageAdapter;
@@ -65,6 +68,7 @@ import io.github.yavski.fabspeeddial.FabSpeedDial;
 import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
 import jp.wasabeef.blurry.Blurry;
 
+import static android.content.Intent.ACTION_SEARCH;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_COMPLETE;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_SHOW_DIALOG;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_UPDATE_DIALOG;
@@ -73,7 +77,7 @@ import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_DI
 import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_OPERATION_ID;
 import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_TOTAL_COUNT;
 
-public class SourceActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
+public class SourceActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener, SearchView.OnQueryTextListener {
 
     private SourceManager               mSourceManager;
 
@@ -209,10 +213,11 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         if (action != null) {
             switch (intent.getAction()) {
                 default:
-                    super.onNewIntent(intent);
+                    //super.onNewIntent(intent);
                     handleIntent(intent);
                     break;
             }
+
         }
     }
 
@@ -223,6 +228,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        mSearchView.setOnQueryTextListener(this);
         return true;
     }
 
@@ -230,10 +236,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
-            case R.id.action_search:
-                mSearchView.setIconified(!mSearchView.isActivated());
-                break;
-
             case R.id.action_settings:
                 break;
             case R.id.action_viewas:
@@ -254,6 +256,16 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        return false;
     }
 
     private void handleMenuMultiSelect() {
@@ -295,18 +307,56 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     /**
-    private void handleIntent(Intent intent) {
-        String action = intent.getAction();
-        if (action != null) {
-            switch (action) {
-                case ACTION_SEARCH:
-                    doSearch(intent.getStringExtra(SearchManager.QUERY));
-            }
-        }
-    }
-
+     * Search all files and folders for the given query string
+     * @param query     Name of the file or folder to find
+     */
     private void doSearch(String query) {
+        SearchRecentSuggestions suggestions = new SearchRecentSuggestions(
+                this,
+                SuggestionProvider.AUTHORITY,
+                SuggestionProvider.MODE);
+        suggestions.saveRecentQuery(query, null);
 
+        List<TreeNode<SourceFile>> allResults = new ArrayList<>();
+
+        for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
+            allResults.addAll(TreeNode.searchTree(fragment.getSource().getRootNode(), query));
+        }
+
+        AlertDialog searchDialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_title_results)
+                .setNegativeButton(R.string.close, (dialog, which) -> dialog.dismiss())
+                .create();
+
+        SearchResultAdapter adapter = new SearchResultAdapter(allResults, toOpen -> {
+            List<SourceFragment> fragments = mSourcesPagerAdapter.getFragments();
+            for (int i= 0; i < mSourcesPagerAdapter.getFragments().size(); i++) {
+                if (fragments.get(i).getSource().getSourceName().equals(toOpen.getData().getSourceName())) {
+                    if (searchDialog.isShowing()) {
+                        searchDialog.dismiss();
+                    }
+                    mViewPager.setCurrentItem(i, true);
+                    getActiveFragment().getSource().setCurrentDirectory(toOpen);
+                    ((FileSystemAdapter)getActiveFragment().mRecycler.getAdapter()).setCurrentDirectory(toOpen);
+                    mSourceManager.setActiveDirectory(toOpen);
+
+                    getActiveFragment().popAllBreadCrumbs();
+                    getActiveFragment().pushAllBreadCrumbs(toOpen);
+                }
+            }
+        });
+
+        View view = getLayoutInflater().inflate(R.layout.dialog_search_results, null);
+        RecyclerView rv = view.findViewById(R.id.rv_search_results);
+
+        if (allResults.isEmpty()) {
+            searchDialog.setMessage(getString(R.string.no_results));
+        } else {
+            rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+            rv.setAdapter(adapter);
+            searchDialog.setView(view);
+        }
+        searchDialog.show();
     }
 
     /**
@@ -457,6 +507,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 break;
             case ACTION_UPDATE_DIALOG:
                 updateProgressDialog(intent);
+            case ACTION_SEARCH:
+                doSearch(intent.getStringExtra(SearchManager.QUERY));
+                break;
         }
     }
 
