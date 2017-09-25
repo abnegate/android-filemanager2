@@ -48,7 +48,8 @@
         </activity>
         <activity
             android:name="com.dropbox.core.android.AuthActivity"
-            android:configChanges="orientation|keyboard">
+            android:configChanges="orientation|keyboard"
+            android:launchMode="singleTask">
             <intent-filter>
                 <data android:scheme="db-rse09cxjnnn2yc1" />
 
@@ -71,10 +72,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
-        <provider android:name=".sources.search.SuggestionProvider"
-            android:authorities="com.jakebarnby.filemanager.sources.search.SuggestionProvider"
-            android:exported="false"/>
 
         <service
             android:name=".services.FirebaseNotificationService">
