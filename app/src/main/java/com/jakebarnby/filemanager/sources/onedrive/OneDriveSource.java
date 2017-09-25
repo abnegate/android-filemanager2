@@ -39,7 +39,6 @@ public class OneDriveSource extends Source {
 
     public OneDriveSource(String sourceName, SourceListener listener) {
         super(SourceType.REMOTE, sourceName, listener);
-        setLogoId(R.drawable.ic_onedrive);
     }
 
     public PublicClientApplication getClient() {

@@ -96,7 +96,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
             }
         });
 
-        mSourceLogo.setImageResource(getSource().getLogoId());
+        mSourceLogo.setImageResource(Utils.resolveLogoId(getSource().getSourceName()));
         return rootView;
     }
 

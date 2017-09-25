@@ -27,7 +27,6 @@ public class LocalSource extends Source {
     public LocalSource(String sourceName, String rootPath, SourceListener listener) {
         super(SourceType.LOCAL, sourceName, listener);
         this.rootPath = rootPath;
-        setLogoId(R.mipmap.ic_launcher);
     }
 
     @Override

@@ -28,9 +28,6 @@ public abstract class Source {
 
     protected SourceListener        mSourceListener;
 
-    @DrawableRes
-    private int                     mLogoId;
-
     /**
      * Authenticate the current mSource
      */
@@ -173,14 +170,6 @@ public abstract class Source {
             }
         }
         return true;
-    }
-
-    public int getLogoId() {
-        return mLogoId;
-    }
-
-    public void setLogoId(@DrawableRes int logoId) {
-        this.mLogoId = logoId;
     }
 }
 

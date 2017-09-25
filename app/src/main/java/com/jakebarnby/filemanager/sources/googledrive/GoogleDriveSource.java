@@ -37,7 +37,6 @@ public class GoogleDriveSource extends Source {
 
     public GoogleDriveSource(String sourceName, SourceListener listener) {
         super(SourceType.REMOTE, sourceName, listener);
-        setLogoId(R.drawable.ic_googledrive);
     }
 
     @Override

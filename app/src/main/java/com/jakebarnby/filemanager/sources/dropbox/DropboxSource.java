@@ -23,7 +23,6 @@ public class DropboxSource extends Source {
 
     public DropboxSource(String sourceName, SourceListener listener) {
         super(SourceType.REMOTE, sourceName, listener);
-        setLogoId(R.drawable.ic_dropbox);
     }
 
     @Override

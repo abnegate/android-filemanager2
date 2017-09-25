@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.glide.GlideApp;
 import com.jakebarnby.filemanager.sources.models.Source;
+import com.jakebarnby.filemanager.util.Utils;
 
 import java.util.List;
 
@@ -60,7 +61,7 @@ public class SourceLogoutAdapter extends RecyclerView.Adapter<SourceLogoutAdapte
         void bindHolder(List<Source> sources, int position) {
             Source source = sources.get(position);
 
-            mLogo.setImageResource(source.getLogoId());
+            mLogo.setImageResource(Utils.resolveLogoId(source.getSourceName()));
             mSourceName.setText(String.format("%s", source.getSourceName()));
             mLogout.setText(source.isLoggedIn() ? R.string.logout : R.string.connect);
             mLogout.setOnClickListener((view -> {
