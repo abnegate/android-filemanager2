@@ -89,6 +89,20 @@ public class TreeNode<T extends Serializable> implements Serializable {
         return parent;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (obj instanceof TreeNode){
+            return data.equals(((TreeNode) obj).getData());
+        }
+        return false;
+    }
+
+    /**
+     * Recursively sort down the given node, first sorting by the given comparator then by file/directory
+     * @param rootNode      Node to start the sort at
+     * @param comparator    SourceFile comparator used for sorting the tree
+     */
     public static void sortTree(TreeNode<? extends SourceFile> rootNode, Comparator<TreeNode<? extends SourceFile>> comparator) {
         Collections.sort(rootNode.getChildren(), comparator);
         for (TreeNode<? extends SourceFile> child : rootNode.getChildren()) {
@@ -99,28 +113,40 @@ public class TreeNode<T extends Serializable> implements Serializable {
     }
 
     /**
-     * Find parent with the given name in the given current node
+     * Recursively search up the given node for a direct parent with the given name
      * @param currentNode    The node to start search for parent at
      * @param parentToFind   Name of the node to find as a parent of currentNode
      * @return               Node with the given name which is a parent of the given node if it exists, otherwise null
      */
-    public static TreeNode<SourceFile> findParent(TreeNode<SourceFile> currentNode, String parentToFind) {
+    public static TreeNode<SourceFile> searchForParent(TreeNode<SourceFile> currentNode, String parentToFind) {
         if (currentNode.getParent() != null) {
             if (currentNode.getParent().getData().getName().equals(parentToFind)) {
                 return currentNode.getParent();
             } else {
-                return findParent(currentNode.getParent(), parentToFind);
+                return searchForParent(currentNode.getParent(), parentToFind);
             }
         } else return currentNode;
     }
 
-    public static List<TreeNode<SourceFile>> searchTree(TreeNode<SourceFile> currentNode, String childToFind) {
+    /**
+     * Recursively search down the given node down depth first for children who's name contains the given name
+     * @param currentNode   The node to start search for children at
+     * @param childToFind   Name of the child node
+     * @return              List of children of currentNode who's name contains childToFind, may be empty
+     */
+    public static List<TreeNode<SourceFile>> searchForChildren(TreeNode<SourceFile> currentNode, String childToFind) {
         List<TreeNode<SourceFile>> results = new ArrayList<>();
-        searchTree(currentNode, childToFind, results);
+        searchForChildren(currentNode, childToFind, results);
         return results;
     }
 
-    private static void searchTree(TreeNode<SourceFile> currentNode, String childToFind, List<TreeNode<SourceFile>> results) {
+    /**
+     * Recursively search down the given down depth first for children who's name contains the given name
+     * @param currentNode   The node to start search for children at
+     * @param childToFind   Name of the child node
+     * @param results       Reference to the list to add results to
+     */
+    private static void searchForChildren(TreeNode<SourceFile> currentNode, String childToFind, List<TreeNode<SourceFile>> results) {
         if (currentNode != null) {
             if (currentNode.getData().getName().toLowerCase().contains(childToFind.toLowerCase())) {
                 results.add(currentNode);
@@ -129,21 +155,12 @@ public class TreeNode<T extends Serializable> implements Serializable {
             if (currentNode.getChildren() != null) {
                 for (TreeNode<SourceFile> child : currentNode.getChildren()) {
                     if (child.getData().isDirectory()) {
-                        searchTree(child, childToFind, results);
+                        searchForChildren(child, childToFind, results);
                     } else if (child.getData().getName().toLowerCase().contains(childToFind.toLowerCase())) {
                         results.add(child);
                     }
                 }
             }
         }
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) return false;
-        if (obj instanceof TreeNode){
-            return data.equals(((TreeNode) obj).getData());
-        }
-        return false;
     }
 }

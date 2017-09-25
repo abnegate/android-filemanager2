@@ -27,10 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import com.jakebarnby.filemanager.R;
-import com.jakebarnby.filemanager.glide.GlideApp;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.services.SourceTransferService;
 import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFragment;
@@ -316,8 +313,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
 
         // If this is the root node set the text to the source name instead of file name
         text.setText(directory.getParent() == null ?
-                directory.getData().getSourceName().substring(0,1).toUpperCase() + directory.getData().getSourceName().substring(1).toLowerCase():
-                directory.getData().getName());
+                directory.getData().getSourceName() : directory.getData().getName());
 
         crumbLayout.setOnClickListener(v -> {
             TextView crumbText =  v.findViewById(R.id.crumb_text);
@@ -327,7 +323,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
 
             String name = crumbText.getText().toString();
             if (mSource.getCurrentDirectory().getData().getName().equals(name)) return;
-            TreeNode<SourceFile> selectedParent = TreeNode.findParent(mSource.getCurrentDirectory(), name);
+            TreeNode<SourceFile> selectedParent = TreeNode.searchForParent(mSource.getCurrentDirectory(), name);
 
             int previousPosition = selectedParent.getData().getPositionToRestore();
             if (previousPosition != -1) {

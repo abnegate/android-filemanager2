@@ -13,11 +13,11 @@ public class Constants {
     public static final String ALL = "All";
 
     public class Sources {
-        public static final String LOCAL = "LOCAL";
-        public static final String DROPBOX = "DROPBOX";
-        public static final String GOOGLE_DRIVE = "GOOGLE DRIVE";
+        public static final String LOCAL = "Local";
+        public static final String DROPBOX = "Dropbox";
+        public static final String GOOGLE_DRIVE = "Google Drive";
         public static final String GOOGLE_DRIVE_FOLDER_MIME = "application/vnd.google-apps.folder";
-        public static final String ONEDRIVE = "ONEDRIVE";
+        public static final String ONEDRIVE = "OneDrive";
         public static final String ONEDRIVE_INVALID_CHARS = "[\\/:*?\"<>|#% ]";
 
         public static final int MAX_FILENAME_LENGTH = 255;

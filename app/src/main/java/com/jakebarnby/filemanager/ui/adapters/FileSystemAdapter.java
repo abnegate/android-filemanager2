@@ -19,6 +19,7 @@ import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.glide.GlideApp;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
+import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
@@ -149,7 +150,7 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
         private void setThumbnail(TreeNode<SourceFile> currentDir) {
             GlideApp
                     .with(itemView)
-                    .load(currentDir.getData().getSourceName().equals(Constants.Sources.LOCAL) ?
+                    .load(currentDir.getData().getSourceType() == SourceType.LOCAL ?
                             new File(currentDir.getData().getThumbnailLink()) :
                             currentDir.getData().getThumbnailLink())
                     .error(R.mipmap.ic_launcher_round)
