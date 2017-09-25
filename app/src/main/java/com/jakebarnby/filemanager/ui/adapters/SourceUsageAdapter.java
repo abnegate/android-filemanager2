@@ -58,7 +58,7 @@ public class SourceUsageAdapter extends RecyclerView.Adapter<SourceUsageAdapter.
         }
 
         void bindHolder(Source source) {
-            mSourceName.setText(String.format("%s%s", source.getSourceName().substring(0, 1), source.getSourceName().substring(1).toLowerCase()));
+            mSourceName.setText(String.format("%s", source.getSourceName()));
             mSourceUsage.setText(constructUsageString(source));
             simulateProgress(mPercentBar, source.getUsedSpacePercent());
         }

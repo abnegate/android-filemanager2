@@ -166,7 +166,7 @@ public abstract class Source {
      * If performing an action on a non-local directory, check internet
      */
     public boolean checkConnectionActive(Context context) {
-        if (!getSourceName().equals(Constants.Sources.LOCAL)) {
+        if (getSourceType() == SourceType.REMOTE) {
             if (!Utils.isConnectionReady(context)) {
                 mSourceListener.onNoConnection();
                 return false;

@@ -12,12 +12,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.SearchRecentSuggestions;
 import android.support.design.internal.NavigationMenu;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.FileProvider;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -29,7 +27,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.OvershootInterpolator;
@@ -78,8 +75,6 @@ import static android.content.Intent.ACTION_MEDIA_BAD_REMOVAL;
 import static android.content.Intent.ACTION_MEDIA_MOUNTED;
 import static android.content.Intent.ACTION_MEDIA_REMOVED;
 import static android.content.Intent.ACTION_MEDIA_UNMOUNTED;
-import static android.content.Intent.ACTION_UMS_CONNECTED;
-import static android.hardware.usb.UsbManager.ACTION_USB_DEVICE_ATTACHED;
 import static android.hardware.usb.UsbManager.ACTION_USB_DEVICE_DETACHED;
 import static android.content.Intent.ACTION_SEARCH;
 import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_COMPLETE;
@@ -272,7 +267,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             if (fragment.getSource().getSourceType() == SourceType.LOCAL) indexToInsert++;
         }
 
-        mSourcesPagerAdapter.getFragments().add(indexToInsert, LocalFragment.newInstance(rootDirTitle, path));
+        String newSourceName = indexToInsert == 1 ? "SD Card" : "USB "+String.valueOf(indexToInsert-1);
+
+        mSourcesPagerAdapter.getFragments().add(indexToInsert, LocalFragment.newInstance(newSourceName, path));
         mSourcesPagerAdapter.notifyDataSetChanged();
     }
 
@@ -288,14 +285,14 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
                 boolean alreadyAdded = false;
                 for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
-                    if (fragment.getSource() != null && fragment.getSource().getSourceName().equals(rootDirTitle)) {
+                    if (fragment.getSource() != null && fragment.getSource().getRootNode().getData().getPath().contains(rootDirTitle)) {
                         alreadyAdded = true;
                         break;
                     }
                 }
 
                 if (alreadyAdded) continue;
-                mSourcesPagerAdapter.getFragments().add(i+1, LocalFragment.newInstance(rootDirTitle, paths[i]));
+                mSourcesPagerAdapter.getFragments().add(i+1, LocalFragment.newInstance(i == 0 ? "SD Card" : "USB "+i, paths[i]));
             }
             mSourcesPagerAdapter.notifyDataSetChanged();
         }
@@ -307,7 +304,11 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      */
     private void removeLocalSource(String sourcePath) {
         for (int i = 0; i < mSourcesPagerAdapter.getFragments().size(); i++) {
-            if (sourcePath.contains(mSourcesPagerAdapter.getFragments().get(i).getSource().getSourceName())) {
+            Source source = mSourcesPagerAdapter.getFragments().get(i).getSource();
+            if (source.getSourceType() == SourceType.LOCAL &&
+                source.isFilesLoaded()  &&
+                sourcePath.contains(source.getRootNode().getData().getPath())) {
+
                 mSourcesPagerAdapter.getFragments().remove(i);
             }
         }
@@ -405,8 +406,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         List<String> sourceNames = new ArrayList<>();
 
         for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
-            allResults.addAll(TreeNode.searchTree(fragment.getSource().getRootNode(), query));
-            sourceNames.add(fragment.getSource().getSourceName().substring(0,1)+fragment.getSource().getSourceName().substring(1).toLowerCase());
+            allResults.addAll(TreeNode.searchForChildren(fragment.getSource().getRootNode(), query));
+            sourceNames.add(fragment.getSource().getSourceName());
         }
         Collections.sort(allResults, (t1, t2) -> t1.getData().getName().toLowerCase().compareTo(t2.getData().getName().toLowerCase()));
 
@@ -462,7 +463,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                     adapter.resetDataset();
                     adapter.notifyDataSetChanged();
                 } else {
-                    adapter.removeAllSourceExcept(selected.toUpperCase());
+                    adapter.removeAllSourceExcept(selected);
                     adapter.notifyDataSetChanged();
                 }
             }
@@ -581,7 +582,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             } else {
                 showSnackbar(String.format(
                         getString(R.string.err_no_free_space),
-                        getActiveFragment().getSource().getSourceName().toLowerCase()));
+                        getActiveFragment().getSource().getSourceName()));
             }
         }
     }
@@ -810,7 +811,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         List<Source> sources = new ArrayList<>();
         for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
             if (fragment.getSource().isFilesLoaded() &&
-                    !fragment.getSource().getSourceName().equals(Constants.Sources.LOCAL)) {
+                    fragment.getSource().getSourceType() == SourceType.REMOTE) {
                 sources.add(fragment.getSource());
             }
         }

@@ -61,7 +61,7 @@ public class SourceLogoutAdapter extends RecyclerView.Adapter<SourceLogoutAdapte
             Source source = sources.get(position);
 
             mLogo.setImageResource(source.getLogoId());
-            mSourceName.setText(String.format("%s%s", source.getSourceName().substring(0, 1), source.getSourceName().substring(1).toLowerCase()));
+            mSourceName.setText(String.format("%s", source.getSourceName()));
             mLogout.setText(source.isLoggedIn() ? R.string.logout : R.string.connect);
             mLogout.setOnClickListener((view -> {
                 if (source.isLoggedIn()) {
