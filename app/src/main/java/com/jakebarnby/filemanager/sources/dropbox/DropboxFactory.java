@@ -18,6 +18,7 @@ import com.jakebarnby.filemanager.util.Constants;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,37 +51,29 @@ public class DropboxFactory {
      * @param destinationPath
      * @return
      */
-    public File downloadFile(String downloadPath, String destinationPath) {
+    public File downloadFile(String downloadPath, String destinationPath) throws IOException, DbxException {
         File file = new File(destinationPath);
-        try (OutputStream outputStream = new FileOutputStream(file)) {
-            getClient()
-                    .files()
-                    .download(downloadPath)
-                    .download(outputStream);
-            return file;
-        } catch (DbxException | IOException e) {
-            Log.e("DROPBOX", e.getLocalizedMessage());
-            e.printStackTrace();
-        }
-        return null;
+        OutputStream outputStream = new FileOutputStream(file);
+        getClient()
+                .files()
+                .download(downloadPath)
+                .download(outputStream);
+        return file;
     }
 
     /**
      * @param fileUri
      * @param destPath
      */
-    public FileMetadata uploadFile(String fileUri, String destPath) {
+    public FileMetadata uploadFile(String fileUri, String destPath) throws IOException, DbxException {
         File localFile = new File(fileUri);
         if (localFile.exists()) {
-            try (InputStream inputStream = new FileInputStream(localFile)) {
-                return getClient()
-                        .files()
-                        .uploadBuilder(destPath + "/" + localFile.getName())
-                        .withMode(WriteMode.OVERWRITE)
-                        .uploadAndFinish(inputStream);
-            } catch (DbxException | IOException e) {
-                e.printStackTrace();
-            }
+            InputStream inputStream = new FileInputStream(localFile);
+            return getClient()
+                    .files()
+                    .uploadBuilder(destPath + "/" + localFile.getName())
+                    .withMode(WriteMode.OVERWRITE)
+                    .uploadAndFinish(inputStream);
         }
         return null;
     }
@@ -88,60 +81,45 @@ public class DropboxFactory {
     /**
      * @param filePath
      */
-    public void deleteFile(String filePath) {
-        try {
-            getClient()
-                    .files()
-                    .delete(filePath);
-        } catch (DbxException e) {
-            e.printStackTrace();
-        }
+    public void deleteFile(String filePath) throws DbxException {
+        getClient()
+                .files()
+                .delete(filePath);
     }
 
     /**
-     *  @param name
+     * @param name
      * @param path
      */
-    public FolderMetadata createFolder(String name, String path) {
-        try {
-            return getClient()
-                    .files()
-                    .createFolder( path+File.separator+name);
-        } catch (DbxException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public FolderMetadata createFolder(String name, String path) throws DbxException {
+        return getClient()
+                .files()
+                .createFolder(path + File.separator + name);
     }
 
     /**
-     *
      * @param oldPath
      * @param newPath
      * @return
      */
-    public Metadata rename(String oldPath, String newPath) {
-        try {
-            return  getClient()
-                    .files()
-                    .move(oldPath, newPath);
-        } catch (DbxException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public Metadata rename(String oldPath, String newPath) throws DbxException {
+        return getClient()
+                .files()
+                .move(oldPath, newPath);
     }
 
     public void logout(Context context) {
-            AsyncTask.execute(() -> {
-                try {
-                    getClient().auth().tokenRevoke();
-                    setClient(null);
+        AsyncTask.execute(() -> {
+            try {
+                getClient().auth().tokenRevoke();
+                setClient(null);
 
-                    SharedPreferences prefs = context.getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
-                    prefs.edit().putString(Constants.Prefs.DROPBOX_TOKEN_KEY, null).apply();
-                } catch (DbxException e) {
-                    e.printStackTrace();
-                }
-            });
+                SharedPreferences prefs = context.getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
+                prefs.edit().putString(Constants.Prefs.DROPBOX_TOKEN_KEY, null).apply();
+            } catch (DbxException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public SourceStorageStats getStorageStats() {

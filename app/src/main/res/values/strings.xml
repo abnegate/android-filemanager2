@@ -6,19 +6,24 @@
     <string name="app_name">File Manager</string>
     <string name="background">Background</string>
     <string name="cancel">Cancel</string>
+    <string name="clearing_cache">clearing cache</string>
     <string name="close">Close</string>
     <string name="connect">Connect</string>
     <string name="contacts_permission">Please enable contacts permission to choose a google account.</string>
     <string name="copied">Selection copied</string>
     <string name="copying">Copying..</string>
     <string name="copying_count">Copying %d of %d</string>
+    <string name="copying_items">copying item(s)</string>
     <string name="create_folder">Create Folder</string>
     <string name="createdTime">Created</string>
+    <string name="creating_folder">creating folder</string>
     <string name="cut">Selection cut</string>
     <string name="deleting_count">Deleting %d of %d</string>
+    <string name="deleting_items">deleting item(s)</string>
     <string name="dialog_creating_folder">Creating folder…</string>
     <string name="dialog_delete_confirm">Are you sure you want to delete %d items?</string>
     <string name="dialog_deleting">Deleting..</string>
+    <string name="dialog_error">Error</string>
     <string name="dialog_message">Local storage permission is needed to browse files on your device.</string>
     <string name="dialog_renaming">Renaming…</string>
     <string name="dialog_title_logout">Connected Sources</string>
@@ -48,6 +53,7 @@
     <string name="modifiedTime">Modified</string>
     <string name="moving">Moving..</string>
     <string name="moving_count">Moving %d of %d</string>
+    <string name="moving_items">moving item(s)</string>
     <string name="name">Name</string>
     <string name="new_folder_name">New folder name</string>
     <string name="no">No</string>
@@ -56,9 +62,12 @@
     <string name="ok">OK</string>
     <string name="open_now">Would you like to open %s now?</string>
     <string name="opening">Opening..</string>
+    <string name="opening_file">opening file</string>
     <string name="path">Path</string>
+    <string name="problem_encountered">Problem encountered</string>
     <string name="properties">Properties</string>
     <string name="rename">Rename</string>
+    <string name="renaming_item">renaming item</string>
     <string name="search">Search</string>
     <string name="search_hint">Search files and folders</string>
     <string name="search_results">Search Results</string>
@@ -70,4 +79,5 @@
     <string name="warning">Warning</string>
     <string name="yes">Yes</string>
     <string name="zero">0</string>
+    <string name="loading_source">loading source</string>
 </resources>

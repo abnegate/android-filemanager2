@@ -77,13 +77,15 @@ import static android.content.Intent.ACTION_MEDIA_REMOVED;
 import static android.content.Intent.ACTION_MEDIA_UNMOUNTED;
 import static android.hardware.usb.UsbManager.ACTION_USB_DEVICE_DETACHED;
 import static android.content.Intent.ACTION_SEARCH;
-import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_COMPLETE;
-import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_SHOW_DIALOG;
-import static com.jakebarnby.filemanager.services.SourceTransferService.ACTION_UPDATE_DIALOG;
-import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_CURRENT_COUNT;
-import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_DIALOG_TITLE;
-import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_OPERATION_ID;
-import static com.jakebarnby.filemanager.services.SourceTransferService.EXTRA_TOTAL_COUNT;
+import static com.jakebarnby.filemanager.util.IntentExtensions.ACTION_COMPLETE;
+import static com.jakebarnby.filemanager.util.IntentExtensions.ACTION_SHOW_DIALOG;
+import static com.jakebarnby.filemanager.util.IntentExtensions.ACTION_SHOW_ERROR;
+import static com.jakebarnby.filemanager.util.IntentExtensions.ACTION_UPDATE_DIALOG;
+import static com.jakebarnby.filemanager.util.IntentExtensions.EXTRA_DIALOG_CURRENT_VALUE;
+import static com.jakebarnby.filemanager.util.IntentExtensions.EXTRA_DIALOG_MESSAGE;
+import static com.jakebarnby.filemanager.util.IntentExtensions.EXTRA_DIALOG_TITLE;
+import static com.jakebarnby.filemanager.util.IntentExtensions.EXTRA_OPERATION_ID;
+import static com.jakebarnby.filemanager.util.IntentExtensions.EXTRA_DIALOG_MAX_VALUE;
 
 public class SourceActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener, SearchView.OnQueryTextListener {
 
@@ -155,10 +157,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             public boolean onPrepareMenu(NavigationMenu navigationMenu) {
                 Blurry.with(SourceActivity.this)
                         .radius(17)
-                        .sampling(1)
                         .async()
-                        .animate(500)
-                        .onto(mBlurWrapper);
+                        .sampling(1)
+                        .onto(mViewPager);
 
                 if (mSourceManager.getFileAction(SelectedFilesManager.getInstance().getOperationCount()) == null) {
                     navigationMenu.findItem(R.id.action_paste).setVisible(false);
@@ -198,6 +199,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         IntentFilter filterLocal = new IntentFilter();
         filterLocal.addAction(ACTION_SHOW_DIALOG);
         filterLocal.addAction(ACTION_UPDATE_DIALOG);
+        filterLocal.addAction(ACTION_SHOW_ERROR);
         filterLocal.addAction(ACTION_COMPLETE);
         getApplicationContext().registerReceiver(mBroadcastReciever, filterLocal);
 
@@ -380,6 +382,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 case ACTION_SHOW_DIALOG:
                     showProgressDialog(intent);
                     break;
+                case ACTION_SHOW_ERROR:
+                    showErrorDialog(intent.getStringExtra(EXTRA_DIALOG_MESSAGE));
                 case ACTION_UPDATE_DIALOG:
                     updateProgressDialog(intent);
                     break;
@@ -760,7 +764,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         if (title == null) {
             title = "Operation in progress..";
         }
-        int totalCount = intent.getIntExtra(EXTRA_TOTAL_COUNT, 0);
+        int totalCount = intent.getIntExtra(EXTRA_DIALOG_MAX_VALUE, 0);
         int currentCount = 0;
 
         mDialog = new ProgressDialog(this);
@@ -835,6 +839,17 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         logoutDialog.show();
     }
 
+    void showErrorDialog(String message) {
+        if (mDialog != null && mDialog.isShowing()) mDialog.dismiss();
+
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_error)
+                .setMessage(message)
+                .setNegativeButton(R.string.close, (dialog, which) -> dialog.dismiss())
+                .create()
+                .show();
+    }
+
     /**
      * Update the progress of the {@link ProgressDialog} if it is showing
      *
@@ -845,7 +860,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             if (mDialog.isIndeterminate()) {
                 mDialog.setIndeterminate(false);
             }
-            int currentCount = intent.getIntExtra(EXTRA_CURRENT_COUNT, 0);
+            int currentCount = intent.getIntExtra(EXTRA_DIALOG_CURRENT_VALUE, 0);
             mDialog.setProgress(currentCount);
         }
     }
@@ -887,24 +902,32 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * @param filePath  The absolute path of the file to open
      */
     private void viewFileInExternalApp(String filePath) {
-        if (filePath == null) return;
+        try {
+            if (filePath == null) return;
 
-        File file = new File(filePath);
-        String extension = Utils.fileExt(filePath);
-        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+            File file = new File(filePath);
+            String extension = Utils.fileExt(filePath);
+            String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
 
-        Uri reachableUri = FileProvider.getUriForFile(this, getApplicationInfo().packageName, file);
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(reachableUri, mimeType);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Uri reachableUri = FileProvider.getUriForFile(this, getApplicationInfo().packageName, file);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(reachableUri, mimeType);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        PackageManager manager = getPackageManager();
-        List<ResolveInfo> resolveInfo = manager.queryIntentActivities(intent, 0);
-        if (resolveInfo.size() > 0) {
-            startActivity(intent);
-        } else {
-            showSnackbar(getString(R.string.err_no_app_available));
+            PackageManager manager = getPackageManager();
+            List<ResolveInfo> resolveInfo = manager.queryIntentActivities(intent, 0);
+            if (resolveInfo.size() > 0) {
+                startActivity(intent);
+            } else {
+                showSnackbar(getString(R.string.err_no_app_available));
+            }
+        } catch (Exception e) {
+            showErrorDialog(String.format(
+                    "%s %s %s",
+                    getString(R.string.problem_encountered),
+                    getString(R.string.opening_file),
+                    ": "+e.getLocalizedMessage()));
         }
     }
 
