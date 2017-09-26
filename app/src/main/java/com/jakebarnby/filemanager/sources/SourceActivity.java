@@ -42,6 +42,7 @@ import com.crashlytics.android.ndk.CrashlyticsNdk;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.local.LocalFragment;
 import com.jakebarnby.filemanager.sources.models.SourceType;
+import com.jakebarnby.filemanager.tutorial.FileManagerTutorialActivity;
 import com.jakebarnby.filemanager.ui.adapters.FileSystemAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SearchResultAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourceLogoutAdapter;
@@ -127,7 +128,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_source);
-
         Fabric.with(this, new Crashlytics(), new CrashlyticsNdk(), new Answers());
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -157,8 +157,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             public boolean onPrepareMenu(NavigationMenu navigationMenu) {
                 Blurry.with(SourceActivity.this)
                         .radius(17)
-                        .async()
                         .sampling(1)
+                        .async()
                         .onto(mBlurWrapper);
 
                 if (mSourceManager.getFileAction(SelectedFilesManager.getInstance().getOperationCount()) == null) {
@@ -261,17 +261,17 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     private void addLocalSource(String path) {
-        String[] split = path.split("/");
-        String rootDirTitle = split[split.length-1];
-
         int indexToInsert = 0;
         for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
             if (fragment.getSource().getSourceType() == SourceType.LOCAL) indexToInsert++;
         }
 
-        String newSourceName = indexToInsert == 1 ? "SD Card" : "USB "+String.valueOf(indexToInsert-1);
+        String newSourceName = indexToInsert == 1 ?
+                getString(R.string.sdcard) :
+                getString(R.string.usb)+String.valueOf(indexToInsert-1);
 
-        mSourcesPagerAdapter.getFragments().add(indexToInsert, LocalFragment.newInstance(newSourceName, path));
+        mSourcesPagerAdapter.getFragments()
+                .add(indexToInsert, LocalFragment.newInstance(newSourceName, path));
         mSourcesPagerAdapter.notifyDataSetChanged();
     }
 
@@ -287,14 +287,18 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
                 boolean alreadyAdded = false;
                 for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
-                    if (fragment.getSource() != null && fragment.getSource().getRootNode().getData().getPath().contains(rootDirTitle)) {
+                    if (fragment.getSource() != null &&
+                            fragment.getSource().getRootNode().getData().getPath().contains(rootDirTitle)) {
                         alreadyAdded = true;
                         break;
                     }
                 }
 
                 if (alreadyAdded) continue;
-                mSourcesPagerAdapter.getFragments().add(i+1, LocalFragment.newInstance(i == 0 ? "SD Card" : "USB "+i, paths[i]));
+                mSourcesPagerAdapter.getFragments().add(i+1, LocalFragment.newInstance(
+                        i == 0 ? getString(R.string.sdcard) : getString(R.string.usb)+i,
+                        paths[i])
+                );
             }
             mSourcesPagerAdapter.notifyDataSetChanged();
         }
@@ -413,7 +417,10 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             allResults.addAll(TreeNode.searchForChildren(fragment.getSource().getRootNode(), query));
             sourceNames.add(fragment.getSource().getSourceName());
         }
-        Collections.sort(allResults, (t1, t2) -> t1.getData().getName().toLowerCase().compareTo(t2.getData().getName().toLowerCase()));
+
+        Collections.sort(allResults,
+                (t1, t2) -> t1.getData().getName().toLowerCase().compareTo(t2.getData().getName().toLowerCase())
+        );
 
         AlertDialog searchDialog = new AlertDialog.Builder(this)
                 .setNegativeButton(R.string.close, (dialog, which) -> dialog.dismiss())

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="60dp">
+
+    <RelativeLayout
+        android:id="@+id/fl_tutorial"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:background="#45000000">
+        <ImageView
+            android:id="@+id/img_tutorial"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:layout_centerInParent="true"
+            android:adjustViewBounds="true" />
+    </RelativeLayout>
+
+
+    <TextView
+        android:id="@+id/txt_tut_title"
+        style="@style/TextAppearance.AppCompat.Headline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:paddingEnd="16dp"
+        android:paddingTop="16dp"
+        android:paddingStart="16dp"
+        android:textColor="#FFF" />
+
+    <TextView
+        android:id="@+id/txt_tut_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center_horizontal"
+        android:paddingEnd="32dp"
+        android:paddingStart="32dp"
+        android:textColor="#FFF"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/txt_tut_summary"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom|center_horizontal"
+        android:paddingBottom="8dp"
+        android:paddingEnd="16dp"
+        android:paddingStart="16dp"
+        android:textColor="#FFF"
+        android:textSize="12sp" />
+
+
+</LinearLayout>

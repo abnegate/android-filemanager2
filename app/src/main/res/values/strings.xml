@@ -80,4 +80,9 @@
     <string name="yes">Yes</string>
     <string name="zero">0</string>
     <string name="loading_source">loading source</string>
+    <string name="sdcard">SD Card</string>
+    <string name="usb">USB</string>
+    <string name="back">Back</string>
+    <string name="finish">Finish</string>
+    <string name="next">Next</string>
 </resources>
