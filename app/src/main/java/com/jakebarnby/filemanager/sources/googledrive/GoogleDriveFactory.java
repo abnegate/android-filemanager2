@@ -12,6 +12,7 @@ import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.Utils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -43,29 +44,25 @@ public class GoogleDriveFactory {
     }
 
     /**
-     *
      * @param fileId
      * @param destinationPath
      * @return
      */
-    public File downloadFile(String fileId, String destinationPath) {
+    public File downloadFile(String fileId, String destinationPath) throws IOException {
         File file = new File(destinationPath);
-        try(OutputStream outputStream = new FileOutputStream(file)) {
-            mService.files()
-                    .get(fileId)
-                    .executeMediaAndDownloadTo(outputStream);
-            return file;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        OutputStream outputStream = new FileOutputStream(file);
+        mService.files()
+                .get(fileId)
+                .executeMediaAndDownloadTo(outputStream);
+        return file;
     }
 
     /**
      * Upload a file at the given path on Google Drive
-     * @param filePath  Path to upload the file to
+     *
+     * @param filePath Path to upload the file to
      */
-    public com.google.api.services.drive.model.File uploadFile(String filePath, String fileName, String parentId) {
+    public com.google.api.services.drive.model.File uploadFile(String filePath, String fileName, String parentId) throws IOException {
         File file = new File(filePath);
         com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
 
@@ -78,48 +75,35 @@ public class GoogleDriveFactory {
         fileMetadata.setName(fileName);
 
         FileContent googleFile = new FileContent(mimeType, file);
-        try {
-            return mService.files()
-                    .create(fileMetadata, googleFile)
-                    .setFields("name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime")
-                    .execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return fileMetadata;
+        return mService.files()
+                .create(fileMetadata, googleFile)
+                .setFields("name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime")
+                .execute();
     }
 
     /**
      * Delete the gile with the given ID from Google Drive
-     * @param fileId    The ID of the file to delete
+     *
+     * @param fileId The ID of the file to delete
      */
-    public void deleteFile(String fileId) {
-        try {
-            mService.files().delete(fileId).execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void deleteFile(String fileId) throws IOException {
+        mService.files().delete(fileId).execute();
     }
 
     /**
-     *  @param name
+     * @param name
      * @param parentId
      */
-    public com.google.api.services.drive.model.File createFolder(String name, String parentId) {
+    public com.google.api.services.drive.model.File createFolder(String name, String parentId) throws IOException {
         com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
         fileMetadata.setName(name);
         fileMetadata.setMimeType(Constants.Sources.GOOGLE_DRIVE_FOLDER_MIME);
-        fileMetadata.setParents(Collections.singletonList(parentId));
-        try {
-            return mService
-                    .files()
-                    .create(fileMetadata)
-                    .setFields("name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime")
-                    .execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+
+        return mService
+                .files()
+                .create(fileMetadata)
+                .setFields("name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime")
+                .execute();
     }
 
     public void logout(Context context) {
@@ -129,23 +113,16 @@ public class GoogleDriveFactory {
     }
 
     /**
-     *
      * @param newName
      * @param parentId
      * @return
      */
-    public com.google.api.services.drive.model.File rename(String newName, String parentId) {
+    public com.google.api.services.drive.model.File rename(String newName, String parentId) throws IOException {
         com.google.api.services.drive.model.File file = new com.google.api.services.drive.model.File();
-        file.setName(newName);
-        try {
-            return mService.files()
-                    .update(parentId, file)
-                    .setFields("name")
-                    .execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return mService.files()
+                .update(parentId, file)
+                .setFields("name")
+                .execute();
     }
 
     public SourceStorageStats getStorageStats() {

@@ -48,7 +48,7 @@ public class OneDriveFactory {
      * @param destinationPath
      * @return
      */
-    public File downloadFile(String id, String filename, String destinationPath) {
+    public File downloadFile(String id, String filename, String destinationPath) throws IOException {
         File file = new File(destinationPath, filename);
 
         try(InputStream inputStream = mGraphClient
@@ -61,9 +61,8 @@ public class OneDriveFactory {
             Utils.copyInputStreamToFile(inputStream, file);
             return file;
         } catch (IOException | ClientException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return null;
     }
 
     /**
@@ -71,7 +70,7 @@ public class OneDriveFactory {
      * @param fileName
      * @param parentId
      */
-    public DriveItem uploadFile(String filePath, String fileName, String parentId) {
+    public DriveItem uploadFile(String filePath, String fileName, String parentId) throws IOException, GraphServiceException {
         File file = new File(filePath);
 
         try(FileInputStream in = new FileInputStream(file)) {
@@ -87,16 +86,15 @@ public class OneDriveFactory {
                     .buildRequest()
                     .put(buffer);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw e;
         }
-        return null;
     }
 
     /**
      *
      * @param driveId
      */
-    public void deleteFile(String driveId) {
+    public void deleteFile(String driveId) throws GraphServiceException {
         mGraphClient
                 .getMe()
                 .getDrive()
@@ -109,7 +107,7 @@ public class OneDriveFactory {
      *  @param name
      * @param parentId
      */
-    public DriveItem createFolder(String name, String parentId) {
+    public DriveItem createFolder(String name, String parentId) throws GraphServiceException {
         DriveItem item = new DriveItem();
         item.name = name;
         item.folder = new Folder();
@@ -123,7 +121,7 @@ public class OneDriveFactory {
                 .post(item);
     }
 
-    public DriveItem rename(String newName, String itemId) {
+    public DriveItem rename(String newName, String itemId) throws GraphServiceException {
         DriveItem item = new DriveItem();
         item.name = newName;
         return mGraphClient

@@ -53,7 +53,7 @@ public class GoogleDriveLoaderTask extends LoaderTask {
             mSource.setCurrentDirectory(mRootTreeNode);
             mSource.setQuotaInfo(GoogleDriveFactory.getInstance().getStorageStats());
         } catch (IOException e) {
-            e.printStackTrace();
+            mListener.onLoadError(e.getMessage() != null ? e.getMessage() : "");
         }
         return rootFile;
     }
@@ -73,7 +73,7 @@ public class GoogleDriveLoaderTask extends LoaderTask {
                         .setFields("files(name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime)")
                         .execute();
             } catch (IOException e) {
-                e.printStackTrace();
+                mListener.onLoadError(e.getMessage() != null ? e.getMessage() : "");
             }
 
             List<File> files = fileList.getFiles();

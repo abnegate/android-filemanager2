@@ -7,6 +7,7 @@ import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.microsoft.graph.extensions.DriveItem;
 import com.microsoft.graph.extensions.IDriveItemCollectionPage;
+import com.microsoft.graph.http.GraphServiceException;
 
 import java.util.List;
 
@@ -36,38 +37,42 @@ public class OneDriveLoaderTask extends LoaderTask {
 
     @Override
     protected TreeNode<SourceFile> readFileTree(Object rootObject) {
-        if (rootObject != null && rootObject instanceof DriveItem) {
-            DriveItem node = (DriveItem)rootObject;
-            IDriveItemCollectionPage items = OneDriveFactory
-                    .getInstance()
-                    .getGraphClient()
-                    .getMe()
-                    .getDrive()
-                    .getItems(node.id)
-                    .getChildren()
-                    .buildRequest()
-                    .select("id,name,webUrl,folder,size,createdDateTime,lastModifiedDateTime")
-                    .expand("thumbnails")
-                    .get();
+        try {
+            if (rootObject != null && rootObject instanceof DriveItem) {
+                DriveItem node = (DriveItem) rootObject;
+                IDriveItemCollectionPage items = OneDriveFactory
+                        .getInstance()
+                        .getGraphClient()
+                        .getMe()
+                        .getDrive()
+                        .getItems(node.id)
+                        .getChildren()
+                        .buildRequest()
+                        .select("id,name,webUrl,folder,size,createdDateTime,lastModifiedDateTime")
+                        .expand("thumbnails")
+                        .get();
 
-            List<DriveItem> pageItems = items.getCurrentPage();
-            long dirSize = 0L;
-            if (pageItems != null) {
-                for (DriveItem file : pageItems) {
-                    SourceFile sourceFile = new OneDriveFile(file);
-                    if (file.folder != null) {
-                        mCurrentNode.addChild(sourceFile);
-                        mCurrentNode = mCurrentNode.getChildren().get(mCurrentNode.getChildren().size() - 1);
-                        readFileTree(file);
-                        mCurrentNode.getParent().getData().addSize(mCurrentNode.getData().getSize());
-                        mCurrentNode = mCurrentNode.getParent();
-                    } else {
-                        dirSize += file.size;
-                        mCurrentNode.addChild(sourceFile);
+                List<DriveItem> pageItems = items.getCurrentPage();
+                long dirSize = 0L;
+                if (pageItems != null) {
+                    for (DriveItem file : pageItems) {
+                        SourceFile sourceFile = new OneDriveFile(file);
+                        if (file.folder != null) {
+                            mCurrentNode.addChild(sourceFile);
+                            mCurrentNode = mCurrentNode.getChildren().get(mCurrentNode.getChildren().size() - 1);
+                            readFileTree(file);
+                            mCurrentNode.getParent().getData().addSize(mCurrentNode.getData().getSize());
+                            mCurrentNode = mCurrentNode.getParent();
+                        } else {
+                            dirSize += file.size;
+                            mCurrentNode.addChild(sourceFile);
+                        }
                     }
+                    mCurrentNode.getData().addSize(dirSize);
                 }
-                mCurrentNode.getData().addSize(dirSize);
             }
+        } catch (GraphServiceException e) {
+            mListener.onLoadError(e.getMessage() != null ? e.getMessage() : "");
         }
         return mRootTreeNode;
     }

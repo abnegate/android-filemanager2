@@ -39,7 +39,7 @@ public class DropboxLoaderTask extends LoaderTask {
                     .listFolderBuilder(path)
                     .start();
         } catch (DbxException e) {
-            e.printStackTrace();
+            mListener.onLoadError(e.getMessage() != null ? e.getMessage() : "");
         }
         return result;
     }
@@ -61,7 +61,7 @@ public class DropboxLoaderTask extends LoaderTask {
                                 .getTemporaryLink(sourceFile.getPath()).getLink());
                     }
                 } catch (DbxException e) {
-                    e.printStackTrace();
+                    mListener.onLoadError(e.getMessage() != null ? e.getMessage() : "");
                 }
                 if (data instanceof FolderMetadata) {
                     mCurrentNode.addChild(sourceFile);
@@ -73,7 +73,7 @@ public class DropboxLoaderTask extends LoaderTask {
                                 .files()
                                 .listFolder(data.getPathLower()));
                     } catch (DbxException e) {
-                        e.printStackTrace();
+                        mListener.onLoadError(e.getMessage() != null ? e.getMessage() : "");
                     }
                     mCurrentNode.getParent().getData().addSize(mCurrentNode.getData().getSize());
                     mCurrentNode = mCurrentNode.getParent();
