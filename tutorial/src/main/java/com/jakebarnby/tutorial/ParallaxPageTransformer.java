@@ -1,4 +1,4 @@
-package com.jakebarnby.filemanager.tutorial;
+package com.jakebarnby.tutorial;
 
 import android.support.v4.view.ViewPager;
 import android.view.View;

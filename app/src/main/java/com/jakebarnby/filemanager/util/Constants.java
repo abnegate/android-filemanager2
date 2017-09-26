@@ -11,8 +11,6 @@ public class Constants {
     public static final double BYTES_TO_GIGABYTE = 1073741824d;
     public static final String LOCAL_ROOT = "ROOT_PATH";
     public static final String ALL = "All";
-    public static final String TUT_PAGE_KEY = "PAGE";
-    public static final int TUT_PAGE_COUNT = 3;
 
     public class Sources {
         public static final String LOCAL = "Local";

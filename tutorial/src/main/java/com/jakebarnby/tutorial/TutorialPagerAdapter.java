@@ -1,4 +1,4 @@
-package com.jakebarnby.filemanager.tutorial;
+package com.jakebarnby.tutorial;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -12,7 +12,7 @@ import java.util.List;
 public class TutorialPagerAdapter extends FragmentPagerAdapter {
     private List<TutorialPage> mTutorialPages;
 
-    public TutorialPagerAdapter(FragmentManager fm, List<TutorialPage> tutorialPages) {
+    TutorialPagerAdapter(FragmentManager fm, List<TutorialPage> tutorialPages) {
         super(fm);
         this.mTutorialPages = tutorialPages;
     }

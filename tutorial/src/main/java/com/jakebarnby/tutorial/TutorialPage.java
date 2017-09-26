@@ -1,4 +1,4 @@
-package com.jakebarnby.filemanager.tutorial;
+package com.jakebarnby.tutorial;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -23,6 +23,10 @@ public class TutorialPage implements Parcelable {
 
     TutorialPage(){}
 
+    /**
+     * Create a new tutorial page using the data in the parcel
+     * @param in
+     */
     private TutorialPage(Parcel in) {
         this.mTitle = in.readString();
         this.mContent = in.readString();
@@ -31,60 +35,89 @@ public class TutorialPage implements Parcelable {
         this.mBackgroundColor = in.readInt();
     }
 
-    public String getTitle() {
+    String getTitle() {
         return mTitle;
     }
 
-    public String getContent() {
+    String getContent() {
         return mContent;
     }
 
-    public int getDrawable() {
+    int getDrawable() {
         return mDrawable;
     }
 
-    public int getBackgroundColor() {
+    int getBackgroundColor() {
         return mBackgroundColor;
     }
 
-    public String getSummary() {
+    String getSummary() {
         return mSummary;
     }
 
+
+    /**
+     * Builder for <code>TutorialPage</code>
+     */
     public static class Builder {
 
-        private TutorialPage step;
+        private TutorialPage mPage;
 
         public Builder() {
-            step = new TutorialPage();
+            mPage = new TutorialPage();
         }
 
         public TutorialPage build() {
-            return step;
+            return mPage;
         }
 
+        /**
+         * Set the title text of the page
+         * @param title     Title text to display on the page
+         * @return          The current page
+         */
         public Builder setTitle(String title) {
-            step.mTitle = title;
+            mPage.mTitle = title;
             return this;
         }
 
+        /**
+         * Set the context text of the page
+         * @param content   Content text to display on the page
+         * @return          The current page
+         */
         public Builder setContent(String content) {
-            step.mContent = content;
+            mPage.mContent = content;
             return this;
         }
 
+        /**
+         * Set the summary text of the page
+         * @param summary   Summary text to display on the page
+         * @return
+         */
         public Builder setSummary(String summary) {
-            step.mSummary = summary;
+            mPage.mSummary = summary;
             return this;
         }
 
-        public Builder setDrawable(int drawable) {
-            step.mDrawable = drawable;
+        /**
+         * Set the drawable of the page
+         * @param drawable  Drawable ResID to display on the page
+         * @return          The current page
+         */
+        public Builder setDrawable(@DrawableRes int drawable) {
+            mPage.mDrawable = drawable;
             return this;
         }
 
-        public Builder setBackgroundColor(int backgroundColor) {
-            step.mBackgroundColor = backgroundColor;
+        /**
+         * Set the background color of the page
+         * @param backgroundColor   Color int value to set as background color for the page
+         * @return                  The current page
+         */
+        public Builder setBackgroundColor(@ColorInt int backgroundColor) {
+            mPage.mBackgroundColor = backgroundColor;
             return this;
         }
     }
@@ -103,7 +136,7 @@ public class TutorialPage implements Parcelable {
         dest.writeInt(this.mBackgroundColor);
     }
 
-    public static final Parcelable.Creator<TutorialPage> CREATOR = new Parcelable.Creator<TutorialPage>() {
+    public static final Creator<TutorialPage> CREATOR = new Creator<TutorialPage>() {
         @Override
         public TutorialPage createFromParcel(Parcel source) {
             return new TutorialPage(source);

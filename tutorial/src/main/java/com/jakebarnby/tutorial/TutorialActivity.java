@@ -1,11 +1,6 @@
-package com.jakebarnby.filemanager.tutorial;
+package com.jakebarnby.tutorial;
 
 import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -21,8 +16,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import com.jakebarnby.filemanager.R;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,17 +28,21 @@ public class TutorialActivity extends AppCompatActivity implements View.OnClickL
     private List<TutorialPage>      mTutorialPages;
     private TutorialPagerAdapter    mTutAdapter;
 
-    private ViewPager mViewPager;
-    private Button mNext, mPrev;
-    private LinearLayout mIndicatorLayout;
-    private FrameLayout mContainerLayout;
-    private RelativeLayout mButtonContainer;
+    private ViewPager               mViewPager;
+    private Button                  mNext,
+                                    mPrev;
+    private LinearLayout            mIndicatorLayout;
+    private FrameLayout             mContainerLayout;
+    private RelativeLayout          mButtonContainer;
 
-    private ArgbEvaluator mArgbEvaluator;
+    private ArgbEvaluator           mArgbEvaluator;
 
-    private int mCurrentItem;
+    private int                     mCurrentItem;
 
-    private String mPrevText, mNextText, mFinishText, mCancelText;
+    private String                  mPrevText,
+                                    mNextText,
+                                    mFinishText,
+                                    mCancelText;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,21 +69,20 @@ public class TutorialActivity extends AppCompatActivity implements View.OnClickL
         mViewPager.setPageTransformer(false, new ParallaxPageTransformer(R.id.txt_tut_summary));
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 
-            private int[] colors = { getResources().getColor(R.color.colorPrimary),
-                                     getResources().getColor(R.color.colorAccent),
-                                     getResources().getColor(R.color.colorAccentAccent)};
-
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                if(position < (mTutAdapter.getCount() -1) && position < (colors.length - 1)) {
-                    int result = (Integer) mArgbEvaluator.evaluate(positionOffset, colors[position], colors[position + 1]);
+                if(position < (mTutAdapter.getCount() -1)) {
+                    int result = (Integer) mArgbEvaluator.evaluate(
+                            positionOffset,
+                            mTutorialPages.get(position).getBackgroundColor(),
+                            mTutorialPages.get(position + 1).getBackgroundColor());
                     mViewPager.setBackgroundColor(result);
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         changeStatusBarColor(result);
                     }
                 } else {
-                    mViewPager.setBackgroundColor(colors[colors.length - 1]);
+                    mViewPager.setBackgroundColor(mTutorialPages.get(mTutorialPages.size() - 1).getBackgroundColor());
                 }
             }
 
@@ -122,9 +118,6 @@ public class TutorialActivity extends AppCompatActivity implements View.OnClickL
             mPrev.setText(mPrevText);
             mNext.setText(mNextText);
         }
-
-        mContainerLayout.setBackgroundColor(mTutorialPages.get(position).getBackgroundColor());
-        mButtonContainer.setBackgroundColor(mTutorialPages.get(position).getBackgroundColor());
     }
 
     private void initViews() {
