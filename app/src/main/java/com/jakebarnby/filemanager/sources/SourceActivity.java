@@ -159,7 +159,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                         .radius(17)
                         .async()
                         .sampling(1)
-                        .onto(mViewPager);
+                        .onto(mBlurWrapper);
 
                 if (mSourceManager.getFileAction(SelectedFilesManager.getInstance().getOperationCount()) == null) {
                     navigationMenu.findItem(R.id.action_paste).setVisible(false);
