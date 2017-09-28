@@ -5,11 +5,13 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.SourceListener;
 import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.Utils;
 import com.microsoft.graph.concurrency.ICallback;
 import com.microsoft.graph.core.ClientException;
 import com.microsoft.graph.core.DefaultClientConfig;
@@ -114,6 +116,10 @@ public class OneDriveSource extends Source {
             setFilesLoaded(false);
             mAuthResult = null;
             mSourceListener.onLogout();
+
+            Utils.logFirebaseEvent(
+                    FirebaseAnalytics.getInstance(context),
+                    Constants.Analytics.EVENT_LOGOUT_ONEDRIVE);
         }
     }
 
@@ -142,6 +148,9 @@ public class OneDriveSource extends Source {
                 authenticateSource(fragment);
             } else {
                 loadSource(fragment.getContext());
+                Utils.logFirebaseEvent(
+                        FirebaseAnalytics.getInstance(fragment.getContext()),
+                        Constants.Analytics.EVENT_LOGIN_ONEDRIVE);
             }
         }
     }

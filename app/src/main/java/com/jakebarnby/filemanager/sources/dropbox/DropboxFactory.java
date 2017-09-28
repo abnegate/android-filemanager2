@@ -13,8 +13,10 @@ import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.WriteMode;
 import com.dropbox.core.v2.users.SpaceAllocation;
 import com.dropbox.core.v2.users.SpaceUsage;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.jakebarnby.filemanager.sources.models.SourceStorageStats;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.Utils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -117,7 +119,10 @@ public class DropboxFactory {
                 SharedPreferences prefs = context.getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
                 prefs.edit().putString(Constants.Prefs.DROPBOX_TOKEN_KEY, null).apply();
             } catch (DbxException e) {
-                e.printStackTrace();
+                Utils.logFirebaseErrorEvent(
+                        FirebaseAnalytics.getInstance(context),
+                        Constants.Analytics.EVENT_ERROR_DROPBOX_LOGOUT,
+                        e.getMessage() == null ? e.toString() : e.getMessage());
             }
         });
     }
