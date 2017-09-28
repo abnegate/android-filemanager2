@@ -2,13 +2,7 @@ package com.jakebarnby.filemanager.sources.dropbox;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.SourceFragment;
-import com.jakebarnby.filemanager.glide.GlideApp;
 import com.jakebarnby.filemanager.util.Constants;
 
 /**

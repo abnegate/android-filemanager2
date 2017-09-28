@@ -1,28 +1,19 @@
 package com.jakebarnby.filemanager.ui.adapters;
-
-import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.ListPreloader;
-import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import com.jakebarnby.filemanager.R;
-import com.jakebarnby.filemanager.glide.GlideApp;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.sources.models.SourceType;
-import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
-import com.jakebarnby.filemanager.util.Utils;
+import com.jakebarnby.tutorial.glide.GlideApp;
 
 import java.io.File;
 import java.util.List;

@@ -119,6 +119,7 @@ public class GoogleDriveFactory {
      */
     public com.google.api.services.drive.model.File rename(String newName, String parentId) throws IOException {
         com.google.api.services.drive.model.File file = new com.google.api.services.drive.model.File();
+        file.setName(newName);
         return mService.files()
                 .update(parentId, file)
                 .setFields("name")

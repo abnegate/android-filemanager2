@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jakebarnby.filemanager.R;
-import com.jakebarnby.filemanager.glide.GlideApp;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.util.Utils;
 

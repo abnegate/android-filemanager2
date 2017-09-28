@@ -80,6 +80,14 @@ public class FileManagerTutorialActivity extends TutorialActivity {
     @Override
     public void finish() {
         super.finish();
+        saveFinished();
         startActivity(new Intent(this, SourceActivity.class));
+    }
+
+    private void saveFinished() {
+        getSharedPreferences(Constants.Prefs.PREFS, MODE_PRIVATE)
+                .edit()
+                .putBoolean(Constants.Prefs.TUT_SEEN_KEY, true)
+                .apply();
     }
 }

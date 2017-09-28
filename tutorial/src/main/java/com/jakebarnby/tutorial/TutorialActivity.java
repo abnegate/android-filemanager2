@@ -16,6 +16,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import com.jakebarnby.tutorial.util.Constants;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -163,7 +165,6 @@ public class TutorialActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onBackPressed() {
         if (mCurrentItem == 0) {
-            saveFinished();
             super.onBackPressed();
         } else {
             changeFragment(false);
@@ -192,16 +193,8 @@ public class TutorialActivity extends AppCompatActivity implements View.OnClickL
         }
 
         if (item < 0 || item == mTutorialPages.size()) {
-            saveFinished();
             finish();
         } else
             mViewPager.setCurrentItem(item, true);
-    }
-
-    private void saveFinished() {
-//        getSharedPreferences(Constants.Prefs.PREFS, MODE_PRIVATE)
-//                .edit()
-//                .putBoolean(Constants.Prefs.TUT_SEEN_KEY, true)
-//                .apply();
     }
 }
