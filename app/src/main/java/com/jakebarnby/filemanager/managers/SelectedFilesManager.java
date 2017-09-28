@@ -4,6 +4,7 @@ import android.util.SparseArray;
 
 import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.util.TreeNode;
+import com.jakebarnby.tutorial.glide.GlideApp;
 
 import java.util.ArrayList;
 import java.util.List;

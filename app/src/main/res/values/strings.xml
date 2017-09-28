@@ -40,6 +40,7 @@
     <string name="err_too_many_selected">Only one file or folder can be renamed at a time.</string>
     <string name="file_ready">File Ready</string>
     <string name="greater_than"><![CDATA[>]]></string>
+    <string name="loading_source">loading source</string>
     <string name="logout">Logout</string>
     <string name="menu_item_copy">Copy</string>
     <string name="menu_item_cut">Cut</string>
@@ -68,6 +69,7 @@
     <string name="properties">Properties</string>
     <string name="rename">Rename</string>
     <string name="renaming_item">renaming item</string>
+    <string name="sdcard">SD Card</string>
     <string name="search">Search</string>
     <string name="search_hint">Search files and folders</string>
     <string name="search_results">Search Results</string>
@@ -76,8 +78,8 @@
     <string name="sizeDisplay">%.2f MB</string>
     <string name="sourceName">Source</string>
     <string name="storage_permission">Please enable storage permissions to view local files.</string>
+    <string name="usb">USB</string>
     <string name="warning">Warning</string>
     <string name="yes">Yes</string>
     <string name="zero">0</string>
-    <string name="loading_source">loading source</string>
 </resources>

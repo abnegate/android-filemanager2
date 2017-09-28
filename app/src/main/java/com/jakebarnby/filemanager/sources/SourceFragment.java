@@ -124,17 +124,19 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
 
     @Override
     public void onLoadComplete(TreeNode<SourceFile> fileTree) {
-        pushBreadcrumb(fileTree);
-        initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
+        if (isResumed()) {
+            pushBreadcrumb(fileTree);
+            initAdapters(fileTree, createOnClickListener(), createOnLongClickListener());
 
-        SourceManager sourceManager = ((SourceActivity) getActivity()).getSourceManager();
+            SourceManager sourceManager = ((SourceActivity) getActivity()).getSourceManager();
 
-        if (sourceManager.getActiveDirectory() == null) {
-            sourceManager.setActiveDirectory(fileTree);
+            if (sourceManager.getActiveDirectory() == null) {
+                sourceManager.setActiveDirectory(fileTree);
+            }
+
+            mProgressBar.setVisibility(View.GONE);
+            mSourceLogo.setVisibility(View.GONE);
         }
-
-        mProgressBar.setVisibility(View.GONE);
-        mSourceLogo.setVisibility(View.GONE);
     }
 
     @Override

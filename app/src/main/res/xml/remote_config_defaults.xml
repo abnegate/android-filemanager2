@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <entry>
+        <key>tut_page_count</key>
+        <value>3</value>
+    </entry>
+
+    <!-- Page 1 -->
+    <entry>
+        <key>tut_page1_title</key>
+        <value>Welcome to File Manager</value>
+    </entry>
+    <entry>
+        <key>tut_page1_content</key>
+        <value>The easiest way to manage your files across devices, Dropbox, Google Drive and OneDrive.</value>
+    </entry>
+    <entry>
+        <key>tut_page1_summary</key>
+        <value>Continue to see app features</value>
+    </entry>
+    <entry>
+        <key>tut_page1_image</key>
+        <value>https://firebasestorage.googleapis.com/v0/b/file-manager-4c1f2.appspot.com/o/device-2017-09-27-003008.png?alt=media&amp;token=949271da-ee07-43a0-a459-186f0e212a42</value>
+    </entry>
+    <entry>
+        <key>tut_page1_bgcolor</key>
+        <value>#00bfa5</value>
+    </entry>
+
+    <!-- Page 1=2 -->
+    <entry>
+        <key>tut_page2_title</key>
+        <value>>Ultimate File Manager</value>
+    </entry>
+    <entry>
+        <key>tut_page2_content</key>
+        <value>Copy, move, rename files and folders on any of the supported sources.</value>
+    </entry>
+    <entry>
+        <key>tut_page2_summary</key>
+        <value>Continue to see premium offer</value>
+    </entry>
+    <entry>
+        <key>tut_page2_image</key>
+        <value>https://firebasestorage.googleapis.com/v0/b/file-manager-4c1f2.appspot.com/o/device-2017-09-27-003008.png?alt=media&amp;token=949271da-ee07-43a0-a459-186f0e212a42</value>
+    </entry>
+    <entry>
+        <key>tut_page2_bgcolor</key>
+        <value>#00bcd4</value>
+    </entry>
+
+    <!-- Page 3 -->
+    <entry>
+        <key>tut_page3_title</key>
+        <value>Premium offer</value>
+    </entry>
+    <entry>
+        <key>tut_page3_content</key>
+        <value>Purchase the premium version by clicking this link or from the menu at any time. This will remove the transfer cap on remote sources.</value>
+    </entry>
+    <entry>
+        <key>tut_page3_summary</key>
+        <value>Thanks!</value>
+    </entry>
+    <entry>
+        <key>tut_page3_image</key>
+        <value>https://firebasestorage.googleapis.com/v0/b/file-manager-4c1f2.appspot.com/o/device-2017-09-27-003008.png?alt=media&amp;token=949271da-ee07-43a0-a459-186f0e212a42</value>
+    </entry>
+    <entry>
+        <key>tut_page3_bgcolor</key>
+        <value>#00796b</value>
+    </entry>
+</defaultsMap>
