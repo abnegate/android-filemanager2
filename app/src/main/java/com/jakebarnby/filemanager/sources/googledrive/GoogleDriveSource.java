@@ -14,6 +14,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.drive.DriveScopes;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.SourceListener;
@@ -62,6 +63,10 @@ public class GoogleDriveSource extends Source {
             setFilesLoaded(false);
             setCredential(null);
             mSourceListener.onLogout();
+
+            Utils.logFirebaseEvent(
+                    FirebaseAnalytics.getInstance(context),
+                    Constants.Analytics.EVENT_LOGOUT_GOOGLEDRIVE);
         }
     }
 

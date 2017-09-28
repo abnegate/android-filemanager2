@@ -5,6 +5,7 @@ import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
 import android.support.v4.os.EnvironmentCompat;
@@ -12,6 +13,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.SourceStorageStats;
 
@@ -199,5 +201,27 @@ public class Utils {
             default:
                 return R.mipmap.ic_launcher;
         }
+    }
+
+    public static void logFirebaseSourceErrorEvent(FirebaseAnalytics analytics,
+                                                   String eventName,
+                                                   String errorMessage,
+                                                   String sourceName) {
+        Bundle params = new Bundle();
+        params.putString(Constants.Analytics.PARAM_MESSAGE, errorMessage);
+        params.putString(Constants.Analytics.PARAM_SOURCE_NAME, sourceName);
+        analytics.logEvent(eventName, params);
+    }
+
+    public static void logFirebaseErrorEvent(FirebaseAnalytics analytics,
+                                             String eventName,
+                                             String errorMessage) {
+        Bundle params = new Bundle();
+        params.putString(Constants.Analytics.PARAM_MESSAGE, errorMessage);
+        analytics.logEvent(eventName, params);
+    }
+
+    public static void logFirebaseEvent(FirebaseAnalytics analytics, String eventName) {
+        analytics.logEvent(eventName, new Bundle());
     }
 }

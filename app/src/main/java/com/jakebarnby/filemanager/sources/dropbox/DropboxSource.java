@@ -8,11 +8,13 @@ import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.android.Auth;
 import com.dropbox.core.http.OkHttp3Requestor;
 import com.dropbox.core.v2.DbxClientV2;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.SourceListener;
 import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.Utils;
 
 
 /**
@@ -47,6 +49,10 @@ public class DropboxSource extends Source {
             setLoggedIn(false);
             setFilesLoaded(false);
             mSourceListener.onLogout();
+
+            Utils.logFirebaseEvent(
+                    FirebaseAnalytics.getInstance(context),
+                    Constants.Analytics.EVENT_LOGOUT_DROPBOX);
         }
     }
 
@@ -77,6 +83,7 @@ public class DropboxSource extends Source {
                 prefs.edit().putString(Constants.Prefs.DROPBOX_TOKEN_KEY, accessToken).apply();
                 setupClient(accessToken);
                 loadSource(context);
+                Utils.logFirebaseEvent(FirebaseAnalytics.getInstance(context), Constants.Analytics.EVENT_LOGIN_DROPBOX);
             }
         } else {
             if (!isLoggedIn()) {

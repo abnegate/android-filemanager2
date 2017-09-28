@@ -7,6 +7,7 @@ import android.webkit.MimeTypeMap;
 import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.About;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.jakebarnby.filemanager.sources.models.SourceStorageStats;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.Utils;
@@ -119,6 +120,7 @@ public class GoogleDriveFactory {
      */
     public com.google.api.services.drive.model.File rename(String newName, String parentId) throws IOException {
         com.google.api.services.drive.model.File file = new com.google.api.services.drive.model.File();
+        file.setName(newName);
         return mService.files()
                 .update(parentId, file)
                 .setFields("name")
