@@ -47,5 +47,30 @@ public class Constants {
 
     public class Animation {
         public static final int PROGRESS_DURATION = 1200;
+
+    }
+
+    public class ConfigKeys {
+        public static final int RC_CACHE_EXPIRATION_SECONDS = 60;
+
+        public static final String TUT_PAGE_COUNT_KEY = "tut_page_count";
+
+        public static final String TUT_PAGE1_TITLE_KEY = "tut_page1_title";
+        public static final String TUT_PAGE1_CONTENT_KEY = "tut_page1_content";
+        public static final String TUT_PAGE1_SUMMARY_KEY = "tut_page1_summary";
+        public static final String TUT_PAGE1_IMAGE_KEY = "tut_page1_image";
+        public static final String TUT_PAGE1_BGCOLOR_KEY = "tut_page1_bgcolor";
+
+        public static final String TUT_PAGE2_TITLE_KEY = "tut_page2_title";
+        public static final String TUT_PAGE2_CONTENT_KEY = "tut_page2_content";
+        public static final String TUT_PAGE2_SUMMARY_KEY = "tut_page2_summary";
+        public static final String TUT_PAGE2_IMAGE_KEY = "tut_page2_image";
+        public static final String TUT_PAGE2_BGCOLOR_KEY = "tut_page2_bgcolor";
+
+        public static final String TUT_PAGE3_TITLE_KEY = "tut_page3_title";
+        public static final String TUT_PAGE3_CONTENT_KEY = "tut_page3_content";
+        public static final String TUT_PAGE3_SUMMARY_KEY = "tut_page3_summary";
+        public static final String TUT_PAGE3_IMAGE_KEY = "tut_page3_image";
+        public static final String TUT_PAGE3_BGCOLOR_KEY = "tut_page3_bgcolor";
     }
 }

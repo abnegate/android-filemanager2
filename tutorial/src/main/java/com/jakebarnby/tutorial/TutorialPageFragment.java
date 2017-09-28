@@ -1,15 +1,27 @@
 package com.jakebarnby.tutorial;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.OvershootInterpolator;
+import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.request.target.BaseTarget;
+import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
+import com.jakebarnby.tutorial.glide.GlideApp;
 import com.jakebarnby.tutorial.util.Constants;
+
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 /**
  * Created by Jake on 9/26/2017.
@@ -53,7 +65,41 @@ public class TutorialPageFragment extends Fragment {
         mTitle      .setText(mTutorialPage.getTitle());
         mContent    .setText(mTutorialPage.getContent());
         mSummary    .setText(mTutorialPage.getSummary());
-        mImageView  .setImageResource(mTutorialPage.getDrawable());
+        setImage();
+    }
+
+    private void setImage() {
+        ScaleAnimation anim = new ScaleAnimation(0.5f, 1f, 0.5f, 1.0f);
+        OvershootInterpolator interpolator = new OvershootInterpolator(1f);
+
+        AlphaAnimation alphaAnim = new AlphaAnimation(0.0f, 1.0f);
+        alphaAnim.setDuration(Constants.TUT_IMAGE_FADE_DURATION);
+
+        anim.setInterpolator(interpolator);
+        anim.setDuration(Constants.TUT_IMAGE_BOUNCE_DURATION);
+
+        Target<Bitmap> target = new BaseTarget<Bitmap>() {
+            @Override
+            public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                mImageView.setImageBitmap(resource);
+                mImageView.startAnimation(anim);
+                mImageView.startAnimation(alphaAnim);
+            }
+
+            @Override
+            public void getSize(SizeReadyCallback cb) {
+                cb.onSizeReady(250, 250);
+            }
+
+            @Override
+            public void removeCallback(SizeReadyCallback cb) {}
+        };
+
+        GlideApp
+                .with(getContext())
+                .asBitmap()
+                .load(mTutorialPage.getImageUrl())
+                .into(target);
     }
 
     private void initViews(View view) {

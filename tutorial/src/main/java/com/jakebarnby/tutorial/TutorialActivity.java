@@ -27,18 +27,12 @@ public class TutorialActivity extends AppCompatActivity implements View.OnClickL
 
     private List<TutorialPage>      mTutorialPages;
     private TutorialPagerAdapter    mTutAdapter;
-
     private ViewPager               mViewPager;
     private Button                  mNext,
                                     mPrev;
     private LinearLayout            mIndicatorLayout;
-    private FrameLayout             mContainerLayout;
-    private RelativeLayout          mButtonContainer;
-
     private ArgbEvaluator           mArgbEvaluator;
-
     private int                     mCurrentItem;
-
     private String                  mPrevText,
                                     mNextText,
                                     mFinishText,
@@ -127,8 +121,6 @@ public class TutorialActivity extends AppCompatActivity implements View.OnClickL
         mNext            = findViewById(R.id.next);
         mPrev            = findViewById(R.id.prev);
         mIndicatorLayout = findViewById(R.id.indicatorLayout);
-        mContainerLayout = findViewById(R.id.containerLayout);
-        mButtonContainer = findViewById(R.id.buttonContainer);
 
         mNext.setOnClickListener(this);
         mPrev.setOnClickListener(this);

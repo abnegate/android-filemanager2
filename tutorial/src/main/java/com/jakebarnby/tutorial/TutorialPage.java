@@ -15,11 +15,11 @@ public class TutorialPage implements Parcelable {
     private String  mTitle;
     private String  mContent;
     private String  mSummary;
+    private String  mImageUrl;
 
-    @DrawableRes
-    private int     mDrawable;
     @ColorInt
     private int     mBackgroundColor;
+
 
     TutorialPage(){}
 
@@ -31,7 +31,7 @@ public class TutorialPage implements Parcelable {
         this.mTitle = in.readString();
         this.mContent = in.readString();
         this.mSummary = in.readString();
-        this.mDrawable = in.readInt();
+        this.mImageUrl = in.readString();
         this.mBackgroundColor = in.readInt();
     }
 
@@ -43,8 +43,8 @@ public class TutorialPage implements Parcelable {
         return mContent;
     }
 
-    int getDrawable() {
-        return mDrawable;
+    String getImageUrl() {
+        return mImageUrl;
     }
 
     int getBackgroundColor() {
@@ -103,11 +103,11 @@ public class TutorialPage implements Parcelable {
 
         /**
          * Set the drawable of the page
-         * @param drawable  Drawable ResID to display on the page
+         * @param url       Lnik to the image to display
          * @return          The current page
          */
-        public Builder setDrawable(@DrawableRes int drawable) {
-            mPage.mDrawable = drawable;
+        public Builder setImageUrl(String url) {
+            mPage.mImageUrl = url;
             return this;
         }
 
@@ -132,7 +132,7 @@ public class TutorialPage implements Parcelable {
         dest.writeString(this.mTitle);
         dest.writeString(this.mContent);
         dest.writeString(this.mSummary);
-        dest.writeInt(this.mDrawable);
+        dest.writeString(this.mImageUrl);
         dest.writeInt(this.mBackgroundColor);
     }
 

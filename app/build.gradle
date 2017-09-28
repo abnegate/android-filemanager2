@@ -92,6 +92,7 @@ dependencies {
     implementation "com.google.android.gms:play-services-auth:${project.playServicesVersion}"
     implementation "com.google.firebase:firebase-core:${project.playServicesVersion}"
     implementation "com.google.firebase:firebase-messaging:${project.playServicesVersion}"
+    implementation "com.google.firebase:firebase-config:${project.playServicesVersion}"
 
     //Google Drive
     implementation "com.google.api-client:google-api-client-android:${project.googleApiVersion}"

@@ -23,6 +23,7 @@
 
         <activity
             android:name=".splash.SplashActivity"
+            android:theme="@style/AppTheme.NoActionBar"
             android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

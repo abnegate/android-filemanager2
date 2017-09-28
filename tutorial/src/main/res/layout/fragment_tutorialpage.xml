@@ -10,7 +10,8 @@
         android:id="@+id/fl_tutorial"
         android:layout_width="match_parent"
         android:layout_height="350dp"
-        android:background="#45000000">
+        android:background="@color/translucent_black">
+
         <ImageView
             android:id="@+id/img_tutorial"
             android:layout_width="250dp"
