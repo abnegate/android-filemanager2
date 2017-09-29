@@ -38,6 +38,8 @@ public class LocalFragment extends SourceFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        if (mSource != null && mSource.getSourceName().equals(Constants.Sources.LOCAL))
         onCheckPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Constants.RequestCodes.STORAGE_PERMISSIONS);
     }
 }

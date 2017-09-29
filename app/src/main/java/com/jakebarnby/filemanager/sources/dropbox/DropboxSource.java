@@ -30,7 +30,7 @@ public class DropboxSource extends Source {
     @Override
     public void authenticateSource(Context context) {
         if (!hasToken(context, getSourceName())) {
-            Auth.startOAuth2Authentication(context, Constants.Sources.Keys.DROPBOX_CLIENT_ID);
+            Auth.startOAuth2Authentication(context, Constants.Sources.DROPBOX_CLIENT_ID);
         }
     }
 

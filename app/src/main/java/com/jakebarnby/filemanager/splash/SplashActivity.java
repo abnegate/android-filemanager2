@@ -42,7 +42,7 @@ public class SplashActivity extends AppCompatActivity {
 
         mFirebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
 
-        mFirebaseRemoteConfig.fetch(Constants.ConfigKeys.RC_CACHE_EXPIRATION_SECONDS)
+        mFirebaseRemoteConfig.fetch(Constants.RemoteConfig.RC_CACHE_EXPIRATION_SECONDS)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         mFirebaseRemoteConfig.activateFetched();

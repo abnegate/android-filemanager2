@@ -6,9 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
-import com.jakebarnby.filemanager.BuildConfig;
-import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.SourceActivity;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.tutorial.TutorialActivity;
@@ -34,25 +31,25 @@ public class FileManagerTutorialActivity extends TutorialActivity {
      */
     private void addPages() {
         addPageWithContent(
-                mFirebaseRemoteConfig.getString(Constants.ConfigKeys.TUT_PAGE1_TITLE_KEY),
-                mFirebaseRemoteConfig.getString(Constants.ConfigKeys.TUT_PAGE1_CONTENT_KEY),
-                mFirebaseRemoteConfig.getString(Constants.ConfigKeys.TUT_PAGE1_SUMMARY_KEY),
-                mFirebaseRemoteConfig.getString(Constants.ConfigKeys.TUT_PAGE1_IMAGE_KEY),
-                mFirebaseRemoteConfig.getString(Constants.ConfigKeys.TUT_PAGE1_BGCOLOR_KEY));
+                mFirebaseRemoteConfig.getString(Constants.RemoteConfig.TUT_PAGE1_TITLE_KEY),
+                mFirebaseRemoteConfig.getString(Constants.RemoteConfig.TUT_PAGE1_CONTENT_KEY),
+                mFirebaseRemoteConfig.getString(Constants.RemoteConfig.TUT_PAGE1_SUMMARY_KEY),
+                mFirebaseRemoteConfig.getString(Constants.RemoteConfig.TUT_PAGE1_IMAGE_KEY),
+                mFirebaseRemoteConfig.getString(Constants.RemoteConfig.TUT_PAGE1_BGCOLOR_KEY));
 
         addPageWithContent(
-                mFirebaseRemoteConfig.getString(Constants.ConfigKeys.TUT_PAGE2_TITLE_KEY),
-                mFirebaseRemoteConfig.getString(Constants.ConfigKeys.TUT_PAGE2_CONTENT_KEY),
-                mFirebaseRemoteConfig.getString(Constants.ConfigKeys.TUT_PAGE2_SUMMARY_KEY),
-                mFirebaseRemoteConfig.getString(Constants.ConfigKeys.TUT_PAGE2_IMAGE_KEY),
-                mFirebaseRemoteConfig.getString(Constants.ConfigKeys.TUT_PAGE2_BGCOLOR_KEY));
+                mFirebaseRemoteConfig.getString(Constants.RemoteConfig.TUT_PAGE2_TITLE_KEY),
+                mFirebaseRemoteConfig.getString(Constants.RemoteConfig.TUT_PAGE2_CONTENT_KEY),
+                mFirebaseRemoteConfig.getString(Constants.RemoteConfig.TUT_PAGE2_SUMMARY_KEY),
+                mFirebaseRemoteConfig.getString(Constants.RemoteConfig.TUT_PAGE2_IMAGE_KEY),
+                mFirebaseRemoteConfig.getString(Constants.RemoteConfig.TUT_PAGE2_BGCOLOR_KEY));
 
         addPageWithContent(
-                mFirebaseRemoteConfig.getString(Constants.ConfigKeys.TUT_PAGE3_TITLE_KEY),
-                mFirebaseRemoteConfig.getString(Constants.ConfigKeys.TUT_PAGE3_CONTENT_KEY),
-                mFirebaseRemoteConfig.getString(Constants.ConfigKeys.TUT_PAGE3_SUMMARY_KEY),
-                mFirebaseRemoteConfig.getString(Constants.ConfigKeys.TUT_PAGE3_IMAGE_KEY),
-                mFirebaseRemoteConfig.getString(Constants.ConfigKeys.TUT_PAGE3_BGCOLOR_KEY));
+                mFirebaseRemoteConfig.getString(Constants.RemoteConfig.TUT_PAGE3_TITLE_KEY),
+                mFirebaseRemoteConfig.getString(Constants.RemoteConfig.TUT_PAGE3_CONTENT_KEY),
+                mFirebaseRemoteConfig.getString(Constants.RemoteConfig.TUT_PAGE3_SUMMARY_KEY),
+                mFirebaseRemoteConfig.getString(Constants.RemoteConfig.TUT_PAGE3_IMAGE_KEY),
+                mFirebaseRemoteConfig.getString(Constants.RemoteConfig.TUT_PAGE3_BGCOLOR_KEY));
     }
 
     /**

@@ -19,12 +19,8 @@ public class Constants {
         public static final String GOOGLE_DRIVE_FOLDER_MIME = "application/vnd.google-apps.folder";
         public static final String ONEDRIVE = "OneDrive";
         public static final String ONEDRIVE_INVALID_CHARS = "[\\/:*?\"<>|#% ]";
-
+        public static final String DROPBOX_CLIENT_ID = "rse09cxjnnn2yc1";
         public static final int MAX_FILENAME_LENGTH = 255;
-
-        public class Keys {
-            public static final String DROPBOX_CLIENT_ID = "rse09cxjnnn2yc1";
-        }
     }
 
     public class RequestCodes {
@@ -50,7 +46,7 @@ public class Constants {
 
     }
 
-    public class ConfigKeys {
+    public class RemoteConfig {
         public static final int RC_CACHE_EXPIRATION_SECONDS = 60;
 
         public static final String TUT_PAGE_COUNT_KEY = "tut_page_count";
