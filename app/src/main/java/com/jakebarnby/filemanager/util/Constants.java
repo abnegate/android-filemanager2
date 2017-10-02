@@ -134,5 +134,6 @@ public class Constants {
     public class DialogTags {
         public static final String SORT_BY = "Sort by";
         public static final String CREATE_FOLDER = "Create folder";
+        public static final String SETTINGS = "Settings";
     }
 }

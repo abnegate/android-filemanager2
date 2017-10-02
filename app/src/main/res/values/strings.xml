@@ -96,4 +96,5 @@
     <string name="action_sort_by">Sort by</string>
     <string name="folder_exists">A folder with that name already exists here.</string>
     <string name="file_exists">A file with that name already exists here.</string>
+    <string name="licenses">Licenses</string>
 </resources>
