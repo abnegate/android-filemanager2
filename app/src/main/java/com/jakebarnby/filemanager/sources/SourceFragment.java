@@ -43,6 +43,7 @@ import com.jakebarnby.filemanager.ui.adapters.FileDetailedListAdapter;
 import com.jakebarnby.filemanager.ui.adapters.FileGridAdapter;
 import com.jakebarnby.filemanager.ui.adapters.FileListAdapter;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
 
@@ -174,8 +175,10 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
     public void initRecyclerView() {
         FileAdapter newAdapter;
 
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        int viewType = sharedPref.getInt(Constants.Prefs.VIEW_TYPE_KEY, Constants.ViewTypes.LIST);
+        int viewType = PreferenceUtils.getInt(
+                getContext(),
+                Constants.Prefs.VIEW_TYPE_KEY,
+                Constants.ViewTypes.LIST);
 
         switch (viewType) {
             case Constants.ViewTypes.LIST:

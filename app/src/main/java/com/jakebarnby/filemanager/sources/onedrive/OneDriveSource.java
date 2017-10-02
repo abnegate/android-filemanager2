@@ -1,16 +1,15 @@
 package com.jakebarnby.filemanager.sources.onedrive;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.SourceListener;
 import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.filemanager.util.Utils;
 import com.microsoft.graph.concurrency.ICallback;
 import com.microsoft.graph.core.ClientException;
@@ -55,9 +54,8 @@ public class OneDriveSource extends Source {
         mSourceListener.onLoadStarted();
         if (!isLoggedIn()) {
             try {
-                SharedPreferences prefs = fragment.getContext().getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
-                String accessToken = prefs.getString(Constants.Prefs.ONEDRIVE_TOKEN_KEY, null);
-                String userId = prefs.getString(Constants.Prefs.ONEDRIVE_NAME_KEY, null);
+                String accessToken = PreferenceUtils.getString(fragment.getContext(), Constants.Prefs.ONEDRIVE_TOKEN_KEY, null);
+                String userId = PreferenceUtils.getString(fragment.getContext(), Constants.Prefs.ONEDRIVE_NAME_KEY, null);
 
                 if (accessToken != null && userId != null) {
                     mClient.acquireTokenSilentAsync(SCOPES, mClient.getUser(userId), getAuthSilentCallback(fragment));
@@ -127,14 +125,13 @@ public class OneDriveSource extends Source {
      * Check for a valid access token and store it in shared preferences if found, then load the source
      */
     public void checkForAccessToken(Fragment fragment) {
-        SharedPreferences prefs = fragment.getContext().getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
-        String accessToken = prefs.getString(Constants.Prefs.ONEDRIVE_TOKEN_KEY, null);
+        String accessToken = PreferenceUtils.getString(fragment.getContext(), Constants.Prefs.ONEDRIVE_TOKEN_KEY, null);
         if (mAuthResult != null) {
             if (accessToken == null || !mAuthResult.getAccessToken().equals(accessToken)) {
                 accessToken = mAuthResult.getAccessToken();
                 String userId = mAuthResult.getUser().getUserIdentifier();
-                prefs.edit().putString(Constants.Prefs.ONEDRIVE_TOKEN_KEY, accessToken).apply();
-                prefs.edit().putString(Constants.Prefs.ONEDRIVE_NAME_KEY, userId).apply();
+                PreferenceUtils.savePref(fragment.getContext(), Constants.Prefs.ONEDRIVE_TOKEN_KEY, accessToken);
+                PreferenceUtils.savePref(fragment.getContext(), Constants.Prefs.ONEDRIVE_NAME_KEY, userId);
             } else {
                 if (!isLoggedIn()) {
                     authenticateSource(fragment);

@@ -1,9 +1,7 @@
 package com.jakebarnby.filemanager.sources.dropbox;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
@@ -16,11 +14,11 @@ import com.dropbox.core.v2.users.SpaceUsage;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.jakebarnby.filemanager.sources.models.SourceStorageStats;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.filemanager.util.Utils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -116,8 +114,7 @@ public class DropboxFactory {
                 getClient().auth().tokenRevoke();
                 setClient(null);
 
-                SharedPreferences prefs = context.getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
-                prefs.edit().putString(Constants.Prefs.DROPBOX_TOKEN_KEY, null).apply();
+                PreferenceUtils.savePref(context, Constants.Prefs.DROPBOX_TOKEN_KEY, (String) null);
             } catch (DbxException e) {
                 Utils.logFirebaseErrorEvent(
                         FirebaseAnalytics.getInstance(context),

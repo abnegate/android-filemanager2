@@ -1,8 +1,6 @@
 package com.jakebarnby.filemanager.ui.dialogs;
 
 import android.app.Dialog;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
@@ -10,6 +8,7 @@ import android.support.v7.app.AlertDialog;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.SourceActivity;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.PreferenceUtils;
 
 /**
  * Created by Jake on 5/31/2017.
@@ -19,7 +18,6 @@ import com.jakebarnby.filemanager.util.Constants;
 public class ViewAsDialog extends DialogFragment {
 
     String[]                mOptions;
-    SharedPreferences       mSharedPrefs;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -28,13 +26,15 @@ public class ViewAsDialog extends DialogFragment {
                 getString(R.string.detailed_list),
                 getString(R.string.grid) };
 
-        mSharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
-        int viewAsType = mSharedPrefs.getInt(Constants.Prefs.VIEW_TYPE_KEY, Constants.ViewTypes.LIST);
+        int viewAsType = PreferenceUtils.getInt(
+                getContext(),
+                Constants.Prefs.VIEW_TYPE_KEY,
+                Constants.ViewTypes.LIST);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.action_viewas)
                 .setSingleChoiceItems(mOptions, viewAsType, (dialog, which) -> {
-                    mSharedPrefs.edit().putInt(Constants.Prefs.VIEW_TYPE_KEY, which).apply();
+                    PreferenceUtils.savePref(getContext(), Constants.Prefs.VIEW_TYPE_KEY, which);
                 })
                 .setPositiveButton(R.string.ok, (dialog, id) -> {
                     ((SourceActivity)getActivity()).initAllRecyclers();

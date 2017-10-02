@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.jakebarnby.filemanager.sources.SourceActivity;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.tutorial.TutorialActivity;
 import com.jakebarnby.tutorial.TutorialPage;
 
@@ -82,9 +83,6 @@ public class FileManagerTutorialActivity extends TutorialActivity {
     }
 
     private void saveFinished() {
-        getSharedPreferences(Constants.Prefs.PREFS, MODE_PRIVATE)
-                .edit()
-                .putBoolean(Constants.Prefs.TUT_SEEN_KEY, true)
-                .apply();
+        PreferenceUtils.savePref(this, Constants.Prefs.TUT_SEEN_KEY, true);
     }
 }
