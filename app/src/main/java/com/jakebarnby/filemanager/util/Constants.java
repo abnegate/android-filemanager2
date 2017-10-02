@@ -13,6 +13,7 @@ public class Constants {
     public static final String LOCAL_ROOT = "ROOT_PATH";
     public static final String ALL = "All";
     public static final String DATE_TIME_FORMAT = "%02d:%02d %02d/%02d/%02d";
+    public static final int GRID_SIZE = 4;
 
     public class Sources {
         public static final String LOCAL = "Local";

@@ -207,7 +207,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                 newAdapter = mFileDetailedAdapter;
                 break;
             case Constants.ViewTypes.GRID:
-                mRecycler.setLayoutManager(new GridLayoutManager(getContext(), 4));
+                mRecycler.setLayoutManager(new GridLayoutManager(getContext(), Constants.GRID_SIZE));
                 newAdapter = mFileGridAdapter;
                 break;
             default:
