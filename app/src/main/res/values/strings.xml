@@ -82,4 +82,7 @@
     <string name="warning">Warning</string>
     <string name="yes">Yes</string>
     <string name="zero">0</string>
+    <string name="list">List</string>
+    <string name="detailed_list">Detailed list</string>
+    <string name="grid">Grid</string>
 </resources>

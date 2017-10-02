@@ -9,8 +9,10 @@ public class Constants {
     public static final String FILE_PATH_KEY = "FILE_PATH";
     public static final String FRAGMENT_TITLE = "TITLE";
     public static final double BYTES_TO_GIGABYTE = 1073741824d;
+    public static final double BYTES_TO_MEGABYTE = 1048576d;
     public static final String LOCAL_ROOT = "ROOT_PATH";
     public static final String ALL = "All";
+    public static final String DATE_TIME_FORMAT = "%02d:%02d %02d/%02d/%02d";
 
     public class Sources {
         public static final String LOCAL = "Local";
@@ -38,7 +40,8 @@ public class Constants {
         public static final String GOOGLE_NAME_KEY = "googledrive-name";
         public static final String ONEDRIVE_TOKEN_KEY = "onedrive-access-token";
         public static final String ONEDRIVE_NAME_KEY = "onedrive-name";
-        public static final String TUT_SEEN_KEY = "SEEN_TUTORIAL";
+        public static final String TUT_SEEN_KEY = "seen-tutorial";
+        public static final String VIEW_TYPE_KEY = "view-type";
     }
 
     public class Animation {
@@ -73,7 +76,7 @@ public class Constants {
     public class Analytics {
         public static final String NO_DESTINATION = "NO DESTINATION";
 
-        public static final String PARAM_MESSAGE = "message";
+        public static final String PARAM_ERROR_VALUE = "error_value";
         public static final String PARAM_SOURCE_NAME = "source_name";
 
         public static final String EVENT_ERROR_DELETE = "error_deleting";
@@ -103,5 +106,11 @@ public class Constants {
         public static final String EVENT_LOGOUT_DROPBOX = "logout_dropbox";
         public static final String EVENT_LOGOUT_GOOGLEDRIVE = "logout_googledrive";
         public static final String EVENT_LOGOUT_ONEDRIVE = "logout_onedrive";
+    }
+
+    public class ViewTypes {
+        public static final int LIST = 0;
+        public static final int DETAILED_LIST = 1;
+        public static final int GRID = 2;
     }
 }

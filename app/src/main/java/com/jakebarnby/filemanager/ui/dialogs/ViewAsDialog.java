@@ -9,6 +9,7 @@ import android.support.v7.app.AlertDialog;
 
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.SourceActivity;
+import com.jakebarnby.filemanager.util.Constants;
 
 /**
  * Created by Jake on 5/31/2017.
@@ -17,27 +18,23 @@ import com.jakebarnby.filemanager.sources.SourceActivity;
  */
 public class ViewAsDialog extends DialogFragment {
 
-    String[]                mOptions = {"List", "Grid"};
+    String[]                mOptions;
     SharedPreferences       mSharedPrefs;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        int selectedIndex;
+        mOptions = new String[]{
+                getString(R.string.list),
+                getString(R.string.detailed_list),
+                getString(R.string.grid) };
 
         mSharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
-        String viewAsType = mSharedPrefs.getString("ViewAs", "List");
-        if (viewAsType.equals("List")) {
-            selectedIndex = 0;
-        } else if (viewAsType.equals("Grid")) {
-            selectedIndex = 1;
-        } else {
-            selectedIndex = 0;
-        }
+        int viewAsType = mSharedPrefs.getInt(Constants.Prefs.VIEW_TYPE_KEY, Constants.ViewTypes.LIST);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.action_viewas)
-                .setSingleChoiceItems(mOptions, selectedIndex, (dialog, which) -> {
-                    mSharedPrefs.edit().putString("ViewAs", mOptions[which]).apply();
+                .setSingleChoiceItems(mOptions, viewAsType, (dialog, which) -> {
+                    mSharedPrefs.edit().putInt(Constants.Prefs.VIEW_TYPE_KEY, which).apply();
                 })
                 .setPositiveButton(R.string.ok, (dialog, id) -> {
                     ((SourceActivity)getActivity()).initAllRecyclers();
@@ -50,3 +47,4 @@ public class ViewAsDialog extends DialogFragment {
         return builder.create();
     }
 }
+

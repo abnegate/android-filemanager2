@@ -38,9 +38,10 @@ import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.sources.models.SourceManager;
 import com.jakebarnby.filemanager.sources.onedrive.OneDriveFragment;
 import com.jakebarnby.filemanager.sources.onedrive.OneDriveSource;
-import com.jakebarnby.filemanager.ui.adapters.FileSystemAdapter;
-import com.jakebarnby.filemanager.ui.adapters.FileSystemGridAdapter;
-import com.jakebarnby.filemanager.ui.adapters.FileSystemListAdapter;
+import com.jakebarnby.filemanager.ui.adapters.FileAdapter;
+import com.jakebarnby.filemanager.ui.adapters.FileDetailedListAdapter;
+import com.jakebarnby.filemanager.ui.adapters.FileGridAdapter;
+import com.jakebarnby.filemanager.ui.adapters.FileListAdapter;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
@@ -52,18 +53,19 @@ import java.util.Stack;
  */
 public abstract class SourceFragment extends Fragment implements SourceListener {
 
-    protected Source                mSource;
+    protected Source                    mSource;
 
-    protected RecyclerView          mRecycler;
-    protected FileSystemListAdapter mFileSystemListAdapter;
-    protected FileSystemGridAdapter mFileSystemGridAdapter;
-    protected ProgressBar           mProgressBar;
-    protected Button                mConnectButton;
-    protected ImageView             mSourceLogo;
-    protected View                  mDivider;
+    protected RecyclerView              mRecycler;
+    protected FileListAdapter           mFileListAdapter;
+    protected FileGridAdapter           mFileGridAdapter;
+    protected FileDetailedListAdapter   mFileDetailedAdapter;
+    protected ProgressBar               mProgressBar;
+    protected Button                    mConnectButton;
+    protected ImageView                 mSourceLogo;
+    protected View                      mDivider;
 
-    private LinearLayout            mBreadcrumbBar;
-    private HorizontalScrollView    mBreadcrumbWrapper;
+    private LinearLayout                mBreadcrumbBar;
+    private HorizontalScrollView        mBreadcrumbWrapper;
 
     public Source getSource() {
         return mSource;
@@ -78,7 +80,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
         mProgressBar = rootView.findViewById(R.id.animation_view);
         mDivider = rootView.findViewById(R.id.divider);
         mConnectButton = rootView.findViewById(R.id.btn_connect);
-        mSourceLogo = rootView.findViewById(R.id.image_source_logo);
+        mSourceLogo = rootView.findViewById(R.id.img_source_logo);
 
         if (getSource().hasToken(getContext(), getSource().getSourceName())) {
             mConnectButton.setVisibility(View.GONE);
@@ -161,7 +163,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
         }
         this.mSource.setMultiSelectEnabled(enabled);
         if (mRecycler.getAdapter() != null) {
-            ((FileSystemAdapter) mRecycler.getAdapter()).setMultiSelectEnabled(enabled);
+            ((FileAdapter) mRecycler.getAdapter()).setMultiSelectEnabled(enabled);
             mRecycler.getAdapter().notifyDataSetChanged();
         }
     }
@@ -170,18 +172,34 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
      * Set the {@link RecyclerView} layout and adapter based on users preferences
      */
     public void initRecyclerView() {
-        FileSystemAdapter newAdapter;
+        FileAdapter newAdapter;
 
         SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        String viewType = sharedPref.getString("ViewAs", "List");
-        if (viewType.equals("List")) {
-            mRecycler.setLayoutManager(new LinearLayoutManager(getContext(),
-                    LinearLayoutManager.VERTICAL,
-                    false));
-            newAdapter = mFileSystemListAdapter;
-        } else {
-            mRecycler.setLayoutManager(new GridLayoutManager(getContext(), 4));
-            newAdapter = mFileSystemGridAdapter;
+        int viewType = sharedPref.getInt(Constants.Prefs.VIEW_TYPE_KEY, Constants.ViewTypes.LIST);
+
+        switch (viewType) {
+            case Constants.ViewTypes.LIST:
+                mRecycler.setLayoutManager(new LinearLayoutManager(getContext(),
+                        LinearLayoutManager.VERTICAL,
+                        false));
+                newAdapter = mFileListAdapter;
+                break;
+            case Constants.ViewTypes.DETAILED_LIST:
+                mRecycler.setLayoutManager(new LinearLayoutManager(getContext(),
+                        LinearLayoutManager.VERTICAL,
+                        false));
+                newAdapter = mFileDetailedAdapter;
+                break;
+            case Constants.ViewTypes.GRID:
+                mRecycler.setLayoutManager(new GridLayoutManager(getContext(), 4));
+                newAdapter = mFileGridAdapter;
+                break;
+            default:
+                mRecycler.setLayoutManager(new LinearLayoutManager(getContext(),
+                        LinearLayoutManager.VERTICAL,
+                        false));
+                newAdapter = mFileListAdapter;
+                break;
         }
 
         mRecycler.setAdapter(newAdapter);
@@ -200,15 +218,19 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
      * @param onLongClickListener   The long click listener for files and folders
      */
     protected void initAdapters(TreeNode<SourceFile> file,
-                                FileSystemAdapter.OnFileClickedListener onClickListener,
-                                FileSystemAdapter.OnFileLongClickedListener onLongClickListener) {
-        mFileSystemListAdapter = new FileSystemListAdapter(file);
-        mFileSystemListAdapter.setOnClickListener(onClickListener);
-        mFileSystemListAdapter.setOnLongClickListener(onLongClickListener);
+                                FileAdapter.OnFileClickedListener onClickListener,
+                                FileAdapter.OnFileLongClickedListener onLongClickListener) {
+        mFileListAdapter = new FileListAdapter(file);
+        mFileListAdapter.setOnClickListener(onClickListener);
+        mFileListAdapter.setOnLongClickListener(onLongClickListener);
 
-        mFileSystemGridAdapter = new FileSystemGridAdapter(file);
-        mFileSystemGridAdapter.setOnClickListener(onClickListener);
-        mFileSystemGridAdapter.setOnLongClickListener(onLongClickListener);
+        mFileGridAdapter = new FileGridAdapter(file);
+        mFileGridAdapter.setOnClickListener(onClickListener);
+        mFileGridAdapter.setOnLongClickListener(onLongClickListener);
+
+        mFileDetailedAdapter = new FileDetailedListAdapter(file);
+        mFileDetailedAdapter.setOnClickListener(onClickListener);
+        mFileDetailedAdapter.setOnLongClickListener(onLongClickListener);
 
         initRecyclerView();
     }
@@ -224,7 +246,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
      * Construct a click listener for a file or folder
      * @return  The constructed listener
      */
-    protected FileSystemAdapter.OnFileClickedListener createOnClickListener() {
+    protected FileAdapter.OnFileClickedListener createOnClickListener() {
         return (file, isChecked, position) -> {
             if (mSource.isMultiSelectEnabled()) {
                 if (isChecked) {
@@ -249,7 +271,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                     getSource().getCurrentDirectory().getData().
                             setPositionToRestore(((LinearLayoutManager)mRecycler.getLayoutManager()).findFirstVisibleItemPosition());
 
-                    ((FileSystemAdapter) mRecycler.getAdapter()).setCurrentDirectory(file);
+                    ((FileAdapter) mRecycler.getAdapter()).setCurrentDirectory(file);
 
                     mSource.setCurrentDirectory(file);
 
@@ -281,7 +303,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
      * Construct a long click listener for a file or folder
      * @return  The constructed listener
      */
-    protected FileSystemAdapter.OnFileLongClickedListener createOnLongClickListener() {
+    protected FileAdapter.OnFileLongClickedListener createOnLongClickListener() {
         return file -> {
             if (!mSource.isMultiSelectEnabled()) {
                 setMultiSelectEnabled(true);
@@ -337,7 +359,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
             }
 
             ((SourceActivity)getActivity()).getSourceManager().setActiveDirectory(selectedParent);
-            ((FileSystemAdapter)mRecycler.getAdapter()).setCurrentDirectory(selectedParent);
+            ((FileAdapter)mRecycler.getAdapter()).setCurrentDirectory(selectedParent);
             mSource.setCurrentDirectory(selectedParent);
             mRecycler.getAdapter().notifyDataSetChanged();
         });
