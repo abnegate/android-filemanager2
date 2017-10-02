@@ -58,7 +58,9 @@ import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.models.SourceManager;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.services.SourceTransferService;
+import com.jakebarnby.filemanager.util.ComparatorUtils;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
 
@@ -661,14 +663,19 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * @param operationId
      */
     private void completeTreeModification(int operationId) {
-        //SelectedFilesManager.getInstance().getSelectedFiles(operationId).clear();
-        TreeNode.sortTree(SelectedFilesManager.getInstance().getActionableDirectory(operationId), (node1, node2) -> {
-            int result = Boolean.valueOf(!node1.getData().isDirectory()).compareTo(!node2.getData().isDirectory());
-            if (result == 0) {
-                result = node1.getData().getName().toLowerCase().compareTo(node2.getData().getName().toLowerCase());
-            }
-            return result;
-        });
+        int sortType = PreferenceUtils.getInt(
+                this,
+                Constants.Prefs.SORT_TYPE_KEY,
+                Constants.SortTypes.NAME);
+
+        int orderType = PreferenceUtils.getInt(
+                this,
+                Constants.Prefs.ORDER_TYPE_KEY,
+                Constants.OrderTypes.ASCENDING);
+
+        TreeNode.sortTree(
+                SelectedFilesManager.getInstance().getActionableDirectory(operationId),
+                ComparatorUtils.resolveComparator(this));
 
         getActiveFragment().refreshRecycler();
     }

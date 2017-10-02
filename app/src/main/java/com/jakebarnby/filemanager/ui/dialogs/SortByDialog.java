@@ -10,6 +10,7 @@ import android.widget.CheckBox;
 import android.widget.RadioGroup;
 
 import com.jakebarnby.filemanager.R;
+import com.jakebarnby.filemanager.sources.SourceActivity;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.PreferenceUtils;
 
@@ -29,7 +30,10 @@ public class SortByDialog extends DialogFragment {
         initViews(view);
 
         builder.setView(view);
-        builder.setNegativeButton(getText(R.string.close), (dialog, which) -> dismiss());
+        builder.setNegativeButton(getText(R.string.close), (dialog, which) -> {
+            ((SourceActivity)getActivity()).initAllRecyclers();
+            dismiss();
+        });
         return builder.create();
     }
 
