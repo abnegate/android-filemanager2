@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
+import com.jakebarnby.filemanager.util.ComparatorUtils;
 import com.jakebarnby.filemanager.util.TreeNode;
 
 /**
@@ -41,13 +42,6 @@ public abstract class LoaderTask extends AsyncTask<String, Void, TreeNode<Source
     @Override
     protected void onPostExecute(TreeNode<SourceFile> fileTree) {
         super.onPostExecute(fileTree);
-        TreeNode.sortTree(fileTree, (node1, node2) -> {
-            int result = Boolean.valueOf(!node1.getData().isDirectory()).compareTo(!node2.getData().isDirectory());
-            if (result == 0) {
-                result = node1.getData().getName().toLowerCase().compareTo(node2.getData().getName().toLowerCase());
-            }
-            return result;
-        });
         mSource.setRootNode(fileTree);
         mSource.setFilesLoaded(true);
         mListener.onLoadComplete(fileTree);

@@ -1,9 +1,7 @@
 package com.jakebarnby.filemanager.sources;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -42,11 +40,15 @@ import com.jakebarnby.filemanager.ui.adapters.FileAdapter;
 import com.jakebarnby.filemanager.ui.adapters.FileDetailedListAdapter;
 import com.jakebarnby.filemanager.ui.adapters.FileGridAdapter;
 import com.jakebarnby.filemanager.ui.adapters.FileListAdapter;
+import com.jakebarnby.filemanager.util.ComparatorUtils;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
 
 import java.util.Stack;
+
+import javax.net.ssl.CertPathTrustManagerParameters;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -78,7 +80,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
         mBreadcrumbBar = rootView.findViewById(R.id.breadcrumbs);
         mRecycler = rootView.findViewById(R.id.recycler_local);
         mProgressBar = rootView.findViewById(R.id.animation_view);
-        mDivider = rootView.findViewById(R.id.divider);
+        mDivider = rootView.findViewById(R.id.divider_sort);
         mConnectButton = rootView.findViewById(R.id.btn_connect);
         mSourceLogo = rootView.findViewById(R.id.img_source_logo);
 
@@ -174,8 +176,22 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
     public void initRecyclerView() {
         FileAdapter newAdapter;
 
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        int viewType = sharedPref.getInt(Constants.Prefs.VIEW_TYPE_KEY, Constants.ViewTypes.LIST);
+        int viewType = PreferenceUtils.getInt(
+                getContext(),
+                Constants.Prefs.VIEW_TYPE_KEY,
+                Constants.ViewTypes.LIST);
+
+        int sortType = PreferenceUtils.getInt(
+                getContext(),
+                Constants.Prefs.SORT_TYPE_KEY,
+                Constants.SortTypes.NAME);
+
+        int orderType = PreferenceUtils.getInt(
+                getContext(),
+                Constants.Prefs.ORDER_TYPE_KEY,
+                Constants.OrderTypes.ASCENDING);
+
+        TreeNode.sortTree(mSource.getRootNode(), ComparatorUtils.resolveComparator(getContext()));
 
         switch (viewType) {
             case Constants.ViewTypes.LIST:

@@ -1,9 +1,9 @@
 package com.jakebarnby.filemanager.sources.onedrive;
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import com.jakebarnby.filemanager.sources.models.SourceStorageStats;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.filemanager.util.Utils;
 import com.microsoft.graph.core.ClientException;
 import com.microsoft.graph.extensions.DriveItem;
@@ -163,8 +163,7 @@ public class OneDriveFactory {
     }
 
     public void logout(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
-        prefs.edit().putString(Constants.Prefs.ONEDRIVE_TOKEN_KEY, null).commit();
-        prefs.edit().putString(Constants.Prefs.ONEDRIVE_NAME_KEY, null).commit();
+        PreferenceUtils.savePref(context, Constants.Prefs.ONEDRIVE_TOKEN_KEY, (String) null);
+        PreferenceUtils.savePref(context, Constants.Prefs.ONEDRIVE_NAME_KEY, (String) null);
     }
 }

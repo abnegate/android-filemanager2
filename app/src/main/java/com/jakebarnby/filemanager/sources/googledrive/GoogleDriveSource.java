@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 
@@ -15,11 +14,11 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.drive.DriveScopes;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.SourceListener;
 import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.filemanager.util.Utils;
 
 import java.io.IOException;
@@ -88,9 +87,11 @@ public class GoogleDriveSource extends Source {
      * Create a google credential and try to call the API with it, do nothing if it fails
      */
     public void authGoogleSilent(Fragment fragment) {
-        String accountName = fragment.getContext()
-                .getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE)
-                .getString(Constants.Prefs.GOOGLE_NAME_KEY, null);
+        String accountName = PreferenceUtils.getString(
+                fragment.getContext(),
+                Constants.Prefs.GOOGLE_NAME_KEY,
+                null);
+
         if (accountName != null) {
             fetchCredential(fragment.getContext());
             mCredential.setSelectedAccountName(accountName);
@@ -117,9 +118,8 @@ public class GoogleDriveSource extends Source {
     }
 
     public void saveUserToken(Fragment fragment) {
-        SharedPreferences prefs = fragment.getContext().getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
         try {
-            prefs.edit().putString(Constants.Prefs.GOOGLE_TOKEN_KEY, mCredential.getToken()).apply();
+            PreferenceUtils.savePref(fragment.getContext(), Constants.Prefs.GOOGLE_TOKEN_KEY, mCredential.getToken());
         } catch (IOException | GoogleAuthException e) {
             e.printStackTrace();
         }
@@ -127,8 +127,7 @@ public class GoogleDriveSource extends Source {
     }
 
     public void saveUserAccount(Fragment fragment, String accountName) {
-        SharedPreferences prefs = fragment.getContext().getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE);
-        prefs.edit().putString(Constants.Prefs.GOOGLE_NAME_KEY, accountName).apply();
+        PreferenceUtils.savePref(fragment.getContext(),Constants.Prefs.GOOGLE_NAME_KEY, accountName);
         mCredential.setSelectedAccountName(accountName);
         getResultsFromApi(fragment);
     }

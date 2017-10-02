@@ -14,6 +14,7 @@ import android.view.WindowManager;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.jakebarnby.filemanager.R;
+import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.sources.models.SourceStorageStats;
 
 import java.io.File;
@@ -21,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -45,17 +47,17 @@ public class Utils {
      * @return
      */
     public static String fileExt(String path) {
-        if (path.indexOf("?") > -1) {
+        if (path.contains("?")) {
             path = path.substring(0, path.indexOf("?"));
         }
         if (path.lastIndexOf(".") == -1) {
             return null;
         } else {
             String ext = path.substring(path.lastIndexOf(".") + 1);
-            if (ext.indexOf("%") > -1) {
+            if (ext.contains("%")) {
                 ext = ext.substring(0, ext.indexOf("%"));
             }
-            if (ext.indexOf("/") > -1) {
+            if (ext.contains("/")) {
                 ext = ext.substring(0, ext.indexOf("/"));
             }
             return ext.toLowerCase();
@@ -74,10 +76,13 @@ public class Utils {
     public static int getScreenHeight(Context context) {
         if (screenHeight == 0) {
             WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-            Display display = wm.getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
-            screenHeight = size.y;
+            Display display;
+            if (wm != null) {
+                display = wm.getDefaultDisplay();
+                Point size = new Point();
+                display.getSize(size);
+                screenHeight = size.y;
+            }
         }
         return screenHeight;
     }

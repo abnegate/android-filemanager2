@@ -15,6 +15,7 @@ import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.SourceActivity;
 import com.jakebarnby.filemanager.tutorial.FileManagerTutorialActivity;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.PreferenceUtils;
 
 /**
  * Created by Jake on 9/26/2017.
@@ -58,8 +59,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void goNextActivity() {
-        if (!getSharedPreferences(Constants.Prefs.PREFS, MODE_PRIVATE)
-                .getBoolean(Constants.Prefs.TUT_SEEN_KEY, false)) {
+        if (!PreferenceUtils.getBoolean(this, Constants.Prefs.TUT_SEEN_KEY, false)) {
             startActivity(new Intent(this, FileManagerTutorialActivity.class));
         } else {
             startActivity(new Intent(this, SourceActivity.class));

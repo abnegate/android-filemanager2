@@ -51,13 +51,16 @@ import com.jakebarnby.filemanager.ui.adapters.SourceUsageAdapter;
 import com.jakebarnby.filemanager.ui.dialogs.CreateFolderDialog;
 import com.jakebarnby.filemanager.ui.dialogs.PropertiesDialog;
 import com.jakebarnby.filemanager.ui.dialogs.RenameDialog;
+import com.jakebarnby.filemanager.ui.dialogs.SortByDialog;
 import com.jakebarnby.filemanager.ui.dialogs.ViewAsDialog;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.models.SourceManager;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.services.SourceTransferService;
+import com.jakebarnby.filemanager.util.ComparatorUtils;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
 
@@ -240,8 +243,11 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         switch (id) {
             case R.id.action_settings:
                 break;
-            case R.id.action_viewas:
+            case R.id.action_view_as:
                 showViewAsDialog();
+                break;
+            case R.id.action_sort_by:
+                showSortByDialog();
                 break;
             case R.id.action_new_folder:
                 showCreateFolderDialog();
@@ -657,14 +663,19 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * @param operationId
      */
     private void completeTreeModification(int operationId) {
-        //SelectedFilesManager.getInstance().getSelectedFiles(operationId).clear();
-        TreeNode.sortTree(SelectedFilesManager.getInstance().getActionableDirectory(operationId), (node1, node2) -> {
-            int result = Boolean.valueOf(!node1.getData().isDirectory()).compareTo(!node2.getData().isDirectory());
-            if (result == 0) {
-                result = node1.getData().getName().toLowerCase().compareTo(node2.getData().getName().toLowerCase());
-            }
-            return result;
-        });
+        int sortType = PreferenceUtils.getInt(
+                this,
+                Constants.Prefs.SORT_TYPE_KEY,
+                Constants.SortTypes.NAME);
+
+        int orderType = PreferenceUtils.getInt(
+                this,
+                Constants.Prefs.ORDER_TYPE_KEY,
+                Constants.OrderTypes.ASCENDING);
+
+        TreeNode.sortTree(
+                SelectedFilesManager.getInstance().getActionableDirectory(operationId),
+                ComparatorUtils.resolveComparator(this));
 
         getActiveFragment().refreshRecycler();
     }
@@ -709,7 +720,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             bundle.putString(Constants.DIALOG_TITLE_KEY, getString(R.string.create_folder));
             CreateFolderDialog dialog = new CreateFolderDialog();
             dialog.setArguments(bundle);
-            dialog.show(getSupportFragmentManager(), "CreateFolder");
+            dialog.show(getSupportFragmentManager(), Constants.DialogTags.CREATE_FOLDER);
         }
     }
 
@@ -844,6 +855,11 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         }
 
         logoutDialog.show();
+    }
+
+    private void showSortByDialog() {
+        SortByDialog dialog = new SortByDialog();
+        dialog.show(getSupportFragmentManager(), Constants.DialogTags.SORT_BY);
     }
 
     void showErrorDialog(String message) {
