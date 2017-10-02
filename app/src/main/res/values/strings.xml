@@ -2,7 +2,6 @@
 <resources>
     <string name="action_logout">Logout</string>
     <string name="action_settings">Settings</string>
-    <string name="action_viewas">View As</string>
     <string name="action_viewas">View as</string>
     <string name="app_name">File Manager</string>
     <string name="background">Background</string>
@@ -52,7 +51,7 @@
     <string name="menu_item_properties">Properties</string>
     <string name="menu_item_rename">Rename</string>
     <string name="menu_storage_usage">Storage Usage</string>
-    <string name="modifiedTime">Modified</string>
+    <string name="modifiedTime">Time</string>
     <string name="moving">Moving..</string>
     <string name="moving_count">Moving %d of %d</string>
     <string name="moving_items">moving item(s)</string>
@@ -86,6 +85,15 @@
     <string name="list">List</string>
     <string name="detailed_list">Detailed list</string>
     <string name="grid">Grid</string>
+    <string name="sort_by">Sort by</string>
+    <string name="type">Type</string>
+    <string name="order">Order</string>
+    <string name="ascending">Ascending</string>
+    <string name="descending">Descending</string>
+    <string name="show_folders_first">Show folders first</string>
+    <string name="show_hidden_files">Show hidden files</string>
+    <string name="options">Options</string>
+    <string name="action_sort_by">Sort by</string>
     <string name="folder_exists">A folder with that name already exists here.</string>
     <string name="file_exists">A file with that name already exists here.</string>
 </resources>

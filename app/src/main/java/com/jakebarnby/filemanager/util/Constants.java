@@ -42,6 +42,10 @@ public class Constants {
         public static final String ONEDRIVE_NAME_KEY = "onedrive-name";
         public static final String TUT_SEEN_KEY = "seen-tutorial";
         public static final String VIEW_TYPE_KEY = "view-type";
+        public static final String SORT_TYPE_KEY = "sort-type";
+        public static final String ORDER_TYPE_KEY = "order-type";
+        public static final String HIDDEN_FOLDER_KEY = "hidden-folder";
+        public static final String FOLDER_FIRST_KEY = "folders-first";
     }
 
     public class Animation {
@@ -112,5 +116,22 @@ public class Constants {
         public static final int LIST = 0;
         public static final int DETAILED_LIST = 1;
         public static final int GRID = 2;
+    }
+
+    public class SortTypes {
+        public static final int NAME = 0;
+        public static final int TYPE = 1;
+        public static final int SIZE = 2;
+        public static final int MODIFIED_TIME = 3;
+    }
+
+    public class OrderTypes {
+        public static final int ASCENDING = 0;
+        public static final int DESCENDING = 1;
+    }
+
+    public class DialogTags {
+        public static final String SORT_BY = "Sort by";
+        public static final String CREATE_FOLDER = "Create folder";
     }
 }

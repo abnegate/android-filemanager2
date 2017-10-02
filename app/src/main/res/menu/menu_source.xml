@@ -17,8 +17,12 @@
         android:title="@string/menu_item_multi_select"
         app:showAsAction="never"/>
     <item
-        android:id="@+id/action_viewas"
+        android:id="@+id/action_view_as"
         android:title="@string/action_viewas"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_sort_by"
+        android:title="@string/action_sort_by"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_storage_usage"

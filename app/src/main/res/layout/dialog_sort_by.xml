@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingEnd="24dp"
+    android:paddingStart="24dp"
+    android:paddingTop="18dp">
+
+    <RadioGroup
+        android:id="@+id/rdg_sort_by"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintBottom_toTopOf="@id/divider_sort"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RadioButton
+            android:id="@+id/rdb_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:paddingStart="20dp"
+            android:text="@string/name"
+            android:textSize="18sp" />
+
+        <RadioButton
+            android:id="@+id/rdb_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:paddingStart="20dp"
+            android:text="@string/size"
+            android:textSize="18sp" />
+
+        <RadioButton
+            android:id="@+id/rdb_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:paddingStart="20dp"
+            android:text="@string/type"
+            android:textSize="18sp" />
+
+        <RadioButton
+            android:id="@+id/rdb_modified_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:paddingStart="20dp"
+            android:text="@string/modifiedTime"
+            android:textSize="18sp" />
+    </RadioGroup>
+
+    <View
+        android:id="@+id/divider_sort"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        android:background="@color/colorAccent"
+        app:layout_constraintBottom_toTopOf="@+id/txt_order"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rdg_sort_by" />
+
+    <TextView
+        android:id="@+id/txt_order"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/order"
+        android:textColor="@color/colorAccentAccent"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@id/rdg_order_by"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider_sort" />
+
+    <RadioGroup
+        android:id="@+id/rdg_order_by"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txt_order">
+
+        <RadioButton
+            android:id="@+id/rdb_ascending"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:paddingStart="20dp"
+            android:text="@string/ascending"
+            android:textSize="18sp" />
+
+        <RadioButton
+            android:id="@+id/rdb_descending"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:text="@string/descending"
+            android:textSize="18sp" />
+    </RadioGroup>
+</android.support.constraint.ConstraintLayout>

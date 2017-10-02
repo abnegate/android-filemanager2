@@ -51,6 +51,7 @@ import com.jakebarnby.filemanager.ui.adapters.SourceUsageAdapter;
 import com.jakebarnby.filemanager.ui.dialogs.CreateFolderDialog;
 import com.jakebarnby.filemanager.ui.dialogs.PropertiesDialog;
 import com.jakebarnby.filemanager.ui.dialogs.RenameDialog;
+import com.jakebarnby.filemanager.ui.dialogs.SortByDialog;
 import com.jakebarnby.filemanager.ui.dialogs.ViewAsDialog;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.sources.models.Source;
@@ -240,8 +241,11 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         switch (id) {
             case R.id.action_settings:
                 break;
-            case R.id.action_viewas:
+            case R.id.action_view_as:
                 showViewAsDialog();
+                break;
+            case R.id.action_sort_by:
+                showSortByDialog();
                 break;
             case R.id.action_new_folder:
                 showCreateFolderDialog();
@@ -709,7 +713,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             bundle.putString(Constants.DIALOG_TITLE_KEY, getString(R.string.create_folder));
             CreateFolderDialog dialog = new CreateFolderDialog();
             dialog.setArguments(bundle);
-            dialog.show(getSupportFragmentManager(), "CreateFolder");
+            dialog.show(getSupportFragmentManager(), Constants.DialogTags.CREATE_FOLDER);
         }
     }
 
@@ -844,6 +848,11 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         }
 
         logoutDialog.show();
+    }
+
+    private void showSortByDialog() {
+        SortByDialog dialog = new SortByDialog();
+        dialog.show(getSupportFragmentManager(), Constants.DialogTags.SORT_BY);
     }
 
     void showErrorDialog(String message) {
