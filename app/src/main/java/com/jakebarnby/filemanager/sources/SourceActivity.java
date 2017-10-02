@@ -23,6 +23,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,8 +43,7 @@ import com.crashlytics.android.ndk.CrashlyticsNdk;
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.local.LocalFragment;
 import com.jakebarnby.filemanager.sources.models.SourceType;
-import com.jakebarnby.filemanager.tutorial.FileManagerTutorialActivity;
-import com.jakebarnby.filemanager.ui.adapters.FileSystemAdapter;
+import com.jakebarnby.filemanager.ui.adapters.FileAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SearchResultAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourceLogoutAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourcePagerAdapter;
@@ -438,7 +438,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
                     TreeNode<SourceFile> newDir = toOpen.getData().isDirectory() ? toOpen : toOpen.getParent();
                     getActiveFragment().getSource().setCurrentDirectory(newDir);
-                    ((FileSystemAdapter)getActiveFragment().mRecycler.getAdapter()).setCurrentDirectory(newDir);
+                    ((FileAdapter)getActiveFragment().mRecycler.getAdapter()).setCurrentDirectory(newDir);
                     mSourceManager.setActiveDirectory(newDir);
 
                     getActiveFragment().popAllBreadCrumbs();
@@ -974,8 +974,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      */
     public void initAllRecyclers() {
         for (SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
-            if (fragment.getSource().isFilesLoaded()) {
-                fragment.initRecyclerView();
+            if (fragment != null && fragment.getSource() != null) {
+                if (fragment.getSource().isFilesLoaded()) {
+                    fragment.initRecyclerView();
+                }
+            } else {
+                Log.e("RECYCLER_INIT", "Fragment or source was null.");
             }
         }
     }
@@ -999,6 +1003,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     public void onBackPressed() {
         TreeNode<SourceFile> activeDir = mSourceManager.getActiveDirectory();
 
+        if (getActiveFragment() != null && getActiveFragment().getSource() != null)
         if (getActiveFragment().getSource().isMultiSelectEnabled()) {
 
             getActiveFragment().setMultiSelectEnabled(false);
@@ -1022,7 +1027,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                     .getSource()
                     .setCurrentDirectory(activeDir.getParent());
 
-            ((FileSystemAdapter) getActiveFragment().mRecycler.getAdapter())
+            ((FileAdapter) getActiveFragment().mRecycler.getAdapter())
                     .setCurrentDirectory(activeDir.getParent());
 
             mSourceManager.setActiveDirectory(activeDir.getParent());

@@ -2,9 +2,12 @@ package com.jakebarnby.filemanager.splash;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.jakebarnby.filemanager.BuildConfig;
@@ -43,7 +46,7 @@ public class SplashActivity extends AppCompatActivity {
         mFirebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
 
         mFirebaseRemoteConfig.fetch(Constants.RemoteConfig.RC_CACHE_EXPIRATION_SECONDS)
-                .addOnCompleteListener(this, task -> {
+                .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         mFirebaseRemoteConfig.activateFetched();
                         goNextActivity();
@@ -51,7 +54,6 @@ public class SplashActivity extends AppCompatActivity {
                         //TODO: Log analytics event remote_config_fetch_failed
                         goNextActivity();
                     }
-
                 });
     }
 

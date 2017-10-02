@@ -72,8 +72,8 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
 
         SearchViewHolder(View itemView) {
             super(itemView);
-            mSourceLogo = itemView.findViewById(R.id.image_source_logo);
-            mText = itemView.findViewById(R.id.text_file_title);
+            mSourceLogo = itemView.findViewById(R.id.img_source_logo);
+            mText = itemView.findViewById(R.id.txt_item_title);
             mSubText = itemView.findViewById(R.id.text_file_path);
         }
 

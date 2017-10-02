@@ -16,7 +16,7 @@
         android:layout_alignParentStart="true">
 
         <ImageView
-            android:id="@+id/image_source_logo"
+            android:id="@+id/img_source_logo"
             android:layout_marginStart="5dp"
             android:padding="2dp"
             android:scaleType="centerCrop"
@@ -34,7 +34,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/text_file_title"
+            android:id="@+id/txt_item_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"

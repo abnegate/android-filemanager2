@@ -24,7 +24,7 @@ import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOption
  * Created by Jake on 5/31/2017.
  */
 
-public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemAdapter.FileViewHolder> {
+public abstract class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileViewHolder> {
 
     private List<TreeNode<SourceFile>>      mCurrentDirChildren;
     private OnFileClickedListener           mOnClickListener;
@@ -32,10 +32,10 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
     private boolean                         mMultiSelectEnabled;
 
     /**
-     * Create a new FileSystemAdapter instance with the given root tree node
+     * Create a new FileAdapter instance with the given root tree node
      * @param rootNode     The root node of the file tree
      */
-    public FileSystemAdapter(TreeNode<SourceFile> rootNode) {
+    public FileAdapter(TreeNode<SourceFile> rootNode) {
         setCurrentDirectory(rootNode);
     }
 
@@ -72,9 +72,9 @@ public abstract class FileSystemAdapter extends RecyclerView.Adapter<FileSystemA
 
         FileViewHolder(View itemView) {
             super(itemView);
-            mPreviewImage = itemView.findViewById(R.id.image_file_preview);
+            mPreviewImage = itemView.findViewById(R.id.img_file_preview);
             mCheckbox = itemView.findViewById(R.id.checkbox);
-            mText = itemView.findViewById(R.id.text_file_title);
+            mText = itemView.findViewById(R.id.txt_item_title);
             itemView.setLongClickable(true);
             itemView.setOnClickListener(createOnClickListener());
             itemView.setOnLongClickListener(createOnLongClickListener());

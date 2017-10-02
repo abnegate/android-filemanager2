@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
 import android.support.v4.os.EnvironmentCompat;
-import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -208,7 +207,7 @@ public class Utils {
                                                    String errorMessage,
                                                    String sourceName) {
         Bundle params = new Bundle();
-        params.putString(Constants.Analytics.PARAM_MESSAGE, errorMessage);
+        params.putString(Constants.Analytics.PARAM_ERROR_VALUE, errorMessage);
         params.putString(Constants.Analytics.PARAM_SOURCE_NAME, sourceName);
         analytics.logEvent(eventName, params);
     }
@@ -217,7 +216,7 @@ public class Utils {
                                              String eventName,
                                              String errorMessage) {
         Bundle params = new Bundle();
-        params.putString(Constants.Analytics.PARAM_MESSAGE, errorMessage);
+        params.putString(Constants.Analytics.PARAM_ERROR_VALUE, errorMessage);
         analytics.logEvent(eventName, params);
     }
 
