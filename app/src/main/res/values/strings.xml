@@ -3,6 +3,7 @@
     <string name="action_logout">Logout</string>
     <string name="action_settings">Settings</string>
     <string name="action_viewas">View As</string>
+    <string name="action_viewas">View as</string>
     <string name="app_name">File Manager</string>
     <string name="background">Background</string>
     <string name="cancel">Cancel</string>
@@ -85,4 +86,6 @@
     <string name="list">List</string>
     <string name="detailed_list">Detailed list</string>
     <string name="grid">Grid</string>
+    <string name="folder_exists">A folder with that name already exists here.</string>
+    <string name="file_exists">A file with that name already exists here.</string>
 </resources>

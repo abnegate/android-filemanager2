@@ -59,7 +59,7 @@ public class PropertiesDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(getString(R.string.properties));
         builder.setView(view);
-        builder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
+        builder.setPositiveButton(getString(R.string.ok), (dialog, which) -> dialog.dismiss());
         return builder.create();
     }
 }

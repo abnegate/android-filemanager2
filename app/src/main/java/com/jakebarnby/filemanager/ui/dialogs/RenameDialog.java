@@ -43,14 +43,14 @@ public class RenameDialog extends DialogFragment{
         input.setSelection(input.getText().length());
 
         builder.setView(view);
-        builder.setPositiveButton("OK", (dialog, which) -> {
+        builder.setPositiveButton(getString(R.string.ok), (dialog, which) -> {
             TreeNode<SourceFile> activeDirectory = ((SourceActivity)getActivity()).getSourceManager().getActiveDirectory();
             String newName = name.lastIndexOf('.') > 0 ?
                     input.getText().toString()+name.substring(name.lastIndexOf('.')) :
                     input.getText().toString();
             for(TreeNode<SourceFile> file: activeDirectory.getChildren()) {
                 if (file.getData().getName().equalsIgnoreCase(newName)) {
-                    Snackbar.make(getActivity().getCurrentFocus(), "A file with that name already exists here", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(getActivity().getCurrentFocus(), getString(R.string.file_exists), Snackbar.LENGTH_LONG).show();
                     return;
                 }
             }
