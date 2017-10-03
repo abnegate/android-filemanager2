@@ -1,4 +1,6 @@
 package com.jakebarnby.filemanager.ui.adapters;
+
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -12,6 +14,8 @@ import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.sources.models.SourceType;
+import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.tutorial.glide.GlideApp;
 
@@ -57,6 +61,21 @@ public abstract class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileV
 
     @Override
     public void onBindViewHolder(FileViewHolder holder, int position) {
+        boolean showHiddenFiles = PreferenceUtils.getBoolean(holder.itemView.getContext(), Constants.Prefs.HIDDEN_FOLDER_KEY, false);
+
+
+        RecyclerView.LayoutParams param = (RecyclerView.LayoutParams)holder.itemView.getLayoutParams();
+        if (!showHiddenFiles && mCurrentDirChildren.get(position).getData().isHidden()) {
+            holder.itemView.setVisibility(View.GONE);
+            param.width = 0;
+            param.height = 0;
+            param.setMargins(0,0,0,0);
+        } else if (showHiddenFiles) {
+            holder.itemView.setVisibility(View.VISIBLE);
+            param.height = ConstraintLayout.LayoutParams.WRAP_CONTENT;
+            param.width = ConstraintLayout.LayoutParams.MATCH_PARENT;
+        }
+
         holder.bindHolder(mCurrentDirChildren.get(position));
     }
 
