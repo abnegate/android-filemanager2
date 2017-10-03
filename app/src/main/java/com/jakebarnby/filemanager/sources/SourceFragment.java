@@ -48,8 +48,6 @@ import com.jakebarnby.filemanager.util.Utils;
 
 import java.util.Stack;
 
-import javax.net.ssl.CertPathTrustManagerParameters;
-
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -181,16 +179,6 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                 Constants.Prefs.VIEW_TYPE_KEY,
                 Constants.ViewTypes.LIST);
 
-        int sortType = PreferenceUtils.getInt(
-                getContext(),
-                Constants.Prefs.SORT_TYPE_KEY,
-                Constants.SortTypes.NAME);
-
-        int orderType = PreferenceUtils.getInt(
-                getContext(),
-                Constants.Prefs.ORDER_TYPE_KEY,
-                Constants.OrderTypes.ASCENDING);
-
         TreeNode.sortTree(mSource.getRootNode(), ComparatorUtils.resolveComparator(getContext()));
 
         switch (viewType) {
@@ -207,7 +195,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                 newAdapter = mFileDetailedAdapter;
                 break;
             case Constants.ViewTypes.GRID:
-                mRecycler.setLayoutManager(new GridLayoutManager(getContext(), 4));
+                mRecycler.setLayoutManager(new GridLayoutManager(getContext(), Constants.GRID_SIZE));
                 newAdapter = mFileGridAdapter;
                 break;
             default:

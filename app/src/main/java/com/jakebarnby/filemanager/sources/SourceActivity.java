@@ -51,6 +51,7 @@ import com.jakebarnby.filemanager.ui.adapters.SourceUsageAdapter;
 import com.jakebarnby.filemanager.ui.dialogs.CreateFolderDialog;
 import com.jakebarnby.filemanager.ui.dialogs.PropertiesDialog;
 import com.jakebarnby.filemanager.ui.dialogs.RenameDialog;
+import com.jakebarnby.filemanager.ui.dialogs.SettingsDialog;
 import com.jakebarnby.filemanager.ui.dialogs.SortByDialog;
 import com.jakebarnby.filemanager.ui.dialogs.ViewAsDialog;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
@@ -242,6 +243,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         int id = item.getItemId();
         switch (id) {
             case R.id.action_settings:
+                showSettingsDialog();
                 break;
             case R.id.action_view_as:
                 showViewAsDialog();
@@ -260,10 +262,16 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 break;
             case R.id.action_logout:
                 showLogoutDialog();
+                break;
             default:
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showSettingsDialog() {
+        SettingsDialog dialog = new SettingsDialog();
+        dialog.show(getSupportFragmentManager(), Constants.DialogTags.SETTINGS);
     }
 
     private void addLocalSource(String path) {

@@ -2,7 +2,6 @@ package com.jakebarnby.filemanager.sources.local;
 
 import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.sources.models.SourceType;
-import com.jakebarnby.filemanager.util.Constants;
 
 import java.io.File;
 
@@ -18,6 +17,7 @@ public class LocalFile extends SourceFile {
         setSourceType(SourceType.LOCAL);
         setSourceName(sourceName);
         setDirectory(file.isDirectory());
+        setHidden(file.getName().startsWith("."));
         setSize(file.length());
         setThumbnailLink(file.getAbsolutePath());
         setModifiedTime(file.lastModified());
