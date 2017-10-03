@@ -22,6 +22,8 @@ public class OneDriveFile extends SourceFile {
         setDirectory(file.folder != null);
         setSize(file.size);
         setModifiedTime(file.lastModifiedDateTime.getTimeInMillis());
+        setHidden(file.name.startsWith("."));
+
         if (file.thumbnails != null && file.thumbnails.getCurrentPage().size() > 0) {
             setThumbnailLink(file.thumbnails.getCurrentPage().get(0).small.url);
         }

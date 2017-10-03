@@ -13,6 +13,7 @@ public abstract class SourceFile implements Serializable {
     private SourceType      mSourceType;
     private String          mThumbnailLink;
     private boolean         mIsDirectory;
+    private boolean         mIsHidden;
     private long            mSize;
     private long            mModifiedTime;
     private int             mPositionToRestore = -1;
@@ -74,5 +75,11 @@ public abstract class SourceFile implements Serializable {
     }
     public void setPositionToRestore(int mPositionToRestore) {
         this.mPositionToRestore = mPositionToRestore;
+    }
+    public boolean isHidden() {
+        return mIsHidden;
+    }
+    public void setHidden(boolean isHidden) {
+        mIsHidden = isHidden;
     }
 }
