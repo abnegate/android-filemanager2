@@ -48,8 +48,6 @@ import com.jakebarnby.filemanager.util.Utils;
 
 import java.util.Stack;
 
-import javax.net.ssl.CertPathTrustManagerParameters;
-
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -180,16 +178,6 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                 getContext(),
                 Constants.Prefs.VIEW_TYPE_KEY,
                 Constants.ViewTypes.LIST);
-
-        int sortType = PreferenceUtils.getInt(
-                getContext(),
-                Constants.Prefs.SORT_TYPE_KEY,
-                Constants.SortTypes.NAME);
-
-        int orderType = PreferenceUtils.getInt(
-                getContext(),
-                Constants.Prefs.ORDER_TYPE_KEY,
-                Constants.OrderTypes.ASCENDING);
 
         TreeNode.sortTree(mSource.getRootNode(), ComparatorUtils.resolveComparator(getContext()));
 
