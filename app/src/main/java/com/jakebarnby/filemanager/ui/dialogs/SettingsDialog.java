@@ -41,6 +41,12 @@ public class SettingsDialog extends DialogFragment {
         CheckBox foldersFirst = rootView.findViewById(R.id.ckb_folders_first);
         CheckBox hiddenFolders = rootView.findViewById(R.id.ckb_hidden_files);
 
+        boolean bFoldersFirst = PreferenceUtils.getBoolean(getContext(), Constants.Prefs.FOLDER_FIRST_KEY, true);
+        boolean bShowHiddenFiles = PreferenceUtils.getBoolean(getContext(), Constants.Prefs.HIDDEN_FOLDER_KEY, false);
+
+        foldersFirst.setChecked(bFoldersFirst);
+        hiddenFolders.setChecked(bShowHiddenFiles);
+
         foldersFirst.setOnCheckedChangeListener((compoundButton, checked) -> {
             PreferenceUtils.savePref(getContext(), Constants.Prefs.FOLDER_FIRST_KEY, checked);
         });
@@ -48,5 +54,14 @@ public class SettingsDialog extends DialogFragment {
         hiddenFolders.setOnCheckedChangeListener((compoundButton, checked) -> {
             PreferenceUtils.savePref(getContext(), Constants.Prefs.HIDDEN_FOLDER_KEY, checked);
         });
+
+//        Button ossButton = rootView.findViewById(R.id.btn_oss_licenses);
+//        ossButton.setOnClickListener((view) -> {
+//            Intent intent = new Intent(getActivity(), OssLicensesMenuActivity.class);
+//            String title = getString(R.string.oss_license_title);
+//            intent.putExtra(Constants.DIALOG_TITLE_KEY, title);
+//            startActivity(intent);
+//
+//        });
     }
 }
