@@ -87,14 +87,12 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
         }
 
         mConnectButton.setOnClickListener(v -> {
-            if (Utils.isConnectionReady(getContext())) {
+            if (getSource().checkConnectionActive(getContext())) {
                 if (this instanceof OneDriveFragment) {
                     ((OneDriveSource)getSource()).authenticateSource(this);
                 } else {
                     getSource().authenticateSource(getContext());
                 }
-            } else {
-                Snackbar.make(rootView, R.string.err_no_connection, Snackbar.LENGTH_LONG).show();
             }
         });
 
