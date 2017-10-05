@@ -19,7 +19,6 @@ apply plugin: 'io.fabric'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
 
     android.applicationVariants.all { variant ->
         variant.outputs.all {
