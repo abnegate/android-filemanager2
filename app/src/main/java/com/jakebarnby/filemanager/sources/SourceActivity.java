@@ -816,7 +816,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void showUsageDialog() {
         List<Source> sources = new ArrayList<>();
         for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
-            if (fragment.getSource().isFilesLoaded()) {
+            if (fragment.getSource() != null && fragment.getSource().isFilesLoaded()) {
                 sources.add(fragment.getSource());
             }
         }

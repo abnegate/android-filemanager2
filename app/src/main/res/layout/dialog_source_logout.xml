@@ -2,13 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="?dialogPreferredPadding">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_source_logout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="10dp"
         android:overScrollMode="never"
         android:requiresFadingEdge="vertical" />
 </LinearLayout>
