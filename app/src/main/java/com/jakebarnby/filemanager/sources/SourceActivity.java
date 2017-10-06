@@ -846,7 +846,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             }
         }
         AlertDialog logoutDialog = new AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_title_logout)
                 .setNegativeButton(R.string.close, (dialog, which) -> dialog.dismiss())
                 .create();
 
@@ -860,6 +859,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
             rv.setAdapter(adapter);
             logoutDialog.setView(view);
+            logoutDialog.setTitle(R.string.dialog_title_logout);
         }
 
         logoutDialog.show();
