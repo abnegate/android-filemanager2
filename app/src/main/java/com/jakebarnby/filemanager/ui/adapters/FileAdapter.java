@@ -137,14 +137,14 @@ public abstract class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileV
             if (SelectedFilesManager.getInstance().getOperationCount() > 0) {
                 if (SelectedFilesManager
                         .getInstance()
-                        .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                        .getCurrentSelectedFiles()
                         .contains(currentDir)) {
                     mCheckbox.setChecked(true);
                 }
             }
 
             List<TreeNode<SourceFile>> currentSelection =
-                    SelectedFilesManager.getInstance().getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount());
+                    SelectedFilesManager.getInstance().getCurrentSelectedFiles();
 
             if (currentSelection != null && currentSelection.contains(currentDir)) {
                 mCheckbox.setChecked(true);

@@ -2,8 +2,10 @@
 <resources>
     <string name="action_logout">Logout</string>
     <string name="action_settings">Settings</string>
+    <string name="action_sort_by">Sort by</string>
     <string name="action_viewas">View as</string>
     <string name="app_name">File Manager</string>
+    <string name="ascending">Ascending</string>
     <string name="background">Background</string>
     <string name="cancel">Cancel</string>
     <string name="clearing_cache">clearing cache</string>
@@ -20,6 +22,8 @@
     <string name="cut">Selection cut</string>
     <string name="deleting_count">Deleting %d of %d</string>
     <string name="deleting_items">deleting item(s)</string>
+    <string name="descending">Descending</string>
+    <string name="detailed_list">Detailed list</string>
     <string name="dialog_creating_folder">Creating folder…</string>
     <string name="dialog_delete_confirm">Are you sure you want to delete %d items?</string>
     <string name="dialog_deleting">Deleting..</string>
@@ -38,8 +42,13 @@
     <string name="err_not_loaded">Not loaded yet.</string>
     <string name="err_not_logged_in">Not logged in yet.</string>
     <string name="err_too_many_selected">Only one file or folder can be renamed at a time.</string>
+    <string name="file_exists">A file with that name already exists here.</string>
     <string name="file_ready">File Ready</string>
+    <string name="folder_exists">A folder with that name already exists here.</string>
     <string name="greater_than"><![CDATA[>]]></string>
+    <string name="grid">Grid</string>
+    <string name="licenses">Licenses</string>
+    <string name="list">List</string>
     <string name="loading_source">loading source</string>
     <string name="logout">Logout</string>
     <string name="menu_item_copy">Copy</string>
@@ -64,6 +73,8 @@
     <string name="open_now">Would you like to open %s now?</string>
     <string name="opening">Opening..</string>
     <string name="opening_file">opening file</string>
+    <string name="options">Options</string>
+    <string name="order">Order</string>
     <string name="path">Path</string>
     <string name="problem_encountered">Problem encountered</string>
     <string name="properties">Properties</string>
@@ -74,27 +85,17 @@
     <string name="search_hint">Search files and folders</string>
     <string name="search_results">Search Results</string>
     <string name="selected_item_count">%d selected</string>
+    <string name="selected_title">%d selected</string>
+    <string name="show_folders_first">Show folders first</string>
+    <string name="show_hidden_files">Show hidden files</string>
     <string name="size">Size</string>
     <string name="size_display">%.2f MB</string>
+    <string name="sort_by">Sort by</string>
     <string name="sourceName">Source</string>
     <string name="storage_permission">Please enable storage permissions to view local files.</string>
+    <string name="type">Type</string>
     <string name="usb">USB</string>
     <string name="warning">Warning</string>
     <string name="yes">Yes</string>
     <string name="zero">0</string>
-    <string name="list">List</string>
-    <string name="detailed_list">Detailed list</string>
-    <string name="grid">Grid</string>
-    <string name="sort_by">Sort by</string>
-    <string name="type">Type</string>
-    <string name="order">Order</string>
-    <string name="ascending">Ascending</string>
-    <string name="descending">Descending</string>
-    <string name="show_folders_first">Show folders first</string>
-    <string name="show_hidden_files">Show hidden files</string>
-    <string name="options">Options</string>
-    <string name="action_sort_by">Sort by</string>
-    <string name="folder_exists">A folder with that name already exists here.</string>
-    <string name="file_exists">A file with that name already exists here.</string>
-    <string name="licenses">Licenses</string>
 </resources>

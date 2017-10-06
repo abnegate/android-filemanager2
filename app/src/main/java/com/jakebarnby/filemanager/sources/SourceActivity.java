@@ -170,7 +170,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 }
                 if  (SelectedFilesManager
                         .getInstance()
-                        .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                        .getCurrentSelectedFiles()
                         .size() > 1) {
                     navigationMenu.findItem(R.id.action_rename).setVisible(false);
                 }
@@ -508,7 +508,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void startCutAction() {
         if (SelectedFilesManager
                 .getInstance()
-                .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                .getCurrentSelectedFiles()
                 .size() > 0) {
             mSourceManager.addFileAction(SelectedFilesManager.getInstance().getOperationCount(), FileAction.CUT);
             showSnackbar(getString(R.string.cut));
@@ -525,7 +525,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void startCopyAction() {
         if (SelectedFilesManager
                 .getInstance()
-                .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                .getCurrentSelectedFiles()
                 .size() > 0) {
             mSourceManager.addFileAction(SelectedFilesManager.getInstance().getOperationCount(), FileAction.COPY);
             showSnackbar(getString(R.string.copied));
@@ -546,7 +546,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
             int size = SelectedFilesManager
                     .getInstance()
-                    .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                    .getCurrentSelectedFiles()
                     .size();
 
             if (size > 0) {
@@ -749,8 +749,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                     SelectedFilesManager.getInstance().getOperationCount(),
                     mSourceManager.getActiveDirectory());
 
-            int size = SelectedFilesManager.getInstance().getSelectedFiles(
-                    SelectedFilesManager.getInstance().getOperationCount()).size();
+            int size = SelectedFilesManager.getInstance().getCurrentSelectedFiles().size();
 
             if (size == 0) {
                 showSnackbar(getString(R.string.err_no_selection));
@@ -772,7 +771,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * Shows a dialog displaying properties about the selected files and/or folders
      */
     private void showPropertiesDialog() {
-        int size = SelectedFilesManager.getInstance().getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount()).size();
+        int size = SelectedFilesManager.getInstance().getCurrentSelectedFiles().size();
         if (size == 0) {
             showSnackbar(getString(R.string.err_no_selection));
         } else {
@@ -1036,7 +1035,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
             SelectedFilesManager
                     .getInstance()
-                    .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                    .getCurrentSelectedFiles()
                     .clear();
 
         } else if (getActiveFragment().getSource().isLoggedIn() &&

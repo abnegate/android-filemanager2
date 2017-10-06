@@ -32,13 +32,13 @@ public class PropertiesDialog extends DialogFragment {
         TextView sizeText           = view.findViewById(R.id.txt_size);
         TextView modifiedTimeText   = view.findViewById(R.id.txt_modified_time);
 
-        List<TreeNode<SourceFile>> selected = SelectedFilesManager.getInstance()
-                        .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount());
+        List<TreeNode<SourceFile>> selected =
+                SelectedFilesManager.getInstance().getCurrentSelectedFiles();
 
         if (selected.size() > 1) {
             float totalSize = 0.0f;
             StringBuilder sourceNames = new StringBuilder();
-            
+
             for (TreeNode<SourceFile> file : selected) {
                 if (!sourceNames.toString().contains(file.getData().getSourceName())) {
                     sourceNames.append(file.getData().getSourceName()).append(", ");
