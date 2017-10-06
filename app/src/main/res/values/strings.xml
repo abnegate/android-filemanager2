@@ -73,9 +73,9 @@
     <string name="search">Search</string>
     <string name="search_hint">Search files and folders</string>
     <string name="search_results">Search Results</string>
-    <string name="selected_item_count">%1$d selected</string>
+    <string name="selected_item_count">%d selected</string>
     <string name="size">Size</string>
-    <string name="sizeDisplay">%.2f MB</string>
+    <string name="size_display">%.2f MB</string>
     <string name="sourceName">Source</string>
     <string name="storage_permission">Please enable storage permissions to view local files.</string>
     <string name="usb">USB</string>

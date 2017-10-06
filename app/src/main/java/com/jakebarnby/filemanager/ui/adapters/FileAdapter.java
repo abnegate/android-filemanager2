@@ -85,9 +85,9 @@ public abstract class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileV
     }
 
     class FileViewHolder extends RecyclerView.ViewHolder {
-        private ImageView mPreviewImage;
-        private CheckBox mCheckbox;
-        private TextView mText;
+        private ImageView   mPreviewImage;
+        private CheckBox    mCheckbox;
+        private TextView    mText;
 
         FileViewHolder(View itemView) {
             super(itemView);

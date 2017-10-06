@@ -1,109 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:columnCount="2"
-    android:orientation="vertical"
-    android:padding="25dp"
-    android:rowCount="6">
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="?dialogPreferredPadding"
+>
 
-    <TableRow
-        android:id="@+id/row_name"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="5dp">
+    <TextView
+        android:id="@+id/txt_name_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/name"
+        android:textAlignment="textStart"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/dialog_text"
+        app:layout_constraintBottom_toTopOf="@id/txt_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/name"
-            android:textAlignment="textStart"
-            android:textStyle="bold" />
+    <TextView
+        android:id="@+id/txt_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAlignment="textStart"
+        app:layout_constraintBottom_toTopOf="@id/txt_source_name_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txt_name_label" />
 
-        <TextView
-            android:id="@+id/text_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:textAlignment="textStart" />
-    </TableRow>
+    <TextView
+        android:id="@+id/txt_source_name_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sourceName"
+        android:textAlignment="textStart"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/dialog_text"
+        app:layout_constraintBottom_toTopOf="@id/txt_source_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txt_name" />
 
-    <TableRow
-        android:id="@+id/row_source_name"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="5dp">
+    <TextView
+        android:id="@+id/txt_source_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAlignment="textStart"
+        app:layout_constraintBottom_toTopOf="@id/txt_path_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txt_source_name_label" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/sourceName"
-            android:textAlignment="textStart"
-            android:textStyle="bold" />
+    <TextView
+        android:id="@+id/txt_path_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/path"
+        android:textAlignment="textStart"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/dialog_text"
+        app:layout_constraintBottom_toTopOf="@id/txt_path"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txt_source_name" />
 
-        <TextView
-            android:id="@+id/text_sourceName"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginStart="10dp"
-            android:textAlignment="textStart" />
-    </TableRow>
+    <TextView
+        android:id="@+id/txt_path"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAlignment="textStart"
+        app:layout_constraintBottom_toTopOf="@id/txt_size_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txt_path_label" />
 
-    <TableRow
-        android:id="@+id/row_path"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="5dp">
+    <TextView
+        android:id="@+id/txt_size_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/size"
+        android:textAlignment="textStart"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/dialog_text"
+        app:layout_constraintBottom_toTopOf="@id/txt_size"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txt_path" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/path"
-            android:textAlignment="textStart"
-            android:textStyle="bold" />
+    <TextView
+        android:id="@+id/txt_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAlignment="textStart"
+        app:layout_constraintBottom_toTopOf="@id/txt_modified_time_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txt_size_label" />
 
-        <TextView
-            android:id="@+id/text_path"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:textAlignment="textStart" />
-    </TableRow>
+    <TextView
+        android:id="@+id/txt_modified_time_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/modifiedTime"
+        android:textAlignment="textStart"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/dialog_text"
+        app:layout_constraintBottom_toTopOf="@id/txt_modified_time"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txt_size" />
 
-    <TableRow
-        android:id="@+id/row_size"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="5dp">
+    <TextView
+        android:id="@+id/txt_modified_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textAlignment="textStart"
+        app:layout_constraintBottom_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txt_modified_time_label" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/size"
-            android:textAlignment="textStart"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/text_size"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginStart="10dp"
-            android:textAlignment="textStart" />
-    </TableRow>
-
-    <TableRow
-        android:id="@+id/row_modified_time"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="5dp">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/modifiedTime"
-            android:textAlignment="textStart"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/text_modifiedTime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:textAlignment="textStart" />
-    </TableRow>
-</TableLayout>
+</android.support.constraint.ConstraintLayout>
