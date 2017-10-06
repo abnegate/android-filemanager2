@@ -2,55 +2,47 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="85dp"
-    android:orientation="vertical">
+    android:layout_height="100dp"
+    android:layout_centerInParent="true"
+    android:orientation="horizontal">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_centerInParent="true"
-        android:orientation="horizontal">
+    <com.dinuscxj.progressbar.CircleProgressBar
+        android:id="@+id/prg_usage"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="40dp"
+        android:progress="100"
+        app:background_color="@android:color/transparent"
+        app:draw_progress_text="true"
+        app:line_count="40"
+        app:line_width="4sp"
+        app:progress_background_color="@color/light_gray"
+        app:progress_end_color="@color/colorPrimaryDark"
+        app:progress_shader="sweep"
+        app:progress_start_color="@color/colorAccent"
+        app:progress_stroke_width="3dp"
+        app:progress_text_color="@color/colorAccent"
+        app:progress_text_size="14sp"
+        app:style="solid_line" />
 
-        <com.dinuscxj.progressbar.CircleProgressBar
-            android:id="@+id/prg_usage"
-            android:layout_width="65dp"
-            android:layout_height="65dp"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="40dp"
-            android:progress="100"
-            app:background_color="@android:color/transparent"
-            app:draw_progress_text="true"
-            app:line_count="40"
-            app:line_width="4sp"
-            app:progress_background_color="@color/light_gray"
-            app:progress_end_color="@color/colorPrimaryDark"
-            app:progress_shader="sweep"
-            app:progress_start_color="@color/colorAccent"
-            app:progress_stroke_width="3dp"
-            app:progress_text_color="@color/colorAccent"
-            app:progress_text_size="14sp"
-            app:style="solid_line" />
+    <TextView
+        android:id="@+id/txt_source_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="22dp"
+        android:layout_toEndOf="@id/prg_usage"
+        android:textColor="@android:color/black"
+        android:textSize="16sp" />
 
-        <TextView
-            android:id="@+id/txt_source_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="22dp"
-            android:layout_toEndOf="@id/prg_usage"
-            android:text="Source"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/txt_space_consumption"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/txt_source_title"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="2dp"
-            android:layout_toEndOf="@id/prg_usage"
-            android:text="14.45 / 20 GB"
-            android:textSize="12sp" />
-    </RelativeLayout>
-
+    <TextView
+        android:id="@+id/txt_space_consumption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txt_source_title"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="2dp"
+        android:layout_toEndOf="@id/prg_usage"
+        android:textSize="12sp" />
 </RelativeLayout>

@@ -4,15 +4,15 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingEnd="24dp"
-    android:paddingStart="24dp"
+    android:paddingEnd="@dimen/dialog_padding"
+    android:paddingStart="@dimen/dialog_padding"
     android:paddingTop="18dp">
 
     <RadioGroup
         android:id="@+id/rdg_sort_by"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="@dimen/rdg_padding_bottom"
         app:layout_constraintBottom_toTopOf="@id/divider_sort"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,37 +22,37 @@
             android:id="@+id/rdb_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:paddingStart="20dp"
+            android:layout_marginBottom="@dimen/rdb_padding_bottom"
+            android:paddingStart="@dimen/rdb_padding"
             android:text="@string/name"
-            android:textSize="18sp" />
+            android:textSize="@dimen/dialog_text" />
 
         <RadioButton
             android:id="@+id/rdb_size"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:paddingStart="20dp"
+            android:layout_marginBottom="@dimen/rdb_padding_bottom"
+            android:paddingStart="@dimen/rdb_padding"
             android:text="@string/size"
-            android:textSize="18sp" />
+            android:textSize="@dimen/dialog_text" />
 
         <RadioButton
             android:id="@+id/rdb_type"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:paddingStart="20dp"
+            android:layout_marginBottom="@dimen/rdb_padding_bottom"
+            android:paddingStart="@dimen/rdb_padding"
             android:text="@string/type"
-            android:textSize="18sp" />
+            android:textSize="@dimen/dialog_text" />
 
         <RadioButton
             android:id="@+id/rdb_modified_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:paddingStart="20dp"
+            android:layout_marginBottom="@dimen/rdb_padding_bottom"
+            android:paddingStart="@dimen/rdb_padding"
             android:text="@string/modifiedTime"
-            android:textSize="18sp" />
+            android:textSize="@dimen/dialog_text" />
     </RadioGroup>
 
     <View
@@ -74,7 +74,7 @@
         android:layout_height="wrap_content"
         android:text="@string/order"
         android:textColor="@color/colorAccentAccent"
-        android:textSize="18sp"
+        android:textSize="@dimen/dialog_text"
         app:layout_constraintBottom_toTopOf="@id/rdg_order_by"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/divider_sort" />
@@ -92,17 +92,17 @@
             android:id="@+id/rdb_ascending"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:paddingStart="20dp"
+            android:layout_marginBottom="@dimen/rdb_padding_bottom"
+            android:paddingStart="@dimen/rdb_padding"
             android:text="@string/ascending"
-            android:textSize="18sp" />
+            android:textSize="@dimen/dialog_text" />
 
         <RadioButton
             android:id="@+id/rdb_descending"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="20dp"
+            android:paddingStart="@dimen/rdb_padding"
             android:text="@string/descending"
-            android:textSize="18sp" />
+            android:textSize="@dimen/dialog_text" />
     </RadioGroup>
 </android.support.constraint.ConstraintLayout>

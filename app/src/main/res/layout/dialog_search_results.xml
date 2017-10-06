@@ -27,6 +27,5 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/spn_sources"
         android:layout_marginTop="16dp"
-        android:overScrollMode="never"
-        android:requiresFadingEdge="vertical" />
+        android:overScrollMode="never" />
 </RelativeLayout>
