@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingEnd="32dp"
-    android:paddingStart="32dp"
-    android:paddingTop="18dp">
+    android:padding="?dialogPreferredPadding">
 
     <TextView
         android:id="@+id/txt_folders_first"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:paddingBottom="15dp"
         android:text="@string/show_folders_first"
-        android:textSize="@dimen/dialog_text_size"
-        android:layout_marginBottom="8dp"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/dialog_text"
         app:layout_constraintBottom_toTopOf="@id/txt_hidden_files"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <CheckBox
         android:id="@+id/ckb_folders_first"
@@ -27,7 +25,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintBaseline_toBaselineOf="@id/txt_folders_first"
         app:layout_constraintBottom_toTopOf="@id/ckb_hidden_files"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
         android:id="@+id/txt_hidden_files"
@@ -35,55 +33,56 @@
         android:layout_height="wrap_content"
         android:paddingBottom="15dp"
         android:text="@string/show_hidden_files"
-        android:textSize="@dimen/dialog_text_size"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/dialog_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/txt_folders_first"/>
+        app:layout_constraintTop_toBottomOf="@id/txt_folders_first" />
 
     <CheckBox
         android:id="@+id/ckb_hidden_files"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBaseline_toBaselineOf="@id/txt_hidden_files"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ckb_folders_first"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/ckb_folders_first" />
 
     <!--<View-->
-        <!--android:id="@+id/divider_license"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="1dp"-->
-        <!--android:layout_marginEnd="10dp"-->
-        <!--android:layout_marginStart="10dp"-->
-        <!--android:background="@color/colorAccent"-->
-        <!--app:layout_constraintBottom_toTopOf="@+id/txt_license"-->
-        <!--app:layout_constraintEnd_toEndOf="parent"-->
-        <!--app:layout_constraintStart_toStartOf="parent"-->
-        <!--app:layout_constraintTop_toBottomOf="@id/txt_hidden_files"/>-->
+    <!--android:id="@+id/divider_license"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="1dp"-->
+    <!--android:layout_marginEnd="10dp"-->
+    <!--android:layout_marginStart="10dp"-->
+    <!--android:background="@color/colorAccent"-->
+    <!--app:layout_constraintBottom_toTopOf="@+id/txt_license"-->
+    <!--app:layout_constraintEnd_toEndOf="parent"-->
+    <!--app:layout_constraintStart_toStartOf="parent"-->
+    <!--app:layout_constraintTop_toBottomOf="@id/txt_hidden_files"/>-->
 
     <!--<TextView-->
-        <!--android:id="@+id/txt_license"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:paddingBottom="15dp"-->
-        <!--android:paddingTop="15dp"-->
-        <!--android:text="@string/licenses"-->
-        <!--android:textColor="@color/colorAccentAccent"-->
-        <!--android:textSize="@dimen/dialog_text_size"-->
-        <!--app:layout_constraintBottom_toTopOf="@id/btn_oss_licenses"-->
-        <!--app:layout_constraintStart_toStartOf="parent"-->
-        <!--app:layout_constraintTop_toBottomOf="@id/divider_license"/>-->
+    <!--android:id="@+id/txt_license"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:paddingBottom="15dp"-->
+    <!--android:paddingTop="15dp"-->
+    <!--android:text="@string/licenses"-->
+    <!--android:textColor="@color/colorAccentAccent"-->
+    <!--android:textSize="@dimen/dialog_text_size"-->
+    <!--app:layout_constraintBottom_toTopOf="@id/btn_oss_licenses"-->
+    <!--app:layout_constraintStart_toStartOf="parent"-->
+    <!--app:layout_constraintTop_toBottomOf="@id/divider_license"/>-->
 
     <!--<Button-->
-        <!--android:id="@+id/btn_oss_licenses"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="@string/show_oss_licenses"-->
-        <!--app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--app:layout_constraintTop_toBottomOf="@id/txt_license"-->
-        <!--android:background="@color/colorPrimary"-->
-        <!--android:textColor="@android:color/white"-->
-        <!--app:layout_constraintStart_toStartOf="parent"-->
-        <!--app:layout_constraintEnd_toEndOf="parent"/>-->
+    <!--android:id="@+id/btn_oss_licenses"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:text="@string/show_oss_licenses"-->
+    <!--app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--app:layout_constraintTop_toBottomOf="@id/txt_license"-->
+    <!--android:background="@color/colorPrimary"-->
+    <!--android:textColor="@android:color/white"-->
+    <!--app:layout_constraintStart_toStartOf="parent"-->
+    <!--app:layout_constraintEnd_toEndOf="parent"/>-->
 
 </android.support.constraint.ConstraintLayout>

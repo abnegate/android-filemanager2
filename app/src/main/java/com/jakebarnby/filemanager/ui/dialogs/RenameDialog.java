@@ -31,7 +31,7 @@ public class RenameDialog extends DialogFragment{
         EditText input = view.findViewById(R.id.text_rename);
         String name = SelectedFilesManager
                 .getInstance()
-                .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                .getCurrentSelectedFiles()
                 .get(0)
                 .getData()
                 .getName();

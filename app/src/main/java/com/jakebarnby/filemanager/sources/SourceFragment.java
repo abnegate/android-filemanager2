@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -46,6 +47,7 @@ import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
 
+import java.util.Locale;
 import java.util.Stack;
 
 /**
@@ -254,20 +256,24 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                 if (isChecked) {
                     SelectedFilesManager
                             .getInstance()
-                            .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                            .getCurrentSelectedFiles()
                             .add(file);
                 } else {
                     SelectedFilesManager
                             .getInstance()
-                            .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                            .getCurrentSelectedFiles()
                             .remove(file);
                 }
 
                 int size = SelectedFilesManager
                         .getInstance()
-                        .getSelectedFiles(SelectedFilesManager.getInstance().getOperationCount())
+                        .getCurrentSelectedFiles()
                         .size();
-                getActivity().setTitle(size + " selected");
+
+                getActivity().setTitle(String.format(
+                        Locale.getDefault(),
+                        getString(R.string.selected_title),
+                        size));
             } else {
                 if (file.getData().isDirectory()) {
                     getSource().getCurrentDirectory().getData().

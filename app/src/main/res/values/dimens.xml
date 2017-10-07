@@ -8,5 +8,12 @@
     <dimen name="cardview_content_padding">10dp</dimen>
     <dimen name="progress_text_size">10sp</dimen>
     <dimen name="thumb_size">40dp</dimen>
-    <dimen name="dialog_text_size">18sp</dimen>
+    <dimen name="dialog_text">18sp</dimen>
+    <dimen name="dialog_subtext">12sp</dimen>
+    <dimen name="dialog_padding">24dp</dimen>
+    <dimen name="rdb_padding">20dp</dimen>
+    <dimen name="rdg_padding_bottom">10dp</dimen>
+    <dimen name="rdb_padding_bottom">8dp</dimen>
+    <dimen name="txt_padding_bottom">10dp</dimen>
+    <dimen name="dialog_padding_large">38dp</dimen>
 </resources>

@@ -5,8 +5,8 @@
     android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="20dp"
-    android:layout_marginStart="20dp"
+    android:layout_marginEnd="@dimen/dialog_padding"
+    android:layout_marginStart="@dimen/dialog_padding"
     android:layout_marginTop="10dp"
     tools:layout_editor_absoluteX="20dp"
     tools:layout_editor_absoluteY="86dp">
@@ -57,7 +57,7 @@
         android:gravity="center_vertical"
         android:maxLines="1"
         android:textColor="@android:color/tertiary_text_dark"
-        android:textSize="12sp"
+        android:textSize="@dimen/dialog_subtext"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@id/txt_item_title"
         app:layout_constraintTop_toBottomOf="@+id/txt_item_title" />
@@ -66,6 +66,7 @@
         android:id="@+id/txt_item_modified_datetime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
         android:ellipsize="end"
         android:gravity="center_vertical"
         android:maxLines="1"

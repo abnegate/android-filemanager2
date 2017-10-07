@@ -9,6 +9,7 @@ import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
+import com.jakebarnby.filemanager.util.Utils;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -63,21 +64,8 @@ public class FileDetailedListAdapter extends FileAdapter {
                         " MB"));
             }
 
-
             if (!currentDir.getData().getSourceName().equals(Constants.Sources.DROPBOX)) {
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(currentDir.getData().getModifiedTime());
-
-                String displayTime = String.format(
-                        Locale.getDefault(),
-                        Constants.DATE_TIME_FORMAT,
-                        calendar.get(Calendar.HOUR_OF_DAY),
-                        calendar.get(Calendar.MINUTE),
-                        calendar.get(Calendar.DAY_OF_MONTH),
-                        calendar.get(Calendar.MONTH) + 1,
-                        calendar.get(Calendar.YEAR) - 2000
-                );
-
+                String displayTime = Utils.getDisplayStringFromDate(currentDir.getData().getModifiedTime());
                 mModifiedDateText.setText(displayTime);
             }
         }

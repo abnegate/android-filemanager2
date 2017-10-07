@@ -36,6 +36,10 @@ public class SelectedFilesManager {
         return mSelectedFilesMap.get(operationId-1);
     }
 
+    public List<TreeNode<SourceFile>> getCurrentSelectedFiles() {
+        return mSelectedFilesMap.get(getOperationCount()-1);
+    }
+
     public TreeNode<SourceFile> getActionableDirectory(int operationId) {
         return mActionableDirectories.get(operationId);
     }
@@ -54,8 +58,7 @@ public class SelectedFilesManager {
 
     public long getCurrentCopySize() {
         long copySize = 0;
-        for(TreeNode<SourceFile> file: SelectedFilesManager.getInstance().getSelectedFiles(
-                SelectedFilesManager.getInstance().getOperationCount())) {
+        for(TreeNode<SourceFile> file: SelectedFilesManager.getInstance().getCurrentSelectedFiles()) {
             copySize+=file.getData().getSize();
         }
         return copySize;
