@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:padding="?dialogPreferredPadding"
->
+    android:padding="?dialogPreferredPadding">
 
     <TextView
         android:id="@+id/txt_name_label"
@@ -12,8 +11,6 @@
         android:layout_height="wrap_content"
         android:text="@string/name"
         android:textAlignment="textStart"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/dialog_text"
         app:layout_constraintBottom_toTopOf="@id/txt_name"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -26,6 +23,8 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:textAlignment="textStart"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/dialog_text"
         app:layout_constraintBottom_toTopOf="@id/txt_source_name_label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txt_name_label" />
@@ -36,8 +35,6 @@
         android:layout_height="wrap_content"
         android:text="@string/sourceName"
         android:textAlignment="textStart"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/dialog_text"
         app:layout_constraintBottom_toTopOf="@id/txt_source_name"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txt_name" />
@@ -50,6 +47,8 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:textAlignment="textStart"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/dialog_text"
         app:layout_constraintBottom_toTopOf="@id/txt_path_label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txt_source_name_label" />
@@ -60,8 +59,6 @@
         android:layout_height="wrap_content"
         android:text="@string/path"
         android:textAlignment="textStart"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/dialog_text"
         app:layout_constraintBottom_toTopOf="@id/txt_path"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txt_source_name" />
@@ -74,6 +71,8 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:textAlignment="textStart"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/dialog_text"
         app:layout_constraintBottom_toTopOf="@id/txt_size_label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txt_path_label" />
@@ -84,8 +83,6 @@
         android:layout_height="wrap_content"
         android:text="@string/size"
         android:textAlignment="textStart"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/dialog_text"
         app:layout_constraintBottom_toTopOf="@id/txt_size"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txt_path" />
@@ -98,6 +95,8 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:textAlignment="textStart"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/dialog_text"
         app:layout_constraintBottom_toTopOf="@id/txt_modified_time_label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txt_size_label" />
@@ -108,8 +107,6 @@
         android:layout_height="wrap_content"
         android:text="@string/modifiedTime"
         android:textAlignment="textStart"
-        android:textColor="@android:color/black"
-        android:textSize="@dimen/dialog_text"
         app:layout_constraintBottom_toTopOf="@id/txt_modified_time"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txt_size" />
@@ -121,6 +118,8 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:textAlignment="textStart"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/dialog_text"
         app:layout_constraintBottom_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txt_modified_time_label" />

@@ -12,6 +12,7 @@ import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
+import com.jakebarnby.filemanager.util.Utils;
 
 import java.util.Date;
 import java.util.List;
@@ -61,7 +62,7 @@ public class PropertiesDialog extends DialogFragment {
             pathText.setText(file.getPath());
             sourceNameText.setText(file.getSourceName());
             sizeText.setText(String.format(getString(R.string.size_display), file.getSize() / Constants.BYTES_TO_MEGABYTE));
-            modifiedTimeText.setText(new Date(file.getModifiedTime()).toString());
+            modifiedTimeText.setText(Utils.getDisplayStringFromDate(file.getModifiedTime()));
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

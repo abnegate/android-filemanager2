@@ -22,8 +22,10 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by Jake on 6/6/2017.
@@ -192,6 +194,21 @@ public class Utils {
         for(int i=0; i<results.size(); ++i) storageDirectories[i] = results.get(i);
 
         return storageDirectories;
+    }
+
+    public static String getDisplayStringFromDate(long date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(date);
+
+        return String.format(
+                Locale.getDefault(),
+                Constants.DATE_TIME_FORMAT,
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+                calendar.get(Calendar.DAY_OF_MONTH),
+                calendar.get(Calendar.MONTH) + 1,
+                calendar.get(Calendar.YEAR) - 2000
+        );
     }
 
     public static int resolveLogoId(String sourceName) {
