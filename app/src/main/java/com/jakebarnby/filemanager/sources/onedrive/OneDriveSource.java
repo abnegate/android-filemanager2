@@ -53,6 +53,8 @@ public class OneDriveSource extends Source {
         mClient = new PublicClientApplication(fragment.getContext(), CLIENT_ID);
         mSourceListener.onLoadStarted();
         if (!isLoggedIn()) {
+            if (!checkConnectionActive(fragment.getContext())) return;
+
             try {
                 String accessToken = PreferenceUtils.getString(fragment.getContext(), Constants.Prefs.ONEDRIVE_TOKEN_KEY, null);
                 String userId = PreferenceUtils.getString(fragment.getContext(), Constants.Prefs.ONEDRIVE_NAME_KEY, null);

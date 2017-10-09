@@ -37,8 +37,8 @@ public class Constants {
     public class Prefs {
         public static final String PREFS = "filemanager-prefs";
         public static final String DROPBOX_TOKEN_KEY = "dropbox-access-token";
-        public static final String GOOGLE_TOKEN_KEY = "googledrive-access-token";
-        public static final String GOOGLE_NAME_KEY = "googledrive-name";
+        public static final String GOOGLE_TOKEN_KEY = "google drive-access-token";
+        public static final String GOOGLE_NAME_KEY = "google drive-name";
         public static final String ONEDRIVE_TOKEN_KEY = "onedrive-access-token";
         public static final String ONEDRIVE_NAME_KEY = "onedrive-name";
         public static final String TUT_SEEN_KEY = "seen-tutorial";

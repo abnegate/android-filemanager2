@@ -38,8 +38,14 @@ public class GoogleDriveSource extends Source {
 
     @Override
     public void authenticateSource(Context context) {
+        if (!checkConnectionActive(context)) return;
         fetchCredential(context);
-        mSourceListener.onCheckPermissions(Manifest.permission.GET_ACCOUNTS, Constants.RequestCodes.ACCOUNTS_PERMISSIONS);
+
+        if (hasToken(context, getSourceName())) {
+            loadSource(context);
+        } else {
+            mSourceListener.onCheckPermissions(Manifest.permission.GET_ACCOUNTS, Constants.RequestCodes.ACCOUNTS_PERMISSIONS);
+        }
     }
 
     @Override

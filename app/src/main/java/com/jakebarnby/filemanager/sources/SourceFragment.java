@@ -116,12 +116,12 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
 
     @Override
     public void onLoadError(String errorMessage) {
+        onLoadAborted();
         ((SourceActivity)getActivity()).showErrorDialog(String.format(
                 "%s %s%s",
                 getString(R.string.problem_encountered),
                 getString(R.string.loading_source),
                 ": "+errorMessage));
-        onLoadAborted();
     }
 
     @Override
@@ -154,6 +154,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
 
     @Override
     public void onNoConnection() {
+        onLoadAborted();
         Snackbar.make(mRecycler, R.string.err_no_connection, Snackbar.LENGTH_LONG).show();
     }
 
