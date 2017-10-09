@@ -4,6 +4,7 @@ import android.Manifest;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import com.jakebarnby.filemanager.sources.SourceFragment;
+import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
 
 /**
@@ -39,7 +40,8 @@ public class LocalFragment extends SourceFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        if (mSource != null && mSource.getSourceName().equals(Constants.Sources.LOCAL))
-        onCheckPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Constants.RequestCodes.STORAGE_PERMISSIONS);
+        if (mSource != null && mSource.getSourceType() == SourceType.LOCAL) {
+            onCheckPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Constants.RequestCodes.STORAGE_PERMISSIONS);
+        }
     }
 }
