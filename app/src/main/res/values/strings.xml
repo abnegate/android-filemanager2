@@ -17,6 +17,7 @@
     <string name="copying_count">Copying %d of %d</string>
     <string name="copying_items">copying item(s)</string>
     <string name="create_folder">Create Folder</string>
+    <string name="create_zip">Create zip file</string>
     <string name="createdTime">Created</string>
     <string name="creating_folder">creating folder</string>
     <string name="cut">Selection cut</string>
@@ -59,6 +60,7 @@
     <string name="menu_item_paste">Paste</string>
     <string name="menu_item_properties">Properties</string>
     <string name="menu_item_rename">Rename</string>
+    <string name="menu_item_zip">Zip to here</string>
     <string name="menu_storage_usage">Storage Usage</string>
     <string name="modifiedTime">Time</string>
     <string name="moving">Moving..</string>
@@ -98,4 +100,5 @@
     <string name="warning">Warning</string>
     <string name="yes">Yes</string>
     <string name="zero">0</string>
+    <string name="creating_zip">Creating zip...</string>
 </resources>
