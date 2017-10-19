@@ -100,5 +100,6 @@
     <string name="warning">Warning</string>
     <string name="yes">Yes</string>
     <string name="zero">0</string>
-    <string name="creating_zip">Creating zip...</string>
+    <string name="creating_zip">Creating zip…</string>
+    <string name="zipping_files">zipping files</string>
 </resources>

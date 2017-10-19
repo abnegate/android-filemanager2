@@ -6,35 +6,40 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 
 import com.dropbox.core.DbxException;
-import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.jakebarnby.filemanager.R;
+import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.sources.SourceActivity;
 import com.jakebarnby.filemanager.sources.dropbox.DropboxFactory;
-import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFactory;
-import com.jakebarnby.filemanager.sources.models.SourceType;
-import com.jakebarnby.filemanager.sources.onedrive.OneDriveFactory;
-import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.sources.dropbox.DropboxFile;
+import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFactory;
 import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFile;
 import com.jakebarnby.filemanager.sources.local.LocalFile;
-import com.jakebarnby.filemanager.sources.onedrive.OneDriveFile;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
+import com.jakebarnby.filemanager.sources.models.SourceType;
+import com.jakebarnby.filemanager.sources.onedrive.OneDriveFactory;
+import com.jakebarnby.filemanager.sources.onedrive.OneDriveFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.IntentExtensions;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
+import com.jakebarnby.filemanager.util.FileZipper;
 import com.microsoft.graph.extensions.DriveItem;
 import com.microsoft.graph.http.GraphServiceException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.Stack;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -98,7 +103,9 @@ public class SourceTransferService extends Service {
             if (intent != null) {
                 final SourceFile toOpen =
                         (SourceFile) intent.getSerializableExtra(IntentExtensions.EXTRA_TO_OPEN_PATH);
+
                 final String newName = intent.getStringExtra(IntentExtensions.EXTRA_NEW_NAME);
+                final String zipName = intent.getStringExtra(IntentExtensions.EXTRA_ZIP_FILENAME);
                 final String action = intent.getAction();
 
                 int operationId = SelectedFilesManager.getInstance().getOperationCount() - 1;
@@ -116,16 +123,27 @@ public class SourceTransferService extends Service {
                             rename(operationId, newName);
                             break;
                         case IntentExtensions.ACTION_COPY:
-                            copy(operationId, false);
+                            copy(
+                                    SelectedFilesManager.getInstance().getActionableDirectory(operationId),
+                                    operationId,
+                                    false,
+                                    false);
                             break;
                         case IntentExtensions.ACTION_MOVE:
-                            copy(operationId, true);
+                            copy(
+                                    SelectedFilesManager.getInstance().getActionableDirectory(operationId),
+                                    operationId,
+                                    true,
+                                    false);
                             break;
                         case IntentExtensions.ACTION_DELETE:
                             delete(operationId, false);
                             break;
                         case IntentExtensions.ACTION_OPEN:
                             open(operationId, toOpen);
+                            break;
+                        case IntentExtensions.ACTION_ZIP:
+                            zipSelection(operationId, zipName);
                             break;
                         case IntentExtensions.ACTION_CLEAR_CACHE:
                             clearLocalCache();
@@ -203,6 +221,13 @@ public class SourceTransferService extends Service {
         Intent intent = new Intent(context, SourceTransferService.class);
         intent.setAction(IntentExtensions.ACTION_OPEN);
         intent.putExtra(IntentExtensions.EXTRA_TO_OPEN_PATH, toOpen);
+        context.startService(intent);
+    }
+
+    public static void startActionZip(Context context, String zipFilename) {
+        Intent intent = new Intent(context, SourceTransferService.class);
+        intent.setAction(IntentExtensions.ACTION_ZIP);
+        intent.putExtra(IntentExtensions.EXTRA_ZIP_FILENAME, zipFilename);
         context.startService(intent);
     }
 
@@ -398,7 +423,7 @@ public class SourceTransferService extends Service {
                     getString(R.string.opening_file),
                     "."));
 
-            String sourceName = toOpen == null ?  Constants.Analytics.NO_DESTINATION: toOpen.getSourceName();
+            String sourceName = toOpen == null ? Constants.Analytics.NO_DESTINATION : toOpen.getSourceName();
 
             Utils.logFirebaseSourceErrorEvent(
                     mFirebaseAnalytics,
@@ -413,27 +438,35 @@ public class SourceTransferService extends Service {
      *
      * @param move Whether this is a move or copt operation
      */
-    private void copy(int operationId, boolean move) {
+    private List<TreeNode<SourceFile>> copy(TreeNode<SourceFile> destDir, int operationId, boolean move, boolean isSilent) {
         try {
             List<TreeNode<SourceFile>> toCopy =
                     SelectedFilesManager.getInstance().getSelectedFiles(operationId);
-            TreeNode<SourceFile> destDir =
-                    SelectedFilesManager.getInstance().getActionableDirectory(operationId);
 
-            postNotification(
-                    operationId,
-                    getString(R.string.app_name),
-                    move ? String.format(getString(R.string.moving_count), 1, toCopy.size()) :
-                            String.format(getString(R.string.copying_count), 1, toCopy.size()));
+            List<TreeNode<SourceFile>> newFiles = new ArrayList<>();
 
-            broadcastShowDialog(
-                    move ? getString(R.string.moving) : getString(R.string.copying), toCopy.size());
-            recurseCopy(toCopy, destDir, operationId, move, 0);
+            if (!isSilent) {
+                postNotification(
+                        operationId,
+                        getString(R.string.app_name),
+                        move ? String.format(getString(R.string.moving_count), 1, toCopy.size()) :
+                                String.format(getString(R.string.copying_count), 1, toCopy.size()));
+
+                broadcastShowDialog(
+                        move ? getString(R.string.moving) : getString(R.string.copying), toCopy.size());
+            }
+
+            recurseCopy(toCopy, destDir, operationId, move,isSilent, 0, newFiles);
             if (move) {
                 delete(operationId, true);
             }
-            broadcastFinishedTask(operationId);
-            Utils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_COPYING);
+
+            if (!isSilent) {
+                broadcastFinishedTask(operationId);
+                Utils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_COPYING);
+            }
+
+            return newFiles;
         } catch (IOException | DbxException | GraphServiceException e) {
             broadcastError(String.format(
                     "%s %s%s",
@@ -455,34 +488,37 @@ public class SourceTransferService extends Service {
                     e.getMessage(),
                     sourceName);
         }
+        return null;
     }
 
     /**
      * Recursively copy or move the given collection of files and/or folders to the given destionation
-     *
-     * @param toCopy      The collection of files and/or folders to copy
+     *  @param toCopy      The collection of files and/or folders to copy
      * @param destDir     The destination of the operation
      * @param operationId Id of the operation
      * @param move        Whether this a move or copy operation
      * @param depth
+     * @param newFiles
      */
     private void recurseCopy(List<TreeNode<SourceFile>> toCopy,
                              TreeNode<SourceFile> destDir,
                              int operationId,
                              boolean move,
-                             int depth)
+                             boolean isSilent,
+                             int depth, List<TreeNode<SourceFile>> newFiles)
             throws IOException, DbxException, GraphServiceException {
 
         for (TreeNode<SourceFile> file : toCopy) {
+            TreeNode<SourceFile> newItem;
+
             if (file.getData().isDirectory()) {
-                TreeNode<SourceFile> newFolder =
-                        createFolder(destDir, operationId, file.getData().getName(), true);
-                recurseCopy(file.getChildren(), newFolder, operationId, move, depth + 1);
+                newItem = createFolder(destDir, operationId, file.getData().getName(), true);
+                recurseCopy(file.getChildren(), newItem, operationId, move, isSilent, depth + 1, newFiles);
             } else {
                 String newFilePath = getFile(file.getData());
                 SourceFile newFile = putFile(newFilePath, file.getData().getName(), destDir.getData());
 
-                destDir.addChild(newFile);
+                newItem = destDir.addChild(newFile);
                 TreeNode<SourceFile> curDir = destDir;
                 while (true) {
                     curDir.getData().addSize(file.getData().getSize());
@@ -493,18 +529,22 @@ public class SourceTransferService extends Service {
             }
 
             if (depth == 0) {
-                broadcastUpdate(toCopy.indexOf(file) + 1);
-                postNotification(
-                        operationId,
-                        getString(R.string.app_name),
-                        move ? String.format(
-                                getString(R.string.moving_count),
-                                toCopy.indexOf(file) + 1,
-                                toCopy.size()) :
-                                String.format(
-                                        getString(R.string.copying_count),
-                                        toCopy.indexOf(file) + 1,
-                                        toCopy.size()));
+                newFiles.add(newItem);
+
+                if (!isSilent) {
+                    broadcastUpdate(toCopy.indexOf(file) + 1);
+                    postNotification(
+                            operationId,
+                            getString(R.string.app_name),
+                            move ? String.format(
+                                    getString(R.string.moving_count),
+                                    toCopy.indexOf(file) + 1,
+                                    toCopy.size()) :
+                                    String.format(
+                                            getString(R.string.copying_count),
+                                            toCopy.indexOf(file) + 1,
+                                            toCopy.size()));
+                }
             }
         }
     }
@@ -599,6 +639,62 @@ public class SourceTransferService extends Service {
         }
     }
 
+    private void zipSelection(int operationId, String zipFileName) {
+        try {
+            TreeNode<SourceFile> destDir =
+                    SelectedFilesManager.getInstance().getActionableDirectory(operationId);
+
+            broadcastShowDialog(getString(R.string.creating_zip), 0);
+
+            List<TreeNode<SourceFile>> toZip = new ArrayList<>();
+            toZip = copy(
+                    new TreeNode<>(new LocalFile(getCacheDir(), Constants.Sources.LOCAL)),
+                    operationId,
+                    false,
+                    true);
+
+            List<String> filesToZipPaths = new ArrayList<>();
+
+            for(TreeNode<SourceFile> file: toZip) {
+                filesToZipPaths.add(file.getData().getPath());
+            }
+
+            FileZipper zipper = new FileZipper();
+            zipper.zipFiles(getCacheDir().getPath()+ File.separator + zipFileName, filesToZipPaths);
+
+            SourceFile newZip = putFile(
+                    getCacheDir().getPath()+ File.separator + zipFileName,
+                    zipFileName,
+                    destDir.getData());
+
+            destDir.addChild(newZip);
+
+            broadcastFinishedTask(operationId);
+        } catch (IOException | DbxException e) {
+            e.printStackTrace();
+
+            broadcastError(String.format(
+                    "%s %s%s",
+                    getString(R.string.problem_encountered),
+                    getString(R.string.zipping_files),
+                    "."));
+
+            String sourceName;
+            if (SelectedFilesManager.getInstance().getActionableDirectory(operationId) != null &&
+                    SelectedFilesManager.getInstance().getActionableDirectory(operationId).getData() != null) {
+                sourceName = SelectedFilesManager.getInstance().getActionableDirectory(operationId).getData().getSourceName();
+            } else {
+                sourceName = Constants.Analytics.NO_DESTINATION;
+            }
+
+            Utils.logFirebaseSourceErrorEvent(
+                    mFirebaseAnalytics,
+                    Constants.Analytics.EVENT_ERROR_DELETE,
+                    e.getMessage(),
+                    sourceName);
+        }
+    }
+
     /**
      * Gets the given source file and stores it in the given destination
      *
@@ -672,7 +768,7 @@ public class SourceTransferService extends Service {
                 Utils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_DROPBOX_UPLOAD);
                 return dropboxFile;
             case Constants.Sources.GOOGLE_DRIVE:
-                GoogleDriveFile googleDriveFile =  new GoogleDriveFile(GoogleDriveFactory
+                GoogleDriveFile googleDriveFile = new GoogleDriveFile(GoogleDriveFactory
                         .getInstance()
                         .uploadFile(
                                 newFilePath,
