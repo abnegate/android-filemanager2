@@ -41,6 +41,7 @@ import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.ndk.CrashlyticsNdk;
 import com.jakebarnby.filemanager.R;
+import com.jakebarnby.filemanager.models.FileAction;
 import com.jakebarnby.filemanager.sources.local.LocalFragment;
 import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.ui.adapters.FileAdapter;
@@ -103,18 +104,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private FabSpeedDial                mFabMenu;
     private ViewGroup                   mBlurWrapper;
     private SearchView                  mSearchView;
-
-    /**
-     * Possible file actions
-     */
-    public enum FileAction {
-        COPY,
-        CUT,
-        RENAME,
-        DELETE,
-        NEW_FOLDER,
-        OPEN
-    }
 
     public SourceManager getSourceManager() {
         return mSourceManager;

@@ -28,6 +28,7 @@ import android.widget.TextView;
 
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
+import com.jakebarnby.filemanager.models.FileAction;
 import com.jakebarnby.filemanager.services.SourceTransferService;
 import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFragment;
 import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveSource;
@@ -296,7 +297,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                         SelectedFilesManager.getInstance().addNewSelection();
                         ((SourceActivity)getActivity()).getSourceManager().addFileAction(
                                 SelectedFilesManager.getInstance().getOperationCount()-1,
-                                SourceActivity.FileAction.OPEN);
+                                FileAction.OPEN);
                         SourceTransferService.startActionOpen(getContext(), file.getData());
                     } else {
                         Snackbar.make(mRecycler,

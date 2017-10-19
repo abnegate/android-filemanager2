@@ -2,6 +2,7 @@ package com.jakebarnby.filemanager.sources.models;
 
 import android.util.SparseArray;
 
+import com.jakebarnby.filemanager.models.FileAction;
 import com.jakebarnby.filemanager.sources.SourceActivity;
 import com.jakebarnby.filemanager.util.TreeNode;
 
@@ -12,7 +13,7 @@ import com.jakebarnby.filemanager.util.TreeNode;
 public class SourceManager {
 
     private TreeNode<SourceFile>                    mActiveDirectory;
-    private SparseArray<SourceActivity.FileAction>  mCurrentFileActions;
+    private SparseArray<FileAction>  mCurrentFileActions;
 
     public SourceManager() {
         this.mCurrentFileActions = new SparseArray<>();
@@ -26,11 +27,11 @@ public class SourceManager {
         this.mActiveDirectory = mActiveDirectory;
     }
 
-    public SourceActivity.FileAction getFileAction(int operationId) {
+    public FileAction getFileAction(int operationId) {
         return mCurrentFileActions.get(operationId);
     }
 
-    public void addFileAction(int operationId, SourceActivity.FileAction action) {
+    public void addFileAction(int operationId, FileAction action) {
         mCurrentFileActions.put(operationId, action);
     }
 }
