@@ -17,6 +17,10 @@
         android:icon="@drawable/ic_action_rename"
         android:title="@string/menu_item_rename" />
     <item
+        android:id="@+id/action_zip"
+        android:icon="@drawable/ic_archive"
+        android:title="@string/menu_item_zip" />
+    <item
         android:id="@+id/action_properties"
         android:icon="@drawable/ic_action_properties"
         android:title="@string/menu_item_properties" />

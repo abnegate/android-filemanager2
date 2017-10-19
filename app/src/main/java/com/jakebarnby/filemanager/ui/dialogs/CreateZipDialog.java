@@ -10,16 +10,16 @@ import android.widget.EditText;
 
 import com.jakebarnby.filemanager.R;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
-import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.services.SourceTransferService;
+import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.TreeNode;
 
 /**
- * Created by Jake on 6/18/2017.
+ * Created by Jake on 10/14/2017.
  */
 
-public class CreateFolderDialog extends DialogFragment {
+public class CreateZipDialog extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -35,7 +35,7 @@ public class CreateFolderDialog extends DialogFragment {
                     SelectedFilesManager.getInstance().getActionableDirectory(
                             SelectedFilesManager.getInstance().getOperationCount());
 
-            String name = input.getText().toString();
+            String name = input.getText().toString()+".zip";
 
             for(TreeNode<SourceFile> file: activeDirectory.getChildren()) {
                 if (file.getData().isDirectory()) {
@@ -45,7 +45,7 @@ public class CreateFolderDialog extends DialogFragment {
                     }
                 }
             }
-            SourceTransferService.startActionCreateFolder(getContext(), name);
+            SourceTransferService.startActionZip(getContext(), name);
             SelectedFilesManager.getInstance().addNewSelection();
         });
         builder.setNegativeButton(getString(R.string.cancel), (dialog, which) -> dialog.dismiss());

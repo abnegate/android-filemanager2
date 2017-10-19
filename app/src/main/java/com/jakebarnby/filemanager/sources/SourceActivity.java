@@ -41,6 +41,7 @@ import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.ndk.CrashlyticsNdk;
 import com.jakebarnby.filemanager.R;
+import com.jakebarnby.filemanager.models.FileAction;
 import com.jakebarnby.filemanager.sources.local.LocalFragment;
 import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.ui.adapters.FileAdapter;
@@ -49,6 +50,7 @@ import com.jakebarnby.filemanager.ui.adapters.SourceLogoutAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourcePagerAdapter;
 import com.jakebarnby.filemanager.ui.adapters.SourceUsageAdapter;
 import com.jakebarnby.filemanager.ui.dialogs.CreateFolderDialog;
+import com.jakebarnby.filemanager.ui.dialogs.CreateZipDialog;
 import com.jakebarnby.filemanager.ui.dialogs.PropertiesDialog;
 import com.jakebarnby.filemanager.ui.dialogs.RenameDialog;
 import com.jakebarnby.filemanager.ui.dialogs.SettingsDialog;
@@ -104,18 +106,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private ViewGroup                   mBlurWrapper;
     private SearchView                  mSearchView;
 
-    /**
-     * Possible file actions
-     */
-    public enum FileAction {
-        COPY,
-        CUT,
-        RENAME,
-        DELETE,
-        NEW_FOLDER,
-        OPEN
-    }
-
     public SourceManager getSourceManager() {
         return mSourceManager;
     }
@@ -159,21 +149,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             @SuppressLint("RestrictedApi")
             @Override
             public boolean onPrepareMenu(NavigationMenu navigationMenu) {
-                Blurry.with(SourceActivity.this)
-                        .radius(17)
-                        .sampling(1)
-                        .async()
-                        .onto(mBlurWrapper);
-
-                if (mSourceManager.getFileAction(SelectedFilesManager.getInstance().getOperationCount()) == null) {
-                    navigationMenu.findItem(R.id.action_paste).setVisible(false);
-                }
-                if  (SelectedFilesManager
-                        .getInstance()
-                        .getCurrentSelectedFiles()
-                        .size() > 1) {
-                    navigationMenu.findItem(R.id.action_rename).setVisible(false);
-                }
+                prepareContextMenu(navigationMenu);
                 return super.onPrepareMenu(navigationMenu);
             }
 
@@ -195,6 +171,25 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         tabLayout.setupWithViewPager(mViewPager);
 
         SourceTransferService.startClearLocalCache(this);
+    }
+
+    private void prepareContextMenu(NavigationMenu navigationMenu) {
+        Blurry.with(SourceActivity.this)
+                .radius(17)
+                .sampling(1)
+                .async()
+                .onto(mBlurWrapper);
+
+        if (mSourceManager.getFileAction(SelectedFilesManager.getInstance().getOperationCount()) == null) {
+            navigationMenu.findItem(R.id.action_paste).setVisible(false);
+        }
+
+        if  (SelectedFilesManager
+                .getInstance()
+                .getCurrentSelectedFiles()
+                .size() > 1) {
+            navigationMenu.findItem(R.id.action_rename).setVisible(false);
+        }
     }
 
     @Override
@@ -376,6 +371,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 break;
             case R.id.action_paste:
                 doPasteChecks();
+                break;
+            case R.id.action_zip:
+                showCreateZipDialog();
                 break;
             case R.id.action_properties:
                 showPropertiesDialog();
@@ -652,6 +650,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             case DELETE:
             case RENAME:
             case NEW_FOLDER:
+            case NEW_ZIP:
                 completeTreeModification(operationId);
                 break;
             case OPEN:
@@ -671,16 +670,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      * @param operationId
      */
     private void completeTreeModification(int operationId) {
-        int sortType = PreferenceUtils.getInt(
-                this,
-                Constants.Prefs.SORT_TYPE_KEY,
-                Constants.SortTypes.NAME);
-
-        int orderType = PreferenceUtils.getInt(
-                this,
-                Constants.Prefs.ORDER_TYPE_KEY,
-                Constants.OrderTypes.ASCENDING);
-
         TreeNode.sortTree(
                 SelectedFilesManager.getInstance().getActionableDirectory(operationId),
                 ComparatorUtils.resolveComparator(this));
@@ -737,10 +726,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      */
     private void showRenameDialog() {
         if (getActiveFragment().getSource().checkConnectionActive(this)) {
-
-            getActiveFragment().setMultiSelectEnabled(false);
             setTitle(getString(R.string.app_name));
             toggleFloatingMenu(false);
+
+            for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
+                fragment.setMultiSelectEnabled(false);
+            }
 
             mSourceManager.addFileAction(
                     SelectedFilesManager.getInstance().getOperationCount(),
@@ -763,7 +754,38 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             bundle.putString(Constants.DIALOG_TITLE_KEY, getString(R.string.rename));
             RenameDialog dialog = new RenameDialog();
             dialog.setArguments(bundle);
-            dialog.show(getSupportFragmentManager(), "Rename");
+            dialog.show(getSupportFragmentManager(), getString(R.string.rename));
+        }
+    }
+
+    private void showCreateZipDialog() {
+        if (getActiveFragment().getSource().checkConnectionActive(this)) {
+            if (!getActiveFragment().getSource().isLoggedIn()) {
+                showSnackbar(getString(R.string.err_not_logged_in));
+                return;
+            } else if (!getActiveFragment().getSource().isFilesLoaded()) {
+                showSnackbar(getString(R.string.err_not_loaded));
+                return;
+            }
+
+            setTitle(getString(R.string.app_name));
+            toggleFloatingMenu(false);
+            for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
+                fragment.setMultiSelectEnabled(false);
+            }
+
+            mSourceManager.addFileAction(
+                    SelectedFilesManager.getInstance().getOperationCount(),
+                    FileAction.NEW_ZIP);
+            SelectedFilesManager.getInstance().addActionableDirectory(
+                    SelectedFilesManager.getInstance().getOperationCount(),
+                    mSourceManager.getActiveDirectory());
+
+            Bundle bundle = new Bundle();
+            bundle.putString(Constants.DIALOG_TITLE_KEY, getString(R.string.create_zip));
+            CreateZipDialog dialog = new CreateZipDialog();
+            dialog.setArguments(bundle);
+            dialog.show(getSupportFragmentManager(), getString(R.string.create_zip));
         }
     }
 
@@ -786,6 +808,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
      */
     private void showProgressDialog(Intent intent) {
         String title = intent.getStringExtra(EXTRA_DIALOG_TITLE);
+
         if (title == null) {
             title = "Operation in progress..";
         }

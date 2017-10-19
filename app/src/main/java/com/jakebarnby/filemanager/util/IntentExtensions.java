@@ -14,6 +14,7 @@ public class IntentExtensions {
     public static final String ACTION_DELETE = "com.jakebarnby.filemanager.services.action.DELETE";
     public static final String ACTION_RENAME = "com.jakebarnby.filemanager.services.action.RENAME";
     public static final String ACTION_OPEN = "com.jakebarnby.filemanager.services.action.OPEN";
+    public static final String ACTION_ZIP = "com.jakebarnby.filemanager.services.action.ZIP";
     public static final String ACTION_CLEAR_CACHE = "com.jakebarnby.filemanager.services.action.CLEAR_CACHE";
 
     public static final String EXTRA_OPERATION_ID = "com.jakebarnby.filemanager.services.extra.OPERATION_ID";
@@ -23,4 +24,5 @@ public class IntentExtensions {
     public static final String EXTRA_NEW_NAME = "com.jakebarnby.filemanager.services.extra.NAME";
     public static final String EXTRA_TO_OPEN_PATH = "com.jakebarnby.filemanager.services.extra.TO_OPEN";
     public static final String EXTRA_DIALOG_MESSAGE = "com.jakebarnby.filemanager.services.extra.DIALOG_MESSAGE";
+    public static final String EXTRA_ZIP_FILENAME = "com.jakebarnby.filemanager.services.extra.ZIP_FILENAME";
 }
