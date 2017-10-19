@@ -39,7 +39,7 @@ public class CreateFolderDialog extends DialogFragment {
 
             for(TreeNode<SourceFile> file: activeDirectory.getChildren()) {
                 if (file.getData().isDirectory()) {
-                    if (file.getData().getName().equalsIgnoreCase(name)) {
+                    if (file.getData().getName().equals(name)) {
                         Snackbar.make(getActivity().getCurrentFocus(), getString(R.string.folder_exists), Snackbar.LENGTH_LONG).show();
                         return;
                     }
