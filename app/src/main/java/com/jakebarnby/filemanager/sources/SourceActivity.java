@@ -426,8 +426,13 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         List<String> sourceNames = new ArrayList<>();
 
         for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
-            allResults.addAll(TreeNode.searchForChildren(fragment.getSource().getRootNode(), query));
-            sourceNames.add(fragment.getSource().getSourceName());
+            List<TreeNode<SourceFile>> results =
+                    TreeNode.searchForChildren(fragment.getSource().getRootNode(), query);
+
+            if (results.size() > 0) {
+                allResults.addAll(results);
+                sourceNames.add(fragment.getSource().getSourceName());
+            }
         }
 
         Collections.sort(allResults,
@@ -469,6 +474,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         } else {
             rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
             rv.setAdapter(adapter);
+            searchDialog.setTitle(R.string.search_results);
             searchDialog.setView(view);
         }
 
