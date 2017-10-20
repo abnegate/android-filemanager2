@@ -220,7 +220,7 @@ public class Utils {
             case Constants.Sources.ONEDRIVE:
                 return R.drawable.ic_onedrive;
             default:
-                return R.mipmap.ic_launcher;
+                return R.drawable.ic_file;
         }
     }
 

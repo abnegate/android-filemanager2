@@ -28,7 +28,7 @@
         android:layout_height="@dimen/thumb_size"
         android:padding="2dp"
         android:scaleType="centerCrop"
-        android:src="@mipmap/ic_launcher_round"
+            app:srcCompat="@drawable/ic_file"
         app:layout_aspectRatio="100%"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/checkbox"

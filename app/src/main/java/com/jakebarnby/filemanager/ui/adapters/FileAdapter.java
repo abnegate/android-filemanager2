@@ -110,7 +110,7 @@ public abstract class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileV
             String name = currentDir.getData().getName();
             if (currentDir.getData().isDirectory()) {
                 mText.setText(name);
-                mPreviewImage.setImageResource(R.drawable.ic_folder);
+                mPreviewImage.setImageResource(R.drawable.ic_folder_flat);
             } else {
                 if (name.lastIndexOf('.') > 0) {
                     mText.setText(name.substring(0, name.lastIndexOf('.')));
@@ -163,8 +163,8 @@ public abstract class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileV
                     .load(currentDir.getData().getSourceType() == SourceType.LOCAL ?
                             new File(currentDir.getData().getThumbnailLink()) :
                             currentDir.getData().getThumbnailLink())
-                    .error(R.mipmap.ic_launcher_round)
-                    .placeholder(R.mipmap.ic_launcher_round)
+                    .error(R.drawable.ic_file)
+                    .placeholder(R.drawable.ic_file)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .transition(withCrossFade())
                     .override(100, 100)

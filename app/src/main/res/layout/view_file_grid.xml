@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="100dp">
 
@@ -10,8 +9,7 @@
         android:layout_width="@dimen/thumb_size"
         android:layout_height="@dimen/thumb_size"
         android:layout_centerHorizontal="true"
-        android:padding="2dp"
-        android:src="@mipmap/ic_launcher_round" />
+        android:padding="2dp"/>
 
     <CheckBox
         android:id="@+id/checkbox"

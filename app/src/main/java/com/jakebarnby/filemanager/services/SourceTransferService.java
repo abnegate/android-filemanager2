@@ -877,7 +877,7 @@ public class SourceTransferService extends Service {
     private void postNotification(int operationId, String title, String content) {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setSmallIcon(R.drawable.ic_folder_flat)
                         .setContentTitle(title)
                         .setContentText(content);
 
