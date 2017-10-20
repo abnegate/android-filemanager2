@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingEnd="@dimen/dialog_padding"
-    android:paddingStart="@dimen/dialog_padding"
-    android:paddingTop="18dp">
+    android:padding="?dialogPreferredPadding">
 
     <RadioGroup
         android:id="@+id/rdg_sort_by"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/rdg_padding_bottom"
+        android:layout_marginBottom="24dp"
         app:layout_constraintBottom_toTopOf="@id/divider_sort"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -49,7 +47,7 @@
             android:id="@+id/rdb_modified_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/rdb_padding_bottom"
+
             android:paddingStart="@dimen/rdb_padding"
             android:text="@string/modifiedTime"
             android:textSize="@dimen/dialog_text" />
@@ -59,7 +57,7 @@
         android:id="@+id/divider_sort"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="24dp"
         android:layout_marginEnd="10dp"
         android:layout_marginStart="10dp"
         android:background="@color/colorAccent"
@@ -72,6 +70,7 @@
         android:id="@+id/txt_order"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
         android:text="@string/order"
         android:textColor="@color/colorAccentAccent"
         android:textSize="@dimen/dialog_text"
@@ -83,7 +82,6 @@
         android:id="@+id/rdg_order_by"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txt_order">
@@ -105,4 +103,4 @@
             android:text="@string/descending"
             android:textSize="@dimen/dialog_text" />
     </RadioGroup>
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>

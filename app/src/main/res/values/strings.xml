@@ -102,4 +102,5 @@
     <string name="zero">0</string>
     <string name="creating_zip">Creating zip…</string>
     <string name="zipping_files">zipping files</string>
+    <string name="source">Source</string>
 </resources>

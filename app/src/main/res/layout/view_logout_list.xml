@@ -7,8 +7,7 @@
         android:id="@+id/img_logo_logout"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="20dp" />
+        android:layout_centerVertical="true" />
 
     <TextView
         android:id="@+id/txt_source_title"
@@ -25,7 +24,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="20dp"
         android:background="@android:color/transparent"
         android:textColor="@color/colorAccent" />
 
