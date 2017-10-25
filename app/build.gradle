@@ -115,6 +115,9 @@ dependencies {
     //CirclePercentProgressBar
     implementation 'com.dinuscxj:circleprogressbar:1.1.1'
 
+    //Play services billing
+    implementation 'com.android.billingclient:billing:1.0'
+
     //Tutorial
     implementation project(':tutorial')
 
