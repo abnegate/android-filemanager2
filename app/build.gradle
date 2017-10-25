@@ -98,8 +98,8 @@ dependencies {
 
     //OneDrive
     implementation project(':msal')
-    implementation('com.microsoft.graph:msgraph-sdk-android:1.4.0')
-    implementation('com.google.code.gson:gson:2.8.1')
+    implementation 'com.microsoft.graph:msgraph-sdk-android:1.4.0'
+    implementation 'com.google.code.gson:gson:2.8.1'
 
     //FAB Menu Button
     implementation 'io.github.yavski:fab-speed-dial:1.0.6'
