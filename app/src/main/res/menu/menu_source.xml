@@ -33,6 +33,10 @@
         android:title="@string/action_logout"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_premium"
+        android:title="@string/action_remove_ads"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_settings"
         android:title="@string/action_settings"
         app:showAsAction="never" />

@@ -40,7 +40,11 @@ import android.widget.Spinner;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.ndk.CrashlyticsNdk;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.jakebarnby.filemanager.R;
+import com.jakebarnby.filemanager.managers.BillingManager;
 import com.jakebarnby.filemanager.models.FileAction;
 import com.jakebarnby.filemanager.sources.local.LocalFragment;
 import com.jakebarnby.filemanager.sources.models.SourceType;
@@ -106,7 +110,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private ViewGroup                   mBlurWrapper;
     private SearchView                  mSearchView;
 
+    private BillingManager              mBillingManager;
     private InterstitialAd              mInterstitialAd;
+
     public SourceManager getSourceManager() {
         return mSourceManager;
     }
@@ -185,6 +191,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         SourceTransferService.startClearLocalCache(this);
     }
 
+    @SuppressLint("RestrictedApi")
     private void prepareContextMenu(NavigationMenu navigationMenu) {
         Blurry.with(SourceActivity.this)
                 .radius(17)
@@ -238,6 +245,10 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_source, menu);
 
+        if (!PreferenceUtils.getBoolean(this, Constants.Prefs.PREMIUM_KEY, false)) {
+            menu.add(R.string.action_remove_ads);
+        }
+
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
@@ -249,9 +260,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
-            case R.id.action_settings:
-                showSettingsDialog();
-                break;
             case R.id.action_view_as:
                 showViewAsDialog();
                 break;
@@ -269,6 +277,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 break;
             case R.id.action_logout:
                 showLogoutDialog();
+                break;
+            case R.id.action_settings:
+                showSettingsDialog();
+                break;
+            case R.id.action_premium:
+                mBillingManager.purchaseItem(this, Constants.Billing.SKU_PREMIUM);
                 break;
             default:
                 break;

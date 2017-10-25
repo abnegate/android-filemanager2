@@ -99,8 +99,8 @@ dependencies {
 
     //OneDrive
     implementation project(':msal')
-    implementation('com.microsoft.graph:msgraph-sdk-android:1.4.0')
-    implementation('com.google.code.gson:gson:2.8.1')
+    implementation 'com.microsoft.graph:msgraph-sdk-android:1.4.0'
+    implementation 'com.google.code.gson:gson:2.8.1'
 
     //FAB Menu Button
     implementation 'io.github.yavski:fab-speed-dial:1.0.6'
@@ -109,12 +109,15 @@ dependencies {
     implementation 'jp.wasabeef:blurry:2.1.1'
 
     //Glide
-    implementation 'com.github.bumptech.glide:glide:4.0.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0'
-    implementation "com.github.bumptech.glide:recyclerview-integration:4.0.0@aar"
+    implementation 'com.github.bumptech.glide:glide:4.1.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.1.1'
+    implementation 'com.github.bumptech.glide:recyclerview-integration:4.1.1@aar'
 
     //CirclePercentProgressBar
     implementation 'com.dinuscxj:circleprogressbar:1.1.1'
+
+    //Play services billing
+    implementation 'com.android.billingclient:billing:1.0'
 
     //Tutorial
     implementation project(':tutorial')

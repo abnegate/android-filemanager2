@@ -47,6 +47,7 @@ public class Constants {
         public static final String ORDER_TYPE_KEY = "order-type";
         public static final String HIDDEN_FOLDER_KEY = "hidden-folder";
         public static final String FOLDER_FIRST_KEY = "folders-first";
+        public static final String PREMIUM_KEY = "premium-enabled";
         public static final String OPERATION_COUNT_KEY = "operation-count";
     }
 
@@ -136,6 +137,10 @@ public class Constants {
         public static final String SORT_BY = "Sort by";
         public static final String CREATE_FOLDER = "Create folder";
         public static final String SETTINGS = "Settings";
+    }
+
+    public class Billing {
+        public static final String SKU_PREMIUM = "premium";
     }
 
     public class Ads {
