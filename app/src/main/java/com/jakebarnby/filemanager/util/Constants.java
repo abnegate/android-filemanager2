@@ -47,6 +47,7 @@ public class Constants {
         public static final String ORDER_TYPE_KEY = "order-type";
         public static final String HIDDEN_FOLDER_KEY = "hidden-folder";
         public static final String FOLDER_FIRST_KEY = "folders-first";
+        public static final String OPERATION_COUNT_KEY = "operation-count";
     }
 
     public class Animation {
@@ -135,5 +136,11 @@ public class Constants {
         public static final String SORT_BY = "Sort by";
         public static final String CREATE_FOLDER = "Create folder";
         public static final String SETTINGS = "Settings";
+    }
+
+    public class Ads {
+        public static final String ADMOB_ID = "ca-app-pub-6044629197845708~9185423482";
+        public static final String INTERSTITIAL_ID = "ca-app-pub-6044629197845708/9815268432";
+        public static final int SHOW_AD_COUNT = 3;
     }
 }

@@ -106,6 +106,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private ViewGroup                   mBlurWrapper;
     private SearchView                  mSearchView;
 
+    private InterstitialAd              mInterstitialAd;
     public SourceManager getSourceManager() {
         return mSourceManager;
     }
@@ -127,6 +128,17 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                mInterstitialAd.loadAd(new AdRequest.Builder().build());
+            }
+        });
+
+        mBillingManager = new BillingManager(this);
         mSourceManager = new SourceManager();
         mSourcesPagerAdapter = new SourcePagerAdapter(getSupportFragmentManager());
         addLocalSources();
@@ -668,6 +680,15 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
         if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
+        }
+
+        int operationCount = PreferenceUtils.getInt(this, Constants.Prefs.OPERATION_COUNT_KEY, 0);
+        PreferenceUtils.savePref(this, Constants.Prefs.OPERATION_COUNT_KEY, operationCount+=1);
+        if (operationCount == Constants.Ads.SHOW_AD_COUNT) {
+            if (mInterstitialAd.isLoaded()) {
+                mInterstitialAd.show();
+                PreferenceUtils.savePref(this, Constants.Prefs.OPERATION_COUNT_KEY, 0);
+            }
         }
     }
 
