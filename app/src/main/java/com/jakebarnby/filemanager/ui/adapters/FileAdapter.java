@@ -11,13 +11,13 @@ import android.widget.TextView;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.jakebarnby.filemanager.R;
+import com.jakebarnby.filemanager.glide.GlideApp;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.filemanager.util.TreeNode;
-import com.jakebarnby.tutorial.glide.GlideApp;
 
 import java.io.File;
 import java.util.List;

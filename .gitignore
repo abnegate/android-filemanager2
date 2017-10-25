@@ -12,3 +12,7 @@ msal/build
 \.idea/
 
 build/
+
+app/release/
+
+app/debug/
