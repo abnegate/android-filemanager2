@@ -561,8 +561,6 @@ public class SourceTransferService extends Service {
         try {
             List<TreeNode<SourceFile>> toDelete =
                     SelectedFilesManager.getInstance().getSelectedFiles(operationId);
-            TreeNode<SourceFile> currentDir =
-                    SelectedFilesManager.getInstance().getActionableDirectory(operationId);
 
             if (!isSilent)
                 broadcastShowDialog(getString(R.string.dialog_deleting), toDelete.size());
@@ -592,15 +590,15 @@ public class SourceTransferService extends Service {
                                 .deleteFile(((OneDriveFile) file.getData()).getDriveId());
                         break;
                     default:
-                        if (currentDir.getData().getSourceType() == SourceType.LOCAL) {
+                        if (file.getData().getSourceType() == SourceType.LOCAL) {
                             int result = deleteFileNative(file.getData().getPath());
                             if (result != 0) throw new IOException("deleting file");
                             break;
                         }
                 }
-                currentDir.removeChild(file);
+                file.getParent().removeChild(file);
 
-                TreeNode<SourceFile> curDir = currentDir;
+                TreeNode<SourceFile> curDir = file.getParent();
                 while (true) {
                     curDir.getData().removeSize(file.getData().getSize());
                     if (curDir.getParent() != null) {

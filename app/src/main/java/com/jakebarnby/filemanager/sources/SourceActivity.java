@@ -76,6 +76,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 import io.fabric.sdk.android.Fabric;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
@@ -545,7 +546,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         } else {
             showSnackbar(getString(R.string.err_no_selection));
         }
-        getActiveFragment().setMultiSelectEnabled(false);
+        disableAllMultiSelect();
     }
 
     /**
@@ -562,9 +563,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         } else {
             showSnackbar(getString(R.string.err_no_selection));
         }
-        for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
-            fragment.setMultiSelectEnabled(false);
-        }
+        disableAllMultiSelect();
     }
 
     /**
@@ -591,9 +590,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                                     SelectedFilesManager.getInstance().getOperationCount(),
                                     mSourceManager.getActiveDirectory());
 
-                            getActiveFragment().setMultiSelectEnabled(false);
-                            setTitle(getString(R.string.app_name));
+                            disableAllMultiSelect();
                             toggleFloatingMenu(false);
+                            setTitle(getString(R.string.app_name));
                             SourceTransferService.startActionDelete(SourceActivity.this);
                             getActiveFragment()
                                     .getSource()
@@ -715,7 +714,9 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                 SelectedFilesManager.getInstance().getActionableDirectory(operationId),
                 ComparatorUtils.resolveComparator(this));
 
-        getActiveFragment().refreshRecycler();
+        for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
+            fragment.refreshRecycler();
+        }
     }
 
     /**
@@ -811,9 +812,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
             setTitle(getString(R.string.app_name));
             toggleFloatingMenu(false);
-            for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
-                fragment.setMultiSelectEnabled(false);
-            }
+            disableAllMultiSelect();
 
             mSourceManager.addFileAction(
                     SelectedFilesManager.getInstance().getOperationCount(),
@@ -1054,6 +1053,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             }
         });
         mFabMenu.startAnimation(translate);
+    }
+
+    private void disableAllMultiSelect() {
+        for (SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
+            fragment.setMultiSelectEnabled(false);
+        }
     }
 
     /**
