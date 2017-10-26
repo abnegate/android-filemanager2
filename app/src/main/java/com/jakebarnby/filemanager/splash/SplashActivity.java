@@ -4,12 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.AnimationUtils;
-import android.view.animation.BounceInterpolator;
-import android.view.animation.ScaleAnimation;
-import android.widget.ImageView;
 
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
@@ -38,7 +32,7 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
 
-        if (!PreferenceUtils.getBoolean(this, Constants.Prefs.PREMIUM_KEY, false)) {
+        if (!PreferenceUtils.getBoolean(this, Constants.Prefs.SHOW_ADS_KEY, false)) {
             MobileAds.initialize(this, Constants.Ads.ADMOB_ID);
         }
     }

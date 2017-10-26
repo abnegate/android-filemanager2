@@ -245,8 +245,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_source, menu);
 
-        if (!PreferenceUtils.getBoolean(this, Constants.Prefs.PREMIUM_KEY, false)) {
-            menu.add(R.string.action_remove_ads);
+        if (!PreferenceUtils.getBoolean(this, Constants.Prefs.SHOW_ADS_KEY, false)) {
+            menu.add(Menu.NONE, Constants.ADS_MENU_ID, Constants.ADS_MENU_POSITION, R.string.action_remove_ads);
         }
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -281,7 +281,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
             case R.id.action_settings:
                 showSettingsDialog();
                 break;
-            case R.id.action_premium:
+            case Constants.ADS_MENU_ID:
                 mBillingManager.purchaseItem(this, Constants.Billing.SKU_PREMIUM);
                 break;
             default:
