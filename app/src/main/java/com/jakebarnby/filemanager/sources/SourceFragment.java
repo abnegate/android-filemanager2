@@ -117,12 +117,14 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
 
     @Override
     public void onLoadError(String errorMessage) {
-        onLoadAborted();
-        ((SourceActivity)getActivity()).showErrorDialog(String.format(
-                "%s %s%s",
-                getString(R.string.problem_encountered),
-                getString(R.string.loading_source),
-                ": "+errorMessage));
+        getActivity().runOnUiThread(() -> {
+            onLoadAborted();
+            ((SourceActivity)getActivity()).showErrorDialog(String.format(
+                    "%s %s%s",
+                    getString(R.string.problem_encountered),
+                    getString(R.string.loading_source),
+                    ": "+errorMessage));
+        });
     }
 
     @Override
