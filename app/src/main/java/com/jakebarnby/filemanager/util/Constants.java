@@ -14,6 +14,8 @@ public class Constants {
     public static final String ALL = "All";
     public static final String DATE_TIME_FORMAT = "%02d:%02d %02d/%02d/%02d";
     public static final int GRID_SIZE = 4;
+    public static final int ADS_MENU_POSITION = 9;
+    public static final int ADS_MENU_ID = 666666;
 
     public class Sources {
         public static final String LOCAL = "Local";
@@ -47,7 +49,7 @@ public class Constants {
         public static final String ORDER_TYPE_KEY = "order-type";
         public static final String HIDDEN_FOLDER_KEY = "hidden-folder";
         public static final String FOLDER_FIRST_KEY = "folders-first";
-        public static final String PREMIUM_KEY = "premium-enabled";
+        public static final String SHOW_ADS_KEY = "premium-enabled";
         public static final String OPERATION_COUNT_KEY = "operation-count";
     }
 
@@ -146,6 +148,6 @@ public class Constants {
     public class Ads {
         public static final String ADMOB_ID = "ca-app-pub-6044629197845708~9185423482";
         public static final String INTERSTITIAL_ID = "ca-app-pub-6044629197845708/9815268432";
-        public static final int SHOW_AD_COUNT = 3;
+        public static final int SHOW_AD_COUNT = 6;
     }
 }

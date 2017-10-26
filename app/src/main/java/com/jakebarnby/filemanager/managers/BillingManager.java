@@ -2,13 +2,11 @@ package com.jakebarnby.filemanager.managers;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.annotation.Nullable;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.PreferenceUtils;
 
@@ -61,7 +59,7 @@ public class BillingManager {
     private void handlePurchase(Context context, Purchase purchase) {
         switch (purchase.getSku()) {
             case Constants.Billing.SKU_PREMIUM:
-                PreferenceUtils.savePref(context, Constants.Prefs.PREMIUM_KEY, true);
+                PreferenceUtils.savePref(context, Constants.Prefs.SHOW_ADS_KEY, true);
                 break;
         }
     }
@@ -79,7 +77,7 @@ public class BillingManager {
         List<Purchase> purchases = purchasesResult.getPurchasesList();
         for(Purchase purchase: purchases) {
             if (purchase.getSku().equals(Constants.Billing.SKU_PREMIUM)) {
-                PreferenceUtils.savePref(context, Constants.Prefs.PREMIUM_KEY, true);
+                PreferenceUtils.savePref(context, Constants.Prefs.SHOW_ADS_KEY, true);
             }
         }
     }
