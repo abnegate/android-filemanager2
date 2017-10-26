@@ -39,7 +39,6 @@ import android.widget.Spinner;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.ndk.CrashlyticsNdk;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
@@ -76,7 +75,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 
 import io.fabric.sdk.android.Fabric;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
@@ -130,7 +128,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_source);
-        Fabric.with(this, new Crashlytics(), new CrashlyticsNdk(), new Answers());
+        Fabric.with(this, new Crashlytics(), new Answers());
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -246,7 +244,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_source, menu);
 
-        if (!PreferenceUtils.getBoolean(this, Constants.Prefs.SHOW_ADS_KEY, false)) {
+        if (!PreferenceUtils.getBoolean(this, Constants.Prefs.HIDE_ADS_KEY, false)) {
             menu.add(Menu.NONE, Constants.ADS_MENU_ID, Constants.ADS_MENU_POSITION, R.string.action_remove_ads);
         }
 
@@ -697,7 +695,8 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
         int operationCount = PreferenceUtils.getInt(this, Constants.Prefs.OPERATION_COUNT_KEY, 0);
         PreferenceUtils.savePref(this, Constants.Prefs.OPERATION_COUNT_KEY, operationCount+=1);
-        if (operationCount == Constants.Ads.SHOW_AD_COUNT) {
+        boolean removeAds = PreferenceUtils.getBoolean(this, Constants.Prefs.HIDE_ADS_KEY, false);
+        if (operationCount == Constants.Ads.SHOW_AD_COUNT && !removeAds) {
             if (mInterstitialAd.isLoaded()) {
                 mInterstitialAd.show();
                 PreferenceUtils.savePref(this, Constants.Prefs.OPERATION_COUNT_KEY, 0);

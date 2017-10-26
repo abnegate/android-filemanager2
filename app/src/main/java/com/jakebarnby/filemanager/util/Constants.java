@@ -49,7 +49,7 @@ public class Constants {
         public static final String ORDER_TYPE_KEY = "order-type";
         public static final String HIDDEN_FOLDER_KEY = "hidden-folder";
         public static final String FOLDER_FIRST_KEY = "folders-first";
-        public static final String SHOW_ADS_KEY = "premium-enabled";
+        public static final String HIDE_ADS_KEY = "premium-enabled";
         public static final String OPERATION_COUNT_KEY = "operation-count";
     }
 

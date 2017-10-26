@@ -59,7 +59,8 @@ public class BillingManager {
     private void handlePurchase(Context context, Purchase purchase) {
         switch (purchase.getSku()) {
             case Constants.Billing.SKU_PREMIUM:
-                PreferenceUtils.savePref(context, Constants.Prefs.SHOW_ADS_KEY, true);
+                //TODO: Show dialog "Thanks! All ads have been disabled."
+                PreferenceUtils.savePref(context, Constants.Prefs.HIDE_ADS_KEY, true);
                 break;
         }
     }
@@ -69,7 +70,7 @@ public class BillingManager {
                 .setSku(sku)
                 .setType(BillingClient.SkuType.INAPP)
                 .build();
-        int responseCode = mBillingClient.launchBillingFlow(activity, flowParams);
+        mBillingClient.launchBillingFlow(activity, flowParams);
     }
 
     public void queryPurchases(Context context) {
@@ -77,7 +78,7 @@ public class BillingManager {
         List<Purchase> purchases = purchasesResult.getPurchasesList();
         for(Purchase purchase: purchases) {
             if (purchase.getSku().equals(Constants.Billing.SKU_PREMIUM)) {
-                PreferenceUtils.savePref(context, Constants.Prefs.SHOW_ADS_KEY, true);
+                PreferenceUtils.savePref(context, Constants.Prefs.HIDE_ADS_KEY, true);
             }
         }
     }

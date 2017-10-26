@@ -32,7 +32,7 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
         mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
 
-        if (!PreferenceUtils.getBoolean(this, Constants.Prefs.SHOW_ADS_KEY, false)) {
+        if (!PreferenceUtils.getBoolean(this, Constants.Prefs.HIDE_ADS_KEY, false)) {
             MobileAds.initialize(this, Constants.Ads.ADMOB_ID);
         }
     }
