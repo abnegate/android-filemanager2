@@ -73,6 +73,7 @@ public class OneDriveLoaderTask extends LoaderTask {
             }
         } catch (GraphServiceException e) {
             mListener.onLoadError(e.getMessage() != null ? e.getMessage() : "");
+            mSucess = false;
         }
         return mRootTreeNode;
     }

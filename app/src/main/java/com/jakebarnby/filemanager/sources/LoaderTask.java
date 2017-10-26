@@ -19,12 +19,15 @@ public abstract class LoaderTask extends AsyncTask<String, Void, TreeNode<Source
     protected Source                  mSource;
     protected SourceListener          mListener;
 
+    protected boolean                 mSucess;
+
     protected abstract Object initRootNode(String path);
     protected abstract TreeNode<SourceFile> readFileTree(Object rootObject);
 
     public LoaderTask(Source source, SourceListener listener) {
         this.mSource = source;
         this.mListener = listener;
+        this.mSucess = true;
     }
 
     @Override
@@ -42,8 +45,10 @@ public abstract class LoaderTask extends AsyncTask<String, Void, TreeNode<Source
     @Override
     protected void onPostExecute(TreeNode<SourceFile> fileTree) {
         super.onPostExecute(fileTree);
-        mSource.setRootNode(fileTree);
-        mSource.setFilesLoaded(true);
-        mListener.onLoadComplete(fileTree);
+        if (mSucess) {
+            mSource.setRootNode(fileTree);
+            mSource.setFilesLoaded(true);
+            mListener.onLoadComplete(fileTree);
+        }
     }
 }

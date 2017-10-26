@@ -54,6 +54,7 @@ public class GoogleDriveLoaderTask extends LoaderTask {
             mSource.setQuotaInfo(GoogleDriveFactory.getInstance().getStorageStats());
         } catch (IOException e) {
             mListener.onLoadError(e.getMessage() != null ? e.getMessage() : "");
+            mSucess = false;
         }
         return rootFile;
     }
@@ -74,6 +75,7 @@ public class GoogleDriveLoaderTask extends LoaderTask {
                         .execute();
             } catch (IOException e) {
                 mListener.onLoadError(e.getMessage() != null ? e.getMessage() : "");
+                mSucess = false;
             }
 
             List<File> files = fileList.getFiles();

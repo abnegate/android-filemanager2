@@ -40,6 +40,7 @@ public class DropboxLoaderTask extends LoaderTask {
                     .start();
         } catch (DbxException e) {
             mListener.onLoadError(e.getMessage() != null ? e.getMessage() : "");
+            mSucess = false;
         }
         return result;
     }
@@ -62,6 +63,7 @@ public class DropboxLoaderTask extends LoaderTask {
                     }
                 } catch (DbxException e) {
                     mListener.onLoadError(e.getMessage() != null ? e.getMessage() : "");
+                    mSucess = false;
                 }
                 if (data instanceof FolderMetadata) {
                     mCurrentNode.addChild(sourceFile);
