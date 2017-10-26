@@ -239,8 +239,10 @@ public class SourceTransferService extends Service {
 
     private void clearLocalCache() {
         try {
-            int result = deleteFileNative(getCacheDir().getPath());
-            if (result != 0) throw new IOException("delete dir did not succeed");
+            if (getCacheDir().exists()) {
+                int result = deleteFileNative(getCacheDir().getPath());
+                if (result != 0) throw new IOException("Delete cache directory failed");
+            }
         } catch (IOException e) {
             broadcastError(String.format(
                     "%s %s%s",
