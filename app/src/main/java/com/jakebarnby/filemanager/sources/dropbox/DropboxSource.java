@@ -65,7 +65,6 @@ public class DropboxSource extends Source {
         if (!isLoggedIn()) {
             DbxRequestConfig requestConfig = DbxRequestConfig
                     .newBuilder("FileManagerAndroid/1.0")
-                    .withHttpRequestor(new OkHttp3Requestor(OkHttp3Requestor.defaultOkHttpClient()))
                     .build();
             DropboxFactory.getInstance().setClient(new DbxClientV2(requestConfig, accessToken));
             setLoggedIn(true);
