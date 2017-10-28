@@ -18,12 +18,12 @@ pipeline {
 
             post {
                 always {
-                    
+                    echo "Pipeline Finished!"
                 }
 
                 failure {
                      echo "Test failed!"
-                     mail to: 'jakeb994@gmail.com', subject: "FileMan Pipeline Test ${env.BUILD_ID} Failed!"
+                     mail to: 'jakeb994@gmail.com', subject: "FileMan Pipeline Test ${env.BUILD_ID} Failed!", body: "Failed"
                 }
             }
         }
