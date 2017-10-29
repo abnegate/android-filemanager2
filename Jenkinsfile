@@ -8,15 +8,15 @@ pipeline {
             steps {
                 echo "Building..."
                 checkout scm
-                sh "chmod +x gradlew && ./gradlew clean assembleDebug assembleDebugAndroidTest"
+                bat "gradlew.bat clean assembleDebug assembleDebugAndroidTest"
             }
         }
 
         stage('Test_API_26') {
             steps {
                 echo "Instantiating Tests..."
-                sh "emulator -avd Nexus_5_API_26 && sleep 30"
-                sh "./gradlew connectedDebugAndroidTest"
+                bat "emulator -avd Nexus_5_API_26 && sleep 30"
+                bat "gradlew.bat connectedDebugAndroidTest"
             }
 
             post {
