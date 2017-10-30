@@ -14,14 +14,13 @@ import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BaseTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
-import com.jakebarnby.tutorial.glide.GlideApp;
 import com.jakebarnby.tutorial.util.Constants;
 
-import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 /**
  * Created by Jake on 9/26/2017.
@@ -95,7 +94,7 @@ public class TutorialPageFragment extends Fragment {
             public void removeCallback(SizeReadyCallback cb) {}
         };
 
-        GlideApp
+        Glide
                 .with(getContext())
                 .asBitmap()
                 .load(mTutorialPage.getImageUrl())

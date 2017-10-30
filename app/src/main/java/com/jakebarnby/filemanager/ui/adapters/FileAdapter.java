@@ -17,7 +17,7 @@ import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.filemanager.util.TreeNode;
-import com.jakebarnby.tutorial.glide.GlideApp;
+import com.jakebarnby.filemanager.glide.GlideApp;
 
 import java.io.File;
 import java.util.List;
