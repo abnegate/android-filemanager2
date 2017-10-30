@@ -55,7 +55,7 @@ public class LocalTest {
 
     private static String sNewFolderName;
     private static String sTopFolderName = "Android";
-    private static String sNewFileName = "newFile";
+    private static String sNewFileName = "AAAAAnewFile";
 
     @Rule
     public ActivityTestRule<SourceActivity> mActivityRule = new ActivityTestRule<>(SourceActivity.class);
@@ -154,99 +154,103 @@ public class LocalTest {
                 .check(doesNotExist());
     }
 
-    @Test
-    public void copyDirectoryToLocalFromLocalAndDelete() {
-        onView(allOf(withId(R.id.txt_item_title), withText(sTopFolderName)))
-                .perform(click());
-
-        onView(allOf(withId(R.id.txt_item_title), withText("data")))
-                .perform(longClick());
-
-        onView(withId(R.id.fab))
-                .perform(click());
-        Util.waitMillis(1000);
-
-        onView(allOf(withId(R.id.title_view), withText(R.string.menu_item_copy)))
-                .perform(click());
-
-        onView(withText(R.string.copied))
-                .check(matches(isDisplayed()));
-
-        Espresso.pressBack();
-
-        onView(withId(R.id.fab))
-                .perform(click());
-
-        onView(allOf(withId(R.id.title_view), withText(R.string.menu_item_paste)))
-                .perform(click());
-
-        onView(allOf(withId(R.id.txt_item_title), withText("data")))
-                .check(matches(isDisplayed()));
-
-        onView(allOf(withId(R.id.txt_item_title), withText("data")))
-                .perform(longClick());
-
-        onView(withId(R.id.fab))
-                .perform(click());
-        Util.waitMillis(1000);
-
-        onView(allOf(withId(R.id.title_view), withText(R.string.menu_item_delete)))
-                .perform(click());
-
-        onView(withId(android.R.id.button1))
-                .inRoot(isDialog())
-                .perform(click());
-
-        onView(allOf(withId(R.id.txt_item_title), withText("data")))
-                .check(doesNotExist());
-    }
-
-    @Test
-    public void copyFileToLocalFromLocalAndDelete() {
-        onView(allOf(withId(R.id.txt_item_title), withText(sTopFolderName)))
-                .perform(click());
-
-        onView(allOf(withId(R.id.txt_item_title), withText(sNewFileName)))
-                .perform(longClick());
-
-        onView(withId(R.id.fab))
-                .perform(click());
-        Util.waitMillis(1000);
-
-        onView(allOf(withId(R.id.title_view), withText(R.string.menu_item_copy)))
-                .perform(click());
-
-        onView(withText(R.string.copied))
-                .check(matches(isDisplayed()));
-
-        Espresso.pressBack();
-
-        onView(withId(R.id.fab))
-                .perform(click());
-        Util.waitMillis(1000);
-
-        onView(allOf(withId(R.id.title_view), withText(R.string.menu_item_paste)))
-                .perform(click());
-
-        onView(allOf(withId(R.id.txt_item_title), withText(sNewFileName)))
-                .check(matches(isDisplayed()));
-
-        onView(allOf(withId(R.id.txt_item_title), withText(sNewFileName)))
-                .perform(longClick());
-
-        onView(withId(R.id.fab))
-                .perform(click());
-
-        onView(allOf(withId(R.id.title_view), withText(R.string.menu_item_delete)))
-                .perform(click());
-
-        onView(withId(android.R.id.button1))
-                .inRoot(isDialog())
-                .perform(click());
-
-        onView(allOf(withId(R.id.txt_item_title), withText(sNewFileName)))
-                .check(doesNotExist());
-    }
+//    @Test
+//    public void copyDirectoryToLocalFromLocalAndDelete() {
+//        onView(allOf(withId(R.id.txt_item_title), withText(sTopFolderName)))
+//                .perform(longClick());
+//
+//        onView(withId(R.id.fab))
+//                .perform(click());
+//        Util.waitMillis(1000);
+//
+//        onView(allOf(withId(R.id.title_view), withText(R.string.menu_item_copy)))
+//                .perform(click());
+//
+//        onView(withText(R.string.copied))
+//                .check(matches(isDisplayed()));
+//
+//        onView(allOf(withId(R.id.txt_item_title), withText(sTopFolderName)))
+//                .perform(click());
+//
+//        onView(withId(R.id.fab))
+//                .perform(click());
+//        Util.waitMillis(1000);
+//
+//        onView(allOf(withId(R.id.title_view), withText(R.string.menu_item_paste)))
+//                .perform(click());
+//
+//        Util.waitMillis(10000);
+//
+//        onView(allOf(withId(R.id.txt_item_title), withText(sTopFolderName)))
+//                .check(matches(isDisplayed()));
+//
+//        onView(allOf(withId(R.id.txt_item_title), withText(sTopFolderName)))
+//                .perform(longClick());
+//
+//        onView(withId(R.id.fab))
+//                .perform(click());
+//        Util.waitMillis(1000);
+//
+//        onView(allOf(withId(R.id.title_view), withText(R.string.menu_item_delete)))
+//                .perform(click());
+//
+//        onView(withId(android.R.id.button1))
+//                .inRoot(isDialog())
+//                .perform(click());
+//
+//        onView(allOf(withId(R.id.txt_item_title), withText(sTopFolderName)))
+//                .check(doesNotExist());
+//    }
+//
+//    @Test
+//    public void copyFileToLocalFromLocalAndDelete() {
+//        onView(allOf(withId(R.id.txt_item_title), withText(sTopFolderName)))
+//                .perform(click());
+//
+//        onView(allOf(withId(R.id.txt_item_title), withText(sNewFileName)))
+//                .perform(longClick());
+//
+//        onView(withId(R.id.fab))
+//                .perform(click());
+//        Util.waitMillis(1000);
+//
+//        onView(allOf(withId(R.id.title_view), withText(R.string.menu_item_copy)))
+//                .perform(click());
+//
+//        onView(withText(R.string.copied))
+//                .check(matches(isDisplayed()));
+//
+//        Espresso.pressBack();
+//
+//        onView(withId(R.id.fab))
+//                .perform(click());
+//        Util.waitMillis(1000);
+//
+//        onView(allOf(withId(R.id.title_view), withText(R.string.menu_item_paste)))
+//                .perform(click());
+//
+//        Util.waitMillis(2000);
+//
+//        onView(allOf(withId(R.id.txt_item_title), withText(sNewFileName)))
+//                .check(matches(isDisplayed()));
+//
+//        onView(allOf(withId(R.id.txt_item_title), withText(sNewFileName)))
+//                .perform(longClick());
+//
+//        onView(withId(R.id.fab))
+//                .perform(click());
+//        Util.waitMillis(1000);
+//
+//        onView(allOf(withId(R.id.title_view), withText(R.string.menu_item_delete)))
+//                .perform(click());
+//
+//        onView(withId(android.R.id.button1))
+//                .inRoot(isDialog())
+//                .perform(click());
+//
+//        onView(allOf(withId(R.id.txt_item_title), withText(sNewFileName)))
+//                .check(doesNotExist());
+//    }
 
     private static void createDummyFile() {
         File file = new File(Environment.getExternalStorageDirectory().getPath()+File.separator+"Android"+File.separator+sNewFileName);
