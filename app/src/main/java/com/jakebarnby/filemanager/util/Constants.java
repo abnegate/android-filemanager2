@@ -1,5 +1,7 @@
 package com.jakebarnby.filemanager.util;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
 /**
  * Created by Jake on 6/1/2017.
  */
@@ -87,6 +89,8 @@ public class Constants {
 
         public static final String PARAM_ERROR_VALUE = "error_value";
         public static final String PARAM_SOURCE_NAME = "source_name";
+        public static final String PARAM_PURCHASE_PRICE = "purchase_price";
+        public static final String PARAM_PURCHASE_SKU = "purchase_sku";
 
         public static final String EVENT_ERROR_DELETE = "error_deleting";
         public static final String EVENT_ERROR_CACHE_CLEAR = "error_clearing_cache";
@@ -95,6 +99,7 @@ public class Constants {
         public static final String EVENT_ERROR_OPENING_FILE = "error_opening_file";
         public static final String EVENT_ERROR_COPYING = "error_copying_file";
         public static final String EVENT_ERROR_DROPBOX_LOGOUT = "error_dropbox_logout";
+        public static final String EVENT_ERROR_PURCHASE = "error_purchase";
 
         public static final String EVENT_SUCCESS_CREATE_FOLDER = "success_creating_folder";
         public static final String EVENT_SUCCESS_RENAMING = "success_renaming";
@@ -107,6 +112,7 @@ public class Constants {
         public static final String EVENT_SUCCESS_DROPBOX_UPLOAD = "success_dropbox_upload";
         public static final String EVENT_SUCCESS_GOOGLEDRIVE_UPLOAD = "success_googledrive_upload";
         public static final String EVENT_SUCCESS_ONEDRIVE_UPLOAD = "success_onedrive_upload";
+        public static final String EVENT_SUCCESS_PURCHASE = "success_purchase";
 
         public static final String EVENT_LOGIN_DROPBOX = "login_dropbox";
         public static final String EVENT_LOGIN_GOOGLE_DRIVE = "login_googledrive";
@@ -115,6 +121,8 @@ public class Constants {
         public static final String EVENT_LOGOUT_DROPBOX = "logout_dropbox";
         public static final String EVENT_LOGOUT_GOOGLEDRIVE = "logout_googledrive";
         public static final String EVENT_LOGOUT_ONEDRIVE = "logout_onedrive";
+        public static final String EVENT_CANCELLED_PURCHASE = "cancelled_purchase";
+        public static final String EVENT_ERROR_ZIPPING = "error_zipping";
     }
 
     public class ViewTypes {

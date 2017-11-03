@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.jakebarnby.filemanager.sources.SourceFragment;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.LogUtils;
 import com.jakebarnby.filemanager.util.Utils;
 
 import static android.app.Activity.RESULT_OK;
@@ -60,7 +61,7 @@ public class GoogleDriveFragment extends SourceFragment {
             case GOOGLE_SIGN_IN:
                 if (resultCode == RESULT_OK) {
                     ((GoogleDriveSource)mSource).saveUserToken(this);
-                    Utils.logFirebaseEvent(
+                    LogUtils.logFirebaseEvent(
                             FirebaseAnalytics.getInstance(getContext()),
                             Constants.Analytics.EVENT_LOGIN_GOOGLE_DRIVE);
                 }

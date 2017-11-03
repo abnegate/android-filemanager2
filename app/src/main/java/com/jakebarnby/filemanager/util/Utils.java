@@ -26,6 +26,7 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Created by Jake on 6/6/2017.
@@ -224,25 +225,5 @@ public class Utils {
         }
     }
 
-    public static void logFirebaseSourceErrorEvent(FirebaseAnalytics analytics,
-                                                   String eventName,
-                                                   String errorMessage,
-                                                   String sourceName) {
-        Bundle params = new Bundle();
-        params.putString(Constants.Analytics.PARAM_ERROR_VALUE, errorMessage);
-        params.putString(Constants.Analytics.PARAM_SOURCE_NAME, sourceName);
-        analytics.logEvent(eventName, params);
-    }
 
-    public static void logFirebaseErrorEvent(FirebaseAnalytics analytics,
-                                             String eventName,
-                                             String errorMessage) {
-        Bundle params = new Bundle();
-        params.putString(Constants.Analytics.PARAM_ERROR_VALUE, errorMessage);
-        analytics.logEvent(eventName, params);
-    }
-
-    public static void logFirebaseEvent(FirebaseAnalytics analytics, String eventName) {
-        analytics.logEvent(eventName, new Bundle());
-    }
 }

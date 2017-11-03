@@ -15,6 +15,7 @@ import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.GooglePlayUtils;
+import com.jakebarnby.filemanager.util.LogUtils;
 import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.filemanager.util.Utils;
 
@@ -66,7 +67,7 @@ public class GoogleDriveSource extends Source {
             setCredential(null);
             mSourceListener.onLogout();
 
-            Utils.logFirebaseEvent(
+            LogUtils.logFirebaseEvent(
                     FirebaseAnalytics.getInstance(context),
                     Constants.Analytics.EVENT_LOGOUT_GOOGLEDRIVE);
         }

@@ -103,11 +103,10 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     private SourcePagerAdapter          mSourcesPagerAdapter;
     private ViewPager                   mViewPager;
-    private BroadcastReceiver           mBroadcastReciever;
+    private BroadcastReceiver           mBroadcastReceiver;
     private ProgressDialog              mDialog;
     private FabSpeedDial                mFabMenu;
     private ViewGroup                   mBlurWrapper;
-    private SearchView                  mSearchView;
 
     private BillingManager              mBillingManager;
     private InterstitialAd              mInterstitialAd;
@@ -154,7 +153,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         mViewPager.addOnPageChangeListener(this);
         mViewPager.setOffscreenPageLimit(mSourcesPagerAdapter.getCount() - 1);
 
-        mBroadcastReciever = new BroadcastReceiver() {
+        mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 handleIntent(intent);
@@ -218,7 +217,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         filterLocal.addAction(ACTION_UPDATE_DIALOG);
         filterLocal.addAction(ACTION_SHOW_ERROR);
         filterLocal.addAction(ACTION_COMPLETE);
-        getApplicationContext().registerReceiver(mBroadcastReciever, filterLocal);
+        getApplicationContext().registerReceiver(mBroadcastReceiver, filterLocal);
 
         IntentFilter filterSystem = new IntentFilter();
         filterSystem.addAction(ACTION_MEDIA_MOUNTED);
@@ -226,12 +225,12 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         filterSystem.addAction(ACTION_MEDIA_UNMOUNTED);
         filterSystem.addAction(ACTION_MEDIA_BAD_REMOVAL);
         filterSystem.addDataScheme("file");
-        getApplicationContext().registerReceiver(mBroadcastReciever, filterSystem);
+        getApplicationContext().registerReceiver(mBroadcastReceiver, filterSystem);
     }
 
     @Override
     protected void onPause() {
-        getApplicationContext().unregisterReceiver(mBroadcastReciever);
+        getApplicationContext().unregisterReceiver(mBroadcastReceiver);
         super.onPause();
     }
 
@@ -249,7 +248,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         }
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        SearchView mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         mSearchView.setOnQueryTextListener(this);
         return true;
@@ -289,11 +288,18 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Show the settings dialog
+     */
     private void showSettingsDialog() {
         SettingsDialog dialog = new SettingsDialog();
         dialog.show(getSupportFragmentManager(), Constants.DialogTags.SETTINGS);
     }
 
+    /**
+     * Add a local source with the given root path
+     * @param path  Root path of the local source
+     */
     private void addLocalSource(String path) {
         int indexToInsert = 0;
         for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
@@ -706,7 +712,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     /**
      * Complete a service action that modified the file tree
-     * @param operationId
+     * @param operationId   Id of the completed operation
      */
     private void completeTreeModification(int operationId) {
         TreeNode.sortTree(

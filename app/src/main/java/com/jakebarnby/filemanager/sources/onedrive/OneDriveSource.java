@@ -9,6 +9,7 @@ import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.SourceListener;
 import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.LogUtils;
 import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.filemanager.util.Utils;
 import com.microsoft.graph.concurrency.ICallback;
@@ -117,7 +118,7 @@ public class OneDriveSource extends Source {
             mAuthResult = null;
             mSourceListener.onLogout();
 
-            Utils.logFirebaseEvent(
+            LogUtils.logFirebaseEvent(
                     FirebaseAnalytics.getInstance(context),
                     Constants.Analytics.EVENT_LOGOUT_ONEDRIVE);
         }
@@ -147,7 +148,7 @@ public class OneDriveSource extends Source {
                 authenticateSource(fragment);
             } else {
                 loadSource(fragment.getContext());
-                Utils.logFirebaseEvent(
+                LogUtils.logFirebaseEvent(
                         FirebaseAnalytics.getInstance(fragment.getContext()),
                         Constants.Analytics.EVENT_LOGIN_ONEDRIVE);
             }

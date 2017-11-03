@@ -27,6 +27,7 @@ import com.jakebarnby.filemanager.sources.onedrive.OneDriveFactory;
 import com.jakebarnby.filemanager.sources.onedrive.OneDriveFile;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.IntentExtensions;
+import com.jakebarnby.filemanager.util.LogUtils;
 import com.jakebarnby.filemanager.util.TreeNode;
 import com.jakebarnby.filemanager.util.Utils;
 import com.jakebarnby.filemanager.util.FileZipper;
@@ -250,10 +251,12 @@ public class SourceTransferService extends Service {
                     getString(R.string.clearing_cache),
                     ": " + e.getLocalizedMessage()));
 
-            Utils.logFirebaseErrorEvent(
+            Bundle params = new Bundle();
+            params.putString(Constants.Analytics.PARAM_ERROR_VALUE, e.getMessage());
+            LogUtils.logFirebaseEvent(
                     mFirebaseAnalytics,
                     Constants.Analytics.EVENT_ERROR_CACHE_CLEAR,
-                    e.getMessage());
+                    params);
         }
     }
 
@@ -306,7 +309,7 @@ public class SourceTransferService extends Service {
             TreeNode<SourceFile> newFolder = destDir.addChild(newFile);
             if (!isSilent) broadcastFinishedTask(operationId);
 
-            Utils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_CREATE_FOLDER);
+            LogUtils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_CREATE_FOLDER);
             return newFolder;
         } catch (IOException | DbxException | GraphServiceException e) {
             broadcastError(String.format(
@@ -315,11 +318,13 @@ public class SourceTransferService extends Service {
                     getString(R.string.creating_folder),
                     "."));
 
-            Utils.logFirebaseSourceErrorEvent(
+            Bundle params = new Bundle();
+            params.putString(Constants.Analytics.PARAM_ERROR_VALUE, e.getMessage());
+            params.putString(Constants.Analytics.PARAM_SOURCE_NAME, destDir.getData().getSourceName());
+            LogUtils.logFirebaseEvent(
                     mFirebaseAnalytics,
                     Constants.Analytics.EVENT_ERROR_CREATE_FOLDER,
-                    e.getMessage(),
-                    destDir.getData().getSourceName());
+                    params);
         }
         return null;
     }
@@ -371,7 +376,7 @@ public class SourceTransferService extends Service {
             destDir.getData().setName(name);
             destDir.getData().setPath(newPath);
             broadcastFinishedTask(operationId);
-            Utils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_RENAMING);
+            LogUtils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_RENAMING);
         } catch (IOException | DbxException | GraphServiceException e) {
             broadcastError(String.format(
                     "%s %s%s",
@@ -387,11 +392,13 @@ public class SourceTransferService extends Service {
                 sourceName = Constants.Analytics.NO_DESTINATION;
             }
 
-            Utils.logFirebaseSourceErrorEvent(
+            Bundle params = new Bundle();
+            params.putString(Constants.Analytics.PARAM_ERROR_VALUE, e.getMessage());
+            params.putString(Constants.Analytics.PARAM_SOURCE_NAME, sourceName);
+            LogUtils.logFirebaseEvent(
                     mFirebaseAnalytics,
                     Constants.Analytics.EVENT_ERROR_RENAMING,
-                    e.getMessage(),
-                    sourceName);
+                    params);
         }
     }
 
@@ -417,7 +424,7 @@ public class SourceTransferService extends Service {
             Bundle bundle = new Bundle();
             bundle.putString(Constants.FILE_PATH_KEY, filePath);
             broadcastFinishedTask(operationId, bundle);
-            Utils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_OPEN_FILE);
+            LogUtils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_OPEN_FILE);
         } catch (IOException | DbxException | GraphServiceException e) {
             broadcastError(String.format(
                     "%s %s%s",
@@ -427,11 +434,13 @@ public class SourceTransferService extends Service {
 
             String sourceName = toOpen == null ? Constants.Analytics.NO_DESTINATION : toOpen.getSourceName();
 
-            Utils.logFirebaseSourceErrorEvent(
+            Bundle params = new Bundle();
+            params.putString(Constants.Analytics.PARAM_ERROR_VALUE, e.getMessage());
+            params.putString(Constants.Analytics.PARAM_SOURCE_NAME, sourceName);
+            LogUtils.logFirebaseEvent(
                     mFirebaseAnalytics,
                     Constants.Analytics.EVENT_ERROR_OPENING_FILE,
-                    e.getMessage(),
-                    sourceName);
+                    params);
         }
     }
 
@@ -465,7 +474,7 @@ public class SourceTransferService extends Service {
 
             if (!isSilent) {
                 broadcastFinishedTask(operationId);
-                Utils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_COPYING);
+                LogUtils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_COPYING);
             }
 
             return newFiles;
@@ -484,11 +493,13 @@ public class SourceTransferService extends Service {
                 sourceName = Constants.Analytics.NO_DESTINATION;
             }
 
-            Utils.logFirebaseSourceErrorEvent(
+            Bundle params = new Bundle();
+            params.putString(Constants.Analytics.PARAM_ERROR_VALUE, e.getMessage());
+            params.putString(Constants.Analytics.PARAM_SOURCE_NAME, sourceName);
+            LogUtils.logFirebaseEvent(
                     mFirebaseAnalytics,
                     Constants.Analytics.EVENT_ERROR_COPYING,
-                    e.getMessage(),
-                    sourceName);
+                    params);
         }
         return null;
     }
@@ -614,7 +625,7 @@ public class SourceTransferService extends Service {
                 broadcastFinishedTask(operationId);
             }
 
-            Utils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_DELETING);
+            LogUtils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_DELETING);
 
         } catch (IOException | DbxException | GraphServiceException e) {
             broadcastError(String.format(
@@ -631,11 +642,13 @@ public class SourceTransferService extends Service {
                 sourceName = Constants.Analytics.NO_DESTINATION;
             }
 
-            Utils.logFirebaseSourceErrorEvent(
+            Bundle params = new Bundle();
+            params.putString(Constants.Analytics.PARAM_ERROR_VALUE, e.getMessage());
+            params.putString(Constants.Analytics.PARAM_SOURCE_NAME, sourceName);
+            LogUtils.logFirebaseEvent(
                     mFirebaseAnalytics,
                     Constants.Analytics.EVENT_ERROR_DELETE,
-                    e.getMessage(),
-                    sourceName);
+                    params);
         }
     }
 
@@ -687,11 +700,13 @@ public class SourceTransferService extends Service {
                 sourceName = Constants.Analytics.NO_DESTINATION;
             }
 
-            Utils.logFirebaseSourceErrorEvent(
+            Bundle params = new Bundle();
+            params.putString(Constants.Analytics.PARAM_ERROR_VALUE, e.getMessage());
+            params.putString(Constants.Analytics.PARAM_SOURCE_NAME, sourceName);
+            LogUtils.logFirebaseEvent(
                     mFirebaseAnalytics,
-                    Constants.Analytics.EVENT_ERROR_DELETE,
-                    e.getMessage(),
-                    sourceName);
+                    Constants.Analytics.EVENT_ERROR_ZIPPING,
+                    params);
         }
     }
 
@@ -712,7 +727,7 @@ public class SourceTransferService extends Service {
                                 file.getPath(),
                                 getCacheDir().getPath() + File.separator + file.getName());
                 if (newFile.exists()) {
-                    Utils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_DROPBOX_DOWNLOAD);
+                    LogUtils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_DROPBOX_DOWNLOAD);
                     newFilePath = newFile.getPath();
                 }
                 break;
@@ -721,7 +736,7 @@ public class SourceTransferService extends Service {
                         .getInstance()
                         .downloadFile(((GoogleDriveFile) file).getDriveId(), destPath);
                 if (googleFile.exists()) {
-                    Utils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_GOOGLEDRIVE_DOWNLOAD);
+                    LogUtils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_GOOGLEDRIVE_DOWNLOAD);
                     newFilePath = googleFile.getPath();
                 }
                 break;
@@ -733,7 +748,7 @@ public class SourceTransferService extends Service {
                                 file.getName(),
                                 getCacheDir().getPath());
                 if (oneDriveFile.exists()) {
-                    Utils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_ONEDRIVE_DOWNLOAD);
+                    LogUtils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_ONEDRIVE_DOWNLOAD);
                     newFilePath = oneDriveFile.getPath();
                 }
                 break;
@@ -765,7 +780,7 @@ public class SourceTransferService extends Service {
                         DropboxFactory
                                 .getInstance()
                                 .uploadFile(newFilePath, destDir.getPath()));
-                Utils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_DROPBOX_UPLOAD);
+                LogUtils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_DROPBOX_UPLOAD);
                 return dropboxFile;
             case Constants.Sources.GOOGLE_DRIVE:
                 GoogleDriveFile googleDriveFile = new GoogleDriveFile(GoogleDriveFactory
@@ -774,7 +789,7 @@ public class SourceTransferService extends Service {
                                 newFilePath,
                                 fileName,
                                 ((GoogleDriveFile) destDir).getDriveId()));
-                Utils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_GOOGLEDRIVE_UPLOAD);
+                LogUtils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_GOOGLEDRIVE_UPLOAD);
                 return googleDriveFile;
             case Constants.Sources.ONEDRIVE:
                 OneDriveFile oneDriveFile = new OneDriveFile(OneDriveFactory
@@ -783,7 +798,7 @@ public class SourceTransferService extends Service {
                                 newFilePath,
                                 fileName,
                                 ((OneDriveFile) destDir).getDriveId()));
-                Utils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_ONEDRIVE_UPLOAD);
+                LogUtils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_ONEDRIVE_UPLOAD);
                 return oneDriveFile;
             default:
 

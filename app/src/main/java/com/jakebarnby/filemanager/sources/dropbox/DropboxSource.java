@@ -12,6 +12,7 @@ import com.jakebarnby.filemanager.sources.models.Source;
 import com.jakebarnby.filemanager.sources.SourceListener;
 import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
+import com.jakebarnby.filemanager.util.LogUtils;
 import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.filemanager.util.Utils;
 
@@ -51,7 +52,7 @@ public class DropboxSource extends Source {
             setFilesLoaded(false);
             mSourceListener.onLogout();
 
-            Utils.logFirebaseEvent(
+            LogUtils.logFirebaseEvent(
                     FirebaseAnalytics.getInstance(context),
                     Constants.Analytics.EVENT_LOGOUT_DROPBOX);
         }
@@ -85,7 +86,9 @@ public class DropboxSource extends Source {
                 PreferenceUtils.savePref(context, Constants.Prefs.DROPBOX_TOKEN_KEY, accessToken);
                 setupClient(accessToken);
                 loadSource(context);
-                Utils.logFirebaseEvent(FirebaseAnalytics.getInstance(context), Constants.Analytics.EVENT_LOGIN_DROPBOX);
+                LogUtils.logFirebaseEvent(
+                        FirebaseAnalytics.getInstance(context),
+                        Constants.Analytics.EVENT_LOGIN_DROPBOX);
             }
         } else {
             if (!isLoggedIn()) {
