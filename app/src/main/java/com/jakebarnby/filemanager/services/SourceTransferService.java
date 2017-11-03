@@ -306,6 +306,7 @@ public class SourceTransferService extends Service {
             LogUtils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_CREATE_FOLDER);
             return newFolder;
         } catch (IOException | DbxException | GraphServiceException e) {
+            hideNotification(operationId);
             broadcastError(String.format(
                     "%s %s%s",
                     getString(R.string.problem_encountered),
@@ -420,6 +421,7 @@ public class SourceTransferService extends Service {
             broadcastFinishedTask(operationId, bundle);
             LogUtils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_OPEN_FILE);
         } catch (IOException | DbxException | GraphServiceException e) {
+            hideNotification(operationId);
             broadcastError(String.format(
                     "%s %s%s",
                     getString(R.string.problem_encountered),
@@ -473,6 +475,7 @@ public class SourceTransferService extends Service {
 
             return newFiles;
         } catch (IOException | DbxException | GraphServiceException e) {
+            hideNotification(operationId);
             broadcastError(String.format(
                     "%s %s%s",
                     getString(R.string.problem_encountered),
@@ -622,6 +625,7 @@ public class SourceTransferService extends Service {
             LogUtils.logFirebaseEvent(mFirebaseAnalytics, Constants.Analytics.EVENT_SUCCESS_DELETING);
 
         } catch (IOException | DbxException | GraphServiceException e) {
+            hideNotification(operationId);
             broadcastError(String.format(
                     "%s %s%s",
                     getString(R.string.problem_encountered),
@@ -679,7 +683,7 @@ public class SourceTransferService extends Service {
             broadcastFinishedTask(operationId);
         } catch (IOException | DbxException e) {
             e.printStackTrace();
-
+            hideNotification(operationId);
             broadcastError(String.format(
                     "%s %s%s",
                     getString(R.string.problem_encountered),
