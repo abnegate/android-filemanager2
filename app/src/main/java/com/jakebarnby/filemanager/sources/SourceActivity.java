@@ -110,6 +110,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
     private BillingManager              mBillingManager;
     private InterstitialAd              mInterstitialAd;
+    private boolean                     mIsCheckingPermissions;
 
     public SourceManager getSourceManager() {
         return mSourceManager;
@@ -1134,5 +1135,13 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         } else {
             super.onBackPressed();
         }
+    }
+
+    public boolean isCheckingPermissions() {
+        return mIsCheckingPermissions;
+    }
+
+    public void setCheckingPermissions(boolean isChecking) {
+        this.mIsCheckingPermissions = isChecking;
     }
 }

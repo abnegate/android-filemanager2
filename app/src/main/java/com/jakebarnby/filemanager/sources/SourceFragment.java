@@ -414,9 +414,14 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
 
     @Override
     public void onCheckPermissions(String permissionToCheck, int requestCode) {
+        SourceActivity activity = ((SourceActivity)getActivity());
+
         int permissionCheck = ContextCompat.checkSelfPermission(getActivity(), permissionToCheck);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{permissionToCheck}, requestCode);
+            if (!activity.isCheckingPermissions()) {
+                activity.setCheckingPermissions(true);
+                requestPermissions(new String[]{permissionToCheck}, requestCode);
+            }
         } else {
             if (this instanceof LocalFragment) {
                 getSource().setLoggedIn(true);
@@ -456,6 +461,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                 break;
             }
         }
+        ((SourceActivity)getActivity()).setCheckingPermissions(false);
     }
 
     /**
