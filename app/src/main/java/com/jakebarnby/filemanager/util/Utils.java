@@ -1,6 +1,7 @@
 package com.jakebarnby.filemanager.util;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
 import android.support.v4.os.EnvironmentCompat;
+import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -225,5 +227,14 @@ public class Utils {
         }
     }
 
-
+    /**
+     * This method converts device specific pixels to density independent pixels.
+     *
+     * @param px A value in px (pixels) unit. Which we need to convert into db
+     * @return A float value to represent dp equivalent to px value
+     */
+    public static int pxToDp(int px){
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        return px / (metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+    }
 }

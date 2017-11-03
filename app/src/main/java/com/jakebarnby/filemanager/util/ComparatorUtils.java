@@ -11,7 +11,8 @@ import java.util.Comparator;
  */
 
 public class ComparatorUtils {
-    public static Comparator<TreeNode<? extends SourceFile>> resolveComparator(Context context) {
+
+    public static Comparator<TreeNode<? extends SourceFile>> resolveComparatorForPrefs(Context context) {
         boolean showFoldersFirst = PreferenceUtils.getBoolean(
                 context,
                 Constants.Prefs.FOLDER_FIRST_KEY,

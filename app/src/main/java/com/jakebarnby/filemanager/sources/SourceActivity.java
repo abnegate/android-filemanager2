@@ -290,14 +290,6 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     }
 
     /**
-     * Show the settings dialog
-     */
-    private void showSettingsDialog() {
-        SettingsDialog dialog = new SettingsDialog();
-        dialog.show(getSupportFragmentManager(), Constants.DialogTags.SETTINGS);
-    }
-
-    /**
      * Add a local source with the given root path
      * @param path  Root path of the local source
      */
@@ -487,7 +479,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
 
                     TreeNode<SourceFile> newDir = toOpen.getData().isDirectory() ? toOpen : toOpen.getParent();
                     getActiveFragment().getSource().setCurrentDirectory(newDir);
-                    ((FileAdapter)getActiveFragment().mRecycler.getAdapter()).setCurrentDirectory(newDir);
+                    ((FileAdapter)getActiveFragment().mRecycler.getAdapter()).setCurrentDirectory(newDir, this);
                     mSourceManager.setActiveDirectory(newDir);
 
                     getActiveFragment().popAllBreadCrumbs();
@@ -718,7 +710,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
     private void completeTreeModification(int operationId) {
         TreeNode.sortTree(
                 SelectedFilesManager.getInstance().getActionableDirectory(operationId),
-                ComparatorUtils.resolveComparator(this));
+                ComparatorUtils.resolveComparatorForPrefs(this));
 
         for(SourceFragment fragment: mSourcesPagerAdapter.getFragments()) {
             fragment.refreshRecycler();
@@ -938,6 +930,14 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
         dialog.show(getSupportFragmentManager(), Constants.DialogTags.SORT_BY);
     }
 
+    /**
+     * Show the settings dialog
+     */
+    private void showSettingsDialog() {
+        SettingsDialog dialog = new SettingsDialog();
+        dialog.show(getSupportFragmentManager(), Constants.DialogTags.SETTINGS);
+    }
+
     void showErrorDialog(String message) {
         if (mDialog != null && mDialog.isShowing()) mDialog.dismiss();
 
@@ -1126,7 +1126,7 @@ public class SourceActivity extends AppCompatActivity implements ViewPager.OnPag
                     .setCurrentDirectory(activeDir.getParent());
 
             ((FileAdapter) getActiveFragment().mRecycler.getAdapter())
-                    .setCurrentDirectory(activeDir.getParent());
+                    .setCurrentDirectory(activeDir.getParent(), this);
 
             mSourceManager.setActiveDirectory(activeDir.getParent());
 

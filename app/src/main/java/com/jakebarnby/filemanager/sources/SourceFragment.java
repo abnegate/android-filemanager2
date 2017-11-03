@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -183,7 +182,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                 Constants.Prefs.VIEW_TYPE_KEY,
                 Constants.ViewTypes.LIST);
 
-        TreeNode.sortTree(mSource.getRootNode(), ComparatorUtils.resolveComparator(getContext()));
+        TreeNode.sortTree(mSource.getRootNode(), ComparatorUtils.resolveComparatorForPrefs(getContext()));
 
         switch (viewType) {
             case Constants.ViewTypes.LIST:
@@ -210,10 +209,10 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                 break;
         }
 
+        newAdapter.setCurrentDirectory(getSource().getCurrentDirectory(), getContext());
+
         mRecycler.setAdapter(newAdapter);
-        if (mRecycler.getAdapter() != null) {
-            mRecycler.getAdapter().notifyDataSetChanged();
-        }
+        mRecycler.getAdapter().notifyDataSetChanged();
         mRecycler.setVisibility(View.VISIBLE);
         mDivider.setVisibility(View.VISIBLE);
         mBreadcrumbWrapper.setVisibility(View.VISIBLE);
@@ -228,15 +227,15 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
     protected void initAdapters(TreeNode<SourceFile> file,
                                 FileAdapter.OnFileClickedListener onClickListener,
                                 FileAdapter.OnFileLongClickedListener onLongClickListener) {
-        mFileListAdapter = new FileListAdapter(file);
+        mFileListAdapter = new FileListAdapter(file, getContext());
         mFileListAdapter.setOnClickListener(onClickListener);
         mFileListAdapter.setOnLongClickListener(onLongClickListener);
 
-        mFileGridAdapter = new FileGridAdapter(file);
+        mFileGridAdapter = new FileGridAdapter(file, getContext());
         mFileGridAdapter.setOnClickListener(onClickListener);
         mFileGridAdapter.setOnLongClickListener(onLongClickListener);
 
-        mFileDetailedAdapter = new FileDetailedListAdapter(file);
+        mFileDetailedAdapter = new FileDetailedListAdapter(file, getContext());
         mFileDetailedAdapter.setOnClickListener(onClickListener);
         mFileDetailedAdapter.setOnLongClickListener(onLongClickListener);
 
@@ -283,7 +282,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                     getSource().getCurrentDirectory().getData().
                             setPositionToRestore(((LinearLayoutManager)mRecycler.getLayoutManager()).findFirstVisibleItemPosition());
 
-                    ((FileAdapter) mRecycler.getAdapter()).setCurrentDirectory(file);
+                    ((FileAdapter) mRecycler.getAdapter()).setCurrentDirectory(file, getContext());
 
                     mSource.setCurrentDirectory(file);
 
@@ -371,7 +370,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
             }
 
             ((SourceActivity)getActivity()).getSourceManager().setActiveDirectory(selectedParent);
-            ((FileAdapter)mRecycler.getAdapter()).setCurrentDirectory(selectedParent);
+            ((FileAdapter)mRecycler.getAdapter()).setCurrentDirectory(selectedParent, getContext());
             mSource.setCurrentDirectory(selectedParent);
             mRecycler.getAdapter().notifyDataSetChanged();
         });

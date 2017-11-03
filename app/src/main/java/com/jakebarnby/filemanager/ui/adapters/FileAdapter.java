@@ -1,6 +1,6 @@
 package com.jakebarnby.filemanager.ui.adapters;
 
-import android.support.constraint.ConstraintLayout;
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -15,11 +15,13 @@ import com.jakebarnby.filemanager.glide.GlideApp;
 import com.jakebarnby.filemanager.managers.SelectedFilesManager;
 import com.jakebarnby.filemanager.sources.models.SourceFile;
 import com.jakebarnby.filemanager.sources.models.SourceType;
+import com.jakebarnby.filemanager.util.ComparatorUtils;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.PreferenceUtils;
 import com.jakebarnby.filemanager.util.TreeNode;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
@@ -34,13 +36,15 @@ public abstract class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileV
     private OnFileClickedListener           mOnClickListener;
     private OnFileLongClickedListener       mOnLongClickListener;
     private boolean                         mMultiSelectEnabled;
+    private boolean mShowHiddenFiles;
 
     /**
      * Create a new FileAdapter instance with the given root tree node
      * @param rootNode     The root node of the file tree
      */
-    public FileAdapter(TreeNode<SourceFile> rootNode) {
-        setCurrentDirectory(rootNode);
+    public FileAdapter(TreeNode<SourceFile> rootNode, Context context) {
+        mShowHiddenFiles = PreferenceUtils.getBoolean(context, Constants.Prefs.HIDDEN_FOLDER_KEY, false);
+        setCurrentDirectory(rootNode, context);
     }
 
     /**
@@ -51,31 +55,33 @@ public abstract class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileV
         this.mMultiSelectEnabled = mMultiSelectEnabled;
     }
 
+    public TreeNode<SourceFile> getCurrentDirectory() {
+        return mCurrentDirChildren.get(0).getParent();
+    }
+
     /**
      * Set the current directory based of the given current directory
      * @param currentDir Directory to set as current
      */
-    public void setCurrentDirectory(TreeNode<SourceFile> currentDir) {
+    public void setCurrentDirectory(TreeNode<SourceFile> currentDir, Context context) {
+        mShowHiddenFiles = PreferenceUtils.getBoolean(context, Constants.Prefs.HIDDEN_FOLDER_KEY, false);
         mCurrentDirChildren = currentDir.getChildren();
+
+        if (!mShowHiddenFiles) {
+            List<TreeNode<SourceFile>> readableChildren = new ArrayList<>();
+            for (TreeNode<SourceFile> file : mCurrentDirChildren) {
+                if (!file.getData().isHidden()) {
+                    readableChildren.add(file);
+                }
+            }
+            mCurrentDirChildren = readableChildren;
+            TreeNode.sortTree(mCurrentDirChildren.get(0).getParent(), ComparatorUtils.resolveComparatorForPrefs(context));
+        }
     }
 
     @Override
     public void onBindViewHolder(FileViewHolder holder, int position) {
-        boolean showHiddenFiles = PreferenceUtils.getBoolean(holder.itemView.getContext(), Constants.Prefs.HIDDEN_FOLDER_KEY, false);
-
-
-        RecyclerView.LayoutParams param = (RecyclerView.LayoutParams)holder.itemView.getLayoutParams();
-        if (!showHiddenFiles && mCurrentDirChildren.get(position).getData().isHidden()) {
-            holder.itemView.setVisibility(View.GONE);
-            param.width = 0;
-            param.height = 0;
-            param.setMargins(0,0,0,0);
-        } else if (showHiddenFiles) {
-            holder.itemView.setVisibility(View.VISIBLE);
-            param.height = ConstraintLayout.LayoutParams.WRAP_CONTENT;
-            param.width = ConstraintLayout.LayoutParams.MATCH_PARENT;
-        }
-
+        mShowHiddenFiles = PreferenceUtils.getBoolean(holder.itemView.getContext(), Constants.Prefs.HIDDEN_FOLDER_KEY, false);
         holder.bindHolder(mCurrentDirChildren.get(position));
     }
 

@@ -1,5 +1,6 @@
 package com.jakebarnby.filemanager.ui.adapters;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,8 +27,8 @@ public class FileDetailedListAdapter extends FileAdapter {
      *
      * @param rootNode The root node of the file tree
      */
-    public FileDetailedListAdapter(TreeNode<SourceFile> rootNode) {
-        super(rootNode);
+    public FileDetailedListAdapter(TreeNode<SourceFile> rootNode, Context context) {
+        super(rootNode, context);
     }
 
     @Override

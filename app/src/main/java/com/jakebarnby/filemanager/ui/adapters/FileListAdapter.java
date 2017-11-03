@@ -1,5 +1,6 @@
 package com.jakebarnby.filemanager.ui.adapters;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +15,8 @@ import com.jakebarnby.filemanager.util.TreeNode;
 
 public class FileListAdapter extends FileAdapter {
 
-    public FileListAdapter(TreeNode<SourceFile> rootNode) {
-        super(rootNode);
+    public FileListAdapter(TreeNode<SourceFile> rootNode, Context context) {
+        super(rootNode, context);
     }
 
     @Override
