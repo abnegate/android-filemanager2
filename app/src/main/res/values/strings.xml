@@ -50,7 +50,7 @@
     <string name="grid">Grid</string>
     <string name="licenses">Licenses</string>
     <string name="list">List</string>
-    <string name="loading_source">loading source</string>
+    <string name="loading_source">loading</string>
     <string name="logout">Logout</string>
     <string name="menu_item_copy">Copy</string>
     <string name="menu_item_cut">Cut</string>

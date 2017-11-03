@@ -123,7 +123,7 @@ public abstract class SourceFragment extends Fragment implements SourceListener 
                     "%s %s%s",
                     getString(R.string.problem_encountered),
                     getString(R.string.loading_source),
-                    ": "+errorMessage));
+                    " " + mSource.getSourceName() + " files."));
         });
     }
 

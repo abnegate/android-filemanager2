@@ -245,12 +245,6 @@ public class SourceTransferService extends Service {
                 if (result != 0) throw new IOException("Delete cache directory failed");
             }
         } catch (IOException e) {
-            broadcastError(String.format(
-                    "%s %s%s",
-                    getString(R.string.problem_encountered),
-                    getString(R.string.clearing_cache),
-                    ": " + e.getLocalizedMessage()));
-
             Bundle params = new Bundle();
             params.putString(Constants.Analytics.PARAM_ERROR_VALUE, e.getMessage());
             LogUtils.logFirebaseEvent(
