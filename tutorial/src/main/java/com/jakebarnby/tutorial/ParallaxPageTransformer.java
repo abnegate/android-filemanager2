@@ -1,7 +1,8 @@
 package com.jakebarnby.tutorial;
 
-import android.support.v4.view.ViewPager;
 import android.view.View;
+
+import androidx.viewpager.widget.ViewPager;
 
 /**
  * Created by Jake on 9/26/2017.

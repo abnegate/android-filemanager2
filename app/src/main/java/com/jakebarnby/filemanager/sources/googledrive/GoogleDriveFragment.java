@@ -3,13 +3,12 @@ package com.jakebarnby.filemanager.sources.googledrive;
 import android.accounts.AccountManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.jakebarnby.filemanager.sources.SourceFragment;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.LogUtils;
-import com.jakebarnby.filemanager.util.Utils;
 
 import static android.app.Activity.RESULT_OK;
 import static com.jakebarnby.filemanager.util.Constants.RequestCodes.ACCOUNT_PICKER;

@@ -2,7 +2,7 @@ package com.jakebarnby.filemanager.sources.onedrive;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.jakebarnby.filemanager.sources.models.Source;
@@ -11,7 +11,6 @@ import com.jakebarnby.filemanager.sources.models.SourceType;
 import com.jakebarnby.filemanager.util.Constants;
 import com.jakebarnby.filemanager.util.LogUtils;
 import com.jakebarnby.filemanager.util.PreferenceUtils;
-import com.jakebarnby.filemanager.util.Utils;
 import com.microsoft.graph.concurrency.ICallback;
 import com.microsoft.graph.core.ClientException;
 import com.microsoft.graph.core.DefaultClientConfig;
@@ -23,9 +22,6 @@ import com.microsoft.identity.client.AuthenticationResult;
 import com.microsoft.identity.client.MsalClientException;
 import com.microsoft.identity.client.MsalException;
 import com.microsoft.identity.client.PublicClientApplication;
-import com.microsoft.identity.client.User;
-
-import java.util.List;
 
 /**
  * Created by jakebarnby on 2/08/17.

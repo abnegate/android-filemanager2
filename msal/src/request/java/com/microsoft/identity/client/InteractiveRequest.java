@@ -25,8 +25,9 @@ package com.microsoft.identity.client;
 
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
-import android.support.v4.app.Fragment;
 import android.util.Base64;
+
+import androidx.fragment.app.Fragment;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;

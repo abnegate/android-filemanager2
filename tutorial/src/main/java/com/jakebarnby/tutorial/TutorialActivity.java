@@ -3,20 +3,17 @@ package com.jakebarnby.tutorial;
 import android.animation.ArgbEvaluator;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager.widget.ViewPager;
+
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-
-import com.jakebarnby.tutorial.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +26,7 @@ public class TutorialActivity extends AppCompatActivity implements View.OnClickL
 
     private List<TutorialPage>      mTutorialPages;
     private TutorialPagerAdapter    mTutAdapter;
-    private ViewPager               mViewPager;
+    private ViewPager mViewPager;
     private Button                  mNext,
                                     mPrev;
     private LinearLayout            mIndicatorLayout;

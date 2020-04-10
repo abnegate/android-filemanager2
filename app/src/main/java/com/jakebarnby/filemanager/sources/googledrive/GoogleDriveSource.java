@@ -3,7 +3,7 @@ package com.jakebarnby.filemanager.sources.googledrive;
 import android.Manifest;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;

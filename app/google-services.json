@@ -19,20 +19,8 @@
           "client_type": 1,
           "android_info": {
             "package_name": "com.jakebarnby.filemanager",
-            "certificate_hash": "56cabd9161a913e351f15e7e2a30ece204d807ef"
+            "certificate_hash": "20cfb512e87a91c30c92df96d55356b87f3c509c"
           }
-        },
-        {
-          "client_id": "50712246132-83jp2jon1a2i1q568en3da29llqsh54d.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.jakebarnby.filemanager",
-            "certificate_hash": "aa582f8ffab217167d950100e4939e868a9880a3"
-          }
-        },
-        {
-          "client_id": "50712246132-0k1qfahsg70qt6sarlfdjt9fq584fvg1.apps.googleusercontent.com",
-          "client_type": 3
         },
         {
           "client_id": "50712246132-5sbprorm5fifdqg8vk95bb1m5sr58a40.apps.googleusercontent.com",
@@ -43,36 +31,52 @@
           }
         },
         {
-          "client_id": "50712246132-duttbf4tsq7iqarm3o03rmlvnfajebg4.apps.googleusercontent.com",
+          "client_id": "50712246132-0k1qfahsg70qt6sarlfdjt9fq584fvg1.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
           "current_key": "AIzaSyB4jo3ug7fhFYYUhq3sHNg5foKPrQtbcvA"
-        },
-        {
-          "current_key": "AIzaSyCiahrEEZK3suLw_Cd8T3gfR5EKUuNsBSg"
-        },
-        {
-          "current_key": "AIzaSyBDNcb3xdmjM3jiGSuw7fKC98lpEVfwZaE"
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 2,
           "other_platform_oauth_client": [
             {
               "client_id": "50712246132-0k1qfahsg70qt6sarlfdjt9fq584fvg1.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
-        },
-        "ads_service": {
-          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:50712246132:android:a78d34de2f9a7ef7419e21",
+        "android_client_info": {
+          "package_name": "com.jakebarnby.filemanager.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "50712246132-0k1qfahsg70qt6sarlfdjt9fq584fvg1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4jo3ug7fhFYYUhq3sHNg5foKPrQtbcvA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "50712246132-0k1qfahsg70qt6sarlfdjt9fq584fvg1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

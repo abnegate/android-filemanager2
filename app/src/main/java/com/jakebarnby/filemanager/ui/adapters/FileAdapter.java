@@ -1,7 +1,7 @@
 package com.jakebarnby.filemanager.ui.adapters;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
@@ -75,7 +75,15 @@ public abstract class FileAdapter extends RecyclerView.Adapter<FileAdapter.FileV
                 }
             }
             mCurrentDirChildren = readableChildren;
-            TreeNode.sortTree(mCurrentDirChildren.get(0).getParent(), ComparatorUtils.resolveComparatorForPrefs(context));
+
+            if (mCurrentDirChildren.size() == 0) {
+                //TODO: Show empty source
+                return;
+            }
+            TreeNode.sortTree(
+                mCurrentDirChildren.get(0).getParent(),
+                ComparatorUtils.resolveComparatorForPrefs(context)
+            );
         }
     }
 

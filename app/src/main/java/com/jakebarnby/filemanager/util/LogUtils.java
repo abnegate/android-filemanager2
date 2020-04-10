@@ -29,9 +29,11 @@ public class LogUtils {
      * @param eventName  The name of the event
      * @param parameters Map of event parameters
      */
-    public static void logFirebaseEvent(FirebaseAnalytics analytics,
-                                         String eventName,
-                                         Bundle parameters) {
+    public static void logFirebaseEvent(
+        FirebaseAnalytics analytics,
+        String eventName,
+        Bundle parameters
+    ) {
         analytics.logEvent(eventName, parameters);
     }
 }

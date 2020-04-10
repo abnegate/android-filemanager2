@@ -3,7 +3,7 @@ package com.jakebarnby.filemanager.tutorial;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.jakebarnby.filemanager.sources.SourceActivity;

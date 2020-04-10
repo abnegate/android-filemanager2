@@ -15,14 +15,15 @@
         android:required="false" />
 
     <application
-        android:name="android.support.multidex.MultiDexApplication"
+        android:name="androidx.multidex.MultiDexApplication"
         tools:replace="android:allowBackup"
         android:allowBackup="false"
         android:icon="@drawable/ic_folder_flat"
         android:label="@string/app_name"
         android:roundIcon="@drawable/ic_folder_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:requestLegacyExternalStorage="true">
 
         <activity
             android:name=".splash.SplashActivity"
@@ -84,10 +85,12 @@
             </intent-filter>
         </activity>
 
-        <service android:name="com.jakebarnby.filemanager.services.SourceTransferService" />
+        <service
+            android:name="com.jakebarnby.filemanager.services.SourceTransferService"
+            android:exported="false"/>
 
         <provider
-            android:name="android.support.v4.content.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:authorities="com.jakebarnby.filemanager"
             android:exported="false"
             android:grantUriPermissions="true">
@@ -103,8 +106,8 @@
         </service>
 
         <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="e44987bfa96bc339b52c2a35e2fca1e356a4b4ef" />
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
 
     </application>
 

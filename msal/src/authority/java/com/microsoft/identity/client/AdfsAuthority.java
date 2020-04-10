@@ -24,7 +24,7 @@
 package com.microsoft.identity.client;
 
 import android.net.Uri;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import java.net.URI;
 import java.net.URISyntaxException;

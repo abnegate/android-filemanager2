@@ -16,3 +16,4 @@ build/
 app/release/
 
 app/debug/
+app/.cxx
