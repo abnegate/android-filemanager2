@@ -1,8 +1,6 @@
 package com.jakebarnby.filemanager.sources.dropbox
 
 import android.content.Context
-import android.os.AsyncTask
-import android.os.Bundle
 import androidx.core.os.bundleOf
 import com.dropbox.core.DbxException
 import com.dropbox.core.v2.DbxClientV2
@@ -14,8 +12,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakebarnby.filemanager.sources.models.SourceStorageStats
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
-import com.jakebarnby.filemanager.util.LogUtils
-import com.jakebarnby.filemanager.util.PreferenceUtils
+import com.jakebarnby.filemanager.util.Logger
 import java.io.*
 
 /**
@@ -99,10 +96,10 @@ object DropboxFactory {
         try {
             client!!.auth().tokenRevoke()
             client = null
-            PreferenceUtils.savePref(context, Prefs.DROPBOX_TOKEN_KEY, null as String?)
+            Preferences.savePref(context, Prefs.DROPBOX_TOKEN_KEY, null as String?)
         } catch (e: DbxException) {
             val params = bundleOf(Constants.Analytics.PARAM_ERROR_VALUE to e.message)
-            LogUtils.logFirebaseEvent(
+            Logger.logFirebaseEvent(
                 FirebaseAnalytics.getInstance(context!!),
                 Constants.Analytics.EVENT_ERROR_DROPBOX_LOGOUT,
                 params

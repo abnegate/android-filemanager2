@@ -3,7 +3,7 @@ package com.jakebarnby.filemanager.util
 /**
  * Created by Jake on 9/26/2017.
  */
-object IntentExtensions {
+object Intents {
     const val ACTION_COMPLETE = "com.jakebarnby.filemanager.services.action.COMPLETE"
     const val ACTION_SHOW_DIALOG = "com.jakebarnby.filemanager.services.action.SHOW_DIALOG"
     const val ACTION_UPDATE_DIALOG = "com.jakebarnby.filemanager.services.action.UPDATE_DIALOG"

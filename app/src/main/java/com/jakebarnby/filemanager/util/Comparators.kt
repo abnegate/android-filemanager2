@@ -1,6 +1,7 @@
 package com.jakebarnby.filemanager.util
 
 import android.content.Context
+import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.sources.models.SourceFile
 import com.jakebarnby.filemanager.util.Constants.OrderTypes
 import com.jakebarnby.filemanager.util.Constants.Prefs
@@ -10,23 +11,20 @@ import java.util.*
 /**
  * Created by Jake on 10/3/2017.
  */
-object ComparatorUtils {
+object Comparators {
 
-    fun resolveComparatorForPrefs(context: Context): Comparator<TreeNode<out SourceFile>> {
-        val showFoldersFirst = PreferenceUtils.getBoolean(
-                context,
-                Prefs.FOLDER_FIRST_KEY,
-                true
+    fun resolveComparatorForPrefs(prefs: PreferenceManager): Comparator<TreeNode<out SourceFile>> {
+        val showFoldersFirst = prefs.getBoolean(
+            Prefs.FOLDER_FIRST_KEY,
+            true
         )
-        val sortType = PreferenceUtils.getInt(
-                context,
-                Prefs.SORT_TYPE_KEY,
-                SortTypes.NAME
+        val sortType = prefs.getInt(
+            Prefs.SORT_TYPE_KEY,
+            SortTypes.NAME
         )
-        val orderType = PreferenceUtils.getInt(
-                context,
-                Prefs.ORDER_TYPE_KEY,
-                SortTypes.NAME
+        val orderType = prefs.getInt(
+            Prefs.ORDER_TYPE_KEY,
+            SortTypes.NAME
         )
 
         return when (sortType) {

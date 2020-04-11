@@ -7,9 +7,11 @@ import com.jakebarnby.filemanager.util.TreeNode
 /**
  * Created by Jake on 7/29/2017.
  */
-class SourceManager {
+class SourceManager(
+    val sources: MutableList<Source> = mutableListOf()
+) {
 
-    lateinit var activeDirectory: TreeNode<SourceFile>
+    lateinit var activeSource: Source
 
     private val currentFileActions = SparseArray<FileAction>()
 

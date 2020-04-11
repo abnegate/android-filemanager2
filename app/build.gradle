@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId "com.jakebarnby.filemanager"
-        minSdkVersion 18
+        minSdkVersion 19
         targetSdkVersion 29
         versionCode 3
         versionName "1.0"
@@ -82,7 +82,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 
     //Dropbox
-    implementation 'com.dropbox.core:dropbox-core-sdk:3.0.3'
+    implementation 'com.dropbox.core:dropbox-core-sdk:3.1.3'
     implementation 'com.squareup.okhttp3:okhttp:3.12.1'
 
     //Firebase

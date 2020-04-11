@@ -10,8 +10,6 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.os.bundleOf
 import com.dropbox.core.DbxException
-import com.dropbox.core.v2.files.FolderMetadata
-import com.google.api.services.drive.model.File
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.managers.SelectedFilesManager
@@ -27,26 +25,25 @@ import com.jakebarnby.filemanager.sources.onedrive.OneDriveFactory
 import com.jakebarnby.filemanager.sources.onedrive.OneDriveFile
 import com.jakebarnby.filemanager.util.*
 import com.jakebarnby.filemanager.util.Constants.Sources
-import com.jakebarnby.filemanager.util.IntentExtensions.ACTION_CLEAR_CACHE
-import com.jakebarnby.filemanager.util.IntentExtensions.ACTION_COMPLETE
-import com.jakebarnby.filemanager.util.IntentExtensions.ACTION_COPY
-import com.jakebarnby.filemanager.util.IntentExtensions.ACTION_DELETE
-import com.jakebarnby.filemanager.util.IntentExtensions.ACTION_MOVE
-import com.jakebarnby.filemanager.util.IntentExtensions.ACTION_OPEN
-import com.jakebarnby.filemanager.util.IntentExtensions.ACTION_RENAME
-import com.jakebarnby.filemanager.util.IntentExtensions.ACTION_SHOW_DIALOG
-import com.jakebarnby.filemanager.util.IntentExtensions.ACTION_SHOW_ERROR
-import com.jakebarnby.filemanager.util.IntentExtensions.ACTION_UPDATE_DIALOG
-import com.jakebarnby.filemanager.util.IntentExtensions.ACTION_ZIP
-import com.jakebarnby.filemanager.util.IntentExtensions.EXTRA_DIALOG_CURRENT_VALUE
-import com.jakebarnby.filemanager.util.IntentExtensions.EXTRA_DIALOG_MAX_VALUE
-import com.jakebarnby.filemanager.util.IntentExtensions.EXTRA_DIALOG_MESSAGE
-import com.jakebarnby.filemanager.util.IntentExtensions.EXTRA_DIALOG_TITLE
-import com.jakebarnby.filemanager.util.IntentExtensions.EXTRA_NEW_NAME
-import com.jakebarnby.filemanager.util.IntentExtensions.EXTRA_OPERATION_ID
-import com.jakebarnby.filemanager.util.IntentExtensions.EXTRA_TO_OPEN_PATH
-import com.jakebarnby.filemanager.util.IntentExtensions.EXTRA_ZIP_FILENAME
-import com.microsoft.graph.extensions.DriveItem
+import com.jakebarnby.filemanager.util.Intents.ACTION_CLEAR_CACHE
+import com.jakebarnby.filemanager.util.Intents.ACTION_COMPLETE
+import com.jakebarnby.filemanager.util.Intents.ACTION_COPY
+import com.jakebarnby.filemanager.util.Intents.ACTION_DELETE
+import com.jakebarnby.filemanager.util.Intents.ACTION_MOVE
+import com.jakebarnby.filemanager.util.Intents.ACTION_OPEN
+import com.jakebarnby.filemanager.util.Intents.ACTION_RENAME
+import com.jakebarnby.filemanager.util.Intents.ACTION_SHOW_DIALOG
+import com.jakebarnby.filemanager.util.Intents.ACTION_SHOW_ERROR
+import com.jakebarnby.filemanager.util.Intents.ACTION_UPDATE_DIALOG
+import com.jakebarnby.filemanager.util.Intents.ACTION_ZIP
+import com.jakebarnby.filemanager.util.Intents.EXTRA_DIALOG_CURRENT_VALUE
+import com.jakebarnby.filemanager.util.Intents.EXTRA_DIALOG_MAX_VALUE
+import com.jakebarnby.filemanager.util.Intents.EXTRA_DIALOG_MESSAGE
+import com.jakebarnby.filemanager.util.Intents.EXTRA_DIALOG_TITLE
+import com.jakebarnby.filemanager.util.Intents.EXTRA_NEW_NAME
+import com.jakebarnby.filemanager.util.Intents.EXTRA_OPERATION_ID
+import com.jakebarnby.filemanager.util.Intents.EXTRA_TO_OPEN_PATH
+import com.jakebarnby.filemanager.util.Intents.EXTRA_ZIP_FILENAME
 import com.microsoft.graph.http.GraphServiceException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -281,7 +278,7 @@ class SourceTransferService : Service(), CoroutineScope {
         } catch (e: IOException) {
             val params = Bundle()
             params.putString(Constants.Analytics.PARAM_ERROR_VALUE, e.message)
-            LogUtils.logFirebaseEvent(
+            Logger.logFirebaseEvent(
                 analytics,
                 Constants.Analytics.EVENT_ERROR_CACHE_CLEAR,
                 params)
@@ -358,7 +355,7 @@ class SourceTransferService : Service(), CoroutineScope {
             if (!isSilent) {
                 broadcastFinishedTask(operationId)
             }
-            LogUtils.logFirebaseEvent(
+            Logger.logFirebaseEvent(
                 analytics,
                 Constants.Analytics.EVENT_SUCCESS_CREATE_FOLDER
             )
@@ -375,7 +372,7 @@ class SourceTransferService : Service(), CoroutineScope {
                 Constants.Analytics.PARAM_ERROR_VALUE to e.message,
                 Constants.Analytics.PARAM_SOURCE_NAME to destDir.data.sourceName
             )
-            LogUtils.logFirebaseEvent(
+            Logger.logFirebaseEvent(
                 analytics,
                 Constants.Analytics.EVENT_ERROR_CREATE_FOLDER,
                 params)
@@ -433,7 +430,7 @@ class SourceTransferService : Service(), CoroutineScope {
 
             broadcastFinishedTask(operationId)
 
-            LogUtils.logFirebaseEvent(
+            Logger.logFirebaseEvent(
                 analytics,
                 Constants.Analytics.EVENT_SUCCESS_RENAMING
             )
@@ -457,7 +454,7 @@ class SourceTransferService : Service(), CoroutineScope {
                 Constants.Analytics.PARAM_ERROR_VALUE to e.message,
                 Constants.Analytics.PARAM_SOURCE_NAME to sourceName
             )
-            LogUtils.logFirebaseEvent(
+            Logger.logFirebaseEvent(
                 analytics,
                 Constants.Analytics.EVENT_ERROR_RENAMING,
                 params
@@ -493,7 +490,7 @@ class SourceTransferService : Service(), CoroutineScope {
                 operationId,
                 bundleOf(Constants.FILE_PATH_KEY to filePath)
             )
-            LogUtils.logFirebaseEvent(
+            Logger.logFirebaseEvent(
                 analytics,
                 Constants.Analytics.EVENT_SUCCESS_OPEN_FILE
             )
@@ -512,7 +509,7 @@ class SourceTransferService : Service(), CoroutineScope {
                 Constants.Analytics.PARAM_ERROR_VALUE to e.message,
                 Constants.Analytics.PARAM_SOURCE_NAME to sourceName
             )
-            LogUtils.logFirebaseEvent(
+            Logger.logFirebaseEvent(
                 analytics,
                 Constants.Analytics.EVENT_ERROR_OPENING_FILE,
                 params
@@ -570,7 +567,7 @@ class SourceTransferService : Service(), CoroutineScope {
 
             if (!isSilent) {
                 broadcastFinishedTask(operationId)
-                LogUtils.logFirebaseEvent(
+                Logger.logFirebaseEvent(
                     analytics,
                     Constants.Analytics.EVENT_SUCCESS_COPYING
                 )
@@ -594,7 +591,7 @@ class SourceTransferService : Service(), CoroutineScope {
                 Constants.Analytics.PARAM_ERROR_VALUE to e.message,
                 Constants.Analytics.PARAM_SOURCE_NAME to sourceName
             )
-            LogUtils.logFirebaseEvent(
+            Logger.logFirebaseEvent(
                 analytics,
                 Constants.Analytics.EVENT_ERROR_COPYING,
                 params
@@ -752,7 +749,7 @@ class SourceTransferService : Service(), CoroutineScope {
             if (!isSilent) {
                 broadcastFinishedTask(operationId)
             }
-            LogUtils.logFirebaseEvent(
+            Logger.logFirebaseEvent(
                 analytics,
                 Constants.Analytics.EVENT_SUCCESS_DELETING
             )
@@ -774,7 +771,7 @@ class SourceTransferService : Service(), CoroutineScope {
                 Constants.Analytics.PARAM_ERROR_VALUE to e.message,
                 Constants.Analytics.PARAM_SOURCE_NAME to sourceName
             )
-            LogUtils.logFirebaseEvent(
+            Logger.logFirebaseEvent(
                 analytics,
                 Constants.Analytics.EVENT_ERROR_DELETE,
                 params
@@ -831,7 +828,7 @@ class SourceTransferService : Service(), CoroutineScope {
                 Constants.Analytics.PARAM_ERROR_VALUE to e.message,
                 Constants.Analytics.PARAM_SOURCE_NAME to sourceName
             )
-            LogUtils.logFirebaseEvent(
+            Logger.logFirebaseEvent(
                 analytics,
                 Constants.Analytics.EVENT_ERROR_ZIPPING,
                 params)
@@ -859,7 +856,7 @@ class SourceTransferService : Service(), CoroutineScope {
                     cacheDir.path + separator + file.name
                 )
                 if (newFile.exists()) {
-                    LogUtils.logFirebaseEvent(
+                    Logger.logFirebaseEvent(
                         analytics,
                         Constants.Analytics.EVENT_SUCCESS_DROPBOX_DOWNLOAD
                     )
@@ -872,7 +869,7 @@ class SourceTransferService : Service(), CoroutineScope {
                     destPath
                 )
                 if (googleFile.exists()) {
-                    LogUtils.logFirebaseEvent(
+                    Logger.logFirebaseEvent(
                         analytics,
                         Constants.Analytics.EVENT_SUCCESS_GOOGLEDRIVE_DOWNLOAD
                     )
@@ -887,7 +884,7 @@ class SourceTransferService : Service(), CoroutineScope {
                 )
 
                 if (oneDriveFile?.exists() == true) {
-                    LogUtils.logFirebaseEvent(
+                    Logger.logFirebaseEvent(
                         analytics,
                         Constants.Analytics.EVENT_SUCCESS_ONEDRIVE_DOWNLOAD
                     )
@@ -922,7 +919,7 @@ class SourceTransferService : Service(), CoroutineScope {
                         destDir.path
                     ) ?: throw NullPointerException("Upload returned null")
                 )
-                LogUtils.logFirebaseEvent(
+                Logger.logFirebaseEvent(
                     analytics,
                     Constants.Analytics.EVENT_SUCCESS_DROPBOX_UPLOAD
                 )
@@ -936,7 +933,7 @@ class SourceTransferService : Service(), CoroutineScope {
                         (destDir as GoogleDriveFile).driveId
                     ) ?: throw NullPointerException("Upload returned null")
                 )
-                LogUtils.logFirebaseEvent(
+                Logger.logFirebaseEvent(
                     analytics,
                     Constants.Analytics.EVENT_SUCCESS_GOOGLEDRIVE_UPLOAD
                 )
@@ -950,7 +947,7 @@ class SourceTransferService : Service(), CoroutineScope {
                         (destDir as OneDriveFile).driveId
                     ) ?: throw NullPointerException("Upload returned null")
                 )
-                LogUtils.logFirebaseEvent(
+                Logger.logFirebaseEvent(
                     analytics,
                     Constants.Analytics.EVENT_SUCCESS_ONEDRIVE_UPLOAD
                 )

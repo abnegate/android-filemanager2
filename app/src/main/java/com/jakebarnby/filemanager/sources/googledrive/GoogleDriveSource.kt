@@ -2,9 +2,7 @@ package com.jakebarnby.filemanager.sources.googledrive
 
 import android.Manifest
 import android.content.Context
-import android.os.AsyncTask
 import androidx.fragment.app.Fragment
-import com.google.android.gms.auth.GoogleAuthException
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.util.ExponentialBackOff
 import com.google.api.services.drive.DriveScopes
@@ -17,9 +15,7 @@ import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Constants.RequestCodes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
-import java.io.IOException
 import java.lang.Exception
-import java.util.*
 
 /**
  * Created by jakebarnby on 2/08/17.
@@ -65,7 +61,7 @@ class GoogleDriveSource(
             credendtial = null
             sourceListener.onLogout()
 
-            LogUtils.logFirebaseEvent(
+            Logger.logFirebaseEvent(
                 FirebaseAnalytics.getInstance(context),
                 Constants.Analytics.EVENT_LOGOUT_GOOGLEDRIVE
             )
@@ -86,7 +82,7 @@ class GoogleDriveSource(
      * Create a google credential and try to call the API with it, do nothing if it fails
      */
     fun authGoogleSilent(fragment: Fragment) {
-        val accountName = PreferenceUtils.getString(
+        val accountName = Preferences.getString(
             fragment.context!!,
             Prefs.GOOGLE_NAME_KEY,
             null)
@@ -105,8 +101,8 @@ class GoogleDriveSource(
             return
         }
 
-        if (!GooglePlayUtils.isGooglePlayServicesAvailable(fragment.context!!)) {
-            GooglePlayUtils.acquireGooglePlayServices(fragment.activity)
+        if (!GooglePlay.isGooglePlayServicesAvailable(fragment.context!!)) {
+            GooglePlay.acquireGooglePlayServices(fragment.activity)
         } else if (credendtial != null && credendtial!!.selectedAccountName == null) {
             fragment.startActivityForResult(credendtial!!.newChooseAccountIntent(), RequestCodes.ACCOUNT_PICKER)
         } else if (!Utils.isConnectionReady(fragment.context!!)) {
@@ -119,7 +115,7 @@ class GoogleDriveSource(
 
     fun saveUserToken(fragment: Fragment) {
         try {
-            PreferenceUtils.savePref(fragment.context!!, Prefs.GOOGLE_TOKEN_KEY, credendtial!!.token)
+            Preferences.savePref(fragment.context!!, Prefs.GOOGLE_TOKEN_KEY, credendtial!!.token)
         } catch (e: Exception) {
             e.printStackTrace()
             //TODO: Log error
@@ -128,7 +124,7 @@ class GoogleDriveSource(
     }
 
     fun saveUserAccount(fragment: Fragment, accountName: String?) {
-        PreferenceUtils.savePref(fragment.context!!, Prefs.GOOGLE_NAME_KEY, accountName)
+        Preferences.savePref(fragment.context!!, Prefs.GOOGLE_NAME_KEY, accountName)
         credendtial!!.selectedAccountName = accountName
         getResultsFromApi(fragment)
     }

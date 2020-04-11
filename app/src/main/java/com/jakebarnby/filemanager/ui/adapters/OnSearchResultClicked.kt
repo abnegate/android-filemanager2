@@ -5,5 +5,5 @@ import com.jakebarnby.filemanager.util.TreeNode
 
 @FunctionalInterface
 interface OnSearchResultClicked {
-    fun navigateToFile(toOpen: TreeNode<SourceFile>)
+    fun navigateToFile(fileNode: TreeNode<SourceFile>)
 }

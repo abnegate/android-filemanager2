@@ -1,7 +1,6 @@
 package com.jakebarnby.filemanager.sources.onedrive
 
 import android.content.Context
-import android.os.AsyncTask
 import androidx.fragment.app.Fragment
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakebarnby.filemanager.sources.SourceListener
@@ -9,8 +8,7 @@ import com.jakebarnby.filemanager.sources.models.Source
 import com.jakebarnby.filemanager.sources.models.SourceType
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
-import com.jakebarnby.filemanager.util.LogUtils
-import com.jakebarnby.filemanager.util.PreferenceUtils
+import com.jakebarnby.filemanager.util.Logger
 import com.microsoft.graph.concurrency.ICallback
 import com.microsoft.graph.core.ClientException
 import com.microsoft.graph.core.DefaultClientConfig
@@ -46,8 +44,8 @@ class OneDriveSource(
         }
 
         try {
-            val accessToken = PreferenceUtils.getString(fragment.context!!, Prefs.ONEDRIVE_TOKEN_KEY, null)
-            val userId = PreferenceUtils.getString(fragment.context!!, Prefs.ONEDRIVE_NAME_KEY, null)
+            val accessToken = Preferences.getString(fragment.context!!, Prefs.ONEDRIVE_TOKEN_KEY, null)
+            val userId = Preferences.getString(fragment.context!!, Prefs.ONEDRIVE_NAME_KEY, null)
             if (accessToken != null && userId != null) {
                 client!!.acquireTokenSilentAsync(SCOPES, client!!.getUser(userId), getAuthSilentCallback(fragment))
             } else {
@@ -68,12 +66,12 @@ class OneDriveSource(
         }
 
         val clientConfig = DefaultClientConfig.createWithAuthenticationProvider {
-                it.addHeader("Authorization", String.format("Bearer %s", authResult!!.accessToken))
-            }
+            it.addHeader("Authorization", String.format("Bearer %s", authResult!!.accessToken))
+        }
 
         OneDriveFactory.service = GraphServiceClient.Builder()
-                .fromConfig(clientConfig)
-                .buildClient()
+            .fromConfig(clientConfig)
+            .buildClient()
 
         OneDriveFactory.service
             ?.me
@@ -100,7 +98,7 @@ class OneDriveSource(
             isFilesLoaded = false
             authResult = null
             sourceListener.onLogout()
-            LogUtils.logFirebaseEvent(
+            Logger.logFirebaseEvent(
                 FirebaseAnalytics.getInstance(context),
                 Constants.Analytics.EVENT_LOGOUT_ONEDRIVE
             )
@@ -111,13 +109,13 @@ class OneDriveSource(
      * Check for a valid access token and store it in shared preferences if found, then load the source
      */
     fun checkForAccessToken(fragment: Fragment) {
-        var accessToken = PreferenceUtils.getString(fragment.context!!, Prefs.ONEDRIVE_TOKEN_KEY, null)
+        var accessToken = Preferences.getString(fragment.context!!, Prefs.ONEDRIVE_TOKEN_KEY, null)
         if (authResult != null) {
             if (accessToken == null || authResult!!.accessToken != accessToken) {
                 accessToken = authResult!!.accessToken
                 val userId = authResult!!.user.userIdentifier
-                PreferenceUtils.savePref(fragment.context!!, Prefs.ONEDRIVE_TOKEN_KEY, accessToken)
-                PreferenceUtils.savePref(fragment.context!!, Prefs.ONEDRIVE_NAME_KEY, userId)
+                Preferences.savePref(fragment.context!!, Prefs.ONEDRIVE_TOKEN_KEY, accessToken)
+                Preferences.savePref(fragment.context!!, Prefs.ONEDRIVE_NAME_KEY, userId)
             } else {
                 if (!isLoggedIn) {
                     authenticateSource(fragment)
@@ -131,7 +129,7 @@ class OneDriveSource(
                 authenticateSource(fragment)
             } else {
                 loadSource(fragment.context!!)
-                LogUtils.logFirebaseEvent(
+                Logger.logFirebaseEvent(
                     FirebaseAnalytics.getInstance(fragment.context!!),
                     Constants.Analytics.EVENT_LOGIN_ONEDRIVE)
             }

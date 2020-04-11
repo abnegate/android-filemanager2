@@ -12,7 +12,8 @@ import java.io.File
 /**
  * Utility functions to support Uri conversion and processing.
  */
-object UriUtils {
+object Uris {
+
     /**
      * Get the file path for a uri. This is a convoluted way to get the path for an Uri created using the
      * StorageAccessFramework. This in no way is the official way to do this but there doesn't seem to be a better
@@ -38,7 +39,7 @@ object UriUtils {
                 // DownloadsProvider
                 val id = DocumentsContract.getDocumentId(uri)
                 val contentUri = ContentUris
-                        .withAppendedId(Uri.parse("content://downloads/public_downloads"), java.lang.Long.valueOf(id))
+                    .withAppendedId(Uri.parse("content://downloads/public_downloads"), java.lang.Long.valueOf(id))
                 path = getDataColumn(context, contentUri, null, null)
             } else if (isMediaDocument(uri)) {
                 // MediaProvider
@@ -55,7 +56,7 @@ object UriUtils {
                 }
                 val selection = "_id=?"
                 val selectionArgs = arrayOf(
-                        split[1]
+                    split[1]
                 )
                 path = getDataColumn(context, contentUri, selection, selectionArgs)
             }
@@ -74,14 +75,14 @@ object UriUtils {
         var cursor: Cursor? = null
         val column = "_data"
         val projection = arrayOf(
-                column
+            column
         )
         try {
             cursor = context.contentResolver.query(uri!!, projection, selection, selectionArgs,
-                    null)
+                null)
             if (cursor != null && cursor.moveToFirst()) {
-                val column_index = cursor.getColumnIndexOrThrow(column)
-                return cursor.getString(column_index)
+                val columnIndex = cursor.getColumnIndexOrThrow(column)
+                return cursor.getString(columnIndex)
             }
         } finally {
             cursor?.close()

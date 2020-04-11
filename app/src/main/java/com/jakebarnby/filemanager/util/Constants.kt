@@ -131,6 +131,7 @@ object Constants {
     }
 
     object DialogTags {
+        const val PROPERTIES = "Properties"
         const val SORT_BY = "Sort by"
         const val CREATE_FOLDER = "Create folder"
         const val SETTINGS = "Settings"

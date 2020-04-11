@@ -15,18 +15,21 @@ import com.jakebarnby.filemanager.util.Utils
 /**
  * Created by Jake on 8/6/2017.
  */
-class SourceLogoutAdapter(private val mSources: MutableList<Source?>, private val mListener: LogoutListener) : RecyclerView.Adapter<LogoutViewHolder>() {
+class SourceLogoutAdapter(
+    private val sources: MutableList<Source>,
+    private val listener: LogoutListener
+) : RecyclerView.Adapter<LogoutViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LogoutViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.view_logout_list, parent, false)
         return LogoutViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: LogoutViewHolder, position: Int) {
-        holder.bindHolder(mSources, position)
+        holder.bindHolder(sources, position)
     }
 
     override fun getItemCount(): Int {
-        return mSources.size
+        return sources.size
     }
 
     inner class LogoutViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -35,7 +38,7 @@ class SourceLogoutAdapter(private val mSources: MutableList<Source?>, private va
         private val sourceName: TextView = itemView.findViewById(R.id.txt_source_title)
         private val logout: Button = itemView.findViewById(R.id.btn_logout)
 
-        fun bindHolder(sources: MutableList<Source?>, position: Int) {
+        fun bindHolder(sources: MutableList<Source>, position: Int) {
 
             val source = sources[position] ?: return
 
@@ -52,7 +55,7 @@ class SourceLogoutAdapter(private val mSources: MutableList<Source?>, private va
                 sources.remove(source)
                 notifyDataSetChanged()
                 if (sources.size == 0) {
-                    mListener.onLastLogout()
+                    listener.onLastLogout()
                 }
             }
         }

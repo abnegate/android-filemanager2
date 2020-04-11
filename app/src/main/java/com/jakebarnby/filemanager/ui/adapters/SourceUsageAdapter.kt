@@ -17,9 +17,14 @@ import java.util.*
 /**
  * Created by Jake on 7/31/2017.
  */
-class SourceUsageAdapter(private val sources: List<Source?>) : RecyclerView.Adapter<UsageViewHolder>() {
+class SourceUsageAdapter(
+    private val sources: List<Source>
+) : RecyclerView.Adapter<UsageViewHolder>() {
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UsageViewHolder {
-        val inflatedView = LayoutInflater.from(parent.context).inflate(R.layout.view_usage_list, parent, false)
+        val inflatedView = LayoutInflater.from(parent.context)
+            .inflate(R.layout.view_usage_list, parent, false)
+
         return UsageViewHolder(inflatedView)
     }
 
@@ -37,10 +42,10 @@ class SourceUsageAdapter(private val sources: List<Source?>) : RecyclerView.Adap
         private val sourceName: TextView = itemView.findViewById(R.id.txt_source_title)
         private val sourceUsage: TextView = itemView.findViewById(R.id.txt_space_consumption)
 
-        fun bindHolder(source: Source?) {
-            sourceName.text = String.format("%s", source?.sourceName)
+        fun bindHolder(source: Source) {
+            sourceName.text = String.format("%s", source.sourceName)
             sourceUsage.text = constructUsageString(source)
-            animateProgress(percentBar, source?.usedSpacePercent ?: 0)
+            animateProgress(percentBar, source.usedSpacePercent ?: 0)
         }
 
         private fun constructUsageString(source: Source?): String {
@@ -56,7 +61,7 @@ class SourceUsageAdapter(private val sources: List<Source?>) : RecyclerView.Adap
         }
 
         private fun animateProgress(bar: ProgressBar, maxPercent: Int) =
-             ValueAnimator.ofInt(0, maxPercent).apply {
+            ValueAnimator.ofInt(0, maxPercent).apply {
                 addUpdateListener { animation: ValueAnimator ->
                     val progress = animation.animatedValue as Int
                     bar.progress = progress

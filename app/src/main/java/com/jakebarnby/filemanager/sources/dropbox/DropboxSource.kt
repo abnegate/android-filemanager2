@@ -12,8 +12,7 @@ import com.jakebarnby.filemanager.sources.models.SourceType
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Constants.Sources
-import com.jakebarnby.filemanager.util.LogUtils
-import com.jakebarnby.filemanager.util.PreferenceUtils
+import com.jakebarnby.filemanager.util.Logger
 
 /**
  * Created by jakebarnby on 2/08/17.
@@ -46,7 +45,7 @@ class DropboxSource(
         isLoggedIn = false
         isFilesLoaded = false
         sourceListener.onLogout()
-        LogUtils.logFirebaseEvent(
+        Logger.logFirebaseEvent(
             FirebaseAnalytics.getInstance(context),
             Constants.Analytics.EVENT_LOGOUT_DROPBOX
         )
@@ -75,7 +74,7 @@ class DropboxSource(
      * Check for a valid access token and store it in shared preferences if found, then load the source
      */
     fun checkForAccessToken(context: Context) {
-        var accessToken = PreferenceUtils.getString(
+        var accessToken = Preferences.getString(
             context,
             Prefs.DROPBOX_TOKEN_KEY,
             null
@@ -89,10 +88,10 @@ class DropboxSource(
         if (accessToken == null) {
             accessToken = Auth.getOAuth2Token()
             if (accessToken != null) {
-                PreferenceUtils.savePref(context, Prefs.DROPBOX_TOKEN_KEY, accessToken)
+                Preferences.savePref(context, Prefs.DROPBOX_TOKEN_KEY, accessToken)
                 setupClient(accessToken)
                 loadSource(context)
-                LogUtils.logFirebaseEvent(
+                Logger.logFirebaseEvent(
                     FirebaseAnalytics.getInstance(context),
                     Constants.Analytics.EVENT_LOGIN_DROPBOX
                 )

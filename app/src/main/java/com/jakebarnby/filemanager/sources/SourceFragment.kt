@@ -39,12 +39,11 @@ import com.jakebarnby.filemanager.util.*
 import com.jakebarnby.filemanager.util.Constants.GRID_SIZE
 import java.util.*
 
-/**
- * A placeholder fragment containing a simple view.
- */
 abstract class SourceFragment : Fragment(), SourceListener {
 
     lateinit var source: Source
+
+    lateinit var presenter: SourceFragmentContract.Presenter
 
     var recycler: RecyclerView? = null
 
@@ -145,7 +144,7 @@ abstract class SourceFragment : Fragment(), SourceListener {
 
     fun setMultiSelectEnabled(enabled: Boolean) {
         if (enabled) {
-            (activity as? SourceActivity)?.toggleFloatingMenu(true)
+            (activity as? SourceActivity)?.toggleContextMenu(true)
         }
         source.isMultiSelectEnabled = enabled
 
@@ -159,14 +158,14 @@ abstract class SourceFragment : Fragment(), SourceListener {
      * Set the [RecyclerView] layout and adapter based on users preferences
      */
     fun initRecyclerView() {
-        val viewType = PreferenceUtils.getInt(
+        val viewType = Preferences.getInt(
             context!!,
             Constants.Prefs.VIEW_TYPE_KEY,
             Constants.ViewTypes.LIST)
 
         TreeNode.sortTree(
             source.rootNode,
-            ComparatorUtils.resolveComparatorForPrefs(context!!)
+            Comparators.resolveComparatorForPrefs(context!!)
         )
 
         val newAdapter: FileAdapter = when (viewType) {

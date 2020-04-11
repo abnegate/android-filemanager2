@@ -38,7 +38,7 @@ class CreateFolderDialog : DialogFragment() {
 
         builder.setPositiveButton(getString(R.string.ok)) { dialog: DialogInterface?, which: Int ->
             val activeDirectory = SelectedFilesManager.getActionableDirectory(
-                    SelectedFilesManager.operationCount
+                SelectedFilesManager.operationCount
             )
             val name = input.text.toString()
             for (file in activeDirectory?.children ?: emptyList<TreeNode<SourceFile>>()) {

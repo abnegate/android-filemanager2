@@ -7,7 +7,6 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.jakebarnby.filemanager.sources.SourceActivity
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Constants.RemoteConfig
-import com.jakebarnby.filemanager.util.PreferenceUtils
 import com.jakebarnby.tutorial.TutorialActivity
 import com.jakebarnby.tutorial.TutorialPage
 
@@ -27,23 +26,23 @@ class FileManagerTutorialActivity : TutorialActivity() {
      */
     private fun addPages() {
         addPageWithContent(
-                mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE1_TITLE_KEY),
-                mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE1_CONTENT_KEY),
-                mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE1_SUMMARY_KEY),
-                mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE1_IMAGE_KEY),
-                mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE1_BGCOLOR_KEY))
+            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE1_TITLE_KEY),
+            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE1_CONTENT_KEY),
+            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE1_SUMMARY_KEY),
+            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE1_IMAGE_KEY),
+            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE1_BGCOLOR_KEY))
         addPageWithContent(
-                mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE2_TITLE_KEY),
-                mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE2_CONTENT_KEY),
-                mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE2_SUMMARY_KEY),
-                mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE2_IMAGE_KEY),
-                mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE2_BGCOLOR_KEY))
+            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE2_TITLE_KEY),
+            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE2_CONTENT_KEY),
+            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE2_SUMMARY_KEY),
+            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE2_IMAGE_KEY),
+            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE2_BGCOLOR_KEY))
         addPageWithContent(
-                mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE3_TITLE_KEY),
-                mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE3_CONTENT_KEY),
-                mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE3_SUMMARY_KEY),
-                mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE3_IMAGE_KEY),
-                mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE3_BGCOLOR_KEY))
+            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE3_TITLE_KEY),
+            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE3_CONTENT_KEY),
+            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE3_SUMMARY_KEY),
+            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE3_IMAGE_KEY),
+            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE3_BGCOLOR_KEY))
     }
 
     /**
@@ -60,12 +59,12 @@ class FileManagerTutorialActivity : TutorialActivity() {
                                    image: String,
                                    bgColor: String) {
         addFragment(TutorialPage.Builder()
-                .setTitle(title)
-                .setContent(content)
-                .setSummary(summary)
-                .setImageUrl(image)
-                .setBackgroundColor(Color.parseColor(bgColor))
-                .build())
+            .setTitle(title)
+            .setContent(content)
+            .setSummary(summary)
+            .setImageUrl(image)
+            .setBackgroundColor(Color.parseColor(bgColor))
+            .build())
     }
 
     override fun finish() {
@@ -75,6 +74,6 @@ class FileManagerTutorialActivity : TutorialActivity() {
     }
 
     private fun saveFinished() {
-        PreferenceUtils.savePref(this, Prefs.TUT_SEEN_KEY, true)
+        Preferences.savePref(this, Prefs.TUT_SEEN_KEY, true)
     }
 }

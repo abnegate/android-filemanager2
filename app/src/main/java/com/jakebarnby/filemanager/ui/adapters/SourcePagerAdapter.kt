@@ -17,18 +17,19 @@ import java.util.*
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
  * one of the sections/tabs/pages.
  */
-class SourcePagerAdapter(fm: FragmentManager?) : FragmentStatePagerAdapter(fm!!) {
+class SourcePagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+
     internal val fragments: MutableList<SourceFragment> = ArrayList()
-    fun getFragments(): List<SourceFragment> {
-        return fragments
+
+    init {
+        fragments.add(LocalFragment.newInstance(Sources.LOCAL, Environment.getExternalStorageDirectory().path))
+        fragments.add(DropboxFragment.newInstance(Sources.DROPBOX))
+        fragments.add(GoogleDriveFragment.newInstance(Sources.GOOGLE_DRIVE))
+        fragments.add(OneDriveFragment.newInstance(Sources.ONEDRIVE))
     }
 
     override fun getItem(position: Int): Fragment {
         return fragments[position]
-    }
-
-    override fun getItemPosition(`object`: Any): Int {
-        return PagerAdapter.POSITION_NONE
     }
 
     override fun getCount(): Int {
@@ -37,12 +38,5 @@ class SourcePagerAdapter(fm: FragmentManager?) : FragmentStatePagerAdapter(fm!!)
 
     override fun getPageTitle(position: Int): CharSequence? {
         return fragments[position].arguments!!.getString("TITLE")
-    }
-
-    init {
-        fragments.add(LocalFragment.Companion.newInstance(Sources.LOCAL, Environment.getExternalStorageDirectory().path))
-        fragments.add(DropboxFragment.Companion.newInstance(Sources.DROPBOX))
-        fragments.add(GoogleDriveFragment.Companion.newInstance(Sources.GOOGLE_DRIVE))
-        fragments.add(OneDriveFragment.Companion.newInstance(Sources.ONEDRIVE))
     }
 }

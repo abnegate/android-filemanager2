@@ -24,6 +24,7 @@ import java.util.*
  * Created by Jake on 6/6/2017.
  */
 object Utils {
+
     /**
      * Checks whether the device currently has a network connection.
      * @return True if the device has a network connection, false otherwise.
@@ -130,9 +131,10 @@ object Utils {
      * @param context   Context for resources
      * @return          Array of external storage paths
      */
-    fun getExternalStorageDirectories(context: Context): Array<String?> {
-        val results: MutableList<String> = ArrayList()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) { //Method 1 for KitKat & above
+    fun getExternalStorageDirectories(context: Context): List<String> {
+        val results = mutableListOf<String>()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             val externalDirs = context.getExternalFilesDirs(null)
             for (file in externalDirs) {
                 if (file == null) continue
@@ -152,40 +154,41 @@ object Utils {
             var output = ""
             try {
                 val process = ProcessBuilder().command("mount | grep /dev/block/vold")
-                        .redirectErrorStream(true).start()
+                    .redirectErrorStream(true).start()
                 process.waitFor()
-                val `is` = process.inputStream
+                val inputStream = process.inputStream
                 val buffer = ByteArray(1024)
-                while (`is`.read(buffer) != -1) {
-                    output = output + String(buffer)
+                while (inputStream.read(buffer) != -1) {
+                    output += String(buffer)
                 }
-                `is`.close()
+                inputStream.close()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            if (!output.trim { it <= ' ' }.isEmpty()) {
+            if (output.trim { it <= ' ' }.isNotEmpty()) {
                 val devicePoints = output.split("\n").toTypedArray()
                 for (voldPoint in devicePoints) {
                     results.add(voldPoint.split(" ").toTypedArray()[2])
                 }
             }
         }
-        val storageDirectories = arrayOfNulls<String>(results.size)
-        for (i in results.indices) storageDirectories[i] = results[i]
-        return storageDirectories
+
+        return results
     }
 
     fun getDisplayStringFromDate(date: Long): String {
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = date
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = date
+        }
+
         return String.format(
-                Locale.getDefault(),
-                Constants.DATE_TIME_FORMAT,
-                calendar[Calendar.HOUR_OF_DAY],
-                calendar[Calendar.MINUTE],
-                calendar[Calendar.DAY_OF_MONTH],
-                calendar[Calendar.MONTH] + 1,
-                calendar[Calendar.YEAR] - 2000
+            Locale.getDefault(),
+            Constants.DATE_TIME_FORMAT,
+            calendar[Calendar.HOUR_OF_DAY],
+            calendar[Calendar.MINUTE],
+            calendar[Calendar.DAY_OF_MONTH],
+            calendar[Calendar.MONTH] + 1,
+            calendar[Calendar.YEAR] - 2000
         )
     }
 

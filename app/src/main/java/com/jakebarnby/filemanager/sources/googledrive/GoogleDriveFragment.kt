@@ -10,7 +10,7 @@ import com.jakebarnby.filemanager.sources.SourceFragment
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.RequestCodes
 import com.jakebarnby.filemanager.util.Constants.Sources
-import com.jakebarnby.filemanager.util.LogUtils
+import com.jakebarnby.filemanager.util.Logger
 
 /**
  * Created by Jake on 5/31/2017.
@@ -37,9 +37,9 @@ class GoogleDriveFragment : SourceFragment() {
             }
             RequestCodes.GOOGLE_SIGN_IN -> if (resultCode == Activity.RESULT_OK) {
                 (source as GoogleDriveSource).saveUserToken(this)
-                LogUtils.logFirebaseEvent(
-                        FirebaseAnalytics.getInstance(context!!),
-                        Constants.Analytics.EVENT_LOGIN_GOOGLE_DRIVE)
+                Logger.logFirebaseEvent(
+                    FirebaseAnalytics.getInstance(context!!),
+                    Constants.Analytics.EVENT_LOGIN_GOOGLE_DRIVE)
             }
             RequestCodes.ACCOUNT_PICKER -> if (resultCode == Activity.RESULT_OK && data != null && data.extras != null) {
                 val accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)

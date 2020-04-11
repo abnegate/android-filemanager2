@@ -4,7 +4,6 @@ import android.content.Context
 import com.jakebarnby.filemanager.sources.models.SourceStorageStats
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Constants.Sources
-import com.jakebarnby.filemanager.util.PreferenceUtils
 import com.jakebarnby.filemanager.util.Utils
 import com.microsoft.graph.core.ClientException
 import com.microsoft.graph.extensions.DriveItem
@@ -170,7 +169,7 @@ object OneDriveFactory {
     }
 
     fun logout(context: Context) {
-        PreferenceUtils.savePref(context, Prefs.ONEDRIVE_TOKEN_KEY, null as String?)
-        PreferenceUtils.savePref(context, Prefs.ONEDRIVE_NAME_KEY, null as String?)
+        Preferences.savePref(context, Prefs.ONEDRIVE_TOKEN_KEY, null as String?)
+        Preferences.savePref(context, Prefs.ONEDRIVE_NAME_KEY, null as String?)
     }
 }

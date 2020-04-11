@@ -7,7 +7,6 @@ import com.google.api.services.drive.Drive
 import com.jakebarnby.filemanager.sources.models.SourceStorageStats
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Constants.Sources
-import com.jakebarnby.filemanager.util.PreferenceUtils
 import com.jakebarnby.filemanager.util.Utils
 import java.io.File
 import java.io.FileOutputStream
@@ -108,8 +107,8 @@ object GoogleDriveFactory {
     }
 
     fun logout(context: Context) {
-        PreferenceUtils.savePref(context, Prefs.GOOGLE_TOKEN_KEY, null as String?)
-        PreferenceUtils.savePref(context, Prefs.GOOGLE_NAME_KEY, null as String?)
+        Preferences.savePref(context, Prefs.GOOGLE_TOKEN_KEY, null as String?)
+        Preferences.savePref(context, Prefs.GOOGLE_NAME_KEY, null as String?)
     }
 
     /**

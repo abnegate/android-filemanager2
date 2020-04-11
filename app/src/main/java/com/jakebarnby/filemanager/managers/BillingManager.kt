@@ -10,14 +10,16 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Billing
 import com.jakebarnby.filemanager.util.Constants.Prefs
-import com.jakebarnby.filemanager.util.LogUtils
-import com.jakebarnby.filemanager.util.PreferenceUtils
+import com.jakebarnby.filemanager.util.Logger
 import kotlinx.coroutines.*
 
 /**
  * Created by Jake on 10/21/2017.
  */
-class BillingManager(context: Context) {
+class BillingManager(
+    context: Context,
+    private val prefs: PreferenceManager
+) {
 
     companion object {
         private const val MAX_RETRIES = 5
@@ -25,6 +27,41 @@ class BillingManager(context: Context) {
 
     private val billingClient: BillingClient
     private var retryCount = 0
+
+    init {
+        billingClient = BillingClient.newBuilder(context).setListener { billingResult, purchases ->
+            if (billingResult.responseCode == OK && purchases != null) {
+                GlobalScope.launch {
+                    purchases.map {
+                        GlobalScope.async {
+                            handlePurchase(context, it)
+                        }
+                    }.awaitAll()
+                }
+
+            } else if (billingResult.responseCode == USER_CANCELED) {
+                // TODO: show snackbar purchase cancelled
+                Logger.logFirebaseEvent(
+                    FirebaseAnalytics.getInstance(context),
+                    Constants.Analytics.EVENT_CANCELLED_PURCHASE)
+            }
+        }.enablePendingPurchases().build()
+
+        billingClient.startConnection(object : BillingClientStateListener {
+            override fun onBillingSetupFinished(billingResult: BillingResult) {
+                if (billingResult.responseCode == OK) {
+                    queryPurchases(context)
+                }
+            }
+
+            override fun onBillingServiceDisconnected() {
+                if (retryCount < MAX_RETRIES) {
+                    billingClient.startConnection(this)
+                    retryCount++
+                }
+            }
+        })
+    }
 
     /**
      * Start google play billing flow for the given sku
@@ -34,9 +71,9 @@ class BillingManager(context: Context) {
      */
     suspend fun purchaseItem(activity: Activity?, sku: String?) {
         val params = SkuDetailsParams.newBuilder()
-                .setSkusList(listOf(sku))
-                .setType(BillingClient.SkuType.INAPP)
-                .build()
+            .setSkusList(listOf(sku))
+            .setType(BillingClient.SkuType.INAPP)
+            .build()
 
         val skuDetailResult = withContext(Dispatchers.IO) {
             billingClient.querySkuDetails(params)
@@ -54,8 +91,8 @@ class BillingManager(context: Context) {
                 continue
             }
             val flowParams = BillingFlowParams.newBuilder()
-                    .setSkuDetails(detail)
-                    .build()
+                .setSkuDetails(detail)
+                .build()
             billingClient.launchBillingFlow(activity, flowParams)
         }
     }
@@ -75,7 +112,7 @@ class BillingManager(context: Context) {
         when (purchase.sku) {
             Billing.SKU_PREMIUM -> {
                 //TODO: Show dialog "Thanks! All ads have been disabled."
-                PreferenceUtils.savePref(context, Prefs.HIDE_ADS_KEY, true)
+                prefs.savePref(Prefs.HIDE_ADS_KEY, true)
             }
         }
 
@@ -84,8 +121,8 @@ class BillingManager(context: Context) {
         }
 
         val params = AcknowledgePurchaseParams.newBuilder()
-                .setPurchaseToken(purchase.purchaseToken)
-                .build()
+            .setPurchaseToken(purchase.purchaseToken)
+            .build()
 
         val acknowledgeResult = withContext(Dispatchers.IO) {
             billingClient.acknowledgePurchase(params)
@@ -93,12 +130,12 @@ class BillingManager(context: Context) {
 
         if (acknowledgeResult.responseCode == OK) {
             val args = bundleOf(
-                    Constants.Analytics.PARAM_PURCHASE_SKU to purchase.sku
+                Constants.Analytics.PARAM_PURCHASE_SKU to purchase.sku
             )
-            LogUtils.logFirebaseEvent(
-                    FirebaseAnalytics.getInstance(context),
-                    Constants.Analytics.EVENT_SUCCESS_PURCHASE,
-                    args)
+            Logger.logFirebaseEvent(
+                FirebaseAnalytics.getInstance(context),
+                Constants.Analytics.EVENT_SUCCESS_PURCHASE,
+                args)
         }
     }
 
@@ -112,43 +149,8 @@ class BillingManager(context: Context) {
         val purchases = purchasesResult.purchasesList
         for (purchase in purchases) {
             if (purchase.sku == Billing.SKU_PREMIUM) {
-                PreferenceUtils.savePref(context, Prefs.HIDE_ADS_KEY, true)
+                prefs.savePref(Prefs.HIDE_ADS_KEY, true)
             }
         }
-    }
-
-    init {
-        billingClient = BillingClient.newBuilder(context).setListener { billingResult, purchases ->
-            if (billingResult.responseCode == OK && purchases != null) {
-                GlobalScope.launch {
-                    purchases.map {
-                        GlobalScope.async {
-                            handlePurchase(context, it)
-                        }
-                    }.awaitAll()
-                }
-
-            } else if (billingResult.responseCode == USER_CANCELED) {
-                // TODO: show snackbar purchase cancelled
-                LogUtils.logFirebaseEvent(
-                        FirebaseAnalytics.getInstance(context),
-                        Constants.Analytics.EVENT_CANCELLED_PURCHASE)
-            }
-        }.enablePendingPurchases().build()
-
-        billingClient.startConnection(object : BillingClientStateListener {
-            override fun onBillingSetupFinished(billingResult: BillingResult) {
-                if (billingResult.responseCode == OK) {
-                    queryPurchases(context)
-                }
-            }
-
-            override fun onBillingServiceDisconnected() {
-                if (retryCount < MAX_RETRIES) {
-                    billingClient.startConnection(this)
-                    retryCount++
-                }
-            }
-        })
     }
 }

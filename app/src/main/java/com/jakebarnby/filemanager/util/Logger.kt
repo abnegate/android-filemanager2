@@ -6,7 +6,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 /**
  * Created by Jake on 11/3/2017.
  */
-object LogUtils {
+object Logger {
     /**
      * Log an event to firebase with the given event name
      *
@@ -25,9 +25,9 @@ object LogUtils {
      * @param parameters Map of event parameters
      */
     fun logFirebaseEvent(
-            analytics: FirebaseAnalytics?,
-            eventName: String?,
-            parameters: Bundle?
+        analytics: FirebaseAnalytics?,
+        eventName: String?,
+        parameters: Bundle?
     ) {
         analytics!!.logEvent(eventName!!, parameters)
     }

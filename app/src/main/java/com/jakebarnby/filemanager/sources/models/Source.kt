@@ -3,7 +3,6 @@ package com.jakebarnby.filemanager.sources.models
 import android.content.Context
 import com.jakebarnby.filemanager.sources.SourceListener
 import com.jakebarnby.filemanager.util.Constants
-import com.jakebarnby.filemanager.util.PreferenceUtils
 import com.jakebarnby.filemanager.util.TreeNode
 import com.jakebarnby.filemanager.util.Utils
 
@@ -72,7 +71,7 @@ abstract class Source(
         context: Context,
         sourceName: String
     ): Boolean =
-        PreferenceUtils.getString(
+        Preferences.getString(
             context,
             sourceName.toLowerCase() + "-access-token",
             null
