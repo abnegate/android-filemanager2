@@ -4,7 +4,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.jakebarnby.filemanager.sources.SourceActivity
+import com.jakebarnby.filemanager.ui.sources.SourceActivity
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Constants.RemoteConfig
 import com.jakebarnby.tutorial.TutorialActivity

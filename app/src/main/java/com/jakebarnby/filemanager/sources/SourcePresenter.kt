@@ -1,7 +1,5 @@
 package com.jakebarnby.filemanager.sources
 
-import android.content.Intent
-import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.managers.BillingManager
 import com.jakebarnby.filemanager.managers.ConnectionManager
 import com.jakebarnby.filemanager.managers.PreferenceManager
@@ -10,6 +8,7 @@ import com.jakebarnby.filemanager.models.FileAction
 import com.jakebarnby.filemanager.sources.models.SourceFile
 import com.jakebarnby.filemanager.sources.models.SourceManager
 import com.jakebarnby.filemanager.sources.models.SourceType
+import com.jakebarnby.filemanager.ui.sources.SourceActivityContract
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.TreeNode
@@ -125,9 +124,9 @@ class SourcePresenter(
     override fun onCut() {
         if (SelectedFilesManager.currentSelectedFiles.size > 0) {
             sourceManager.addFileAction(SelectedFilesManager.operationCount, FileAction.CUT)
-            view?.showSnackbar(R.string.cut)
+            view?.showCutSnackBar()
         } else {
-            view?.showSnackbar(R.string.err_no_selection)
+            view?.showNoSelectionSnackBar()
         }
         disableAllMultiSelect()
     }
@@ -135,9 +134,9 @@ class SourcePresenter(
     override fun onCopy() {
         if (SelectedFilesManager.currentSelectedFiles.size > 0) {
             sourceManager.addFileAction(SelectedFilesManager.operationCount, FileAction.COPY)
-            view?.showSnackbar(R.string.copied)
+            view?.showCopiedSnackBar()
         } else {
-            view?.showSnackbar(R.string.err_no_selection)
+            view?.showNoSelectionSnackBar()
         }
         disableAllMultiSelect()
     }
@@ -150,7 +149,7 @@ class SourcePresenter(
         if (sourceManager.getFileAction(SelectedFilesManager.operationCount) != null) {
             sourceManager.activeSource.isMultiSelectEnabled = false
 
-            view?.setTitle(R.string.app_name)
+            view?.setAppNameTitle()
             view?.toggleContextMenu(false)
 
             SelectedFilesManager.addActionableDirectory(
@@ -174,28 +173,25 @@ class SourcePresenter(
 
     private fun pastePreconditions(): Boolean {
         if (!connectionManager.isConnected) {
-            view?.showSnackbar(R.id.err_no_connection)
+            view?.showNoConnectionSnackBar()
             return false
         }
         if (sourceManager.activeSource.sourceType == SourceType.LOCAL &&
             sourceManager.activeSource.sourceName != Constants.Sources.LOCAL) {
-            view?.showSnackbar(R.string.err_no_ext_write)
+            view?.showUnwritableDestinationSnackBar()
             return false
         }
         if (!sourceManager.activeSource.isLoggedIn) {
-            view?.showSnackbar(R.string.err_not_logged_in)
+            view?.showNotLoggedInSnackBar()
             return false
         } else if (!sourceManager.activeSource.isFilesLoaded) {
-            view?.showSnackbar(R.string.err_not_loaded)
+            view?.showNotLoadedSnackBar()
             return false
         }
 
         val copySize = SelectedFilesManager.currentCopySize
         if (copySize > sourceManager.activeSource.freeSpace) {
-            view?.showSnackbar(
-                R.string.err_no_free_space,
-                sourceManager.activeSource.sourceName
-            )
+            view?.showNotEnoughSpaceSnackBar()
             return false
         }
         return true
@@ -204,7 +200,7 @@ class SourcePresenter(
     override fun onDelete() {
         val size = SelectedFilesManager.currentSelectedFiles.size
         if (size < 0) {
-            view?.showSnackbar(R.string.err_no_selection)
+            view?.showNoSelectionSnackBar()
             return
         }
         view?.showDeleteDialog(size)
@@ -222,7 +218,7 @@ class SourcePresenter(
         disableAllMultiSelect()
 
         view?.toggleContextMenu(false)
-        view?.setTitle(R.string.app_name)
+        view?.setAppNameTitle()
         view?.startDeleteService()
 
         sourceManager.activeSource
@@ -236,7 +232,7 @@ class SourcePresenter(
             sourceManager.activeSource.isMultiSelectEnabled = false
 
             view?.toggleContextMenu(false)
-            view?.setTitle(R.string.app_name)
+            view?.setAppNameTitle()
 
             SelectedFilesManager.currentSelectedFiles.clear()
         } else if (sourceManager.activeSource.isLoggedIn) {
@@ -260,20 +256,20 @@ class SourcePresenter(
         sourceManager.activeSource = sourceManager.sources[position]
     }
 
-    override fun onShowViewAsDialog() {
+    override fun onChangeViewType() {
         TODO("Not yet implemented")
     }
 
-    override fun onShowCreateFolderDialog() {
+    override fun onCreateFolder() {
         if (!connectionManager.isConnected) {
-            view?.showSnackbar(R.id.err_no_connection)
+            view?.showNoConnectionSnackBar()
             return
         }
         if (!sourceManager.activeSource.isLoggedIn) {
-            view?.showSnackbar(R.string.err_not_logged_in)
+            view?.showNotLoggedInSnackBar()
             return
         } else if (!sourceManager.activeSource.isFilesLoaded) {
-            view?.showSnackbar(R.string.err_not_loaded)
+            view?.showNotLoadedSnackBar()
             return
         }
 
@@ -289,23 +285,23 @@ class SourcePresenter(
         view?.showCreateFolderDialog()
     }
 
-    override fun onShowRenameDialog() {
+    override fun onRename() {
         if (!connectionManager.isConnected) {
-            view?.showSnackbar(R.id.err_no_connection)
+            view?.showNoConnectionSnackBar()
             return
         }
 
-        view?.setTitle(R.string.app_name)
+        view?.setAppNameTitle()
         view?.toggleContextMenu(false)
 
         disableAllMultiSelect()
 
         val size = SelectedFilesManager.currentSelectedFiles.size
         if (size == 0) {
-            view?.showSnackbar(R.string.err_no_selection)
+            view?.showNoSelectionSnackBar()
             return
         } else if (size > 1) {
-            view?.showSnackbar(R.string.err_too_many_selected)
+            view?.showTooManySelectedSnackBar()
             return
         }
 
@@ -321,20 +317,20 @@ class SourcePresenter(
         view?.showRenameDialog()
     }
 
-    override fun onShowCreateZipDialog() {
+    override fun onCreateZip() {
         if (!connectionManager.isConnected) {
-            view?.showSnackbar(R.id.err_no_connection)
+            view?.showNoConnectionSnackBar()
             return
         }
         if (!sourceManager.activeSource.isLoggedIn) {
-            view?.showSnackbar(R.string.err_not_logged_in)
+            view?.showNotLoggedInSnackBar()
             return
         } else if (!sourceManager.activeSource.isFilesLoaded) {
-            view?.showSnackbar(R.string.err_not_loaded)
+            view?.showNotLoadedSnackBar()
             return
         }
 
-        view?.setTitle(R.string.app_name)
+        view?.setAppNameTitle()
         view?.toggleContextMenu(false)
 
         disableAllMultiSelect()
@@ -352,32 +348,32 @@ class SourcePresenter(
         view?.showCreateZipDialog()
     }
 
-    override fun onShowPropertiesDialog() {
+    override fun onShowProperties() {
         val size: Int = SelectedFilesManager.currentSelectedFiles.size
         if (size == 0) {
-            view?.showSnackbar(R.string.err_no_selection)
-                return
+            view?.showNoSelectionSnackBar()
+            return
         }
         view?.showPropertiesDialog()
     }
 
-    override fun onShowProgressDialog(intent: Intent) {
+    override fun onShowProgress() {
         TODO("Not yet implemented")
     }
 
-    override fun onShowUsageDialog() {
+    override fun onShowUsage() {
         view?.showUsageDialog()
     }
 
-    override fun onShowLogoutDialog() {
+    override fun onLogout() {
         TODO("Not yet implemented")
     }
 
-    override fun onShowSortByDialog() {
+    override fun onSortBy() {
         TODO("Not yet implemented")
     }
 
-    override fun onShowSettingsDialog() {
+    override fun onShowSettings() {
         TODO("Not yet implemented")
     }
 

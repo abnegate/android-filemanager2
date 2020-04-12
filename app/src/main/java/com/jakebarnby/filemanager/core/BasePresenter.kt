@@ -1,4 +1,4 @@
-package com.jakebarnby.filemanager.sources
+package com.jakebarnby.filemanager.core
 
 interface BasePresenter<T> {
     var view: T?

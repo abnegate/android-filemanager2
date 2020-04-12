@@ -6,7 +6,6 @@ import com.dropbox.core.v2.files.FolderMetadata
 import com.dropbox.core.v2.files.ListFolderResult
 import com.dropbox.core.v2.files.Metadata
 import com.jakebarnby.filemanager.sources.LoaderTask
-import com.jakebarnby.filemanager.sources.SourceListener
 import com.jakebarnby.filemanager.sources.models.Source
 import com.jakebarnby.filemanager.sources.models.SourceFile
 import com.jakebarnby.filemanager.util.TreeNode

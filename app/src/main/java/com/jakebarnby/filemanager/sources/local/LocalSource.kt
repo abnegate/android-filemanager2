@@ -2,8 +2,6 @@ package com.jakebarnby.filemanager.sources.local
 
 import android.Manifest
 import android.content.Context
-import android.os.AsyncTask
-import com.jakebarnby.filemanager.sources.SourceListener
 import com.jakebarnby.filemanager.sources.models.Source
 import com.jakebarnby.filemanager.sources.models.SourceType
 import com.jakebarnby.filemanager.util.Constants.RequestCodes
@@ -19,11 +17,11 @@ class LocalSource(
     listener: SourceListener
 ) : Source(SourceType.LOCAL, sourceName, listener) {
 
-    override fun authenticateSource(context: Context) {
+    override fun authenticate(context: Context) {
         sourceListener.onCheckPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, RequestCodes.STORAGE_PERMISSIONS)
     }
 
-    override fun loadSource(context: Context) {
+    override fun loadFiles(context: Context) {
         if (isFilesLoaded) {
             return
         }

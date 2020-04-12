@@ -13,7 +13,6 @@ import com.dropbox.core.DbxException
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.managers.SelectedFilesManager
-import com.jakebarnby.filemanager.sources.SourceActivity
 import com.jakebarnby.filemanager.sources.dropbox.DropboxFactory
 import com.jakebarnby.filemanager.sources.dropbox.DropboxFile
 import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFactory
@@ -23,8 +22,10 @@ import com.jakebarnby.filemanager.sources.models.SourceFile
 import com.jakebarnby.filemanager.sources.models.SourceType
 import com.jakebarnby.filemanager.sources.onedrive.OneDriveFactory
 import com.jakebarnby.filemanager.sources.onedrive.OneDriveFile
-import com.jakebarnby.filemanager.util.*
+import com.jakebarnby.filemanager.ui.sources.SourceActivity
+import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Sources
+import com.jakebarnby.filemanager.util.FileZipper
 import com.jakebarnby.filemanager.util.Intents.ACTION_CLEAR_CACHE
 import com.jakebarnby.filemanager.util.Intents.ACTION_COMPLETE
 import com.jakebarnby.filemanager.util.Intents.ACTION_COPY
@@ -44,6 +45,8 @@ import com.jakebarnby.filemanager.util.Intents.EXTRA_NEW_NAME
 import com.jakebarnby.filemanager.util.Intents.EXTRA_OPERATION_ID
 import com.jakebarnby.filemanager.util.Intents.EXTRA_TO_OPEN_PATH
 import com.jakebarnby.filemanager.util.Intents.EXTRA_ZIP_FILENAME
+import com.jakebarnby.filemanager.util.Logger
+import com.jakebarnby.filemanager.util.TreeNode
 import com.microsoft.graph.http.GraphServiceException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -51,8 +54,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File.separator
 import java.io.IOException
-import java.lang.Exception
-import java.lang.NullPointerException
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -537,9 +538,9 @@ class SourceTransferService : Service(), CoroutineScope {
                     operationId,
                     getString(R.string.app_name),
                     if (move) {
-                        String.format(getString(R.string.moving_count), 1, toCopy?.size)
+                        String.format(getString(R.string.moving_count), 1, toCopy.size)
                     } else {
-                        String.format(getString(R.string.copying_count), 1, toCopy?.size)
+                        String.format(getString(R.string.copying_count), 1, toCopy.size)
                     })
                 broadcastShowDialog(
                     if (move) {

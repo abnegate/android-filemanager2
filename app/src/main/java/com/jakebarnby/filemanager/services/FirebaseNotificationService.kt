@@ -10,7 +10,7 @@ import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.jakebarnby.filemanager.R
-import com.jakebarnby.filemanager.sources.SourceActivity
+import com.jakebarnby.filemanager.ui.sources.SourceActivity
 
 /**
  * Created by jakebarnby on 28/07/17.

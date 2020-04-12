@@ -11,11 +11,11 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.managers.PreferenceManager
-import com.jakebarnby.filemanager.sources.SourceActivity
+import com.jakebarnby.filemanager.ui.sources.SourceActivity
 import com.jakebarnby.filemanager.util.Constants
-import com.jakebarnby.filemanager.util.Constants.OrderTypes
+import com.jakebarnby.filemanager.util.Constants.OrderType
 import com.jakebarnby.filemanager.util.Constants.Prefs
-import com.jakebarnby.filemanager.util.Constants.SortTypes
+import com.jakebarnby.filemanager.util.Constants.SortType
 
 /**
  * Created by Jake on 10/2/2017.
@@ -53,7 +53,7 @@ class SortByDialog : DialogFragment() {
         val sortGroup = rootView.findViewById<RadioGroup>(R.id.rdg_sort_by)
         val currentSortType = prefs.getInt(
             Prefs.SORT_TYPE_KEY,
-            SortTypes.NAME
+            SortType.NAME
         )
 
         setCheckedSortType(currentSortType, sortGroup)
@@ -62,7 +62,7 @@ class SortByDialog : DialogFragment() {
         val orderGroup = rootView.findViewById<RadioGroup>(R.id.rdg_order_by)
         val currentOrderType = prefs.getInt(
             Prefs.ORDER_TYPE_KEY,
-            OrderTypes.ASCENDING
+            OrderType.ASCENDING
         )
 
         setCheckedOrderType(currentOrderType, orderGroup)
@@ -74,11 +74,11 @@ class SortByDialog : DialogFragment() {
             when (id) {
                 R.id.rdb_ascending -> prefs.savePref(
                     Prefs.ORDER_TYPE_KEY,
-                    OrderTypes.ASCENDING
+                    OrderType.ASCENDING
                 )
                 R.id.rdb_descending -> prefs.savePref(
                     Prefs.ORDER_TYPE_KEY,
-                    OrderTypes.DESCENDING
+                    OrderType.DESCENDING
                 )
             }
         }
@@ -86,8 +86,8 @@ class SortByDialog : DialogFragment() {
 
     private fun setCheckedOrderType(currentOrderType: Int, orderGroup: RadioGroup) {
         when (currentOrderType) {
-            OrderTypes.ASCENDING -> orderGroup.check(R.id.rdb_ascending)
-            OrderTypes.DESCENDING -> orderGroup.check(R.id.rdb_descending)
+            OrderType.ASCENDING -> orderGroup.check(R.id.rdb_ascending)
+            OrderType.DESCENDING -> orderGroup.check(R.id.rdb_descending)
         }
     }
 
@@ -96,19 +96,19 @@ class SortByDialog : DialogFragment() {
             when (id) {
                 R.id.rdb_name -> prefs.savePref(
                     Prefs.SORT_TYPE_KEY,
-                    SortTypes.NAME
+                    SortType.NAME
                 )
                 R.id.rdb_size -> prefs.savePref(
                     Prefs.SORT_TYPE_KEY,
-                    SortTypes.SIZE
+                    SortType.SIZE
                 )
                 R.id.rdb_type -> prefs.savePref(
                     Prefs.SORT_TYPE_KEY,
-                    SortTypes.TYPE
+                    SortType.TYPE
                 )
                 R.id.rdb_modified_time -> prefs.savePref(
                     Prefs.SORT_TYPE_KEY,
-                    SortTypes.MODIFIED_TIME
+                    SortType.MODIFIED_TIME
                 )
             }
         }
@@ -116,10 +116,10 @@ class SortByDialog : DialogFragment() {
 
     private fun setCheckedSortType(currentSortType: Int, sortGroup: RadioGroup) {
         when (currentSortType) {
-            SortTypes.NAME -> sortGroup.check(R.id.rdb_name)
-            SortTypes.SIZE -> sortGroup.check(R.id.rdb_size)
-            SortTypes.TYPE -> sortGroup.check(R.id.rdb_type)
-            SortTypes.MODIFIED_TIME -> sortGroup.check(R.id.rdb_modified_time)
+            SortType.NAME -> sortGroup.check(R.id.rdb_name)
+            SortType.SIZE -> sortGroup.check(R.id.rdb_size)
+            SortType.TYPE -> sortGroup.check(R.id.rdb_type)
+            SortType.MODIFIED_TIME -> sortGroup.check(R.id.rdb_modified_time)
         }
     }
 }

@@ -18,7 +18,4 @@ class DeleteDialog : DialogFragment() {
             }
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return super.onCreateDialog(savedInstanceState)
-    }
 }

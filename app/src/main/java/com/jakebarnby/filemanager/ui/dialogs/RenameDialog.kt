@@ -11,8 +11,8 @@ import com.google.android.material.snackbar.Snackbar
 import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.managers.SelectedFilesManager
 import com.jakebarnby.filemanager.services.SourceTransferService
-import com.jakebarnby.filemanager.sources.SourceActivity
 import com.jakebarnby.filemanager.sources.models.SourceFile
+import com.jakebarnby.filemanager.ui.sources.SourceActivity
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.TreeNode
 
@@ -50,13 +50,13 @@ class RenameDialog : DialogFragment() {
 
         builder.setView(view)
         builder.setPositiveButton(getString(R.string.ok)) { dialog: DialogInterface?, _: Int ->
-            val activeDirectory = (activity as? SourceActivity)?.sourceManager?.activeDirectory
+            val activeDirectory = (activity as? SourceActivity)?.sourceManager.activeDirectory
             val newName = if (name.lastIndexOf('.') > 0) {
                 input?.text?.toString() + name.substring(name.lastIndexOf('.'))
             } else {
                 input?.text.toString()
             }
-            for (file in activeDirectory?.children ?: emptyList<TreeNode<SourceFile>>()) {
+            for (file in activeDirectory.children ?: emptyList<TreeNode<SourceFile>>()) {
                 if (file.data.name.equals(newName, ignoreCase = true)) {
                     Snackbar.make(activity!!.currentFocus!!, getString(R.string.file_exists), Snackbar.LENGTH_LONG).show()
                     return@setPositiveButton

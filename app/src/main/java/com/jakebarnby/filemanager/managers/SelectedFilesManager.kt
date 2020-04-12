@@ -23,7 +23,7 @@ object SelectedFilesManager {
         get() {
             var copySize: Long = 0
             for (file in currentSelectedFiles) {
-                copySize += file.data.size ?: 0
+                copySize += file.data.size
             }
             return copySize
         }

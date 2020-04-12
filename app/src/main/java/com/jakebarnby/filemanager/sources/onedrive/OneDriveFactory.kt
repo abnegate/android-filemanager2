@@ -131,7 +131,7 @@ object OneDriveFactory {
             name = newName
         }
         return service
-            ?.getMe()
+            ?.me
             ?.drive
             ?.getItems(itemId)
             ?.buildRequest()

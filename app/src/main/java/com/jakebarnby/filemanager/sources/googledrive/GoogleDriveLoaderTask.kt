@@ -7,7 +7,6 @@ import com.google.api.services.drive.Drive
 import com.google.api.services.drive.model.File
 import com.google.api.services.drive.model.FileList
 import com.jakebarnby.filemanager.sources.LoaderTask
-import com.jakebarnby.filemanager.sources.SourceListener
 import com.jakebarnby.filemanager.sources.models.Source
 import com.jakebarnby.filemanager.sources.models.SourceFile
 import com.jakebarnby.filemanager.util.TreeNode

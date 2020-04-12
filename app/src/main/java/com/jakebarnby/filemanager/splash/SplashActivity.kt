@@ -8,8 +8,8 @@ import com.google.android.gms.ads.MobileAds
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.jakebarnby.filemanager.R
-import com.jakebarnby.filemanager.sources.SourceActivity
 import com.jakebarnby.filemanager.tutorial.FileManagerTutorialActivity
+import com.jakebarnby.filemanager.ui.sources.SourceActivity
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.GooglePlay
 

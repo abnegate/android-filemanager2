@@ -1,10 +1,10 @@
 package com.jakebarnby.filemanager.sources.models
 
 import android.content.Context
-import com.jakebarnby.filemanager.sources.SourceListener
+import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.TreeNode
-import com.jakebarnby.filemanager.util.Utils
+import java.io.Serializable
 
 /**
  * Created by Jake on 7/29/2017.
@@ -12,8 +12,8 @@ import com.jakebarnby.filemanager.util.Utils
 abstract class Source(
     var sourceType: SourceType,
     val sourceName: String,
-    protected var sourceListener: SourceListener
-) {
+    protected val prefsManager: PreferenceManager
+) : Serializable {
 
     lateinit var rootNode: TreeNode<SourceFile>
     lateinit var currentDirectory: TreeNode<SourceFile>
@@ -25,16 +25,9 @@ abstract class Source(
     var isFilesLoaded = false
     var isMultiSelectEnabled = false
 
-    /**
-     * Authenticate the current mSource
-     */
-    abstract fun authenticateSource(context: Context)
 
-    /**
-     * Load the current mSource
-     */
-    abstract fun loadSource(context: Context)
-
+    abstract fun authenticate(context: Context)
+    abstract fun loadFiles(context: Context)
     abstract fun logout(context: Context)
 
     fun setQuotaInfo(info: SourceStorageStats?) {
@@ -61,32 +54,5 @@ abstract class Source(
 
     fun increaseFreeSpace(amount: Long) {
         freeSpace += amount
-    }
-
-    /**
-     * Checks if this mSource has a valid access token
-     * @return  Whether there is a valid access token for this mSource
-     */
-    fun hasToken(
-        context: Context,
-        sourceName: String
-    ): Boolean =
-        Preferences.getString(
-            context,
-            sourceName.toLowerCase() + "-access-token",
-            null
-        ) != null
-
-    /**
-     * If performing an action on a non-local directory, check internet
-     */
-    fun checkConnectionActive(context: Context): Boolean {
-        if (sourceType == SourceType.REMOTE) {
-            if (!Utils.isConnectionReady(context)) {
-                sourceListener.onNoConnection()
-                return false
-            }
-        }
-        return true
     }
 }

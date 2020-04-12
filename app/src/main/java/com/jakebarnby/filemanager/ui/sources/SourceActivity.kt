@@ -1,4 +1,4 @@
-package com.jakebarnby.filemanager.sources
+package com.jakebarnby.filemanager.ui.sources
 
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
@@ -19,7 +19,6 @@ import android.webkit.MimeTypeMap
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
@@ -40,6 +39,7 @@ import com.jakebarnby.filemanager.managers.ConnectionManager
 import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.managers.SelectedFilesManager
 import com.jakebarnby.filemanager.services.SourceTransferService
+import com.jakebarnby.filemanager.sources.SourcePresenter
 import com.jakebarnby.filemanager.sources.local.LocalFragment
 import com.jakebarnby.filemanager.sources.models.Source
 import com.jakebarnby.filemanager.sources.models.SourceFile
@@ -128,12 +128,16 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
     }
 
     private fun initPresenter() {
+        val prefs = PreferenceManager(
+            getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE)
+        )
         presenter = SourcePresenter(
             SourceManager(),
-            PreferenceManager(
-                getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE)
+            prefs,
+            BillingManager(
+                this,
+                prefs
             ),
-            BillingManager(this),
             ConnectionManager(
                 getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             )
@@ -241,13 +245,13 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_view_as -> presenter.onShowViewAsDialog()
-            R.id.action_sort_by -> presenter.onShowSortByDialog()
-            R.id.action_new_folder -> presenter.onShowCreateFolderDialog()
+            R.id.action_view_as -> presenter.onChangeViewType()
+            R.id.action_sort_by -> presenter.onSortBy()
+            R.id.action_new_folder -> presenter.onCreateFolder()
             R.id.action_multi_select -> presenter.onStartMultiSelect()
-            R.id.action_storage_usage -> presenter.onShowUsageDialog()
-            R.id.action_logout -> presenter.onShowLogoutDialog()
-            R.id.action_settings -> presenter.onShowSettingsDialog()
+            R.id.action_storage_usage -> presenter.onShowUsage()
+            R.id.action_logout -> presenter.onLogout()
+            R.id.action_settings -> presenter.onShowSettings()
             ADS_MENU_ID -> {
                 launch {
                     presenter.billingManager.purchaseItem(
@@ -270,10 +274,6 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
 
     override fun startMoveService() {
         SourceTransferService.startActionCopy(this, true)
-    }
-
-    override fun setTitle(@StringRes titleId: Int) {
-        this.title = getString(titleId)
     }
 
     override fun addLocalSourceView(position: Int, name: String, rootPath: String) {
@@ -307,12 +307,12 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
      */
     private fun handleFabMenuItemSelected(menuItem: MenuItem) {
         when (menuItem.itemId) {
-            R.id.action_rename -> presenter.onShowRenameDialog()
+            R.id.action_rename -> presenter.onRename()
             R.id.action_copy -> presenter.onCopy()
             R.id.action_cut -> presenter.onCut()
             R.id.action_paste -> presenter.onPaste()
-            R.id.action_zip -> presenter.onShowCreateZipDialog()
-            R.id.action_properties -> presenter.onShowPropertiesDialog()
+            R.id.action_zip -> presenter.onCreateZip()
+            R.id.action_properties -> presenter.onShowProperties()
             R.id.action_delete -> presenter.onDelete()
         }
     }
@@ -332,14 +332,17 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
                     presenter.onServiceActionComplete(operationId, path)
                 }
                 ACTION_SHOW_DIALOG -> {
-                    showProgressDialog(intent)
+                    val title = intent.getStringExtra(EXTRA_DIALOG_TITLE)
+                        ?: getString(R.string.operation_in_progress)
+                    val maxCount = intent.getIntExtra(EXTRA_DIALOG_MAX_VALUE, 0)
+                    showProgressDialog(title, maxCount)
                 }
                 ACTION_SHOW_ERROR -> {
                     showErrorDialog(intent.getStringExtra(EXTRA_DIALOG_MESSAGE))
-                    updateProgressDialog(intent)
                 }
                 ACTION_UPDATE_DIALOG -> {
-                    updateProgressDialog(intent)
+                    val currentCount = intent.getIntExtra(EXTRA_DIALOG_CURRENT_VALUE, 0)
+                    updateProgressDialog(currentCount)
                 }
                 Intent.ACTION_MEDIA_MOUNTED -> {
                     presenter.onAddLocalSource(
@@ -368,18 +371,6 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
             interstitialAd.show()
             presenter.prefsManager.savePref(Constants.Prefs.OPERATION_COUNT_KEY, 0)
         }
-    }
-
-    override fun showSnackbar(message: String) {
-        Snackbar.make(viewPager, message, Snackbar.LENGTH_LONG).show()
-    }
-
-    override fun showSnackbar(@StringRes messageId: Int) {
-        Snackbar.make(viewPager, messageId, Snackbar.LENGTH_LONG).show()
-    }
-
-    override fun showSnackbar(messageId: Int, vararg formatArgs: String) {
-        Snackbar.make(viewPager, getString(messageId, formatArgs), Snackbar.LENGTH_LONG).show()
     }
 
     override fun showViewAsDialog() {
@@ -424,21 +415,15 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
             .show(supportFragmentManager, Constants.DialogTags.PROPERTIES)
     }
 
-    override fun showProgressDialog(intent: Intent) {
-        var title = intent.getStringExtra(EXTRA_DIALOG_TITLE)
-        if (title == null) {
-            title = "Operation in progress.."
-        }
-
-        val totalCount = intent.getIntExtra(EXTRA_DIALOG_MAX_VALUE, 0)
+    override fun showProgressDialog(title: String, maxProgress: Int) {
         val currentCount = 0
 
         progressDialog = ProgressDialog(this)
         progressDialog.setTitle(title)
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
         progressDialog.isIndeterminate = true
-        if (totalCount != 0) {
-            progressDialog.max = totalCount
+        if (maxProgress != 0) {
+            progressDialog.max = maxProgress
             progressDialog.progress = currentCount
         } else {
             progressDialog.setProgressNumberFormat(null)
@@ -465,7 +450,6 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
             progressDialog.dismiss()
         }
     }
-
 
     override fun showUsageDialog() {
         val loadedSources = presenter.sourceManager.sources.filter {
@@ -535,7 +519,7 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
         dialog.show(supportFragmentManager, Constants.DialogTags.SETTINGS)
     }
 
-    override fun showErrorDialog(message: String?) {
+    fun showErrorDialog(message: String?) {
         hideProgressDialog()
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_error)
@@ -603,13 +587,12 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
      *
      * @param intent The broadcasted intent with update extras
      */
-    override fun updateProgressDialog(intent: Intent) {
+    override fun updateProgressDialog(newProgress: Int) {
         if (progressDialog.isShowing) {
             if (progressDialog.isIndeterminate) {
                 progressDialog.isIndeterminate = false
             }
-            val currentCount = intent.getIntExtra(EXTRA_DIALOG_CURRENT_VALUE, 0)
-            progressDialog.progress = currentCount
+            progressDialog.progress = newProgress
         }
     }
 
@@ -618,6 +601,7 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
             .radius(17)
             .sampling(1)
             .async()
+            .animate(300)
             .onto(blurWrapper)
     }
 
@@ -668,7 +652,7 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
             if (resolveInfo.size > 0) {
                 startActivity(intent)
             } else {
-                showSnackbar(getString(R.string.err_no_app_available))
+                showNoAppAvailableSnackBar()
             }
         } catch (e: Exception) {
             showErrorDialog(String.format(
@@ -717,6 +701,10 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
         contextMenuButton.startAnimation(translate)
     }
 
+    override fun setAppNameTitle() {
+        title = getString(R.string.app_name)
+    }
+
     /**
      * Initializes recyclerviews for all logged in fragments due to a view layout change (Grid <-> List)
      */
@@ -756,4 +744,34 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
             recycler?.requestFocus()
         }
     }
+
+    override fun showCutSnackBar() =
+        Snackbar.make(viewPager, R.string.cut, Snackbar.LENGTH_LONG).show()
+
+    override fun showNoSelectionSnackBar() =
+        Snackbar.make(viewPager, R.string.err_no_selection, Snackbar.LENGTH_LONG).show()
+
+    override fun showCopiedSnackBar() =
+        Snackbar.make(viewPager, R.string.copied, Snackbar.LENGTH_LONG).show()
+
+    override fun showNoConnectionSnackBar() =
+        Snackbar.make(viewPager, R.string.err_no_connection, Snackbar.LENGTH_LONG).show()
+
+    override fun showUnwritableDestinationSnackBar() =
+        Snackbar.make(viewPager, R.string.err_no_ext_write, Snackbar.LENGTH_LONG).show()
+
+    override fun showNotLoggedInSnackBar() =
+        Snackbar.make(viewPager, R.string.err_not_logged_in, Snackbar.LENGTH_LONG).show()
+
+    override fun showNotLoadedSnackBar() =
+        Snackbar.make(viewPager, R.string.err_not_loaded, Snackbar.LENGTH_LONG).show()
+
+    override fun showNotEnoughSpaceSnackBar() =
+        Snackbar.make(viewPager, R.string.err_no_free_space, Snackbar.LENGTH_LONG).show()
+
+    override fun showTooManySelectedSnackBar() =
+        Snackbar.make(viewPager, R.string.err_too_many_selected, Snackbar.LENGTH_LONG).show()
+
+    override fun showNoAppAvailableSnackBar() =
+        Snackbar.make(viewPager, R.string.err_no_app_available, Snackbar.LENGTH_LONG).show()
 }

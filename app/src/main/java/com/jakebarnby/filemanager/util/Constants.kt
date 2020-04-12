@@ -112,24 +112,6 @@ object Constants {
         const val EVENT_ERROR_ZIPPING = "error_zipping"
     }
 
-    object ViewTypes {
-        const val LIST = 0
-        const val DETAILED_LIST = 1
-        const val GRID = 2
-    }
-
-    object SortTypes {
-        const val NAME = 0
-        const val TYPE = 1
-        const val SIZE = 2
-        const val MODIFIED_TIME = 3
-    }
-
-    object OrderTypes {
-        const val ASCENDING = 0
-        const val DESCENDING = 1
-    }
-
     object DialogTags {
         const val PROPERTIES = "Properties"
         const val SORT_BY = "Sort by"
@@ -144,6 +126,39 @@ object Constants {
     object Ads {
         const val ADMOB_ID = "ca-app-pub-6044629197845708~9185423482"
         const val INTERSTITIAL_ID = "ca-app-pub-6044629197845708/9815268432"
-        const val SHOW_AD_COUNT = 6
+        const val SHOW_AD_COUNT = 5
+    }
+
+    enum class ViewType(val value: Int) {
+        LIST(0),
+        DETAILED_LIST(1),
+        GRID(2);
+
+        companion object {
+            fun getFromValue(value: Int): ViewType? =
+                values().find { it.value == value }
+        }
+    }
+
+    enum class SortType(val value: Int) {
+        NAME(0),
+        TYPE(1),
+        SIZE(2),
+        MODIFIED_TIME(3);
+
+        companion object {
+            fun getFromValue(value: Int): SortType? =
+                values().find { it.value == value }
+        }
+    }
+
+    enum class OrderType(val value: Int) {
+        ASCENDING(0),
+        DESCENDING(1);
+
+        companion object {
+            fun getFromValue(value: Int): OrderType? =
+                values().find { it.value == value }
+        }
     }
 }

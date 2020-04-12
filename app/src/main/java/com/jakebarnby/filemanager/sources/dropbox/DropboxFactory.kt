@@ -13,7 +13,10 @@ import com.jakebarnby.filemanager.sources.models.SourceStorageStats
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Logger
-import java.io.*
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
 
 /**
  * Created by Jake on 6/9/2017.
@@ -100,7 +103,7 @@ object DropboxFactory {
         } catch (e: DbxException) {
             val params = bundleOf(Constants.Analytics.PARAM_ERROR_VALUE to e.message)
             Logger.logFirebaseEvent(
-                FirebaseAnalytics.getInstance(context!!),
+                FirebaseAnalytics.getInstance(context),
                 Constants.Analytics.EVENT_ERROR_DROPBOX_LOGOUT,
                 params
             )

@@ -53,4 +53,10 @@ class PreferenceManager(
     fun getStringSet(name: String?, defaultValue: Set<String?>?): Set<String>? {
         return preferences.getStringSet(name, defaultValue)
     }
+
+    fun hasSourceToken(sourceName: String): Boolean =
+        preferences.getString(
+            sourceName.toLowerCase() + "-access-token",
+            null
+        ) != null
 }

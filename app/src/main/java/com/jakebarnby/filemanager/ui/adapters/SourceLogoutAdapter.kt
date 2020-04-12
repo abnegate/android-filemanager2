@@ -40,14 +40,14 @@ class SourceLogoutAdapter(
 
         fun bindHolder(sources: MutableList<Source>, position: Int) {
 
-            val source = sources[position] ?: return
+            val source = sources[position]
 
             logo.setImageResource(Utils.resolveLogoId(source.sourceName))
             sourceName.text = String.format("%s", source.sourceName)
             logout.setText(if (source.isLoggedIn) R.string.logout else R.string.connect)
             logout.setOnClickListener { view: View ->
                 if (!source.isLoggedIn) {
-                    source.authenticateSource(logo.context)
+                    source.authenticate(logo.context)
                     return@setOnClickListener
                 }
 

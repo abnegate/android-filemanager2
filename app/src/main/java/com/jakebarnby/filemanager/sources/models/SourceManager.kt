@@ -2,14 +2,14 @@ package com.jakebarnby.filemanager.sources.models
 
 import android.util.SparseArray
 import com.jakebarnby.filemanager.models.FileAction
-import com.jakebarnby.filemanager.util.TreeNode
+import java.io.Serializable
 
 /**
  * Created by Jake on 7/29/2017.
  */
 class SourceManager(
     val sources: MutableList<Source> = mutableListOf()
-) {
+) : Serializable {
 
     lateinit var activeSource: Source
 

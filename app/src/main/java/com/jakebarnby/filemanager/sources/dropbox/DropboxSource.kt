@@ -6,7 +6,7 @@ import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.android.Auth
 import com.dropbox.core.v2.DbxClientV2
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.jakebarnby.filemanager.sources.SourceListener
+import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.sources.models.Source
 import com.jakebarnby.filemanager.sources.models.SourceType
 import com.jakebarnby.filemanager.util.Constants
@@ -19,21 +19,25 @@ import com.jakebarnby.filemanager.util.Logger
  */
 class DropboxSource(
     sourceName: String,
-    listener: SourceListener
-) : Source(SourceType.REMOTE, sourceName, listener) {
+    prefsManager: PreferenceManager
+) : Source(
+    SourceType.REMOTE,
+    sourceName,
+    prefsManager
+) {
 
-    override fun authenticateSource(context: Context) {
-        if (hasToken(context, sourceName)) {
-            loadSource(context)
+    override fun authenticate(context: Context) {
+        if (prefsManager.hasSourceToken(sourceName)) {
+            loadFiles(context)
         } else {
             Auth.startOAuth2Authentication(context, Sources.DROPBOX_CLIENT_ID)
         }
     }
 
-    override fun loadSource(context: Context) {
+    override fun loadFiles(context: Context) {
         if (!isFilesLoaded) {
-            if (!checkConnectionActive(context)) return
-            DropboxLoaderTask(this, sourceListener).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "")
+            DropboxLoaderTask(this)
+                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "")
         }
     }
 
@@ -42,9 +46,12 @@ class DropboxSource(
             return
         }
         DropboxFactory.logout(context)
+
         isLoggedIn = false
         isFilesLoaded = false
+
         sourceListener.onLogout()
+
         Logger.logFirebaseEvent(
             FirebaseAnalytics.getInstance(context),
             Constants.Analytics.EVENT_LOGOUT_DROPBOX
@@ -74,23 +81,23 @@ class DropboxSource(
      * Check for a valid access token and store it in shared preferences if found, then load the source
      */
     fun checkForAccessToken(context: Context) {
-        var accessToken = Preferences.getString(
-            context,
+        var accessToken = prefsManager.getString(
             Prefs.DROPBOX_TOKEN_KEY,
             null
         )
 
         if (accessToken != null && !isLoggedIn) {
             setupClient(accessToken)
-            loadSource(context)
+            loadFiles(context)
         }
 
         if (accessToken == null) {
             accessToken = Auth.getOAuth2Token()
             if (accessToken != null) {
-                Preferences.savePref(context, Prefs.DROPBOX_TOKEN_KEY, accessToken)
+                prefsManager.savePref(Prefs.DROPBOX_TOKEN_KEY, accessToken)
                 setupClient(accessToken)
-                loadSource(context)
+                loadFiles(context)
+
                 Logger.logFirebaseEvent(
                     FirebaseAnalytics.getInstance(context),
                     Constants.Analytics.EVENT_LOGIN_DROPBOX

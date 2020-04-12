@@ -39,13 +39,13 @@ abstract class FileAdapter(
         getVisibileFiles(source.rootNode)
     }
 
-    private fun getVisibileFiles(currentDir: TreeNode<SourceFile>) : TreeNode<SourceFile> {
+    private fun getVisibileFiles(currentDir: TreeNode<SourceFile>): TreeNode<SourceFile> {
         showHiddenFiles = prefs.getBoolean(Prefs.HIDDEN_FOLDER_KEY, false)
 
         var currentDirChildren = currentDir.children
         if (!showHiddenFiles) {
             val readableChildren = mutableListOf<TreeNode<SourceFile>>()
-            for (file in currentDirChildren!!) {
+            for (file in currentDirChildren) {
                 if (!file.data.isHidden) {
                     readableChildren.add(file)
                 }

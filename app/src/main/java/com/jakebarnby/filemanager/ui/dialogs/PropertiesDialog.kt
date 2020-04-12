@@ -1,7 +1,6 @@
 package com.jakebarnby.filemanager.ui.dialogs
 
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
@@ -10,9 +9,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.managers.SelectedFilesManager
-import com.jakebarnby.filemanager.sources.models.SourceFile
 import com.jakebarnby.filemanager.util.Constants
-import com.jakebarnby.filemanager.util.TreeNode
 import com.jakebarnby.filemanager.util.Utils
 
 /**

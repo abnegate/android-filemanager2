@@ -3,8 +3,8 @@ package com.jakebarnby.filemanager.sources.local
 import android.Manifest
 import android.os.Bundle
 import androidx.core.os.bundleOf
-import com.jakebarnby.filemanager.sources.SourceFragment
 import com.jakebarnby.filemanager.sources.models.SourceType
+import com.jakebarnby.filemanager.ui.sources.SourceFragment
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.RequestCodes
 

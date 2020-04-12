@@ -3,7 +3,6 @@ package com.jakebarnby.filemanager.sources.onedrive
 import android.content.Context
 import androidx.fragment.app.Fragment
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.jakebarnby.filemanager.sources.SourceListener
 import com.jakebarnby.filemanager.sources.models.Source
 import com.jakebarnby.filemanager.sources.models.SourceType
 import com.jakebarnby.filemanager.util.Constants
@@ -14,10 +13,12 @@ import com.microsoft.graph.core.ClientException
 import com.microsoft.graph.core.DefaultClientConfig
 import com.microsoft.graph.extensions.DriveItem
 import com.microsoft.graph.extensions.GraphServiceClient
-import com.microsoft.identity.client.*
+import com.microsoft.identity.client.AuthenticationCallback
+import com.microsoft.identity.client.AuthenticationResult
+import com.microsoft.identity.client.MsalException
+import com.microsoft.identity.client.PublicClientApplication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
-import java.lang.Exception
 
 /**
  * Created by jakebarnby on 2/08/17.
@@ -31,7 +32,7 @@ class OneDriveSource(
 
     private var authResult: AuthenticationResult? = null
 
-    override fun authenticateSource(context: Context) {}
+    override fun authenticate(context: Context) {}
 
     fun authenticateSource(fragment: Fragment) {
         client = PublicClientApplication(fragment.context!!, CLIENT_ID)
@@ -56,7 +57,7 @@ class OneDriveSource(
         }
     }
 
-    override fun loadSource(context: Context) {
+    override fun loadFiles(context: Context) {
         if (isFilesLoaded || authResult == null) {
             return
         }
@@ -120,7 +121,7 @@ class OneDriveSource(
                 if (!isLoggedIn) {
                     authenticateSource(fragment)
                 } else {
-                    loadSource(fragment.context!!)
+                    loadFiles(fragment.context!!)
                 }
             }
         }
@@ -128,7 +129,7 @@ class OneDriveSource(
             if (!isLoggedIn) {
                 authenticateSource(fragment)
             } else {
-                loadSource(fragment.context!!)
+                loadFiles(fragment.context!!)
                 Logger.logFirebaseEvent(
                     FirebaseAnalytics.getInstance(fragment.context!!),
                     Constants.Analytics.EVENT_LOGIN_ONEDRIVE)

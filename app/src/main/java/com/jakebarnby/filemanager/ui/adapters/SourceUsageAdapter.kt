@@ -45,7 +45,7 @@ class SourceUsageAdapter(
         fun bindHolder(source: Source) {
             sourceName.text = String.format("%s", source.sourceName)
             sourceUsage.text = constructUsageString(source)
-            animateProgress(percentBar, source.usedSpacePercent ?: 0)
+            animateProgress(percentBar, source.usedSpacePercent)
         }
 
         private fun constructUsageString(source: Source?): String {

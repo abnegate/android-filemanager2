@@ -30,7 +30,7 @@ object Utils {
      * @return True if the device has a network connection, false otherwise.
      */
     fun isConnectionReady(context: Context): Boolean {
-        val connMgr = context!!.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connMgr = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkInfo = connMgr.activeNetworkInfo
         return networkInfo != null && networkInfo.isAvailable && networkInfo.isConnected
     }

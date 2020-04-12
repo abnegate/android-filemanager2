@@ -7,15 +7,16 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.util.ExponentialBackOff
 import com.google.api.services.drive.DriveScopes
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.jakebarnby.filemanager.sources.SourceListener
 import com.jakebarnby.filemanager.sources.models.Source
 import com.jakebarnby.filemanager.sources.models.SourceType
-import com.jakebarnby.filemanager.util.*
+import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Constants.RequestCodes
+import com.jakebarnby.filemanager.util.GooglePlay
+import com.jakebarnby.filemanager.util.Logger
+import com.jakebarnby.filemanager.util.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
-import java.lang.Exception
 
 /**
  * Created by jakebarnby on 2/08/17.
@@ -31,11 +32,11 @@ class GoogleDriveSource(
         private val SCOPES = listOf(DriveScopes.DRIVE)
     }
 
-    override fun authenticateSource(context: Context) {
+    override fun authenticate(context: Context) {
         if (!checkConnectionActive(context)) return
         fetchCredential(context)
         if (hasToken(context, sourceName)) {
-            loadSource(context)
+            loadFiles(context)
         } else {
             sourceListener.onCheckPermissions(
                 Manifest.permission.GET_ACCOUNTS,
@@ -44,7 +45,7 @@ class GoogleDriveSource(
         }
     }
 
-    override fun loadSource(context: Context) {
+    override fun loadFiles(context: Context) {
         if (!isFilesLoaded) {
             if (!checkConnectionActive(context)) return
             GoogleDriveLoaderTask(this, sourceListener, credendtial)
@@ -109,7 +110,7 @@ class GoogleDriveSource(
             sourceListener.onNoConnection()
         } else {
             isLoggedIn = true
-            loadSource(fragment.context!!)
+            loadFiles(fragment.context!!)
         }
     }
 

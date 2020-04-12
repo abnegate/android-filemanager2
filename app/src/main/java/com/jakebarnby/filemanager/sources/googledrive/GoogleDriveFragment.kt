@@ -6,7 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.core.os.bundleOf
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.jakebarnby.filemanager.sources.SourceFragment
+import com.jakebarnby.filemanager.ui.sources.SourceFragment
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.RequestCodes
 import com.jakebarnby.filemanager.util.Constants.Sources
@@ -23,7 +23,7 @@ class GoogleDriveFragment : SourceFragment() {
     }
 
     override fun onResume() {
-        if (!(source?.isLoggedIn == true)) {
+        if (!(source.isLoggedIn == true)) {
             (source as GoogleDriveSource).authGoogleSilent(this)
         }
         super.onResume()

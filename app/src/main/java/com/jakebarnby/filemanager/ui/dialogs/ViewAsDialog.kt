@@ -9,10 +9,10 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.managers.PreferenceManager
-import com.jakebarnby.filemanager.sources.SourceActivity
+import com.jakebarnby.filemanager.ui.sources.SourceActivity
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
-import com.jakebarnby.filemanager.util.Constants.ViewTypes
+import com.jakebarnby.filemanager.util.Constants.ViewType
 
 /**
  * Created by Jake on 5/31/2017.
@@ -44,7 +44,7 @@ class ViewAsDialog : DialogFragment() {
 
         val viewAsType = prefs.getInt(
             Prefs.VIEW_TYPE_KEY,
-            ViewTypes.LIST
+            ViewType.LIST
         )
 
         return AlertDialog.Builder(activity!!)
