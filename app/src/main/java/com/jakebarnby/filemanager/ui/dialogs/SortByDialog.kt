@@ -2,7 +2,6 @@ package com.jakebarnby.filemanager.ui.dialogs
 
 import android.app.Dialog
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.RadioGroup
@@ -11,11 +10,11 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.managers.PreferenceManager
-import com.jakebarnby.filemanager.ui.sources.SourceActivity
-import com.jakebarnby.filemanager.util.Constants
-import com.jakebarnby.filemanager.util.Constants.OrderType
+import com.jakebarnby.filemanager.models.OrderType
+import com.jakebarnby.filemanager.models.SortType
+import com.jakebarnby.filemanager.util.Constants.DIALOG_ON_POSITIVE_KEY
+import com.jakebarnby.filemanager.util.Constants.DIALOG_TITLE_KEY
 import com.jakebarnby.filemanager.util.Constants.Prefs
-import com.jakebarnby.filemanager.util.Constants.SortType
 
 /**
  * Created by Jake on 10/2/2017.
@@ -23,10 +22,13 @@ import com.jakebarnby.filemanager.util.Constants.SortType
 class SortByDialog : DialogFragment() {
 
     companion object {
-        fun newInstance() =
+        fun newInstance(
+            onPositive: () -> Unit
+        ) =
             SortByDialog().apply {
                 arguments = bundleOf(
-                    Constants.DIALOG_TITLE_KEY to getString(R.string.rename)
+                    DIALOG_TITLE_KEY to getString(R.string.rename),
+                    DIALOG_ON_POSITIVE_KEY to onPositive
                 )
             }
     }
@@ -36,25 +38,36 @@ class SortByDialog : DialogFragment() {
         Context.MODE_PRIVATE
     ))
 
+    var selectedIndex = 0
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(activity!!)
-        builder.setTitle(getString(R.string.sort_by))
-        val view = activity!!.layoutInflater.inflate(R.layout.dialog_sort_by, null)
+        val onPositive = arguments
+            ?.getSerializable(DIALOG_ON_POSITIVE_KEY) as? () -> Unit
+
+        val builder = AlertDialog.Builder(context!!).setTitle(getString(R.string.sort_by))
+
+        val view = layoutInflater.inflate(R.layout.dialog_sort_by, null)
         initViews(view)
-        builder.setView(view)
-        builder.setNegativeButton(getText(R.string.close)) { dialog: DialogInterface?, which: Int ->
-            (activity as SourceActivity?)!!.initAllRecyclers()
-            dismiss()
-        }
-        return builder.create()
+
+        return builder
+            .setView(view)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                prefs.savePref(Prefs.SORT_TYPE_KEY, selectedIndex)
+                onPositive?.invoke()
+                dismiss()
+            }
+            .setNegativeButton(getText(R.string.close)) { _, _ ->
+                dismiss()
+            }.create()
     }
 
     private fun initViews(rootView: View) {
         val sortGroup = rootView.findViewById<RadioGroup>(R.id.rdg_sort_by)
         val currentSortType = prefs.getInt(
             Prefs.SORT_TYPE_KEY,
-            SortType.NAME
+            SortType.NAME.value
         )
+        selectedIndex = currentSortType
 
         setCheckedSortType(currentSortType, sortGroup)
         setSortTypeListener(sortGroup)
@@ -62,7 +75,7 @@ class SortByDialog : DialogFragment() {
         val orderGroup = rootView.findViewById<RadioGroup>(R.id.rdg_order_by)
         val currentOrderType = prefs.getInt(
             Prefs.ORDER_TYPE_KEY,
-            OrderType.ASCENDING
+            OrderType.ASCENDING.value
         )
 
         setCheckedOrderType(currentOrderType, orderGroup)
@@ -74,11 +87,11 @@ class SortByDialog : DialogFragment() {
             when (id) {
                 R.id.rdb_ascending -> prefs.savePref(
                     Prefs.ORDER_TYPE_KEY,
-                    OrderType.ASCENDING
+                    OrderType.ASCENDING.value
                 )
                 R.id.rdb_descending -> prefs.savePref(
                     Prefs.ORDER_TYPE_KEY,
-                    OrderType.DESCENDING
+                    OrderType.DESCENDING.value
                 )
             }
         }
@@ -86,40 +99,28 @@ class SortByDialog : DialogFragment() {
 
     private fun setCheckedOrderType(currentOrderType: Int, orderGroup: RadioGroup) {
         when (currentOrderType) {
-            OrderType.ASCENDING -> orderGroup.check(R.id.rdb_ascending)
-            OrderType.DESCENDING -> orderGroup.check(R.id.rdb_descending)
+            OrderType.ASCENDING.value -> orderGroup.check(R.id.rdb_ascending)
+            OrderType.DESCENDING.value -> orderGroup.check(R.id.rdb_descending)
         }
     }
 
     private fun setSortTypeListener(sortGroup: RadioGroup) {
-        sortGroup.setOnCheckedChangeListener { radioGroup: RadioGroup?, id: Int ->
+        sortGroup.setOnCheckedChangeListener { _, id ->
             when (id) {
-                R.id.rdb_name -> prefs.savePref(
-                    Prefs.SORT_TYPE_KEY,
-                    SortType.NAME
-                )
-                R.id.rdb_size -> prefs.savePref(
-                    Prefs.SORT_TYPE_KEY,
-                    SortType.SIZE
-                )
-                R.id.rdb_type -> prefs.savePref(
-                    Prefs.SORT_TYPE_KEY,
-                    SortType.TYPE
-                )
-                R.id.rdb_modified_time -> prefs.savePref(
-                    Prefs.SORT_TYPE_KEY,
-                    SortType.MODIFIED_TIME
-                )
+                R.id.rdb_name -> selectedIndex = SortType.NAME.value
+                R.id.rdb_size -> selectedIndex = SortType.SIZE.value
+                R.id.rdb_type -> selectedIndex = SortType.TYPE.value
+                R.id.rdb_modified_time -> selectedIndex = SortType.MODIFIED_TIME.value
             }
         }
     }
 
     private fun setCheckedSortType(currentSortType: Int, sortGroup: RadioGroup) {
         when (currentSortType) {
-            SortType.NAME -> sortGroup.check(R.id.rdb_name)
-            SortType.SIZE -> sortGroup.check(R.id.rdb_size)
-            SortType.TYPE -> sortGroup.check(R.id.rdb_type)
-            SortType.MODIFIED_TIME -> sortGroup.check(R.id.rdb_modified_time)
+            SortType.NAME.value -> sortGroup.check(R.id.rdb_name)
+            SortType.SIZE.value -> sortGroup.check(R.id.rdb_size)
+            SortType.TYPE.value -> sortGroup.check(R.id.rdb_type)
+            SortType.MODIFIED_TIME.value -> sortGroup.check(R.id.rdb_modified_time)
         }
     }
 }

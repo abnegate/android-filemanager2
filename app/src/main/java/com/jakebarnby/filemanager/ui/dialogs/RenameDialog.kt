@@ -1,20 +1,16 @@
 package com.jakebarnby.filemanager.ui.dialogs
 
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import com.google.android.material.snackbar.Snackbar
 import com.jakebarnby.filemanager.R
-import com.jakebarnby.filemanager.managers.SelectedFilesManager
-import com.jakebarnby.filemanager.services.SourceTransferService
-import com.jakebarnby.filemanager.sources.models.SourceFile
-import com.jakebarnby.filemanager.ui.sources.SourceActivity
 import com.jakebarnby.filemanager.util.Constants
-import com.jakebarnby.filemanager.util.TreeNode
+import com.jakebarnby.filemanager.util.Constants.DIALOG_CURRENT_FILE_NAME_KEY
+import com.jakebarnby.filemanager.util.Constants.DIALOG_ON_POSITIVE_KEY
+import com.jakebarnby.filemanager.util.Constants.DIALOG_TITLE_KEY
 
 /**
  * Created by Jake on 6/18/2017.
@@ -22,50 +18,48 @@ import com.jakebarnby.filemanager.util.TreeNode
 class RenameDialog : DialogFragment() {
 
     companion object {
-        fun newInstance() =
-            CreateFolderDialog().apply {
-                arguments = bundleOf(
-                    Constants.DIALOG_TITLE_KEY to getString(R.string.rename)
-                )
-            }
+        fun newInstance(
+            currentFileName: String,
+            onPositive: (String) -> Unit
+        ) = RenameDialog().apply {
+            arguments = bundleOf(
+                DIALOG_TITLE_KEY to getString(R.string.rename),
+                DIALOG_CURRENT_FILE_NAME_KEY to currentFileName,
+                DIALOG_ON_POSITIVE_KEY to onPositive
+            )
+        }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val currentName = arguments
+            ?.getString(DIALOG_CURRENT_FILE_NAME_KEY) ?: ""
+
+        val onPositive = arguments
+            ?.getSerializable(DIALOG_ON_POSITIVE_KEY) as? (String) -> Unit
+
         val builder = AlertDialog.Builder(activity!!)
             .setTitle(arguments?.getString(Constants.DIALOG_TITLE_KEY))
 
-        val view = activity?.layoutInflater?.inflate(R.layout.dialog_rename, null)
-        val input = view?.findViewById<EditText>(R.id.text_rename)
+        val view = layoutInflater.inflate(R.layout.dialog_rename, null)
+        val input = view.findViewById<EditText>(R.id.text_rename)
 
-        val name = SelectedFilesManager.currentSelectedFiles[0].data.name
         input?.setText(
-            if (name.lastIndexOf('.') > 0) {
-                name.substring(0, name.lastIndexOf('.'))
+            if (currentName.lastIndexOf('.') > 0) {
+                currentName.substring(0, currentName.lastIndexOf('.'))
             } else {
-                name
+                currentName
             }
         )
 
-        input?.setSelection(input.text.length)
+        input.setSelection(input.text.length)
 
-        builder.setView(view)
-        builder.setPositiveButton(getString(R.string.ok)) { dialog: DialogInterface?, _: Int ->
-            val activeDirectory = (activity as? SourceActivity)?.sourceManager.activeDirectory
-            val newName = if (name.lastIndexOf('.') > 0) {
-                input?.text?.toString() + name.substring(name.lastIndexOf('.'))
-            } else {
-                input?.text.toString()
-            }
-            for (file in activeDirectory.children ?: emptyList<TreeNode<SourceFile>>()) {
-                if (file.data.name.equals(newName, ignoreCase = true)) {
-                    Snackbar.make(activity!!.currentFocus!!, getString(R.string.file_exists), Snackbar.LENGTH_LONG).show()
-                    return@setPositiveButton
-                }
-            }
-            SourceTransferService.startActionRename(context!!, newName)
-            SelectedFilesManager.startNewSelection()
-        }
-        builder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-        return builder.create()
+        return builder.setView(view)
+            .setPositiveButton(getString(R.string.ok)) { _, _ ->
+                onPositive?.invoke(input.text.toString())
+                dismiss()
+            }.setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }.create()
+
     }
 }

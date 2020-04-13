@@ -5,18 +5,23 @@ import com.dropbox.core.v2.files.FileMetadata
 import com.dropbox.core.v2.files.FolderMetadata
 import com.dropbox.core.v2.files.ListFolderResult
 import com.dropbox.core.v2.files.Metadata
-import com.jakebarnby.filemanager.sources.LoaderTask
-import com.jakebarnby.filemanager.sources.models.Source
-import com.jakebarnby.filemanager.sources.models.SourceFile
+import com.jakebarnby.filemanager.models.Source
+import com.jakebarnby.filemanager.models.SourceFile
+import com.jakebarnby.filemanager.ui.sources.SourceFragmentContract
 import com.jakebarnby.filemanager.util.TreeNode
+import com.jakebarnby.filemanager.workers.LoaderTask
+import javax.inject.Inject
 
 /**
  * Created by Jake on 8/2/2017.
  */
 class DropboxLoaderTask(
     source: Source,
-    listener: SourceListener
-) : LoaderTask(source, listener) {
+    presenter: SourceFragmentContract.Presenter
+) : LoaderTask(source, presenter) {
+
+    @Inject
+    lateinit var dropboxClient: DropboxClient
 
     override fun initRootNode(path: String): Any? {
         val rootSourceFile: SourceFile = DropboxFile(Metadata(path))
@@ -24,15 +29,13 @@ class DropboxLoaderTask(
         rootTreeNode = TreeNode(rootSourceFile)
         currentNode = rootTreeNode
         source.currentDirectory = rootTreeNode
-        source.setQuotaInfo(DropboxFactory.storageStats)
+        source.setQuotaInfo(dropboxClient.storageInfo)
         var result: ListFolderResult? = null
         try {
-            result = DropboxFactory.client
-                ?.files()
-                ?.listFolderBuilder(path)
-                ?.start()
+            result = dropboxClient.getFilesAtPath(path)
+
         } catch (e: DbxException) {
-            sourceListener.onLoadError(if (e.message != null) e.message else "")
+            presenter.onLoadError(if (e.message != null) e.message else "")
             success = false
         }
         return result
@@ -48,16 +51,12 @@ class DropboxLoaderTask(
             val sourceFile: SourceFile = DropboxFile(data)
             try {
                 if (!sourceFile.isDirectory) {
-                    DropboxFactory.client
-                        ?.files()
-                        ?.getTemporaryLink(sourceFile.path)
-                        ?.link
-                        ?.let {
-                            sourceFile.thumbnailLink = it
-                        }
+                    dropboxClient.getExternalLink(sourceFile.path)?.let {
+                        sourceFile.thumbnailLink = it
+                    }
                 }
             } catch (e: DbxException) {
-                sourceListener.onLoadError(if (e.message != null) e.message else "")
+                presenter.onLoadError(if (e.message != null) e.message else "")
                 success = false
             }
             if (data is FolderMetadata) {
@@ -65,16 +64,14 @@ class DropboxLoaderTask(
                 currentNode = currentNode.children[currentNode.children.size - 1]
                 try {
                     readFileTree(
-                        DropboxFactory.client
-                            ?.files()
-                            ?.listFolder(data.getPathLower())
+                        dropboxClient.getFilesAtPath(data.getPathLower())
                     )
                 } catch (e: DbxException) {
-                    sourceListener.onLoadError(if (e.message != null) e.message else "")
+                    presenter.onLoadError(if (e.message != null) e.message else "")
                 }
 
                 if (currentNode.parent != null) {
-                    currentNode.parent!!.data.addSize(currentNode.data.size)
+                    currentNode.parent!!.data.size += currentNode.data.size
                     currentNode = currentNode.parent!!
                 }
             } else {
@@ -82,7 +79,7 @@ class DropboxLoaderTask(
                 currentNode.addChild(sourceFile)
             }
         }
-        currentNode.data.addSize(dirSize)
+        currentNode.data.size += dirSize
 
         return rootTreeNode
     }

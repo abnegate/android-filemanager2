@@ -12,11 +12,12 @@ import com.jakebarnby.filemanager.util.Constants.Billing
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Logger
 import kotlinx.coroutines.*
+import javax.inject.Inject
 
 /**
  * Created by Jake on 10/21/2017.
  */
-class BillingManager(
+class BillingManager @Inject constructor(
     context: Context,
     private val prefs: PreferenceManager
 ) {

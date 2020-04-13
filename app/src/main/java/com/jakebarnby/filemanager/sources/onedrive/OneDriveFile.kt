@@ -1,7 +1,8 @@
 package com.jakebarnby.filemanager.sources.onedrive
 
-import com.jakebarnby.filemanager.sources.models.SourceFile
-import com.jakebarnby.filemanager.sources.models.SourceType
+import com.jakebarnby.filemanager.models.SourceFile
+import com.jakebarnby.filemanager.models.SourceConnectionType
+import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.util.Constants.Sources
 import com.microsoft.graph.extensions.DriveItem
 
@@ -16,8 +17,7 @@ class OneDriveFile(file: DriveItem) : SourceFile() {
         path = file.webUrl
         driveId = file.id
         name = file.name
-        sourceType = SourceType.REMOTE
-        sourceName = Sources.ONEDRIVE
+        sourceId = SourceType.ONEDRIVE.id
         isDirectory = file.folder != null
         size = file.size
         modifiedTime = file.lastModifiedDateTime.timeInMillis

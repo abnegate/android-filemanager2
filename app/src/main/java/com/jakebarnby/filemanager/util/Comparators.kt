@@ -1,10 +1,10 @@
 package com.jakebarnby.filemanager.util
 
 import com.jakebarnby.filemanager.managers.PreferenceManager
-import com.jakebarnby.filemanager.sources.models.SourceFile
-import com.jakebarnby.filemanager.util.Constants.OrderType
+import com.jakebarnby.filemanager.models.OrderType
+import com.jakebarnby.filemanager.models.SortType
+import com.jakebarnby.filemanager.models.SourceFile
 import com.jakebarnby.filemanager.util.Constants.Prefs
-import com.jakebarnby.filemanager.util.Constants.SortType
 import java.util.*
 
 /**
@@ -19,21 +19,21 @@ object Comparators {
         )
         val sortType = prefs.getInt(
             Prefs.SORT_TYPE_KEY,
-            SortType.NAME
+            SortType.NAME.value
         )
         val orderType = prefs.getInt(
             Prefs.ORDER_TYPE_KEY,
-            SortType.NAME
+            SortType.NAME.value
         )
 
         return when (sortType) {
-            SortType.NAME ->
+            SortType.NAME.value ->
                 getComparatorNameForOrder(orderType, showFoldersFirst)
-            SortType.MODIFIED_TIME ->
+            SortType.MODIFIED_TIME.value ->
                 getComparatorTimeForOrder(orderType, showFoldersFirst)
-            SortType.SIZE ->
+            SortType.SIZE.value ->
                 getComparatorSizeForOrder(orderType, showFoldersFirst)
-            SortType.TYPE ->
+            SortType.TYPE.value ->
                 getComparatorTypeForOrder(orderType, showFoldersFirst)
             else ->
                 getComparatorNameForOrder(orderType, showFoldersFirst)
@@ -41,7 +41,7 @@ object Comparators {
     }
 
     private fun getComparatorNameForOrder(orderType: Int, showFoldersFirst: Boolean): Comparator<TreeNode<out SourceFile>> {
-        return if (orderType == OrderType.ASCENDING) {
+        return if (orderType == OrderType.ASCENDING.value) {
             Comparator { node1, node2 ->
                 if (showFoldersFirst) {
                     var result = (!node1.data.isDirectory).compareTo(!node2.data.isDirectory)
@@ -69,7 +69,7 @@ object Comparators {
     }
 
     private fun getComparatorTimeForOrder(orderType: Int, showFoldersFirst: Boolean): Comparator<TreeNode<out SourceFile>> {
-        return if (orderType == OrderType.ASCENDING) {
+        return if (orderType == OrderType.ASCENDING.value) {
             Comparator { node1: TreeNode<out SourceFile>, node2: TreeNode<out SourceFile> ->
                 if (showFoldersFirst) {
                     var result = (!node1.data.isDirectory).compareTo(!node2.data.isDirectory)
@@ -97,7 +97,7 @@ object Comparators {
     }
 
     private fun getComparatorSizeForOrder(orderType: Int, showFoldersFirst: Boolean): Comparator<TreeNode<out SourceFile>> {
-        return if (orderType == OrderType.ASCENDING) {
+        return if (orderType == OrderType.ASCENDING.value) {
             Comparator { node1: TreeNode<out SourceFile>, node2: TreeNode<out SourceFile> ->
                 if (showFoldersFirst) {
                     var result = (!node1.data.isDirectory).compareTo(!node2.data.isDirectory)
@@ -125,7 +125,7 @@ object Comparators {
     }
 
     private fun getComparatorTypeForOrder(orderType: Int, showFoldersFirst: Boolean): Comparator<TreeNode<out SourceFile>> {
-        return if (orderType == OrderType.ASCENDING) {
+        return if (orderType == OrderType.ASCENDING.value) {
             Comparator { node1: TreeNode<out SourceFile>, node2: TreeNode<out SourceFile> ->
                 if (showFoldersFirst) {
                     var result = (!node1.data.isDirectory).compareTo(!node2.data.isDirectory)

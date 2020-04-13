@@ -5,7 +5,6 @@ import android.app.ProgressDialog
 import android.app.SearchManager
 import android.content.*
 import android.hardware.usb.UsbManager
-import android.net.ConnectivityManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -20,7 +19,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -34,23 +32,20 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.jakebarnby.filemanager.R
-import com.jakebarnby.filemanager.managers.BillingManager
-import com.jakebarnby.filemanager.managers.ConnectionManager
-import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.managers.SelectedFilesManager
 import com.jakebarnby.filemanager.services.SourceTransferService
-import com.jakebarnby.filemanager.sources.SourcePresenter
 import com.jakebarnby.filemanager.sources.local.LocalFragment
-import com.jakebarnby.filemanager.sources.models.Source
-import com.jakebarnby.filemanager.sources.models.SourceFile
-import com.jakebarnby.filemanager.sources.models.SourceManager
-import com.jakebarnby.filemanager.sources.models.SourceType
+import com.jakebarnby.filemanager.models.Source
+import com.jakebarnby.filemanager.models.SourceFile
+import com.jakebarnby.filemanager.models.SourceConnectionType
+import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.ui.adapters.*
 import com.jakebarnby.filemanager.ui.adapters.SourceLogoutAdapter.LogoutListener
 import com.jakebarnby.filemanager.ui.dialogs.*
 import com.jakebarnby.filemanager.util.*
 import com.jakebarnby.filemanager.util.Constants.ADS_MENU_ID
 import com.jakebarnby.filemanager.util.Constants.ADS_MENU_POSITION
+import com.jakebarnby.filemanager.util.Constants.DialogTags
 import com.jakebarnby.filemanager.util.Constants.FILE_PATH_KEY
 import com.jakebarnby.filemanager.util.Intents.ACTION_COMPLETE
 import com.jakebarnby.filemanager.util.Intents.ACTION_SHOW_DIALOG
@@ -60,6 +55,7 @@ import com.jakebarnby.filemanager.util.Intents.EXTRA_DIALOG_CURRENT_VALUE
 import com.jakebarnby.filemanager.util.Intents.EXTRA_DIALOG_MAX_VALUE
 import com.jakebarnby.filemanager.util.Intents.EXTRA_DIALOG_MESSAGE
 import com.jakebarnby.filemanager.util.Intents.EXTRA_DIALOG_TITLE
+import dagger.android.support.DaggerAppCompatActivity
 import io.github.yavski.fabspeeddial.FabSpeedDial
 import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter
 import jp.wasabeef.blurry.Blurry
@@ -68,17 +64,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File
-import java.util.*
-import kotlin.coroutines.CoroutineContext
+import javax.inject.Inject
 
-class SourceActivity : AppCompatActivity(), SourceActivityContract.View, CoroutineScope {
+class SourceActivity : DaggerAppCompatActivity(), SourceActivityContract.View, CoroutineScope {
 
     var job = Job()
 
-    override val coroutineContext: CoroutineContext
-        get() = job + Dispatchers.Main
+    override val coroutineContext = job + Dispatchers.Main
 
-    private lateinit var presenter: SourceActivityContract.Presenter
+    @Inject
+    lateinit var presenter: SourceActivityContract.Presenter
 
     private lateinit var sourcesPagerAdapter: SourcePagerAdapter
     private lateinit var viewPager: ViewPager
@@ -120,28 +115,10 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
 
         setSupportActionBar(findViewById(R.id.toolbar))
 
-        initPresenter()
         initAds()
         initViews()
 
         SourceTransferService.startClearLocalCache(this)
-    }
-
-    private fun initPresenter() {
-        val prefs = PreferenceManager(
-            getSharedPreferences(Constants.Prefs.PREFS, Context.MODE_PRIVATE)
-        )
-        presenter = SourcePresenter(
-            SourceManager(),
-            prefs,
-            BillingManager(
-                this,
-                prefs
-            ),
-            ConnectionManager(
-                getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            )
-        )
     }
 
     private fun initViews() {
@@ -264,6 +241,14 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
         return super.onOptionsItemSelected(item)
     }
 
+    override fun startCreateFolderService(name: String) {
+        SourceTransferService.startActionCreateFolder(this, name)
+    }
+
+    override fun startRenameService(newName: String) {
+        SourceTransferService.startActionRename(this, newName)
+    }
+
     override fun startDeleteService() {
         SourceTransferService.startActionDelete(this)
     }
@@ -276,10 +261,15 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
         SourceTransferService.startActionCopy(this, true)
     }
 
+    override fun startZipService(name: String) {
+        SourceTransferService.Companion.startActionZip(this, name)
+    }
+
     override fun addLocalSourceView(position: Int, name: String, rootPath: String) {
         sourcesPagerAdapter.fragments.add(
             position,
-            LocalFragment.newInstance(name, rootPath)
+            // TODO: Fix additional local source ids
+            LocalFragment.newInstance(5, rootPath)
         )
         sourcesPagerAdapter.notifyDataSetChanged()
     }
@@ -347,8 +337,8 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
                 Intent.ACTION_MEDIA_MOUNTED -> {
                     presenter.onAddLocalSource(
                         intent.dataString!!.replace("file://", ""),
-                        sourcesPagerAdapter.fragments.count {
-                            it.source.sourceType == SourceType.LOCAL
+                        presenter.sourceManager.sources.count {
+                            it.sourceConnectionType == SourceConnectionType.LOCAL
                         },
                         getString(R.string.sdcard),
                         getString(R.string.usb)
@@ -378,41 +368,35 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
     }
 
     override fun showCreateFolderDialog() {
-        CreateFolderDialog.newInstance()
-            .show(supportFragmentManager, Constants.DialogTags.CREATE_FOLDER)
+        CreateFolderDialog.newInstance {
+            presenter.createFolder(it)
+        }.show(supportFragmentManager, DialogTags.CREATE_FOLDER)
     }
 
     /**
      * Shows a dialog allowing the user to rename a file or folder
      */
-    override fun showRenameDialog() {
-        RenameDialog.newInstance()
-            .show(supportFragmentManager, getString(R.string.rename))
+    override fun showRenameDialog(currentFileName: String) {
+        RenameDialog.newInstance(currentFileName) {
+            presenter.rename(currentFileName, it)
+        }.show(supportFragmentManager, getString(R.string.rename))
     }
 
     override fun showDeleteDialog(deleteCount: Int) {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.warning)
-            .setMessage(String.format(Locale.getDefault(), getString(R.string.dialog_delete_confirm), deleteCount))
-            .setNegativeButton(R.string.no) { dialog, _ -> dialog.dismiss() }
-            .setPositiveButton(R.string.yes) { dialog, _ ->
-                presenter.onConfirmDelete()
-                dialog.dismiss()
-            }
-            .create()
-            .show()
+        DeleteDialog.newInstance(deleteCount) {
+            presenter.deleteFiles()
+        }.show(supportFragmentManager, DialogTags.DELETE)
     }
 
     override fun showCreateZipDialog() {
-        CreateZipDialog
-            .newInstance()
-            .show(supportFragmentManager, getString(R.string.create_zip))
+        CreateZipDialog.newInstance {
+            presenter.zip(it)
+        }.show(supportFragmentManager, getString(R.string.create_zip))
     }
 
-    override fun showPropertiesDialog() {
-        PropertiesDialog
-            .newInstance()
-            .show(supportFragmentManager, Constants.DialogTags.PROPERTIES)
+    override fun showPropertiesDialog(selectedCount: Int, totalSize: Int) {
+        PropertiesDialog.newInstance(selectedCount, totalSize)
+            .show(supportFragmentManager, DialogTags.PROPERTIES)
     }
 
     override fun showProgressDialog(title: String, maxProgress: Int) {
@@ -433,6 +417,7 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
             DialogInterface.BUTTON_NEGATIVE,
             getString(R.string.cancel)
         ) { _, _ ->
+            // TODO: Check if this stops ALL operations
             stopService(Intent(this, SourceTransferService::class.java))
         }
         progressDialog.setButton(
@@ -451,11 +436,7 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
         }
     }
 
-    override fun showUsageDialog() {
-        val loadedSources = presenter.sourceManager.sources.filter {
-            it.isFilesLoaded
-        }
-
+    override fun showUsageDialog(loadedSources: List<Source>) {
         val adapter = SourceUsageAdapter(loadedSources)
         val view = layoutInflater.inflate(R.layout.dialog_source_usage, null)
         val rv: RecyclerView = view.findViewById(R.id.rv_source_usage)
@@ -471,29 +452,20 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
             .show()
     }
 
-    override fun showLogoutDialog() {
-        val loggedInSources = mutableListOf<Source>()
-
-        for (fragment in sourcesPagerAdapter.fragments) {
-            if (fragment.source.isFilesLoaded &&
-                fragment.source.sourceType == SourceType.REMOTE) {
-                loggedInSources.add(fragment.source)
-            }
-        }
-
+    override fun showLogoutDialog(loggedInSources: List<Source>) {
         val logoutDialog = AlertDialog
             .Builder(this)
             .setNegativeButton(R.string.close) { dialog, _ -> dialog.dismiss() }
             .create()
 
-        val adapter = SourceLogoutAdapter(loggedInSources, object : LogoutListener {
+        val adapter = SourceLogoutAdapter(loggedInSources.toMutableList(), object : LogoutListener {
             override fun onLastLogout() {
                 logoutDialog.dismiss()
             }
         })
 
         val view = layoutInflater.inflate(R.layout.dialog_source_logout, null)
-        val rv: RecyclerView = view.findViewById(R.id.rv_source_logout)
+        val rv = view.findViewById<RecyclerView>(R.id.rv_source_logout)
 
         if (loggedInSources.isEmpty()) {
             logoutDialog.setMessage(getString(R.string.no_connected_sources))
@@ -507,19 +479,21 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
     }
 
     override fun showSortByDialog() {
-        val dialog = SortByDialog()
-        dialog.show(supportFragmentManager, Constants.DialogTags.SORT_BY)
+        SortByDialog.newInstance {
+            //initAllRecyclers()
+        }.show(supportFragmentManager, DialogTags.SORT_BY)
     }
 
     /**
      * Show the settings dialog
      */
     override fun showSettingsDialog() {
-        val dialog = SettingsDialog()
-        dialog.show(supportFragmentManager, Constants.DialogTags.SETTINGS)
+        SettingsDialog.newInstance {
+            //initAllRecyclers()
+        }.show(supportFragmentManager, DialogTags.SETTINGS)
     }
 
-    fun showErrorDialog(message: String?) {
+    private fun showErrorDialog(message: String?) {
         hideProgressDialog()
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_error)
@@ -572,7 +546,7 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
                     adapter.resetDataset()
                     adapter.notifyDataSetChanged()
                 } else {
-                    adapter.removeAllSourceExcept(selected)
+                    adapter.removeAllSourceExcept(SourceType.valueOf(selected).id)
                     adapter.notifyDataSetChanged()
                 }
             }
@@ -705,26 +679,15 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
         title = getString(R.string.app_name)
     }
 
-    /**
-     * Initializes recyclerviews for all logged in fragments due to a view layout change (Grid <-> List)
-     */
-    fun initAllRecyclers() {
-        for (fragment in sourcesPagerAdapter.fragments) {
-            if (fragment.source.isFilesLoaded) {
-                fragment.initRecyclerView()
-            }
-        }
-    }
-
     override fun refreshFileLists(operationId: Int) {
-        val sortRoot = SelectedFilesManager.getActionableDirectory(operationId) ?: return
-        TreeNode.sortTree(
-            sortRoot,
-            Comparators.resolveComparatorForPrefs(presenter.prefsManager)
-        )
-        for (fragment in sourcesPagerAdapter.fragments) {
-            fragment.refreshRecycler()
-        }
+//        val sortRoot = SelectedFilesManager.getActionableDirectory(operationId) ?: return
+//        TreeNode.sortTree(
+//            sortRoot,
+//            Comparators.resolveComparatorForPrefs(presenter.prefsManager)
+//        )
+//        for (fragment in sourcesPagerAdapter.fragments) {
+//            fragment.refreshRecycler()
+//        }
     }
 
     override fun popAllBreadCrumbs() {
@@ -774,4 +737,8 @@ class SourceActivity : AppCompatActivity(), SourceActivityContract.View, Corouti
 
     override fun showNoAppAvailableSnackBar() =
         Snackbar.make(viewPager, R.string.err_no_app_available, Snackbar.LENGTH_LONG).show()
+
+    override fun showFileExistsSnackBar() {
+        Snackbar.make(viewPager, R.string.folder_exists, Snackbar.LENGTH_LONG).show()
+    }
 }

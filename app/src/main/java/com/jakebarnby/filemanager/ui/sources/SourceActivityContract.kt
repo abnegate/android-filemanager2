@@ -6,8 +6,10 @@ import com.jakebarnby.filemanager.core.BasePresenter
 import com.jakebarnby.filemanager.managers.BillingManager
 import com.jakebarnby.filemanager.managers.ConnectionManager
 import com.jakebarnby.filemanager.managers.PreferenceManager
-import com.jakebarnby.filemanager.sources.models.SourceFile
-import com.jakebarnby.filemanager.sources.models.SourceManager
+import com.jakebarnby.filemanager.managers.SelectedFilesManager
+import com.jakebarnby.filemanager.models.Source
+import com.jakebarnby.filemanager.models.SourceFile
+import com.jakebarnby.filemanager.managers.SourceManager
 import com.jakebarnby.filemanager.util.TreeNode
 import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter
 
@@ -16,6 +18,7 @@ interface SourceActivityContract {
     interface Presenter : BasePresenter<View> {
 
         var sourceManager: SourceManager
+        var selectedFilesManager: SelectedFilesManager
         var prefsManager: PreferenceManager
         var billingManager: BillingManager
         var connectionManager: ConnectionManager
@@ -46,10 +49,13 @@ interface SourceActivityContract {
         fun onCopy()
         fun onPaste()
         fun onDelete()
-        fun onConfirmDelete()
+        fun deleteFiles()
         fun onCreateFolder()
+        fun createFolder(name: String)
         fun onRename()
+        fun rename(name: String, newName: String)
         fun onCreateZip()
+        fun zip(name: String)
         fun onChangeViewType()
         fun onShowProperties()
         fun onShowProgress()
@@ -88,15 +94,15 @@ interface SourceActivityContract {
         fun showOpeningDialog(path: String)
         fun showViewAsDialog()
         fun showCreateFolderDialog()
-        fun showRenameDialog()
+        fun showRenameDialog(currentFileName: String)
         fun showDeleteDialog(deleteCount: Int)
         fun showCreateZipDialog()
-        fun showPropertiesDialog()
+        fun showPropertiesDialog(selectedCount: Int, totalSize: Int)
         fun showProgressDialog(title: String, maxProgress: Int)
         fun isProgressShowing(): Boolean
         fun hideProgressDialog()
-        fun showUsageDialog()
-        fun showLogoutDialog()
+        fun showUsageDialog(loadedSources: List<Source>)
+        fun showLogoutDialog(loggedInSources: List<Source>)
         fun showSortByDialog()
         fun showSettingsDialog()
         fun showSearchDialog(results: List<TreeNode<SourceFile>>, sourceNames: List<String>)
@@ -111,9 +117,12 @@ interface SourceActivityContract {
         fun blurFileList()
         fun clearBlur()
 
+        fun startCreateFolderService(name: String)
+        fun startRenameService(newName: String)
         fun startDeleteService()
         fun startCopyService()
         fun startMoveService()
+        fun startZipService(name: String)
 
         fun refreshFileLists(operationId: Int)
         fun popAllBreadCrumbs()
@@ -129,6 +138,7 @@ interface SourceActivityContract {
         fun showNotEnoughSpaceSnackBar()
         fun showTooManySelectedSnackBar()
         fun showNoAppAvailableSnackBar()
+        fun showFileExistsSnackBar()
         fun setAppNameTitle()
     }
 }

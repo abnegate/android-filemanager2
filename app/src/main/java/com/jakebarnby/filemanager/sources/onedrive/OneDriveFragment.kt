@@ -3,7 +3,9 @@ package com.jakebarnby.filemanager.sources.onedrive
 import android.content.Intent
 import android.os.Bundle
 import androidx.core.os.bundleOf
+import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.ui.sources.SourceFragment
+import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Sources
 
 /**
@@ -13,22 +15,24 @@ class OneDriveFragment : SourceFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        source = OneDriveSource(Sources.ONEDRIVE, this)
+        presenter.source = OneDriveSource(presenter)
     }
 
     override fun onResume() {
         super.onResume()
-        (source as OneDriveSource).checkForAccessToken(this)
+        (presenter.source as OneDriveSource).checkForAccessToken(this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        (source as OneDriveSource).client?.handleInteractiveRequestRedirect(requestCode, resultCode, data)
+        (presenter.source as OneDriveSource).client?.handleInteractiveRequestRedirect(requestCode, resultCode, data)
     }
 
     companion object {
-        fun newInstance(sourceName: String): SourceFragment =
+        fun newInstance(sourceId: Int): SourceFragment =
             OneDriveFragment().apply {
-                arguments = bundleOf("TITLE" to sourceName)
+                arguments = bundleOf(
+                    Constants.FRAGMENT_TITLE to SourceType.values()[sourceId]
+                )
             }
     }
 }

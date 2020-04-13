@@ -1,6 +1,7 @@
 package com.jakebarnby.filemanager.splash
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -11,6 +12,7 @@ import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.tutorial.FileManagerTutorialActivity
 import com.jakebarnby.filemanager.ui.sources.SourceActivity
 import com.jakebarnby.filemanager.util.Constants
+import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.GooglePlay
 
 /**
@@ -22,7 +24,11 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        if (!Preferences.getBoolean(this, Constants.Prefs.HIDE_ADS_KEY, false)) {
+        if (!getSharedPreferences(
+                Prefs.PREFS,
+                Context.MODE_PRIVATE
+            ).getBoolean(Prefs.HIDE_ADS_KEY, false)
+        ) {
             MobileAds.initialize(this, Constants.Ads.ADMOB_ID)
         }
 
@@ -75,7 +81,10 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun goToSources() {
-        if (!Preferences.getBoolean(this, Constants.Prefs.TUT_SEEN_KEY, false)) {
+        if (!getSharedPreferences(
+                Prefs.PREFS,
+                Context.MODE_PRIVATE
+            ).getBoolean(Prefs.TUT_SEEN_KEY, false)) {
             startActivity(Intent(this, FileManagerTutorialActivity::class.java))
         } else {
             startActivity(Intent(this, SourceActivity::class.java))

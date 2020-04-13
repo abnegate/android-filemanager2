@@ -13,9 +13,9 @@ import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.glide.GlideApp
 import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.managers.SelectedFilesManager
-import com.jakebarnby.filemanager.sources.models.Source
-import com.jakebarnby.filemanager.sources.models.SourceFile
-import com.jakebarnby.filemanager.sources.models.SourceType
+import com.jakebarnby.filemanager.models.Source
+import com.jakebarnby.filemanager.models.SourceFile
+import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.ui.adapters.FileAdapter.FileViewHolder
 import com.jakebarnby.filemanager.util.Comparators
 import com.jakebarnby.filemanager.util.Constants.Prefs
@@ -27,6 +27,7 @@ import java.io.File
  */
 abstract class FileAdapter(
     private val source: Source,
+    private val selectedFilesManager: SelectedFilesManager,
     private val prefs: PreferenceManager
 ) : RecyclerView.Adapter<FileViewHolder>() {
 
@@ -35,12 +36,12 @@ abstract class FileAdapter(
     private var showHiddenFiles: Boolean
 
     init {
-        showHiddenFiles = prefs.getBoolean(Prefs.HIDDEN_FOLDER_KEY, false)
+        showHiddenFiles = prefs.getBoolean(Prefs.HIDDEN_FILES_KEY, false)
         getVisibileFiles(source.rootNode)
     }
 
     private fun getVisibileFiles(currentDir: TreeNode<SourceFile>): TreeNode<SourceFile> {
-        showHiddenFiles = prefs.getBoolean(Prefs.HIDDEN_FOLDER_KEY, false)
+        showHiddenFiles = prefs.getBoolean(Prefs.HIDDEN_FILES_KEY, false)
 
         var currentDirChildren = currentDir.children
         if (!showHiddenFiles) {
@@ -106,8 +107,8 @@ abstract class FileAdapter(
                 selectionCheckbox.startAnimation(translate)
             }
 
-            if (SelectedFilesManager.operationCount > 0 &&
-                SelectedFilesManager.currentSelectedFiles.contains(currentDir)) {
+            if (selectedFilesManager.operationCount > 0 &&
+                selectedFilesManager.currentSelectedFiles.contains(currentDir)) {
                 selectionCheckbox.isChecked = true
             }
         }
@@ -116,7 +117,7 @@ abstract class FileAdapter(
             GlideApp
                 .with(itemView)
                 .load(
-                    if (currentDir.data.sourceType == SourceType.LOCAL) {
+                    if (currentDir.data.sourceId == SourceType.LOCAL.id) {
                         File(currentDir.data.thumbnailLink)
                     } else {
                         currentDir.data.thumbnailLink

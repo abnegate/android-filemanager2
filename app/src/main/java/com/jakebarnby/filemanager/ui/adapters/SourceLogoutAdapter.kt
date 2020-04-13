@@ -8,7 +8,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.jakebarnby.filemanager.R
-import com.jakebarnby.filemanager.sources.models.Source
+import com.jakebarnby.filemanager.models.Source
+import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.ui.adapters.SourceLogoutAdapter.LogoutViewHolder
 import com.jakebarnby.filemanager.util.Utils
 
@@ -19,6 +20,7 @@ class SourceLogoutAdapter(
     private val sources: MutableList<Source>,
     private val listener: LogoutListener
 ) : RecyclerView.Adapter<LogoutViewHolder>() {
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LogoutViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.view_logout_list, parent, false)
         return LogoutViewHolder(view)
@@ -42,8 +44,8 @@ class SourceLogoutAdapter(
 
             val source = sources[position]
 
-            logo.setImageResource(Utils.resolveLogoId(source.sourceName))
-            sourceName.text = String.format("%s", source.sourceName)
+            logo.setImageResource(Utils.resolveLogoId(source.sourceId))
+            sourceName.text = String.format("%s", SourceType.values()[source.sourceId].sourceName)
             logout.setText(if (source.isLoggedIn) R.string.logout else R.string.connect)
             logout.setOnClickListener { view: View ->
                 if (!source.isLoggedIn) {

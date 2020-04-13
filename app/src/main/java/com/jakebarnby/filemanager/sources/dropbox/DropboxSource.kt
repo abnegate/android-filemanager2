@@ -7,27 +7,32 @@ import com.dropbox.core.android.Auth
 import com.dropbox.core.v2.DbxClientV2
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakebarnby.filemanager.managers.PreferenceManager
-import com.jakebarnby.filemanager.sources.models.Source
-import com.jakebarnby.filemanager.sources.models.SourceType
+import com.jakebarnby.filemanager.models.Source
+import com.jakebarnby.filemanager.models.SourceConnectionType
+import com.jakebarnby.filemanager.models.SourceType
+import com.jakebarnby.filemanager.ui.sources.SourceFragmentContract
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Constants.Sources
 import com.jakebarnby.filemanager.util.Logger
+import javax.inject.Inject
 
 /**
  * Created by jakebarnby on 2/08/17.
  */
 class DropboxSource(
-    sourceName: String,
-    prefsManager: PreferenceManager
+    private val presenter: SourceFragmentContract.Presenter
 ) : Source(
-    SourceType.REMOTE,
-    sourceName,
-    prefsManager
+    SourceConnectionType.REMOTE,
+    SourceType.DROPBOX.id,
+    presenter.prefsManager
 ) {
 
+    @Inject
+    lateinit var dropboxClient: DropboxClient
+
     override fun authenticate(context: Context) {
-        if (prefsManager.hasSourceToken(sourceName)) {
+        if (prefsManager.hasSourceToken(sourceId)) {
             loadFiles(context)
         } else {
             Auth.startOAuth2Authentication(context, Sources.DROPBOX_CLIENT_ID)
@@ -36,7 +41,7 @@ class DropboxSource(
 
     override fun loadFiles(context: Context) {
         if (!isFilesLoaded) {
-            DropboxLoaderTask(this)
+            DropboxLoaderTask(this, presenter)
                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "")
         }
     }
@@ -45,18 +50,17 @@ class DropboxSource(
         if (!isLoggedIn) {
             return
         }
-        DropboxFactory.logout(context)
+        dropboxClient.logout(context)
 
         isLoggedIn = false
         isFilesLoaded = false
 
-        sourceListener.onLogout()
+        presenter.onLogout()
 
         Logger.logFirebaseEvent(
             FirebaseAnalytics.getInstance(context),
             Constants.Analytics.EVENT_LOGOUT_DROPBOX
         )
-
     }
 
     /**
@@ -68,7 +72,7 @@ class DropboxSource(
             return
         }
 
-        DropboxFactory.client = DbxClientV2(
+        DropboxClient.client = DbxClientV2(
             DbxRequestConfig
                 .newBuilder("FileManagerAndroid/1.0")
                 .build(),

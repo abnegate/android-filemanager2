@@ -1,8 +1,9 @@
-package com.jakebarnby.filemanager.sources
+package com.jakebarnby.filemanager.workers
 
 import android.os.AsyncTask
-import com.jakebarnby.filemanager.sources.models.Source
-import com.jakebarnby.filemanager.sources.models.SourceFile
+import com.jakebarnby.filemanager.models.Source
+import com.jakebarnby.filemanager.models.SourceFile
+import com.jakebarnby.filemanager.ui.sources.SourceFragmentContract
 import com.jakebarnby.filemanager.util.TreeNode
 
 /**
@@ -10,7 +11,7 @@ import com.jakebarnby.filemanager.util.TreeNode
  */
 abstract class LoaderTask(
     protected var source: Source,
-    protected var sourceListener: SourceListener
+    protected var presenter: SourceFragmentContract.Presenter
 ) : AsyncTask<String, Void?, TreeNode<SourceFile>>() {
 
     protected lateinit var rootTreeNode: TreeNode<SourceFile>
@@ -23,7 +24,7 @@ abstract class LoaderTask(
 
     override fun onPreExecute() {
         super.onPreExecute()
-        sourceListener.onLoadStarted()
+        presenter.onLoadStarted()
     }
 
     override fun doInBackground(vararg params: String): TreeNode<SourceFile>? {
@@ -36,8 +37,7 @@ abstract class LoaderTask(
         if (success) {
             source.rootNode = fileTree
             source.isFilesLoaded = true
-            sourceListener.onLoadComplete(fileTree)
+            presenter.onLoadComplete(fileTree)
         }
     }
-
 }

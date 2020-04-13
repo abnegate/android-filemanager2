@@ -6,10 +6,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.managers.PreferenceManager
-import com.jakebarnby.filemanager.sources.models.Source
-import com.jakebarnby.filemanager.sources.models.SourceFile
+import com.jakebarnby.filemanager.managers.SelectedFilesManager
+import com.jakebarnby.filemanager.models.Source
+import com.jakebarnby.filemanager.models.SourceFile
+import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.util.Constants
-import com.jakebarnby.filemanager.util.Constants.Sources
 import com.jakebarnby.filemanager.util.TreeNode
 import com.jakebarnby.filemanager.util.Utils
 import java.util.*
@@ -19,8 +20,9 @@ import java.util.*
  */
 class FileDetailedListAdapter(
     source: Source,
+    selectedFilesManager: SelectedFilesManager,
     prefs: PreferenceManager
-) : FileAdapter(source, prefs) {
+) : FileAdapter(source, selectedFilesManager, prefs) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -44,10 +46,11 @@ class FileDetailedListAdapter(
                     Locale.getDefault(),
                     "%.2f %s",
                     currentDir.data.size / Constants.BYTES_TO_MEGABYTE,
-                    " MB")
+                    "MB"
+                )
             }
 
-            if (currentDir.data.sourceName != Sources.DROPBOX) {
+            if (currentDir.data.sourceId != SourceType.DROPBOX.id) {
                 val displayTime = Utils.getDisplayStringFromDate(currentDir.data.modifiedTime)
                 modifiedDateText.text = displayTime
             }

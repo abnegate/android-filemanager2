@@ -1,25 +1,47 @@
 package com.jakebarnby.filemanager.sources.onedrive
 
-import android.content.Context
-import com.jakebarnby.filemanager.sources.models.SourceStorageStats
+import com.jakebarnby.filemanager.managers.PreferenceManager
+import com.jakebarnby.filemanager.models.StorageInfo
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Constants.Sources
 import com.jakebarnby.filemanager.util.Utils
 import com.microsoft.graph.core.ClientException
-import com.microsoft.graph.extensions.DriveItem
-import com.microsoft.graph.extensions.Folder
-import com.microsoft.graph.extensions.IGraphServiceClient
+import com.microsoft.graph.extensions.*
 import com.microsoft.graph.http.GraphServiceException
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import javax.inject.Inject
 
 /**
  * Created by Jake on 6/9/2017.
  */
-object OneDriveFactory {
+class OneDriveClient @Inject constructor(
+    var prefsManager: PreferenceManager
+) {
 
-    var service: IGraphServiceClient? = null
+    companion object {
+        var client: IGraphServiceClient? = null
+    }
+
+    fun getFilesByParentId(id: String) =
+        client
+            ?.me
+            ?.drive
+            ?.getItems(id)
+            ?.children
+            ?.buildRequest()
+            ?.select("id,name,webUrl,folder,size,createdDateTime,lastModifiedDateTime")
+            ?.expand("thumbnails")
+            ?.get()
+
+    fun getNextPage(collection: IDriveItemCollectionPage?) =
+        collection
+            ?.nextPage
+            ?.buildRequest()
+            ?.select("id,name,webUrl,folder,size,createdDateTime,lastModifiedDateTime")
+            ?.expand("thumbnails")
+            ?.get()
 
     /**
      *
@@ -36,7 +58,7 @@ object OneDriveFactory {
     ): File? {
         val file = File(destinationPath, filename)
         try {
-            service
+            client
                 ?.me
                 ?.drive
                 ?.getItems(id)
@@ -71,7 +93,7 @@ object OneDriveFactory {
             FileInputStream(file).use {
                 val buffer = ByteArray(file.length().toInt())
                 it.read(buffer)
-                return service
+                return client
                     ?.me
                     ?.drive
                     ?.getItems(parentId)
@@ -91,7 +113,7 @@ object OneDriveFactory {
      */
     @Throws(GraphServiceException::class)
     fun deleteFile(driveId: String?) {
-        service
+        client
             ?.me
             ?.drive
             ?.getItems(driveId)
@@ -113,7 +135,7 @@ object OneDriveFactory {
             this.folder = Folder()
         }
 
-        return service
+        return client
             ?.me
             ?.drive
             ?.getItems(parentId)
@@ -130,7 +152,7 @@ object OneDriveFactory {
         val item = DriveItem().apply {
             name = newName
         }
-        return service
+        return client
             ?.me
             ?.drive
             ?.getItems(itemId)
@@ -138,10 +160,10 @@ object OneDriveFactory {
             ?.patch(item)
     }
 
-    val storageStats: SourceStorageStats?
+    val storageInfo: StorageInfo?
         get() {
             try {
-                val quota = service
+                val quota = client
                     ?.me
                     ?.drive
                     ?.buildRequest()
@@ -149,7 +171,7 @@ object OneDriveFactory {
                     ?.get()
                     ?.quota
 
-                return SourceStorageStats().apply {
+                return StorageInfo().apply {
                     totalSpace += quota?.total ?: 0
                     usedSpace += quota?.used ?: 0
                     freeSpace += quota?.remaining ?: 0
@@ -168,8 +190,8 @@ object OneDriveFactory {
         return newName
     }
 
-    fun logout(context: Context) {
-        Preferences.savePref(context, Prefs.ONEDRIVE_TOKEN_KEY, null as String?)
-        Preferences.savePref(context, Prefs.ONEDRIVE_NAME_KEY, null as String?)
+    fun logout() {
+        prefsManager.savePref(Prefs.ONEDRIVE_TOKEN_KEY, null as String?)
+        prefsManager.savePref(Prefs.ONEDRIVE_NAME_KEY, null as String?)
     }
 }

@@ -9,10 +9,11 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.managers.PreferenceManager
+import com.jakebarnby.filemanager.models.ViewType
 import com.jakebarnby.filemanager.ui.sources.SourceActivity
-import com.jakebarnby.filemanager.util.Constants
+import com.jakebarnby.filemanager.util.Constants.DIALOG_ON_POSITIVE_KEY
+import com.jakebarnby.filemanager.util.Constants.DIALOG_TITLE_KEY
 import com.jakebarnby.filemanager.util.Constants.Prefs
-import com.jakebarnby.filemanager.util.Constants.ViewType
 
 /**
  * Created by Jake on 5/31/2017.
@@ -22,12 +23,14 @@ import com.jakebarnby.filemanager.util.Constants.ViewType
 class ViewAsDialog : DialogFragment() {
 
     companion object {
-        fun newInstance() =
-            ViewAsDialog().apply {
-                arguments = bundleOf(
-                    Constants.DIALOG_TITLE_KEY to getString(R.string.rename)
-                )
-            }
+        fun newInstance(
+            onPositive: () -> Unit
+        ) = ViewAsDialog().apply {
+            arguments = bundleOf(
+                DIALOG_TITLE_KEY to getString(R.string.action_viewas),
+                DIALOG_ON_POSITIVE_KEY to onPositive
+            )
+        }
     }
 
     private val prefs = PreferenceManager(context!!.getSharedPreferences(
@@ -36,24 +39,28 @@ class ViewAsDialog : DialogFragment() {
     ))
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val onPositive = arguments
+            ?.getSerializable(DIALOG_ON_POSITIVE_KEY) as? () -> Unit
+
         val options = arrayOf(
             getString(R.string.list),
             getString(R.string.detailed_list),
             getString(R.string.grid)
         )
-
-        val viewAsType = prefs.getInt(
+        val currentViewType = prefs.getInt(
             Prefs.VIEW_TYPE_KEY,
-            ViewType.LIST
+            ViewType.LIST.value
         )
+        var selectedIndex = currentViewType
 
         return AlertDialog.Builder(activity!!)
             .setTitle(R.string.action_viewas)
-            .setSingleChoiceItems(options, viewAsType) { _, which ->
-                prefs.savePref(Prefs.VIEW_TYPE_KEY, which)
+            .setSingleChoiceItems(options, currentViewType) { _, which ->
+                selectedIndex = which
             }
             .setPositiveButton(R.string.ok) { _, _ ->
-                (activity as? SourceActivity)?.initAllRecyclers()
+                prefs.savePref(Prefs.VIEW_TYPE_KEY, selectedIndex)
+                onPositive?.invoke()
                 dismiss()
             }
             .setNegativeButton(R.string.cancel) { dialog: DialogInterface, id ->

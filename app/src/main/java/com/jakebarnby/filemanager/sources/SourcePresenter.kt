@@ -1,21 +1,20 @@
 package com.jakebarnby.filemanager.sources
 
-import com.jakebarnby.filemanager.managers.BillingManager
-import com.jakebarnby.filemanager.managers.ConnectionManager
-import com.jakebarnby.filemanager.managers.PreferenceManager
-import com.jakebarnby.filemanager.managers.SelectedFilesManager
+import com.jakebarnby.filemanager.managers.*
 import com.jakebarnby.filemanager.models.FileAction
-import com.jakebarnby.filemanager.sources.models.SourceFile
-import com.jakebarnby.filemanager.sources.models.SourceManager
-import com.jakebarnby.filemanager.sources.models.SourceType
+import com.jakebarnby.filemanager.models.SourceConnectionType
+import com.jakebarnby.filemanager.models.SourceFile
+import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.ui.sources.SourceActivityContract
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.TreeNode
 import java.io.File
+import javax.inject.Inject
 
-class SourcePresenter(
+class SourcePresenter @Inject constructor(
     override var sourceManager: SourceManager,
+    override var selectedFilesManager: SelectedFilesManager,
     override var prefsManager: PreferenceManager,
     override var billingManager: BillingManager,
     override var connectionManager: ConnectionManager
@@ -80,14 +79,14 @@ class SourcePresenter(
     }
 
     override fun onRemoveLocalSource(roothPath: String) {
-        for (i in sourceManager.sources.indices) {
-            val source = sourceManager.sources[i]
+        for (sourceType: SourceType in SourceType.values()) {
+            val source = sourceManager.sources[sourceType.id]
 
-            if (source.sourceType == SourceType.LOCAL &&
+            if (source?.sourceConnectionType == SourceConnectionType.LOCAL &&
                 source.isFilesLoaded &&
                 roothPath.contains(source.rootNode.data.path)) {
 
-                view?.removeLocalSourceView(i)
+                view?.removeLocalSourceView(sourceType.id)
             }
         }
     }
@@ -98,8 +97,8 @@ class SourcePresenter(
         }
         sourceManager.activeSource.isMultiSelectEnabled = true
 
-        if (SelectedFilesManager.operationCount == 0) {
-            SelectedFilesManager.startNewSelection()
+        if (selectedFilesManager.operationCount == 0) {
+            selectedFilesManager.startNewSelection()
         }
     }
 
@@ -122,8 +121,8 @@ class SourcePresenter(
     }
 
     override fun onCut() {
-        if (SelectedFilesManager.currentSelectedFiles.size > 0) {
-            sourceManager.addFileAction(SelectedFilesManager.operationCount, FileAction.CUT)
+        if (selectedFilesManager.currentSelectedFiles.size > 0) {
+            sourceManager.addFileAction(selectedFilesManager.operationCount, FileAction.CUT)
             view?.showCutSnackBar()
         } else {
             view?.showNoSelectionSnackBar()
@@ -132,8 +131,8 @@ class SourcePresenter(
     }
 
     override fun onCopy() {
-        if (SelectedFilesManager.currentSelectedFiles.size > 0) {
-            sourceManager.addFileAction(SelectedFilesManager.operationCount, FileAction.COPY)
+        if (selectedFilesManager.currentSelectedFiles.size > 0) {
+            sourceManager.addFileAction(selectedFilesManager.operationCount, FileAction.COPY)
             view?.showCopiedSnackBar()
         } else {
             view?.showNoSelectionSnackBar()
@@ -146,18 +145,18 @@ class SourcePresenter(
             return
         }
 
-        if (sourceManager.getFileAction(SelectedFilesManager.operationCount) != null) {
+        if (sourceManager.getFileAction(selectedFilesManager.operationCount) != null) {
             sourceManager.activeSource.isMultiSelectEnabled = false
 
             view?.setAppNameTitle()
             view?.toggleContextMenu(false)
 
-            SelectedFilesManager.addActionableDirectory(
-                SelectedFilesManager.operationCount,
+            selectedFilesManager.addActionableDirectory(
+                selectedFilesManager.operationCount,
                 sourceManager.activeSource.currentDirectory
             )
 
-            val curAction = sourceManager.getFileAction(SelectedFilesManager.operationCount)
+            val curAction = sourceManager.getFileAction(selectedFilesManager.operationCount)
             if (curAction == FileAction.COPY) {
                 view?.startCopyService()
             } else if (curAction == FileAction.CUT) {
@@ -165,9 +164,9 @@ class SourcePresenter(
             }
 
             sourceManager.activeSource
-                .decreaseFreeSpace(SelectedFilesManager.currentCopySize)
+                .decreaseFreeSpace(selectedFilesManager.currentCopySize)
 
-            SelectedFilesManager.startNewSelection()
+            selectedFilesManager.startNewSelection()
         }
     }
 
@@ -176,8 +175,8 @@ class SourcePresenter(
             view?.showNoConnectionSnackBar()
             return false
         }
-        if (sourceManager.activeSource.sourceType == SourceType.LOCAL &&
-            sourceManager.activeSource.sourceName != Constants.Sources.LOCAL) {
+        if (sourceManager.activeSource.sourceConnectionType == SourceConnectionType.LOCAL &&
+            sourceManager.activeSource.sourceId != SourceType.LOCAL.id) {
             view?.showUnwritableDestinationSnackBar()
             return false
         }
@@ -189,7 +188,7 @@ class SourcePresenter(
             return false
         }
 
-        val copySize = SelectedFilesManager.currentCopySize
+        val copySize = selectedFilesManager.currentCopySize
         if (copySize > sourceManager.activeSource.freeSpace) {
             view?.showNotEnoughSpaceSnackBar()
             return false
@@ -198,7 +197,7 @@ class SourcePresenter(
     }
 
     override fun onDelete() {
-        val size = SelectedFilesManager.currentSelectedFiles.size
+        val size = selectedFilesManager.currentSelectedFiles.size
         if (size < 0) {
             view?.showNoSelectionSnackBar()
             return
@@ -206,12 +205,15 @@ class SourcePresenter(
         view?.showDeleteDialog(size)
     }
 
-    override fun onConfirmDelete() {
+    override fun deleteFiles() {
         val activeDirectory = sourceManager.activeSource.currentDirectory
-        sourceManager.addFileAction(SelectedFilesManager.operationCount, FileAction.DELETE)
+        sourceManager.addFileAction(
+            selectedFilesManager.operationCount,
+            FileAction.DELETE
+        )
 
-        SelectedFilesManager.addActionableDirectory(
-            SelectedFilesManager.operationCount,
+        selectedFilesManager.addActionableDirectory(
+            selectedFilesManager.operationCount,
             activeDirectory
         )
 
@@ -222,9 +224,9 @@ class SourcePresenter(
         view?.startDeleteService()
 
         sourceManager.activeSource
-            .increaseFreeSpace(SelectedFilesManager.currentCopySize)
+            .increaseFreeSpace(selectedFilesManager.currentCopySize)
 
-        SelectedFilesManager.startNewSelection()
+        selectedFilesManager.startNewSelection()
     }
 
     override fun onBack() {
@@ -234,7 +236,7 @@ class SourcePresenter(
             view?.toggleContextMenu(false)
             view?.setAppNameTitle()
 
-            SelectedFilesManager.currentSelectedFiles.clear()
+            selectedFilesManager.currentSelectedFiles.clear()
         } else if (sourceManager.activeSource.isLoggedIn) {
 //            val previousPosition = sourceManager.activeSource
 //                .currentDirectory.parent?.data?.positionToRestore ?: 0
@@ -253,7 +255,7 @@ class SourcePresenter(
     }
 
     override fun onSourceSelected(position: Int) {
-        sourceManager.activeSource = sourceManager.sources[position]
+        sourceManager.activeSource = sourceManager.sources[position] ?: return
     }
 
     override fun onChangeViewType() {
@@ -274,15 +276,33 @@ class SourcePresenter(
         }
 
         sourceManager.addFileAction(
-            SelectedFilesManager.operationCount,
+            selectedFilesManager.operationCount,
             FileAction.NEW_FOLDER
         )
-        SelectedFilesManager.addActionableDirectory(
-            SelectedFilesManager.operationCount,
+        selectedFilesManager.addActionableDirectory(
+            selectedFilesManager.operationCount,
             sourceManager.activeSource.currentDirectory
         )
 
         view?.showCreateFolderDialog()
+    }
+
+    override fun createFolder(name: String) {
+        val activeDirectory = selectedFilesManager.getActionableDirectory(
+            selectedFilesManager.operationCount
+        )
+        for (file in activeDirectory?.children ?: emptyList<TreeNode<SourceFile>>()) {
+            if (!file.data.isDirectory) {
+                continue
+            }
+            if (file.data.name == name) {
+                view?.showFileExistsSnackBar()
+                return
+            }
+        }
+        view?.startCreateFolderService(name)
+
+        selectedFilesManager.startNewSelection()
     }
 
     override fun onRename() {
@@ -296,7 +316,7 @@ class SourcePresenter(
 
         disableAllMultiSelect()
 
-        val size = SelectedFilesManager.currentSelectedFiles.size
+        val size = selectedFilesManager.currentSelectedFiles.size
         if (size == 0) {
             view?.showNoSelectionSnackBar()
             return
@@ -306,15 +326,39 @@ class SourcePresenter(
         }
 
         sourceManager.addFileAction(
-            SelectedFilesManager.operationCount,
+            selectedFilesManager.operationCount,
             FileAction.RENAME
         )
-        SelectedFilesManager.addActionableDirectory(
-            SelectedFilesManager.operationCount,
+        selectedFilesManager.addActionableDirectory(
+            selectedFilesManager.operationCount,
             sourceManager.activeSource.currentDirectory
         )
 
-        view?.showRenameDialog()
+        val currentName = selectedFilesManager
+            .currentSelectedFiles[0].data.name
+
+        view?.showRenameDialog(currentName)
+    }
+
+    override fun rename(name: String, newName: String) {
+        val activeDirectory = sourceManager.activeSource.currentDirectory
+
+        val nameToSet = if (name.lastIndexOf('.') > 0) {
+            newName + name.substring(name.lastIndexOf('.'))
+        } else {
+            newName
+        }
+
+        for (file in activeDirectory.children) {
+            if (file.data.name.equals(nameToSet, false)) {
+                view?.showFileExistsSnackBar()
+                return
+            }
+        }
+
+        view?.startRenameService(nameToSet)
+
+        selectedFilesManager.startNewSelection()
     }
 
     override fun onCreateZip() {
@@ -336,25 +380,44 @@ class SourcePresenter(
         disableAllMultiSelect()
 
         sourceManager.addFileAction(
-            SelectedFilesManager.operationCount,
+            selectedFilesManager.operationCount,
             FileAction.NEW_ZIP
         )
 
-        SelectedFilesManager.addActionableDirectory(
-            SelectedFilesManager.operationCount,
+        selectedFilesManager.addActionableDirectory(
+            selectedFilesManager.operationCount,
             sourceManager.activeSource.currentDirectory
         )
 
         view?.showCreateZipDialog()
     }
 
+    override fun zip(name: String) {
+        val activeDirectory = selectedFilesManager
+            .getActionableDirectory(selectedFilesManager.operationCount)
+
+        for (file in activeDirectory?.children ?: emptyList<TreeNode<SourceFile>>()) {
+            if (file.data.name == name) {
+                view?.showFileExistsSnackBar()
+                return
+            }
+        }
+
+        view?.startZipService(name)
+        selectedFilesManager.startNewSelection()
+    }
+
     override fun onShowProperties() {
-        val size: Int = SelectedFilesManager.currentSelectedFiles.size
-        if (size == 0) {
+        val selectedCount = selectedFilesManager.currentSelectedFiles.size
+        if (selectedCount == 0) {
             view?.showNoSelectionSnackBar()
             return
         }
-        view?.showPropertiesDialog()
+        val selectedSize = selectedFilesManager.currentSelectedFiles.sumBy {
+            it.data.size.toInt()
+        }
+
+        view?.showPropertiesDialog(selectedCount, selectedSize)
     }
 
     override fun onShowProgress() {
@@ -362,40 +425,47 @@ class SourcePresenter(
     }
 
     override fun onShowUsage() {
-        view?.showUsageDialog()
+        val loadedSources = sourceManager.sources.filter {
+            it.isFilesLoaded
+        }
+
+        view?.showUsageDialog(loadedSources)
     }
 
     override fun onLogout() {
-        TODO("Not yet implemented")
+        val loggedInSources = sourceManager.sources.filter {
+            it.isFilesLoaded && it.sourceConnectionType == SourceConnectionType.REMOTE
+        }
+        view?.showLogoutDialog(loggedInSources)
     }
 
     override fun onSortBy() {
-        TODO("Not yet implemented")
+        view?.showSortByDialog()
     }
 
     override fun onShowSettings() {
-        TODO("Not yet implemented")
+        view?.showSettingsDialog()
     }
 
     override fun onPrepareContextMenu() {
-        if (sourceManager.getFileAction(SelectedFilesManager.operationCount) == null) {
+        if (sourceManager.getFileAction(selectedFilesManager.operationCount) == null) {
             view?.hidePasteMenuItem()
         }
 
-        if (SelectedFilesManager.currentSelectedFiles.size > 1) {
+        if (selectedFilesManager.currentSelectedFiles.size > 1) {
             view?.hideRenameMenuItem()
         }
     }
 
     override fun onSearch(query: String) {
         val allResults = mutableListOf<TreeNode<SourceFile>>()
-        val sourceNames = mutableListOf<String>()
+        val sourceIds = mutableListOf<String>()
 
         for (source in sourceManager.sources) {
             val results = TreeNode.searchForChildren(source.rootNode, query)
             if (results.isNotEmpty()) {
                 allResults.addAll(results)
-                sourceNames.add(source.sourceName)
+                sourceIds.add(SourceType.values()[source.sourceId].sourceName)
             }
         }
 
@@ -403,12 +473,12 @@ class SourcePresenter(
             node1.data.name.compareTo(node2.data.name, true)
         })
 
-        view?.showSearchDialog(allResults, sourceNames)
+        view?.showSearchDialog(allResults, sourceIds)
     }
 
     override fun onNavigateToFile(fileNode: TreeNode<SourceFile>) {
         for (i in sourceManager.sources.indices) {
-            if (sourceManager.sources[i].sourceName != fileNode.data.sourceName) {
+            if (sourceManager.sources[i].sourceId != fileNode.data.sourceId) {
                 continue
             }
 

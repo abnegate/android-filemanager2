@@ -9,7 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.dinuscxj.progressbar.CircleProgressBar
 import com.jakebarnby.filemanager.R
-import com.jakebarnby.filemanager.sources.models.Source
+import com.jakebarnby.filemanager.models.Source
 import com.jakebarnby.filemanager.ui.adapters.SourceUsageAdapter.UsageViewHolder
 import com.jakebarnby.filemanager.util.Constants
 import java.util.*
@@ -43,7 +43,7 @@ class SourceUsageAdapter(
         private val sourceUsage: TextView = itemView.findViewById(R.id.txt_space_consumption)
 
         fun bindHolder(source: Source) {
-            sourceName.text = String.format("%s", source.sourceName)
+            sourceName.text = String.format("%s", source.sourceId)
             sourceUsage.text = constructUsageString(source)
             animateProgress(percentBar, source.usedSpacePercent)
         }

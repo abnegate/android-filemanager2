@@ -1,20 +1,26 @@
 package com.jakebarnby.filemanager.sources.onedrive
 
-import com.jakebarnby.filemanager.sources.LoaderTask
-import com.jakebarnby.filemanager.sources.models.Source
-import com.jakebarnby.filemanager.sources.models.SourceFile
+import com.jakebarnby.filemanager.workers.LoaderTask
+import com.jakebarnby.filemanager.models.Source
+import com.jakebarnby.filemanager.models.SourceFile
+import com.jakebarnby.filemanager.sources.dropbox.DropboxClient
+import com.jakebarnby.filemanager.ui.sources.SourceFragmentContract
 import com.jakebarnby.filemanager.util.TreeNode
 import com.microsoft.graph.extensions.DriveItem
 import com.microsoft.graph.http.GraphServiceException
+import javax.inject.Inject
 
 /**
  * Created by Jake on 8/2/2017.
  */
 class OneDriveLoaderTask(
     source: Source,
-    listener: SourceListener,
+    presenter: SourceFragmentContract.Presenter,
     private val rootDriveItem: DriveItem
-) : LoaderTask(source, listener) {
+) : LoaderTask(source, presenter) {
+
+    @Inject
+    lateinit var oneDriveClient: OneDriveClient
 
     override fun initRootNode(path: String): Any? {
         val rootSourceFile: SourceFile = OneDriveFile(rootDriveItem)
@@ -22,7 +28,7 @@ class OneDriveLoaderTask(
         rootTreeNode = TreeNode(rootSourceFile)
         currentNode = rootTreeNode
         source.currentDirectory = rootTreeNode
-        source.setQuotaInfo(OneDriveFactory.storageStats)
+        source.setQuotaInfo(oneDriveClient.storageInfo)
         return rootDriveItem
     }
 
@@ -32,39 +38,36 @@ class OneDriveLoaderTask(
                 return rootTreeNode
             }
 
-            val items = OneDriveFactory.service
-                ?.me
-                ?.drive
-                ?.getItems(rootObject.id)
-                ?.children
-                ?.buildRequest()
-                ?.select("id,name,webUrl,folder,size,createdDateTime,lastModifiedDateTime")
-                ?.expand("thumbnails")
-                ?.get()
-
-            val pageItems = items?.currentPage
             var dirSize = 0L
+            var items = oneDriveClient.getFilesByParentId(rootObject.id)
 
-            if (pageItems == null) {
+            if (items?.currentPage == null) {
                 return rootTreeNode
             }
-            for (file in pageItems) {
-                val sourceFile = OneDriveFile(file)
-                if (file.folder == null) {
-                    dirSize += file.size
-                    currentNode.addChild(sourceFile)
-                    continue
-                }
 
-                currentNode.addChild(sourceFile)
-                currentNode = currentNode.children[currentNode.children.size - 1]
-                readFileTree(file)
-                currentNode.parent?.data?.addSize(currentNode.data.size)
-                currentNode = currentNode.parent!!
+            while (items != null) {
+                val pageItems = items.currentPage
+
+                for (file in pageItems) {
+                    val sourceFile = OneDriveFile(file)
+                    if (file.folder == null) {
+                        dirSize += file.size
+                        currentNode.addChild(sourceFile)
+                        continue
+                    }
+
+                    currentNode.addChild(sourceFile)
+                    currentNode = currentNode.children[currentNode.children.size - 1]
+                    readFileTree(file)
+
+                    currentNode.parent!!.data.size += currentNode.data.size
+                    currentNode = currentNode.parent!!
+                }
+                items = oneDriveClient.getNextPage(items)
             }
-            currentNode.data.addSize(dirSize)
+            currentNode.data.size += dirSize
         } catch (e: GraphServiceException) {
-            sourceListener.onLoadError(if (e.message != null) e.message else "")
+            presenter.onLoadError(if (e.message != null) e.message else "")
             success = false
         }
         return rootTreeNode

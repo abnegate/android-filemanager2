@@ -12,7 +12,8 @@ import android.view.Display
 import android.view.WindowManager
 import androidx.core.os.EnvironmentCompat
 import com.jakebarnby.filemanager.R
-import com.jakebarnby.filemanager.sources.models.SourceStorageStats
+import com.jakebarnby.filemanager.models.SourceType
+import com.jakebarnby.filemanager.models.StorageInfo
 import com.jakebarnby.filemanager.util.Constants.Sources
 import java.io.File
 import java.io.FileOutputStream
@@ -117,9 +118,9 @@ object Utils {
      * @param dir   The dir to check free space of
      * @return      Amount of bytes free in file
      */
-    fun getStorageStats(dir: File): SourceStorageStats {
+    fun getStorageStats(dir: File): StorageInfo {
         val fileSystem = StatFs(dir.absolutePath)
-        val info = SourceStorageStats()
+        val info = StorageInfo()
         info.freeSpace = fileSystem.availableBytes
         info.totalSpace = fileSystem.totalBytes
         info.usedSpace = fileSystem.totalBytes - fileSystem.availableBytes
@@ -192,11 +193,11 @@ object Utils {
         )
     }
 
-    fun resolveLogoId(sourceName: String): Int {
-        return when (sourceName) {
-            Sources.DROPBOX -> R.drawable.ic_dropbox
-            Sources.GOOGLE_DRIVE -> R.drawable.ic_googledrive
-            Sources.ONEDRIVE -> R.drawable.ic_onedrive
+    fun resolveLogoId(sourceId: Int): Int {
+        return when (sourceId) {
+            SourceType.DROPBOX.id -> R.drawable.ic_dropbox
+            SourceType.GOOGLE_DRIVE.id -> R.drawable.ic_googledrive
+            SourceType.ONEDRIVE.id -> R.drawable.ic_onedrive
             else -> R.drawable.ic_file
         }
     }

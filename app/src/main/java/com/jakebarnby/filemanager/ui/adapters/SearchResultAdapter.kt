@@ -7,7 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.jakebarnby.filemanager.R
-import com.jakebarnby.filemanager.sources.models.SourceFile
+import com.jakebarnby.filemanager.models.SourceFile
 import com.jakebarnby.filemanager.ui.adapters.SearchResultAdapter.SearchViewHolder
 import com.jakebarnby.filemanager.util.TreeNode
 import com.jakebarnby.filemanager.util.Utils
@@ -44,10 +44,10 @@ class SearchResultAdapter(
      * Filter out all sources except the given string
      * @param name  Name of the source to keep
      */
-    fun removeAllSourceExcept(name: String) {
+    fun removeAllSourceExcept(id: Int) {
         results = ArrayList()
         for (i in backup.indices) {
-            if (backup[i].data.sourceName == name) {
+            if (backup[i].data.sourceId == id) {
                 results.add(backup[i])
             }
         }
@@ -64,7 +64,7 @@ class SearchResultAdapter(
         private val subText: TextView = itemView.findViewById(R.id.text_file_path)
 
         fun bindHolder(file: TreeNode<SourceFile>) {
-            sourceLogo.setImageResource(Utils.resolveLogoId(file.data.sourceName))
+            sourceLogo.setImageResource(Utils.resolveLogoId(file.data.sourceId))
             text.text = file.data.name
             subText.text = file.data.path
             itemView.setOnClickListener { onClickListener.navigateToFile(file) }

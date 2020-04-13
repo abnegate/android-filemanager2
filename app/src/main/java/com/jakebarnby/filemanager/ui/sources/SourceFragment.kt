@@ -19,12 +19,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.jakebarnby.filemanager.R
+import com.jakebarnby.filemanager.models.SourceFile
+import com.jakebarnby.filemanager.models.SourceType
+import com.jakebarnby.filemanager.models.ViewType
 import com.jakebarnby.filemanager.services.SourceTransferService
-import com.jakebarnby.filemanager.sources.SourceFragmentPresenter
 import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFragment
 import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveSource
 import com.jakebarnby.filemanager.sources.local.LocalFragment
-import com.jakebarnby.filemanager.sources.models.SourceFile
 import com.jakebarnby.filemanager.sources.onedrive.OneDriveFragment
 import com.jakebarnby.filemanager.sources.onedrive.OneDriveSource
 import com.jakebarnby.filemanager.ui.adapters.FileAdapter
@@ -35,12 +36,13 @@ import com.jakebarnby.filemanager.ui.adapters.FileListAdapter
 import com.jakebarnby.filemanager.util.*
 import com.jakebarnby.filemanager.util.Constants.GRID_SIZE
 import com.jakebarnby.filemanager.util.Constants.Prefs
-import com.jakebarnby.filemanager.util.Constants.ViewType
 import java.util.*
+import javax.inject.Inject
 
 abstract class SourceFragment : Fragment(), SourceFragmentContract.View {
 
-    private lateinit var presenter: SourceFragmentContract.Presenter
+    @Inject
+    protected lateinit var presenter: SourceFragmentContract.Presenter
 
     var recycler: RecyclerView? = null
 
@@ -56,9 +58,6 @@ abstract class SourceFragment : Fragment(), SourceFragmentContract.View {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        presenter = SourceFragmentPresenter(
-
-        )
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -79,10 +78,11 @@ abstract class SourceFragment : Fragment(), SourceFragmentContract.View {
         }
 
         sourceLogo.setImageResource(
-            Utils.resolveLogoId(presenter.source.sourceName)
+            Utils.resolveLogoId(presenter.source.sourceId)
         )
         return rootView
     }
+
 
     override fun onResume() {
         super.onResume()
@@ -118,7 +118,7 @@ abstract class SourceFragment : Fragment(), SourceFragmentContract.View {
         recycler?.adapter?.notifyDataSetChanged()
     }
 
-    override fun showLoadError(sourceName: String) {
+    override fun showLoadError(sourceName: Int) {
         val message = String.format(
             "%s %s %s",
             getString(R.string.problem_encountered),
@@ -240,17 +240,27 @@ abstract class SourceFragment : Fragment(), SourceFragmentContract.View {
                 presenter.onFileLongSelected(file)
             }
         }
-
-
-        val listAdapter = FileListAdapter(presenter.source, presenter.prefsManager).apply {
+        val listAdapter = FileListAdapter(
+            presenter.source,
+            presenter.selectedFilesManager,
+            presenter.prefsManager
+        ).apply {
             setOnClickListener(clickListener)
             setOnLongClickListener(longClickListener)
         }
-        val gridAdapter = FileGridAdapter(presenter.source, presenter.prefsManager).apply {
+        val gridAdapter = FileGridAdapter(
+            presenter.source,
+            presenter.selectedFilesManager,
+            presenter.prefsManager
+        ).apply {
             setOnClickListener(clickListener)
             setOnLongClickListener(longClickListener)
         }
-        val detailedListAdapter = FileDetailedListAdapter(presenter.source, presenter.prefsManager).apply {
+        val detailedListAdapter = FileDetailedListAdapter(
+            presenter.source,
+            presenter.selectedFilesManager,
+            presenter.prefsManager
+        ).apply {
             setOnClickListener(clickListener)
             setOnLongClickListener(longClickListener)
         }
@@ -316,7 +326,11 @@ abstract class SourceFragment : Fragment(), SourceFragmentContract.View {
             pushBreadCrumb(
                 node,
                 node.parent != null,
-                if (node.parent == null) node.data.sourceName else node.data.name
+                if (node.parent == null) {
+                    SourceType.values()[node.data.sourceId].sourceName
+                } else {
+                    node.data.name
+                }
             )
         }
     }
@@ -329,14 +343,14 @@ abstract class SourceFragment : Fragment(), SourceFragmentContract.View {
         breadcrumbBar.removeAllViews()
     }
 
-    private fun onCheckPermissions(permission: String, requestCode: Int) {
+    override fun onCheckPermissions(name: String, requestCode: Int) {
         val activity = activity as? SourceActivity ?: return
 
-        val permissionCheck = ContextCompat.checkSelfPermission(context!!, permission)
+        val permissionCheck = ContextCompat.checkSelfPermission(context!!, name)
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             if (!activity.isCheckingPermissions) {
                 activity.isCheckingPermissions = true
-                requestPermissions(arrayOf(permission), requestCode)
+                requestPermissions(arrayOf(name), requestCode)
             }
         } else {
             if (this is LocalFragment) {

@@ -3,8 +3,9 @@ package com.jakebarnby.filemanager.sources.dropbox
 import com.dropbox.core.v2.files.FileMetadata
 import com.dropbox.core.v2.files.FolderMetadata
 import com.dropbox.core.v2.files.Metadata
-import com.jakebarnby.filemanager.sources.models.SourceFile
-import com.jakebarnby.filemanager.sources.models.SourceType
+import com.jakebarnby.filemanager.models.SourceFile
+import com.jakebarnby.filemanager.models.SourceConnectionType
+import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.util.Constants.Sources
 
 /**
@@ -21,8 +22,7 @@ class DropboxFile(file: Metadata) : SourceFile() {
             size = file.size
         }
         name = file.name
-        sourceType = SourceType.REMOTE
-        sourceName = Sources.DROPBOX
+        sourceId = SourceType.DROPBOX.id
         isDirectory = file is FolderMetadata
         isHidden = file.name.startsWith(".")
     }

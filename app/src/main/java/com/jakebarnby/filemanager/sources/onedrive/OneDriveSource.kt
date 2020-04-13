@@ -3,8 +3,11 @@ package com.jakebarnby.filemanager.sources.onedrive
 import android.content.Context
 import androidx.fragment.app.Fragment
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.jakebarnby.filemanager.sources.models.Source
-import com.jakebarnby.filemanager.sources.models.SourceType
+import com.jakebarnby.filemanager.models.Source
+import com.jakebarnby.filemanager.models.SourceConnectionType
+import com.jakebarnby.filemanager.models.SourceType
+import com.jakebarnby.filemanager.sources.dropbox.DropboxClient
+import com.jakebarnby.filemanager.ui.sources.SourceFragmentContract
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Logger
@@ -19,14 +22,21 @@ import com.microsoft.identity.client.MsalException
 import com.microsoft.identity.client.PublicClientApplication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
+import javax.inject.Inject
 
 /**
  * Created by jakebarnby on 2/08/17.
  */
 class OneDriveSource(
-    sourceName: String,
-    listener: SourceListener
-) : Source(SourceType.REMOTE, sourceName, listener) {
+    private val presenter: SourceFragmentContract.Presenter
+) : Source(
+    SourceConnectionType.REMOTE,
+    SourceType.ONEDRIVE.id,
+    presenter.prefsManager
+) {
+
+    @Inject
+    lateinit var oneDriveClient: OneDriveClient
 
     var client: PublicClientApplication? = null
 
@@ -36,24 +46,24 @@ class OneDriveSource(
 
     fun authenticateSource(fragment: Fragment) {
         client = PublicClientApplication(fragment.context!!, CLIENT_ID)
-        sourceListener.onLoadStarted()
+        presenter.onLoadStarted()
         if (isLoggedIn) {
             return
         }
-        if (!checkConnectionActive(fragment.context!!)) {
-            return
-        }
+//        if (!checkConnectionActive(fragment.context!!)) {
+//            return
+//        }
 
         try {
-            val accessToken = Preferences.getString(fragment.context!!, Prefs.ONEDRIVE_TOKEN_KEY, null)
-            val userId = Preferences.getString(fragment.context!!, Prefs.ONEDRIVE_NAME_KEY, null)
+            val accessToken = presenter.prefsManager.getString(Prefs.ONEDRIVE_TOKEN_KEY, null)
+            val userId = presenter.prefsManager.getString(Prefs.ONEDRIVE_NAME_KEY, null)
             if (accessToken != null && userId != null) {
                 client!!.acquireTokenSilentAsync(SCOPES, client!!.getUser(userId), getAuthSilentCallback(fragment))
             } else {
                 client!!.acquireToken(fragment, SCOPES, getAuthInteractiveCallback(fragment))
             }
         } catch (e: Exception) {
-            sourceListener.onLoadError(e.message)
+            presenter.onLoadError(e.message)
         }
     }
 
@@ -62,19 +72,19 @@ class OneDriveSource(
             return
         }
 
-        if (!checkConnectionActive(context)) {
-            return
-        }
+//        if (!checkConnectionActive(context)) {
+//            return
+//        }
 
         val clientConfig = DefaultClientConfig.createWithAuthenticationProvider {
             it.addHeader("Authorization", String.format("Bearer %s", authResult!!.accessToken))
         }
 
-        OneDriveFactory.service = GraphServiceClient.Builder()
+        OneDriveClient.client = GraphServiceClient.Builder()
             .fromConfig(clientConfig)
             .buildClient()
 
-        OneDriveFactory.service
+        OneDriveClient.client
             ?.me
             ?.drive
             ?.root
@@ -82,23 +92,25 @@ class OneDriveSource(
             ?.get(object : ICallback<DriveItem> {
 
                 override fun success(driveItem: DriveItem) {
-                    OneDriveLoaderTask(this@OneDriveSource, sourceListener, driveItem)
+                    OneDriveLoaderTask(this@OneDriveSource, presenter, driveItem)
                         .executeOnExecutor(Dispatchers.IO.asExecutor(), "")
                 }
 
                 override fun failure(ex: ClientException) {
-                    sourceListener.onLoadAborted()
+                    presenter.onLoadAborted()
                 }
             })
     }
 
     override fun logout(context: Context) {
         if (isLoggedIn) {
-            OneDriveFactory.logout(context)
+            oneDriveClient.logout()
+
             isLoggedIn = false
             isFilesLoaded = false
             authResult = null
-            sourceListener.onLogout()
+            presenter.onLogout()
+
             Logger.logFirebaseEvent(
                 FirebaseAnalytics.getInstance(context),
                 Constants.Analytics.EVENT_LOGOUT_ONEDRIVE
@@ -110,13 +122,13 @@ class OneDriveSource(
      * Check for a valid access token and store it in shared preferences if found, then load the source
      */
     fun checkForAccessToken(fragment: Fragment) {
-        var accessToken = Preferences.getString(fragment.context!!, Prefs.ONEDRIVE_TOKEN_KEY, null)
+        var accessToken = presenter.prefsManager.getString(Prefs.ONEDRIVE_TOKEN_KEY, null)
         if (authResult != null) {
             if (accessToken == null || authResult!!.accessToken != accessToken) {
                 accessToken = authResult!!.accessToken
                 val userId = authResult!!.user.userIdentifier
-                Preferences.savePref(fragment.context!!, Prefs.ONEDRIVE_TOKEN_KEY, accessToken)
-                Preferences.savePref(fragment.context!!, Prefs.ONEDRIVE_NAME_KEY, userId)
+                presenter.prefsManager.savePref(Prefs.ONEDRIVE_TOKEN_KEY, accessToken)
+                presenter.prefsManager.savePref(Prefs.ONEDRIVE_NAME_KEY, userId)
             } else {
                 if (!isLoggedIn) {
                     authenticateSource(fragment)
@@ -153,11 +165,11 @@ class OneDriveSource(
             }
 
             override fun onError(exception: MsalException) {
-                sourceListener.onLoadError(exception.errorCode + " " + exception.message)
+                presenter.onLoadError(exception.errorCode + " " + exception.message)
             }
 
             override fun onCancel() {
-                sourceListener.onLoadAborted()
+                presenter.onLoadAborted()
             }
         }
     }
@@ -177,11 +189,11 @@ class OneDriveSource(
             }
 
             override fun onError(exception: MsalException) {
-                sourceListener.onLoadError(exception.errorCode + " " + exception.message)
+                presenter.onLoadError(exception.errorCode + " " + exception.message)
             }
 
             override fun onCancel() {
-                sourceListener.onLoadAborted()
+                presenter.onLoadAborted()
             }
         }
     }

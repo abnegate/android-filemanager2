@@ -6,11 +6,13 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.model.File
 import com.google.api.services.drive.model.FileList
-import com.jakebarnby.filemanager.sources.LoaderTask
-import com.jakebarnby.filemanager.sources.models.Source
-import com.jakebarnby.filemanager.sources.models.SourceFile
+import com.jakebarnby.filemanager.workers.LoaderTask
+import com.jakebarnby.filemanager.models.Source
+import com.jakebarnby.filemanager.models.SourceFile
+import com.jakebarnby.filemanager.ui.sources.SourceFragmentContract
 import com.jakebarnby.filemanager.util.TreeNode
 import java.io.IOException
+import javax.inject.Inject
 
 /**
  * Created by Jake on 8/2/2017.
@@ -21,12 +23,15 @@ import java.io.IOException
  */
 class GoogleDriveLoaderTask(
     source: Source,
-    listener: SourceListener,
+    presenter: SourceFragmentContract.Presenter,
     credential: GoogleAccountCredential?
-) : LoaderTask(source, listener) {
+) : LoaderTask(source, presenter) {
+
+    @Inject
+    lateinit var googleDriveClient: GoogleDriveClient
 
     init {
-        GoogleDriveFactory.service =
+        GoogleDriveClient.client =
             Drive.Builder(
                 NetHttpTransport(),
                 JacksonFactory.getDefaultInstance(),
@@ -37,20 +42,16 @@ class GoogleDriveLoaderTask(
     override fun initRootNode(path: String): Any? {
         var rootFile: File? = null
         try {
-            rootFile = GoogleDriveFactory.service
-                ?.files()
-                ?.get(path)
-                ?.setFields("name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime")
-                ?.execute()
+            rootFile = googleDriveClient.getFilesAtPath(path)
                 ?: throw IOException("Failed to get root file")
 
             val rootSourceFile: SourceFile = GoogleDriveFile(rootFile)
             rootTreeNode = TreeNode(rootSourceFile)
             currentNode = rootTreeNode
             source.currentDirectory = rootTreeNode
-            source.setQuotaInfo(GoogleDriveFactory.storageStats)
+            source.setQuotaInfo(googleDriveClient.storageInfo)
         } catch (e: IOException) {
-            sourceListener.onLoadError(if (e.message != null) e.message else "")
+            presenter.onLoadError(if (e.message != null) e.message else "")
             success = false
         }
         return rootFile
@@ -60,16 +61,11 @@ class GoogleDriveLoaderTask(
         if (rootObject != null && rootObject is File) {
             var fileList: FileList? = null
             try {
-                fileList = GoogleDriveFactory.service
-                    ?.files()
-                    ?.list()
-                    ?.setQ(String.format("'%s' in parents", rootObject.id))
-                    ?.setFields("files(name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime)")
-                    ?.execute()
+                fileList = googleDriveClient.getFilesByParentId(rootObject.id)
                     ?: throw IOException("Failed to get file")
 
             } catch (e: IOException) {
-                sourceListener.onLoadError(if (e.message != null) e.message else "")
+                presenter.onLoadError(if (e.message != null) e.message else "")
                 success = false
             }
             val files = fileList!!.files
@@ -82,7 +78,7 @@ class GoogleDriveLoaderTask(
                         currentNode = currentNode.children[currentNode.children.size - 1]
                         readFileTree(file)
 
-                        currentNode.parent?.data?.addSize(currentNode.data.size)
+                        currentNode.parent!!.data.size += currentNode.data.size
                         currentNode = currentNode.parent!!
                     } else {
                         if (file.getSize() != null) {
@@ -91,7 +87,7 @@ class GoogleDriveLoaderTask(
                         currentNode.addChild(sourceFile)
                     }
                 }
-                currentNode.data.addSize(dirSize)
+                currentNode.data.size += dirSize
             }
         }
         return rootTreeNode

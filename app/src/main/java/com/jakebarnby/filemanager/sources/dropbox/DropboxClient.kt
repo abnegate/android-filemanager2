@@ -4,12 +4,11 @@ import android.content.Context
 import androidx.core.os.bundleOf
 import com.dropbox.core.DbxException
 import com.dropbox.core.v2.DbxClientV2
-import com.dropbox.core.v2.files.FileMetadata
-import com.dropbox.core.v2.files.FolderMetadata
-import com.dropbox.core.v2.files.Metadata
-import com.dropbox.core.v2.files.WriteMode
+import com.dropbox.core.v2.files.*
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.jakebarnby.filemanager.sources.models.SourceStorageStats
+import com.jakebarnby.filemanager.managers.PreferenceManager
+import com.jakebarnby.filemanager.models.StorageInfo
+import com.jakebarnby.filemanager.sources.RemoteClient
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Logger
@@ -17,15 +16,30 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
+import javax.inject.Inject
 
 /**
  * Created by Jake on 6/9/2017.
  */
-object DropboxFactory {
+class DropboxClient @Inject constructor(
+    var prefsManager: PreferenceManager
+) {
 
-    private const val TAG = "DROPBOX"
+    companion object {
+        var client: DbxClientV2? = null
+    }
 
-    var client: DbxClientV2? = null
+    fun getFilesAtPath(path: String): ListFolderResult? =
+        client
+            ?.files()
+            ?.listFolderBuilder(path)
+            ?.start()
+
+    fun getExternalLink(path: String): String? =
+        client
+            ?.files()
+            ?.getTemporaryLink(path)
+            ?.link
 
     /**
      * @param downloadPath
@@ -99,7 +113,7 @@ object DropboxFactory {
         try {
             client!!.auth().tokenRevoke()
             client = null
-            Preferences.savePref(context, Prefs.DROPBOX_TOKEN_KEY, null as String?)
+            prefsManager.savePref(Prefs.DROPBOX_TOKEN_KEY, null as String?)
         } catch (e: DbxException) {
             val params = bundleOf(Constants.Analytics.PARAM_ERROR_VALUE to e.message)
             Logger.logFirebaseEvent(
@@ -110,7 +124,7 @@ object DropboxFactory {
         }
     }
 
-    val storageStats: SourceStorageStats?
+    val storageInfo: StorageInfo?
         get() {
             try {
                 val usage = client!!.users().spaceUsage
@@ -123,7 +137,7 @@ object DropboxFactory {
                 if (alloc.isTeam) {
                     max += alloc.teamValue.allocated
                 }
-                val info = SourceStorageStats()
+                val info = StorageInfo()
                 info.totalSpace = max
                 info.usedSpace = used
                 info.freeSpace = max - used

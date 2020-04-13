@@ -13,18 +13,17 @@ import com.dropbox.core.DbxException
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.managers.SelectedFilesManager
-import com.jakebarnby.filemanager.sources.dropbox.DropboxFactory
+import com.jakebarnby.filemanager.models.SourceFile
+import com.jakebarnby.filemanager.models.SourceType
+import com.jakebarnby.filemanager.sources.dropbox.DropboxClient
 import com.jakebarnby.filemanager.sources.dropbox.DropboxFile
-import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFactory
+import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveClient
 import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFile
 import com.jakebarnby.filemanager.sources.local.LocalFile
-import com.jakebarnby.filemanager.sources.models.SourceFile
-import com.jakebarnby.filemanager.sources.models.SourceType
-import com.jakebarnby.filemanager.sources.onedrive.OneDriveFactory
+import com.jakebarnby.filemanager.sources.onedrive.OneDriveClient
 import com.jakebarnby.filemanager.sources.onedrive.OneDriveFile
 import com.jakebarnby.filemanager.ui.sources.SourceActivity
 import com.jakebarnby.filemanager.util.Constants
-import com.jakebarnby.filemanager.util.Constants.Sources
 import com.jakebarnby.filemanager.util.FileZipper
 import com.jakebarnby.filemanager.util.Intents.ACTION_CLEAR_CACHE
 import com.jakebarnby.filemanager.util.Intents.ACTION_COMPLETE
@@ -54,6 +53,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File.separator
 import java.io.IOException
+import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -61,7 +61,16 @@ import kotlin.coroutines.CoroutineContext
  */
 class SourceTransferService : Service(), CoroutineScope {
 
-    private var analytics: FirebaseAnalytics? = null
+    @Inject
+    lateinit var analytics: FirebaseAnalytics
+    @Inject
+    lateinit var selectedFilesManager: SelectedFilesManager
+    @Inject
+    lateinit var dropBoxClient: DropboxClient
+    @Inject
+    lateinit var googleDriveClient: GoogleDriveClient
+    @Inject
+    lateinit var oneDriveClient: OneDriveClient
 
     private var job = Job()
 
@@ -206,13 +215,13 @@ class SourceTransferService : Service(), CoroutineScope {
                 val newName = intent.getStringExtra(EXTRA_NEW_NAME)
                 val zipName = intent.getStringExtra(EXTRA_ZIP_FILENAME)
                 val action = intent.action
-                val operationId = SelectedFilesManager.operationCount - 1
+                val operationId = selectedFilesManager.operationCount - 1
 
                 if (action != null) {
                     when (action) {
                         ACTION_CREATE_FOLDER -> {
                             createFolder(
-                                SelectedFilesManager.getActionableDirectory(operationId)
+                                selectedFilesManager.getActionableDirectory(operationId)
                                     ?: throw NullPointerException("Couldn't get actionable dir for create folder"),
                                 operationId,
                                 newName
@@ -225,7 +234,7 @@ class SourceTransferService : Service(), CoroutineScope {
                         }
                         ACTION_COPY -> {
                             copy(
-                                SelectedFilesManager.getActionableDirectory(operationId)
+                                selectedFilesManager.getActionableDirectory(operationId)
                                     ?: throw NullPointerException("Couldn't get actionable dir for copy"),
                                 operationId,
                                 move = false,
@@ -234,7 +243,7 @@ class SourceTransferService : Service(), CoroutineScope {
                         }
                         ACTION_MOVE -> {
                             copy(
-                                SelectedFilesManager.getActionableDirectory(operationId)
+                                selectedFilesManager.getActionableDirectory(operationId)
                                     ?: throw NullPointerException("Couldn't get actionable dir for move"),
                                 operationId,
                                 move = true,
@@ -300,40 +309,36 @@ class SourceTransferService : Service(), CoroutineScope {
         isSilent: Boolean
     ): TreeNode<SourceFile>? {
         try {
-            if (destDir == null) {
-                throw NullPointerException("Null destination for create folder")
-            }
-
             if (!isSilent) {
                 broadcastShowDialog(getString(R.string.dialog_creating_folder), 0)
             }
 
             var newFile: SourceFile? = null
-            when (destDir.data.sourceName) {
-                Sources.DROPBOX -> {
-                    val dropboxFile = DropboxFactory.createFolder(
+            when (destDir.data.sourceId) {
+                SourceType.DROPBOX.id -> {
+                    val dropboxFile = dropBoxClient.createFolder(
                         name,
                         destDir.data.path
                     ) ?: return null
                     newFile = DropboxFile(dropboxFile)
                 }
-                Sources.GOOGLE_DRIVE -> {
-                    val googleFile = GoogleDriveFactory.createFolder(
+                SourceType.GOOGLE_DRIVE.id -> {
+                    val googleFile = googleDriveClient.createFolder(
                         name,
                         (destDir.data as GoogleDriveFile).driveId
                     ) ?: return null
 
                     newFile = GoogleDriveFile(googleFile)
                 }
-                Sources.ONEDRIVE -> {
-                    val onedriveFile = OneDriveFactory.createFolder(
+                SourceType.ONEDRIVE.id -> {
+                    val onedriveFile = oneDriveClient.createFolder(
                         name,
                         (destDir.data as OneDriveFile).driveId
                     ) ?: return null
                     newFile = OneDriveFile(onedriveFile)
                 }
                 else -> {
-                    if (destDir.data.sourceType == SourceType.LOCAL) {
+                    if (destDir.data.sourceId == SourceType.LOCAL.id) {
                         val result = createFolderNative("${destDir.data.path}${separator}${name}")
                         if (result != 0) {
                             throw IOException("creating folder")
@@ -341,7 +346,7 @@ class SourceTransferService : Service(), CoroutineScope {
 
                         newFile = LocalFile(
                             java.io.File("${destDir.data.path}${separator}${name}"),
-                            destDir.data.sourceName
+                            destDir.data.sourceId
                         )
                     }
                 }
@@ -371,7 +376,7 @@ class SourceTransferService : Service(), CoroutineScope {
                 "."))
             val params = bundleOf(
                 Constants.Analytics.PARAM_ERROR_VALUE to e.message,
-                Constants.Analytics.PARAM_SOURCE_NAME to destDir.data.sourceName
+                Constants.Analytics.PARAM_SOURCE_NAME to destDir.data.sourceId
             )
             Logger.logFirebaseEvent(
                 analytics,
@@ -395,7 +400,7 @@ class SourceTransferService : Service(), CoroutineScope {
 
             broadcastShowDialog(getString(R.string.dialog_renaming), 0)
 
-            val toRename: TreeNode<SourceFile> = SelectedFilesManager
+            val toRename: TreeNode<SourceFile> = selectedFilesManager
                 .getSelectedFiles(operationId)
                 ?.get(0)
                 ?: throw NullPointerException("No file to rename")
@@ -406,18 +411,18 @@ class SourceTransferService : Service(), CoroutineScope {
                 toRename.data.path.lastIndexOf(separator) + 1
             ) + name
 
-            when (toRename.data.sourceName) {
-                Sources.DROPBOX -> {
-                    DropboxFactory.rename(oldPath, newPath)
+            when (toRename.data.sourceId) {
+                SourceType.DROPBOX.id -> {
+                    dropBoxClient.rename(oldPath, newPath)
                 }
-                Sources.GOOGLE_DRIVE -> {
-                    GoogleDriveFactory.rename(name, (toRename.data as GoogleDriveFile).driveId)
+                SourceType.GOOGLE_DRIVE.id -> {
+                    googleDriveClient.rename(name, (toRename.data as GoogleDriveFile).driveId)
                 }
-                Sources.ONEDRIVE -> {
-                    OneDriveFactory.rename(name, (toRename.data as OneDriveFile).driveId)
+                SourceType.ONEDRIVE.id -> {
+                    oneDriveClient.rename(name, (toRename.data as OneDriveFile).driveId)
                 }
                 else -> {
-                    if (toRename.data.sourceType == SourceType.LOCAL) {
+                    if (toRename.data.sourceId == SourceType.LOCAL.id) {
                         val result = renameFolderNative(oldPath, newPath)
                         if (result != 0) {
                             throw IOException("renaming file")
@@ -443,10 +448,10 @@ class SourceTransferService : Service(), CoroutineScope {
                 "."))
 
             val sourceName = if (
-                SelectedFilesManager.getSelectedFiles(operationId)?.get(0) != null &&
-                SelectedFilesManager.getSelectedFiles(operationId)?.get(0)?.data != null
+                selectedFilesManager.getSelectedFiles(operationId)?.get(0) != null &&
+                selectedFilesManager.getSelectedFiles(operationId)?.get(0)?.data != null
             ) {
-                SelectedFilesManager.getSelectedFiles(operationId)?.get(0)?.data?.sourceName
+                selectedFilesManager.getSelectedFiles(operationId)?.get(0)?.data?.sourceId
             } else {
                 Constants.Analytics.NO_DESTINATION
             }
@@ -504,7 +509,7 @@ class SourceTransferService : Service(), CoroutineScope {
                 getString(R.string.opening_file),
                 "."))
 
-            val sourceName = toOpen?.sourceName ?: Constants.Analytics.NO_DESTINATION
+            val sourceName = toOpen?.sourceId ?: Constants.Analytics.NO_DESTINATION
 
             val params = bundleOf(
                 Constants.Analytics.PARAM_ERROR_VALUE to e.message,
@@ -530,7 +535,7 @@ class SourceTransferService : Service(), CoroutineScope {
         isSilent: Boolean
     ): List<TreeNode<SourceFile>>? {
         try {
-            val toCopy = SelectedFilesManager.getSelectedFiles(operationId)
+            val toCopy = selectedFilesManager.getSelectedFiles(operationId)
                 ?: throw NullPointerException("No files passed to copy")
             val newFiles = mutableListOf<TreeNode<SourceFile>>()
             if (!isSilent) {
@@ -582,9 +587,9 @@ class SourceTransferService : Service(), CoroutineScope {
                 getString(R.string.problem_encountered),
                 getString(if (move) R.string.moving_items else R.string.copying_items),
                 "."))
-            val sourceName = if (SelectedFilesManager.getActionableDirectory(operationId) != null &&
-                SelectedFilesManager.getActionableDirectory(operationId)?.data != null) {
-                SelectedFilesManager.getActionableDirectory(operationId)?.data?.sourceName
+            val sourceName = if (selectedFilesManager.getActionableDirectory(operationId) != null &&
+                selectedFilesManager.getActionableDirectory(operationId)?.data != null) {
+                selectedFilesManager.getActionableDirectory(operationId)?.data?.sourceId
             } else {
                 Constants.Analytics.NO_DESTINATION
             }
@@ -658,10 +663,14 @@ class SourceTransferService : Service(), CoroutineScope {
                 newItem = destDir.addChild(newFile)
                 var curDir: TreeNode<SourceFile>? = destDir
                 while (true) {
-                    curDir?.data?.addSize(file.data.size)
+                    if (curDir?.data != null) {
+                        curDir.data.size += file.data.size
+                    }
                     curDir = if (curDir?.parent != null) {
                         curDir.parent
-                    } else break
+                    } else {
+                        break
+                    }
                 }
             }
             if (depth != 0) {
@@ -704,7 +713,7 @@ class SourceTransferService : Service(), CoroutineScope {
      */
     private fun delete(operationId: Int, isSilent: Boolean) {
         try {
-            val toDelete = SelectedFilesManager.getSelectedFiles(operationId)
+            val toDelete = selectedFilesManager.getSelectedFiles(operationId)
                 ?: throw NullPointerException("Null files passed to delete")
 
             if (!isSilent) {
@@ -718,17 +727,17 @@ class SourceTransferService : Service(), CoroutineScope {
                     toDelete.indexOf(file) + 1,
                     toDelete.size)
                 )
-                when (file.data.sourceName) {
-                    Sources.DROPBOX -> {
-                        DropboxFactory.deleteFile(file.data.path)
+                when (file.data.sourceId) {
+                    SourceType.DROPBOX.id -> {
+                        dropBoxClient.deleteFile(file.data.path)
                     }
-                    Sources.GOOGLE_DRIVE -> {
-                        GoogleDriveFactory.deleteFile((file.data as GoogleDriveFile).driveId)
+                    SourceType.GOOGLE_DRIVE.id -> {
+                        googleDriveClient.deleteFile((file.data as GoogleDriveFile).driveId)
                     }
-                    Sources.ONEDRIVE -> {
-                        OneDriveFactory.deleteFile((file.data as? OneDriveFile)?.driveId)
+                    SourceType.ONEDRIVE.id -> {
+                        oneDriveClient.deleteFile((file.data as? OneDriveFile)?.driveId)
                     }
-                    else -> if (file.data.sourceType == SourceType.LOCAL) {
+                    else -> if (file.data.sourceId == SourceType.LOCAL.id) {
                         val result = deleteFileNative(file.data.path)
                         if (result != 0) {
                             throw IOException("deleting file")
@@ -738,10 +747,14 @@ class SourceTransferService : Service(), CoroutineScope {
                 var curDir = file.parent
                 curDir?.removeChild(file)
                 while (true) {
-                    curDir?.data?.removeSize(file.data.size)
+                    if (curDir?.data != null) {
+                        curDir.data.size -= file.data.size
+                    }
                     curDir = if (curDir?.parent != null) {
                         curDir.parent
-                    } else break
+                    } else {
+                        break
+                    }
                 }
                 if (!isSilent) {
                     broadcastUpdate(toDelete.indexOf(file) + 1)
@@ -761,9 +774,9 @@ class SourceTransferService : Service(), CoroutineScope {
                 getString(R.string.problem_encountered),
                 getString(R.string.deleting_items),
                 "."))
-            val sourceName = if (SelectedFilesManager.getActionableDirectory(operationId) != null &&
-                SelectedFilesManager.getActionableDirectory(operationId)?.data != null) {
-                SelectedFilesManager.getActionableDirectory(operationId)?.data?.sourceName
+            val sourceName = if (selectedFilesManager.getActionableDirectory(operationId) != null &&
+                selectedFilesManager.getActionableDirectory(operationId)?.data != null) {
+                selectedFilesManager.getActionableDirectory(operationId)?.data?.sourceId
             } else {
                 Constants.Analytics.NO_DESTINATION
             }
@@ -782,13 +795,13 @@ class SourceTransferService : Service(), CoroutineScope {
 
     private fun zipSelection(operationId: Int, zipFileName: String) {
         try {
-            val destDir = SelectedFilesManager.getActionableDirectory(operationId)
+            val destDir = selectedFilesManager.getActionableDirectory(operationId)
                 ?: throw NullPointerException("Null files passed to zip")
 
             broadcastShowDialog(getString(R.string.creating_zip), 0)
 
             val toZip = copy(
-                TreeNode(LocalFile(cacheDir, Sources.LOCAL)),
+                TreeNode(LocalFile(cacheDir, SourceType.LOCAL.id)),
                 operationId,
                 move = false,
                 isSilent = true
@@ -819,9 +832,9 @@ class SourceTransferService : Service(), CoroutineScope {
                 getString(R.string.problem_encountered),
                 getString(R.string.zipping_files),
                 "."))
-            val sourceName = if (SelectedFilesManager.getActionableDirectory(operationId) != null &&
-                SelectedFilesManager.getActionableDirectory(operationId)?.data != null) {
-                SelectedFilesManager.getActionableDirectory(operationId)?.data?.sourceName
+            val sourceName = if (selectedFilesManager.getActionableDirectory(operationId) != null &&
+                selectedFilesManager.getActionableDirectory(operationId)?.data != null) {
+                selectedFilesManager.getActionableDirectory(operationId)?.data?.sourceId
             } else {
                 Constants.Analytics.NO_DESTINATION
             }
@@ -850,9 +863,9 @@ class SourceTransferService : Service(), CoroutineScope {
 
         var newFilePath: String? = null
         val destPath = cacheDir.path + separator + file.name
-        when (file.sourceName) {
-            Sources.DROPBOX -> {
-                val newFile = DropboxFactory.downloadFile(
+        when (file.sourceId) {
+            SourceType.DROPBOX.id -> {
+                val newFile = dropBoxClient.downloadFile(
                     file.path,
                     cacheDir.path + separator + file.name
                 )
@@ -864,8 +877,8 @@ class SourceTransferService : Service(), CoroutineScope {
                     newFilePath = newFile.path
                 }
             }
-            Sources.GOOGLE_DRIVE -> {
-                val googleFile = GoogleDriveFactory.downloadFile(
+            SourceType.GOOGLE_DRIVE.id -> {
+                val googleFile = googleDriveClient.downloadFile(
                     (file as GoogleDriveFile).driveId,
                     destPath
                 )
@@ -877,8 +890,8 @@ class SourceTransferService : Service(), CoroutineScope {
                     newFilePath = googleFile.path
                 }
             }
-            Sources.ONEDRIVE -> {
-                val oneDriveFile = OneDriveFactory.downloadFile(
+            SourceType.ONEDRIVE.id -> {
+                val oneDriveFile = oneDriveClient.downloadFile(
                     (file as OneDriveFile).driveId,
                     file.name,
                     cacheDir.path
@@ -892,7 +905,7 @@ class SourceTransferService : Service(), CoroutineScope {
                     newFilePath = oneDriveFile.path
                 }
             }
-            else -> if (file.sourceType == SourceType.LOCAL) {
+            else -> if (file.sourceId == SourceType.LOCAL.id) {
                 newFilePath = file.path
             }
         }
@@ -912,10 +925,10 @@ class SourceTransferService : Service(), CoroutineScope {
         fileName: String,
         destDir: SourceFile
     ): SourceFile? {
-        when (destDir.sourceName) {
-            Sources.DROPBOX -> {
+        when (destDir.sourceId) {
+            SourceType.DROPBOX.id -> {
                 val dropboxFile = DropboxFile(
-                    DropboxFactory.uploadFile(
+                    dropBoxClient.uploadFile(
                         newFilePath,
                         destDir.path
                     ) ?: throw NullPointerException("Upload returned null")
@@ -926,9 +939,9 @@ class SourceTransferService : Service(), CoroutineScope {
                 )
                 return dropboxFile
             }
-            Sources.GOOGLE_DRIVE -> {
+            SourceType.GOOGLE_DRIVE.id -> {
                 val googleDriveFile = GoogleDriveFile(
-                    GoogleDriveFactory.uploadFile(
+                    googleDriveClient.uploadFile(
                         newFilePath,
                         fileName,
                         (destDir as GoogleDriveFile).driveId
@@ -940,9 +953,9 @@ class SourceTransferService : Service(), CoroutineScope {
                 )
                 return googleDriveFile
             }
-            Sources.ONEDRIVE -> {
+            SourceType.ONEDRIVE.id -> {
                 val oneDriveFile = OneDriveFile(
-                    OneDriveFactory.uploadFile(
+                    oneDriveClient.uploadFile(
                         newFilePath,
                         fileName,
                         (destDir as OneDriveFile).driveId
@@ -954,7 +967,7 @@ class SourceTransferService : Service(), CoroutineScope {
                 )
                 return oneDriveFile
             }
-            else -> if (destDir.sourceType == SourceType.LOCAL) {
+            else -> if (destDir.sourceId == SourceType.LOCAL.id) {
                 val result = copyFileNative(
                     newFilePath,
                     destDir.path + "/" + fileName)
@@ -963,22 +976,12 @@ class SourceTransferService : Service(), CoroutineScope {
                 }
                 return LocalFile(
                     java.io.File(destDir.path + "/" + fileName),
-                    destDir.sourceName)
+                    destDir.sourceId)
             }
         }
         return null
     }
-    /**
-     * Notifies the hosting activity that an operation has completed successfully
-     *
-     * @param operationId The id of the operation
-     * @param bundle      The bundle to deliver to the activityy
-     */
-    /**
-     * Notifies the hosting activity that an operation has completed successfully
-     *
-     * @param operationId The id of the operation
-     */
+
     private fun broadcastFinishedTask(
         operationId: Int,
         bundle: Bundle? = null
@@ -993,7 +996,7 @@ class SourceTransferService : Service(), CoroutineScope {
             intent.putExtra(EXTRA_OPERATION_ID, operationId)
         }
 
-        SelectedFilesManager.getSelectedFiles(operationId)?.clear()
+        selectedFilesManager.getSelectedFiles(operationId)?.clear()
         applicationContext.sendBroadcast(intent)
         hideNotification(operationId)
     }

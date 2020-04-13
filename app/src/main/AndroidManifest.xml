@@ -15,7 +15,7 @@
         android:required="false" />
 
     <application
-        android:name="androidx.multidex.MultiDexApplication"
+        android:name=".core.FileManagerApplication"
         tools:replace="android:allowBackup"
         android:allowBackup="false"
         android:icon="@drawable/ic_folder_flat"

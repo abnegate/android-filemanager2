@@ -1,4 +1,4 @@
-package com.jakebarnby.filemanager.sources.models
+package com.jakebarnby.filemanager.models
 
 import android.content.Context
 import com.jakebarnby.filemanager.managers.PreferenceManager
@@ -10,8 +10,8 @@ import java.io.Serializable
  * Created by Jake on 7/29/2017.
  */
 abstract class Source(
-    var sourceType: SourceType,
-    val sourceName: String,
+    var sourceConnectionType: SourceConnectionType,
+    val sourceId: Int,
     protected val prefsManager: PreferenceManager
 ) : Serializable {
 
@@ -30,7 +30,7 @@ abstract class Source(
     abstract fun loadFiles(context: Context)
     abstract fun logout(context: Context)
 
-    fun setQuotaInfo(info: SourceStorageStats?) {
+    fun setQuotaInfo(info: StorageInfo?) {
         totalSpace += info?.totalSpace ?: 0
         usedSpace += info?.usedSpace ?: 0
         freeSpace += info?.freeSpace ?: 0

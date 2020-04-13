@@ -1,9 +1,10 @@
 package com.jakebarnby.filemanager.managers
 
 import android.content.SharedPreferences
+import javax.inject.Inject
 
-class PreferenceManager(
-    val preferences: SharedPreferences
+class PreferenceManager @Inject constructor(
+    private val preferences: SharedPreferences
 ) {
 
     fun savePref(name: String?, value: String?) {
@@ -54,9 +55,9 @@ class PreferenceManager(
         return preferences.getStringSet(name, defaultValue)
     }
 
-    fun hasSourceToken(sourceName: String): Boolean =
+    fun hasSourceToken(sourceId: Int): Boolean =
         preferences.getString(
-            sourceName.toLowerCase() + "-access-token",
+            "$sourceId-access-token",
             null
         ) != null
 }

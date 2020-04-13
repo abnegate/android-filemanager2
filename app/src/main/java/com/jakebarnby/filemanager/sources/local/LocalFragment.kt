@@ -3,7 +3,8 @@ package com.jakebarnby.filemanager.sources.local
 import android.Manifest
 import android.os.Bundle
 import androidx.core.os.bundleOf
-import com.jakebarnby.filemanager.sources.models.SourceType
+import com.jakebarnby.filemanager.models.SourceConnectionType
+import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.ui.sources.SourceFragment
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.RequestCodes
@@ -19,22 +20,22 @@ class LocalFragment : SourceFragment() {
         val name = arguments?.getString(Constants.FRAGMENT_TITLE) ?: ""
         val rootPath = arguments?.getString(Constants.LOCAL_ROOT) ?: "/"
 
-        source = LocalSource(name, rootPath, this)
+        presenter.source = LocalSource(rootPath, presenter)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        if (source.sourceType == SourceType.LOCAL) {
-            onCheckPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, RequestCodes.STORAGE_PERMISSIONS)
+        if (presenter.source.sourceConnectionType == SourceConnectionType.LOCAL) {
+            presenter.onCheckPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, RequestCodes.STORAGE_PERMISSIONS)
         }
     }
 
     companion object {
-        fun newInstance(sourceName: String, rootPath: String): SourceFragment =
+        fun newInstance(sourceId: Int, rootPath: String): SourceFragment =
             LocalFragment().apply {
                 arguments = bundleOf(
-                    Constants.FRAGMENT_TITLE to sourceName,
+                    Constants.FRAGMENT_TITLE to SourceType.values()[sourceId],
                     Constants.LOCAL_ROOT to rootPath
                 )
             }

@@ -4,20 +4,43 @@ import android.content.Context
 import android.webkit.MimeTypeMap
 import com.google.api.client.http.FileContent
 import com.google.api.services.drive.Drive
-import com.jakebarnby.filemanager.sources.models.SourceStorageStats
+import com.google.api.services.drive.model.FileList
+import com.jakebarnby.filemanager.managers.PreferenceManager
+import com.jakebarnby.filemanager.models.StorageInfo
+import com.jakebarnby.filemanager.sources.RemoteClient
+import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
-import com.jakebarnby.filemanager.util.Constants.Sources
 import com.jakebarnby.filemanager.util.Utils
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import javax.inject.Inject
 
 /**
  * Created by Jake on 6/9/2017.
  */
-object GoogleDriveFactory {
+class GoogleDriveClient @Inject constructor(
+    var prefsManager: PreferenceManager
+)  {
 
-    var service: Drive? = null
+    companion object {
+        var client: Drive? = null
+    }
+
+    fun getFilesAtPath(path: String): com.google.api.services.drive.model.File? =
+        client
+            ?.files()
+            ?.get(path)
+            ?.setFields("name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime")
+            ?.execute()
+
+    fun getFilesByParentId(id: String): FileList? =
+        client
+            ?.files()
+            ?.list()
+            ?.setQ(String.format("'%s' in parents", id))
+            ?.setFields("files(name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime)")
+            ?.execute()
 
     /**
      * @param fileId
@@ -31,7 +54,7 @@ object GoogleDriveFactory {
     ): File {
         val file = File(destinationPath)
         FileOutputStream(file).use {
-            service
+            client
                 ?.files()
                 ?.get(fileId)
                 ?.executeMediaAndDownloadTo(it)
@@ -64,7 +87,7 @@ object GoogleDriveFactory {
 
         val googleFile = FileContent(fileMimeType, file)
 
-        return service
+        return client
             ?.files()
             ?.create(fileMetadata, googleFile)
             ?.setFields("name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime")
@@ -78,7 +101,7 @@ object GoogleDriveFactory {
      */
     @Throws(IOException::class)
     fun deleteFile(fileId: String) {
-        service
+        client
             ?.files()
             ?.delete(fileId)
             ?.execute()
@@ -96,10 +119,10 @@ object GoogleDriveFactory {
         val fileMetadata = com.google.api.services.drive.model.File().apply {
             parents = listOf(parentId)
             name = folderName
-            mimeType = Sources.GOOGLE_DRIVE_FOLDER_MIME
+            mimeType = Constants.Sources.GOOGLE_DRIVE_FOLDER_MIME
         }
 
-        return service
+        return client
             ?.files()
             ?.create(fileMetadata)
             ?.setFields("name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime")
@@ -107,8 +130,8 @@ object GoogleDriveFactory {
     }
 
     fun logout(context: Context) {
-        Preferences.savePref(context, Prefs.GOOGLE_TOKEN_KEY, null as String?)
-        Preferences.savePref(context, Prefs.GOOGLE_NAME_KEY, null as String?)
+        prefsManager.savePref(Prefs.GOOGLE_TOKEN_KEY, null as String?)
+        prefsManager.savePref(Prefs.GOOGLE_NAME_KEY, null as String?)
     }
 
     /**
@@ -125,23 +148,23 @@ object GoogleDriveFactory {
             name = newName
         }
 
-        return service
+        return client
             ?.files()
             ?.update(parentId, file)
             ?.setFields("name")
             ?.execute()
     }
 
-    val storageStats: SourceStorageStats?
+    val storageInfo: StorageInfo?
         get() {
             try {
-                val quota = service
+                val quota = client
                     ?.about()
                     ?.get()
                     ?.setFields("storageQuota")
                     ?.execute()
                     ?.storageQuota
-                val info = SourceStorageStats()
+                val info = StorageInfo()
                 info.totalSpace = quota?.limit ?: 0
                 info.usedSpace = quota?.usage ?: 0
                 info.freeSpace = (quota?.limit ?: 0) - (quota?.usage ?: 0)

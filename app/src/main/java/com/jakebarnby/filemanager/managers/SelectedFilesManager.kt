@@ -1,14 +1,15 @@
 package com.jakebarnby.filemanager.managers
 
 import android.util.SparseArray
-import com.jakebarnby.filemanager.sources.models.SourceFile
+import com.jakebarnby.filemanager.models.SourceFile
 import com.jakebarnby.filemanager.util.TreeNode
 import java.util.*
+import javax.inject.Inject
 
 /**
  * Created by Jake on 6/6/2017.
  */
-object SelectedFilesManager {
+class SelectedFilesManager @Inject constructor() {
 
     private val selectedFilesMap = SparseArray<MutableList<TreeNode<SourceFile>>>()
     private val actionableDirectories = SparseArray<TreeNode<SourceFile>>()

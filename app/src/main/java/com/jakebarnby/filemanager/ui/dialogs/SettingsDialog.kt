@@ -2,7 +2,6 @@ package com.jakebarnby.filemanager.ui.dialogs
 
 import android.app.Dialog
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.CheckBox
@@ -11,8 +10,8 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.managers.PreferenceManager
-import com.jakebarnby.filemanager.ui.sources.SourceActivity
-import com.jakebarnby.filemanager.util.Constants
+import com.jakebarnby.filemanager.util.Constants.DIALOG_ON_POSITIVE_KEY
+import com.jakebarnby.filemanager.util.Constants.DIALOG_TITLE_KEY
 import com.jakebarnby.filemanager.util.Constants.Prefs
 
 /**
@@ -21,10 +20,13 @@ import com.jakebarnby.filemanager.util.Constants.Prefs
 class SettingsDialog : DialogFragment() {
 
     companion object {
-        fun newInstance() =
+        fun newInstance(
+            onPositive: () -> Unit
+        ) =
             SettingsDialog().apply {
                 arguments = bundleOf(
-                    Constants.DIALOG_TITLE_KEY to getString(R.string.action_settings)
+                    DIALOG_TITLE_KEY to getString(R.string.action_settings),
+                    DIALOG_ON_POSITIVE_KEY to onPositive
                 )
             }
     }
@@ -34,43 +36,44 @@ class SettingsDialog : DialogFragment() {
         Context.MODE_PRIVATE
     ))
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    private var hiddenFilesChecked = false
+    private var foldersFirstChecked = false
 
-        val builder = AlertDialog.Builder(activity!!)
-        builder.setTitle(getString(R.string.action_settings))
-        val rootView = activity!!.layoutInflater.inflate(R.layout.dialog_settings, null)
-        initViews(rootView)
-        builder.setView(rootView)
-        builder.setNegativeButton(getString(R.string.close)) { dialog: DialogInterface, which: Int ->
-            (activity as SourceActivity?)!!.initAllRecyclers()
-            dialog.dismiss()
-        }
-        return builder.create()
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val onPositive = arguments
+            ?.getSerializable(DIALOG_ON_POSITIVE_KEY) as? () -> Unit
+
+        val builder = AlertDialog.Builder(activity!!).setTitle(getString(R.string.action_settings))
+
+        val view = layoutInflater.inflate(R.layout.dialog_settings, null)
+        initViews(view)
+
+        return builder
+            .setView(view)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                prefs.savePref(Prefs.FOLDER_FIRST_KEY, foldersFirstChecked)
+                prefs.savePref(Prefs.HIDDEN_FILES_KEY, hiddenFilesChecked)
+                onPositive?.invoke()
+            }
+            .setNegativeButton(R.string.close) { _, _ ->
+                dismiss()
+            }.create()
     }
 
     private fun initViews(rootView: View) {
         val foldersFirstCbx = rootView.findViewById<CheckBox>(R.id.ckb_folders_first)
         val hiddenFoldersCbx = rootView.findViewById<CheckBox>(R.id.ckb_hidden_files)
         val foldersFirst = prefs.getBoolean(Prefs.FOLDER_FIRST_KEY, true)
-        val showHiddenFiles = prefs.getBoolean(Prefs.HIDDEN_FOLDER_KEY, false)
+        val showHiddenFiles = prefs.getBoolean(Prefs.HIDDEN_FILES_KEY, false)
 
         foldersFirstCbx.isChecked = foldersFirst
         hiddenFoldersCbx.isChecked = showHiddenFiles
 
         foldersFirstCbx.setOnCheckedChangeListener { _, checked ->
-            prefs.savePref(Prefs.FOLDER_FIRST_KEY, checked)
+            foldersFirstChecked = checked
         }
         hiddenFoldersCbx.setOnCheckedChangeListener { _, checked ->
-            prefs.savePref(Prefs.HIDDEN_FOLDER_KEY, checked)
+            hiddenFilesChecked = checked
         }
-
-//        Button ossButton = rootView.findViewById(R.id.btn_oss_licenses);
-//        ossButton.setOnClickListener((view) -> {
-//            Intent intent = new Intent(getActivity(), OssLicensesMenuActivity.class);
-//            String title = getString(R.string.oss_license_title);
-//            intent.putExtra(Constants.DIALOG_TITLE_KEY, title);
-//            startActivity(intent);
-//
-//        });
     }
 }

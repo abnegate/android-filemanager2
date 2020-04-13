@@ -1,5 +1,6 @@
 package com.jakebarnby.filemanager.tutorial
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -9,15 +10,19 @@ import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Constants.RemoteConfig
 import com.jakebarnby.tutorial.TutorialActivity
 import com.jakebarnby.tutorial.TutorialPage
+import javax.inject.Inject
 
 /**
  * Created by Jake on 9/26/2017.
  */
 class FileManagerTutorialActivity : TutorialActivity() {
-    private var mFirebaseRemoteConfig: FirebaseRemoteConfig? = null
+
+    @Inject
+    lateinit var remoteConfig: FirebaseRemoteConfig
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance()
+        remoteConfig = FirebaseRemoteConfig.getInstance()
         addPages()
     }
 
@@ -26,23 +31,23 @@ class FileManagerTutorialActivity : TutorialActivity() {
      */
     private fun addPages() {
         addPageWithContent(
-            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE1_TITLE_KEY),
-            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE1_CONTENT_KEY),
-            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE1_SUMMARY_KEY),
-            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE1_IMAGE_KEY),
-            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE1_BGCOLOR_KEY))
+            remoteConfig.getString(RemoteConfig.TUT_PAGE1_TITLE_KEY),
+            remoteConfig.getString(RemoteConfig.TUT_PAGE1_CONTENT_KEY),
+            remoteConfig.getString(RemoteConfig.TUT_PAGE1_SUMMARY_KEY),
+            remoteConfig.getString(RemoteConfig.TUT_PAGE1_IMAGE_KEY),
+            remoteConfig.getString(RemoteConfig.TUT_PAGE1_BGCOLOR_KEY))
         addPageWithContent(
-            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE2_TITLE_KEY),
-            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE2_CONTENT_KEY),
-            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE2_SUMMARY_KEY),
-            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE2_IMAGE_KEY),
-            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE2_BGCOLOR_KEY))
+            remoteConfig.getString(RemoteConfig.TUT_PAGE2_TITLE_KEY),
+            remoteConfig.getString(RemoteConfig.TUT_PAGE2_CONTENT_KEY),
+            remoteConfig.getString(RemoteConfig.TUT_PAGE2_SUMMARY_KEY),
+            remoteConfig.getString(RemoteConfig.TUT_PAGE2_IMAGE_KEY),
+            remoteConfig.getString(RemoteConfig.TUT_PAGE2_BGCOLOR_KEY))
         addPageWithContent(
-            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE3_TITLE_KEY),
-            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE3_CONTENT_KEY),
-            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE3_SUMMARY_KEY),
-            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE3_IMAGE_KEY),
-            mFirebaseRemoteConfig!!.getString(RemoteConfig.TUT_PAGE3_BGCOLOR_KEY))
+            remoteConfig.getString(RemoteConfig.TUT_PAGE3_TITLE_KEY),
+            remoteConfig.getString(RemoteConfig.TUT_PAGE3_CONTENT_KEY),
+            remoteConfig.getString(RemoteConfig.TUT_PAGE3_SUMMARY_KEY),
+            remoteConfig.getString(RemoteConfig.TUT_PAGE3_IMAGE_KEY),
+            remoteConfig.getString(RemoteConfig.TUT_PAGE3_BGCOLOR_KEY))
     }
 
     /**
@@ -74,6 +79,8 @@ class FileManagerTutorialActivity : TutorialActivity() {
     }
 
     private fun saveFinished() {
-        Preferences.savePref(this, Prefs.TUT_SEEN_KEY, true)
+        getSharedPreferences(Prefs.PREFS, Context.MODE_PRIVATE).edit()
+            .putBoolean(Prefs.TUT_SEEN_KEY, true)
+            .apply()
     }
 }

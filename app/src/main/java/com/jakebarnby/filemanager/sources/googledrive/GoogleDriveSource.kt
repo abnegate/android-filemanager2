@@ -7,8 +7,11 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.util.ExponentialBackOff
 import com.google.api.services.drive.DriveScopes
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.jakebarnby.filemanager.sources.models.Source
-import com.jakebarnby.filemanager.sources.models.SourceType
+import com.jakebarnby.filemanager.models.Source
+import com.jakebarnby.filemanager.models.SourceConnectionType
+import com.jakebarnby.filemanager.models.SourceType
+import com.jakebarnby.filemanager.sources.dropbox.DropboxClient
+import com.jakebarnby.filemanager.ui.sources.SourceFragmentContract
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Constants.RequestCodes
@@ -17,14 +20,21 @@ import com.jakebarnby.filemanager.util.Logger
 import com.jakebarnby.filemanager.util.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
+import javax.inject.Inject
 
 /**
  * Created by jakebarnby on 2/08/17.
  */
 class GoogleDriveSource(
-    sourceName: String,
-    listener: SourceListener
-) : Source(SourceType.REMOTE, sourceName, listener) {
+    private val presenter: SourceFragmentContract.Presenter
+) : Source(
+    SourceConnectionType.REMOTE,
+    SourceType.GOOGLE_DRIVE.id,
+    presenter.prefsManager
+) {
+
+    @Inject
+    lateinit var googleDriveClient: GoogleDriveClient
 
     private var credendtial: GoogleAccountCredential? = null
 
@@ -33,12 +43,12 @@ class GoogleDriveSource(
     }
 
     override fun authenticate(context: Context) {
-        if (!checkConnectionActive(context)) return
+        //if (!checkConnectionActive(context)) return
         fetchCredential(context)
-        if (hasToken(context, sourceName)) {
+        if (presenter.prefsManager.hasSourceToken(sourceId)) {
             loadFiles(context)
         } else {
-            sourceListener.onCheckPermissions(
+            presenter.onCheckPermissions(
                 Manifest.permission.GET_ACCOUNTS,
                 RequestCodes.ACCOUNTS_PERMISSIONS
             )
@@ -47,20 +57,20 @@ class GoogleDriveSource(
 
     override fun loadFiles(context: Context) {
         if (!isFilesLoaded) {
-            if (!checkConnectionActive(context)) return
-            GoogleDriveLoaderTask(this, sourceListener, credendtial)
+//            if (!precheckConnectionActive(context)) return
+            GoogleDriveLoaderTask(this, presenter, credendtial)
                 .executeOnExecutor(Dispatchers.IO.asExecutor(), "root")
         }
     }
 
     override fun logout(context: Context) {
         if (isLoggedIn) {
-            GoogleDriveFactory.logout(context)
+            googleDriveClient.logout(context)
 
             isLoggedIn = false
             isFilesLoaded = false
             credendtial = null
-            sourceListener.onLogout()
+            presenter.onLogout()
 
             Logger.logFirebaseEvent(
                 FirebaseAnalytics.getInstance(context),
@@ -83,10 +93,10 @@ class GoogleDriveSource(
      * Create a google credential and try to call the API with it, do nothing if it fails
      */
     fun authGoogleSilent(fragment: Fragment) {
-        val accountName = Preferences.getString(
-            fragment.context!!,
+        val accountName = presenter.prefsManager.getString(
             Prefs.GOOGLE_NAME_KEY,
-            null)
+            null
+        )
         if (accountName != null) {
             fetchCredential(fragment.context!!)
             credendtial!!.selectedAccountName = accountName
@@ -107,7 +117,7 @@ class GoogleDriveSource(
         } else if (credendtial != null && credendtial!!.selectedAccountName == null) {
             fragment.startActivityForResult(credendtial!!.newChooseAccountIntent(), RequestCodes.ACCOUNT_PICKER)
         } else if (!Utils.isConnectionReady(fragment.context!!)) {
-            sourceListener.onNoConnection()
+            presenter.onNoConnection()
         } else {
             isLoggedIn = true
             loadFiles(fragment.context!!)
@@ -116,7 +126,7 @@ class GoogleDriveSource(
 
     fun saveUserToken(fragment: Fragment) {
         try {
-            Preferences.savePref(fragment.context!!, Prefs.GOOGLE_TOKEN_KEY, credendtial!!.token)
+            presenter.prefsManager.savePref(Prefs.GOOGLE_TOKEN_KEY, credendtial!!.token)
         } catch (e: Exception) {
             e.printStackTrace()
             //TODO: Log error
@@ -125,7 +135,7 @@ class GoogleDriveSource(
     }
 
     fun saveUserAccount(fragment: Fragment, accountName: String?) {
-        Preferences.savePref(fragment.context!!, Prefs.GOOGLE_NAME_KEY, accountName)
+        presenter.prefsManager.savePref(Prefs.GOOGLE_NAME_KEY, accountName)
         credendtial!!.selectedAccountName = accountName
         getResultsFromApi(fragment)
     }

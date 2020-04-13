@@ -4,15 +4,17 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.managers.PreferenceManager
-import com.jakebarnby.filemanager.sources.models.Source
+import com.jakebarnby.filemanager.managers.SelectedFilesManager
+import com.jakebarnby.filemanager.models.Source
 
 /**
  * Created by Jake on 5/31/2017.
  */
 class FileListAdapter(
     source: Source,
+    selectedFilesManager: SelectedFilesManager,
     prefs: PreferenceManager
-) : FileAdapter(source, prefs) {
+) : FileAdapter(source, selectedFilesManager, prefs) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileViewHolder {
         val inflatedView = LayoutInflater.from(parent.context)

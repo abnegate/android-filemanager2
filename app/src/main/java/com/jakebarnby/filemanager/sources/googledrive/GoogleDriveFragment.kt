@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.core.os.bundleOf
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.ui.sources.SourceFragment
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.RequestCodes
@@ -19,12 +20,12 @@ class GoogleDriveFragment : SourceFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        source = GoogleDriveSource(Sources.GOOGLE_DRIVE, this)
+        presenter.source = GoogleDriveSource(presenter)
     }
 
     override fun onResume() {
-        if (!(source.isLoggedIn == true)) {
-            (source as GoogleDriveSource).authGoogleSilent(this)
+        if (!presenter.source.isLoggedIn) {
+            (presenter.source as GoogleDriveSource).authGoogleSilent(this)
         }
         super.onResume()
     }
@@ -33,10 +34,10 @@ class GoogleDriveFragment : SourceFragment() {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
             RequestCodes.GOOGLE_PLAY_SERVICES -> if (resultCode == Activity.RESULT_OK) {
-                (source as GoogleDriveSource).getResultsFromApi(this)
+                (presenter.source as GoogleDriveSource).getResultsFromApi(this)
             }
             RequestCodes.GOOGLE_SIGN_IN -> if (resultCode == Activity.RESULT_OK) {
-                (source as GoogleDriveSource).saveUserToken(this)
+                (presenter.source as GoogleDriveSource).saveUserToken(this)
                 Logger.logFirebaseEvent(
                     FirebaseAnalytics.getInstance(context!!),
                     Constants.Analytics.EVENT_LOGIN_GOOGLE_DRIVE)
@@ -44,16 +45,18 @@ class GoogleDriveFragment : SourceFragment() {
             RequestCodes.ACCOUNT_PICKER -> if (resultCode == Activity.RESULT_OK && data != null && data.extras != null) {
                 val accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
                 if (accountName != null) {
-                    (source as GoogleDriveSource).saveUserAccount(this, accountName)
+                    (presenter.source as GoogleDriveSource).saveUserAccount(this, accountName)
                 }
             }
         }
     }
 
     companion object {
-        fun newInstance(sourceName: String): SourceFragment =
+        fun newInstance(sourceId: Int): SourceFragment =
             GoogleDriveFragment().apply {
-                arguments = bundleOf("TITLE" to sourceName)
+                arguments = bundleOf(
+                    Constants.FRAGMENT_TITLE to SourceType.values()[sourceId]
+                )
             }
     }
 }

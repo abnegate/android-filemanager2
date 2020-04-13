@@ -5,6 +5,12 @@ package com.jakebarnby.filemanager.util
  */
 object Constants {
     const val DIALOG_TITLE_KEY = "DIALOG_TITLE"
+    const val DIALOG_ON_POSITIVE_KEY = "DIALOG_ON_POSITIVE"
+    const val DIALOG_DELETE_COUNT = "DIALOG_DELETE_COUNT"
+    const val DIALOG_CURRENT_FILE_NAME_KEY = "DIALOG_CURRENT_FILE_NAME_KEY"
+    const val DIALOG_SELECTED_COUNT_KEY = "DIALOG_SELECTED_COUNT_KEY"
+    const val DIALOG_SELECTED_SIZE_KEY = "DIALOG_SELECTED_SIZE"
+
     const val FILE_PATH_KEY = "FILE_PATH"
     const val FRAGMENT_TITLE = "TITLE"
     const val BYTES_TO_GIGABYTE = 1073741824.0
@@ -15,17 +21,6 @@ object Constants {
     const val GRID_SIZE = 4
     const val ADS_MENU_POSITION = 9
     const val ADS_MENU_ID = 666666
-
-    object Sources {
-        const val LOCAL = "Local"
-        const val DROPBOX = "Dropbox"
-        const val GOOGLE_DRIVE = "Google Drive"
-        const val GOOGLE_DRIVE_FOLDER_MIME = "application/vnd.google-apps.folder"
-        const val ONEDRIVE = "OneDrive"
-        const val ONEDRIVE_INVALID_CHARS = "[\\/:*?\"<>|#% ]"
-        const val DROPBOX_CLIENT_ID = "rse09cxjnnn2yc1"
-        const val MAX_FILENAME_LENGTH = 255
-    }
 
     object RequestCodes {
         const val STORAGE_PERMISSIONS = 100
@@ -46,7 +41,7 @@ object Constants {
         const val VIEW_TYPE_KEY = "view-type"
         const val SORT_TYPE_KEY = "sort-type"
         const val ORDER_TYPE_KEY = "order-type"
-        const val HIDDEN_FOLDER_KEY = "hidden-folder"
+        const val HIDDEN_FILES_KEY = "hidden-folder"
         const val FOLDER_FIRST_KEY = "folders-first"
         const val HIDE_ADS_KEY = "premium-enabled"
         const val OPERATION_COUNT_KEY = "operation-count"
@@ -113,6 +108,7 @@ object Constants {
     }
 
     object DialogTags {
+        const val DELETE = "Delete"
         const val PROPERTIES = "Properties"
         const val SORT_BY = "Sort by"
         const val CREATE_FOLDER = "Create folder"
@@ -129,36 +125,10 @@ object Constants {
         const val SHOW_AD_COUNT = 5
     }
 
-    enum class ViewType(val value: Int) {
-        LIST(0),
-        DETAILED_LIST(1),
-        GRID(2);
-
-        companion object {
-            fun getFromValue(value: Int): ViewType? =
-                values().find { it.value == value }
-        }
-    }
-
-    enum class SortType(val value: Int) {
-        NAME(0),
-        TYPE(1),
-        SIZE(2),
-        MODIFIED_TIME(3);
-
-        companion object {
-            fun getFromValue(value: Int): SortType? =
-                values().find { it.value == value }
-        }
-    }
-
-    enum class OrderType(val value: Int) {
-        ASCENDING(0),
-        DESCENDING(1);
-
-        companion object {
-            fun getFromValue(value: Int): OrderType? =
-                values().find { it.value == value }
-        }
+    object Sources {
+        const val ONEDRIVE_INVALID_CHARS = "[\\/:*?\"<>|#% ]"
+        const val GOOGLE_DRIVE_FOLDER_MIME = "application/vnd.google-apps.folder"
+        const val DROPBOX_CLIENT_ID = "rse09cxjnnn2yc1"
+        const val MAX_FILENAME_LENGTH = 255
     }
 }

@@ -1,6 +1,6 @@
 package com.jakebarnby.filemanager.util
 
-import com.jakebarnby.filemanager.sources.models.SourceFile
+import com.jakebarnby.filemanager.models.SourceFile
 import java.io.Serializable
 import java.util.*
 

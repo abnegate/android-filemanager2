@@ -3,9 +3,10 @@ package com.jakebarnby.filemanager.ui.sources
 import com.jakebarnby.filemanager.core.BasePresenter
 import com.jakebarnby.filemanager.managers.ConnectionManager
 import com.jakebarnby.filemanager.managers.PreferenceManager
-import com.jakebarnby.filemanager.sources.models.Source
-import com.jakebarnby.filemanager.sources.models.SourceFile
-import com.jakebarnby.filemanager.sources.models.SourceManager
+import com.jakebarnby.filemanager.managers.SelectedFilesManager
+import com.jakebarnby.filemanager.models.Source
+import com.jakebarnby.filemanager.models.SourceFile
+import com.jakebarnby.filemanager.managers.SourceManager
 import com.jakebarnby.filemanager.util.TreeNode
 
 interface SourceFragmentContract {
@@ -13,10 +14,13 @@ interface SourceFragmentContract {
     interface Presenter : BasePresenter<View> {
         var source: Source
         var sourceManager: SourceManager
+        var selectedFilesManager: SelectedFilesManager
         var prefsManager: PreferenceManager
         var connectionManager: ConnectionManager
 
+
         fun checkState()
+        fun onCheckPermissions(name: String, requestCode: Int)
         fun onConnect()
         fun onNoConnection()
         fun onLoadStarted()
@@ -46,7 +50,7 @@ interface SourceFragmentContract {
         fun showSourceLogo()
         fun hideSourceLogo()
 
-        fun showLoadError(sourceName: String)
+        fun showLoadError(sourceName: Int)
 
         fun showFileList()
         fun hideFileList()
@@ -70,6 +74,8 @@ interface SourceFragmentContract {
         fun authenticate()
 
         fun showAppSettings()
+
+        fun onCheckPermissions(name: String, requestCode: Int)
 
     }
 

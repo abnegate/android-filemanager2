@@ -1,15 +1,18 @@
-package com.jakebarnby.filemanager.sources.models
+package com.jakebarnby.filemanager.managers
 
 import android.util.SparseArray
 import com.jakebarnby.filemanager.models.FileAction
+import com.jakebarnby.filemanager.models.Source
+import com.jakebarnby.filemanager.models.SourceType
 import java.io.Serializable
+import javax.inject.Inject
 
 /**
  * Created by Jake on 7/29/2017.
  */
-class SourceManager(
+class SourceManager @Inject constructor() : Serializable {
+
     val sources: MutableList<Source> = mutableListOf()
-) : Serializable {
 
     lateinit var activeSource: Source
 
@@ -22,5 +25,7 @@ class SourceManager(
     fun addFileAction(operationId: Int, action: FileAction) {
         currentFileActions.put(operationId, action)
     }
+
+    fun getSource(id: Int) = sources[id]
 
 }
