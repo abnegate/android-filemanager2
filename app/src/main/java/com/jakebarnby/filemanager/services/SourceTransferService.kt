@@ -47,6 +47,7 @@ import com.jakebarnby.filemanager.util.Intents.EXTRA_ZIP_FILENAME
 import com.jakebarnby.filemanager.util.Logger
 import com.jakebarnby.filemanager.util.TreeNode
 import com.microsoft.graph.http.GraphServiceException
+import dagger.android.DaggerService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -59,7 +60,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Created by Jake on 6/6/2017.
  */
-class SourceTransferService : Service(), CoroutineScope {
+class SourceTransferService : DaggerService(), CoroutineScope {
 
     @Inject
     lateinit var analytics: FirebaseAnalytics

@@ -14,7 +14,7 @@ class DropboxFragment : SourceFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        presenter.source = DropboxSource(presenter)
+        presenter.setFileSource(DropboxSource(presenter))
     }
 
     override fun onResume() {

@@ -39,6 +39,7 @@ import com.jakebarnby.filemanager.models.Source
 import com.jakebarnby.filemanager.models.SourceFile
 import com.jakebarnby.filemanager.models.SourceConnectionType
 import com.jakebarnby.filemanager.models.SourceType
+import com.jakebarnby.filemanager.sources.SourcePresenter
 import com.jakebarnby.filemanager.ui.adapters.*
 import com.jakebarnby.filemanager.ui.adapters.SourceLogoutAdapter.LogoutListener
 import com.jakebarnby.filemanager.ui.dialogs.*

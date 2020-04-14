@@ -101,7 +101,7 @@ dependencies {
     kapt "androidx.room:room-compiler:$roomVersion"
 
     // Dagger
-    def daggerVersion = "2.15"
+    def daggerVersion = "2.27"
     implementation "com.google.dagger:dagger:$daggerVersion"
     implementation "com.google.dagger:dagger-android:$daggerVersion"
     implementation "com.google.dagger:dagger-android-support:$daggerVersion"

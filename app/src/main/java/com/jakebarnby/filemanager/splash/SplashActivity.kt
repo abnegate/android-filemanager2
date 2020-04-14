@@ -9,16 +9,22 @@ import com.google.android.gms.ads.MobileAds
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.jakebarnby.filemanager.R
+import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.tutorial.FileManagerTutorialActivity
 import com.jakebarnby.filemanager.ui.sources.SourceActivity
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.GooglePlay
+import dagger.android.support.DaggerAppCompatActivity
+import javax.inject.Inject
 
 /**
  * Created by Jake on 9/26/2017.
  */
-class SplashActivity : AppCompatActivity() {
+class SplashActivity : DaggerAppCompatActivity() {
+
+    @Inject
+    lateinit var prefsManager: PreferenceManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,10 +87,7 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun goToSources() {
-        if (!getSharedPreferences(
-                Prefs.PREFS,
-                Context.MODE_PRIVATE
-            ).getBoolean(Prefs.TUT_SEEN_KEY, false)) {
+        if (!prefsManager.getBoolean(Prefs.TUT_SEEN_KEY, false)) {
             startActivity(Intent(this, FileManagerTutorialActivity::class.java))
         } else {
             startActivity(Intent(this, SourceActivity::class.java))

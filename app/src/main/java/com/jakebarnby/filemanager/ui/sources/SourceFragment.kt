@@ -36,10 +36,11 @@ import com.jakebarnby.filemanager.ui.adapters.FileListAdapter
 import com.jakebarnby.filemanager.util.*
 import com.jakebarnby.filemanager.util.Constants.GRID_SIZE
 import com.jakebarnby.filemanager.util.Constants.Prefs
+import dagger.android.support.DaggerFragment
 import java.util.*
 import javax.inject.Inject
 
-abstract class SourceFragment : Fragment(), SourceFragmentContract.View {
+abstract class SourceFragment : DaggerFragment(), SourceFragmentContract.View {
 
     @Inject
     protected lateinit var presenter: SourceFragmentContract.Presenter
@@ -56,8 +57,9 @@ abstract class SourceFragment : Fragment(), SourceFragmentContract.View {
     private lateinit var breadcrumbBar: LinearLayout
     private lateinit var breadcrumbWrapper: HorizontalScrollView
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        presenter.checkState()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -70,8 +72,6 @@ abstract class SourceFragment : Fragment(), SourceFragmentContract.View {
         divider = rootView.findViewById(R.id.divider_sort)
         connectButton = rootView.findViewById(R.id.btn_connect)
         sourceLogo = rootView.findViewById(R.id.img_source_logo)
-
-        presenter.checkState()
 
         connectButton.setOnClickListener {
             presenter.onConnect()

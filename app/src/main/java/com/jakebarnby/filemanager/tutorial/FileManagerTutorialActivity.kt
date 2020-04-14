@@ -10,6 +10,7 @@ import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Constants.RemoteConfig
 import com.jakebarnby.tutorial.TutorialActivity
 import com.jakebarnby.tutorial.TutorialPage
+import dagger.android.AndroidInjection
 import javax.inject.Inject
 
 /**
@@ -17,11 +18,11 @@ import javax.inject.Inject
  */
 class FileManagerTutorialActivity : TutorialActivity() {
 
-    @Inject
     lateinit var remoteConfig: FirebaseRemoteConfig
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AndroidInjection.inject(this)
         remoteConfig = FirebaseRemoteConfig.getInstance()
         addPages()
     }

@@ -15,7 +15,7 @@ class OneDriveFragment : SourceFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        presenter.source = OneDriveSource(presenter)
+        presenter.setFileSource(OneDriveSource(presenter))
     }
 
     override fun onResume() {

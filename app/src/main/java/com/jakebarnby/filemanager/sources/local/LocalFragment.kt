@@ -20,7 +20,7 @@ class LocalFragment : SourceFragment() {
         val name = arguments?.getString(Constants.FRAGMENT_TITLE) ?: ""
         val rootPath = arguments?.getString(Constants.LOCAL_ROOT) ?: "/"
 
-        presenter.source = LocalSource(rootPath, presenter)
+        presenter.setFileSource( LocalSource(rootPath, presenter))
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

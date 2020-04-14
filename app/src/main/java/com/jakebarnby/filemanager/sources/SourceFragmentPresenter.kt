@@ -25,6 +25,17 @@ class SourceFragmentPresenter @Inject constructor(
 
     override lateinit var source: Source
 
+    override fun setFileSource(source: Source) {
+        val index = sourceManager.sources.indexOf(source)
+        if (index == -1) {
+            sourceManager.sources.add(source)
+        } else {
+            sourceManager.sources.removeAt(index)
+            sourceManager.sources.add(index, source)
+        }
+        this.source = source
+    }
+
     override fun checkState() {
         if (prefsManager.hasSourceToken(source.sourceId)) {
             view?.hideConnectButton()

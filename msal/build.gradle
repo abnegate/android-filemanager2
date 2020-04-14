@@ -31,6 +31,10 @@ android {
             java.srcDirs = ['src/main/java', 'src/http/java', 'src/internal/java', 'src/request/java', 'src/cache/java', 'src/authority/java', 'src/telemetry/java']
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {

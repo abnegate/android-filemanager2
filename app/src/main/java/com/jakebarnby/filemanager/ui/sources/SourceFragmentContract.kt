@@ -19,6 +19,7 @@ interface SourceFragmentContract {
         var connectionManager: ConnectionManager
 
 
+        fun setFileSource(source: Source)
         fun checkState()
         fun onCheckPermissions(name: String, requestCode: Int)
         fun onConnect()
