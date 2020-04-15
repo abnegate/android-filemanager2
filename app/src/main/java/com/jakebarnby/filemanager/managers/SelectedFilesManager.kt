@@ -5,10 +5,12 @@ import com.jakebarnby.filemanager.models.SourceFile
 import com.jakebarnby.filemanager.util.TreeNode
 import java.util.*
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Created by Jake on 6/6/2017.
  */
+@Singleton
 class SelectedFilesManager @Inject constructor() {
 
     private val selectedFilesMap = SparseArray<MutableList<TreeNode<SourceFile>>>()

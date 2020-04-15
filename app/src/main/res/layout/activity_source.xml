@@ -25,14 +25,14 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
                 app:layout_scrollFlags="exitUntilCollapsed"
-                app:popupTheme="@style/AppTheme.PopupOverlay"/>
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
 
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:tabMode="scrollable"
-                app:tabIndicatorColor="@android:color/white" />
+                app:tabIndicatorColor="@android:color/white"
+                app:tabMode="scrollable" />
 
         </com.google.android.material.appbar.AppBarLayout>
 

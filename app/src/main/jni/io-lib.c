@@ -7,10 +7,10 @@
 #include <ftw.h>
 
 int unlink_cb(
-    const char *fpath,
-    const struct stat *sb,
-    int typeflag,
-    struct FTW *ftwbuf
+        const char *fpath,
+        const struct stat *sb,
+        int typeflag,
+        struct FTW *ftwbuf
 ) {
     int rv = remove(fpath);
     if (rv)
@@ -25,10 +25,10 @@ int rmrf(const char *path) {
 
 JNIEXPORT jint JNICALL
 Java_com_jakebarnby_filemanager_services_SourceTransferService_copyFileNative(
-    JNIEnv *env,
-    jobject instance,
-    jstring sourcePath_,
-    jstring destinationPath_
+        JNIEnv *env,
+        jobject instance,
+        jstring sourcePath_,
+        jstring destinationPath_
 ) {
     const char *sourcePath = (*env)->GetStringUTFChars(env, sourcePath_, 0);
     const char *destinationPath = (*env)->GetStringUTFChars(env, destinationPath_, 0);
@@ -77,9 +77,9 @@ Java_com_jakebarnby_filemanager_services_SourceTransferService_copyFileNative(
 
 JNIEXPORT jint JNICALL
 Java_com_jakebarnby_filemanager_services_SourceTransferService_deleteFileNative(
-    JNIEnv *env,
-    jobject instance,
-    jstring sourcePath_
+        JNIEnv *env,
+        jobject instance,
+        jstring sourcePath_
 ) {
     const char *sourcePath = (*env)->GetStringUTFChars(env, sourcePath_, 0);
 
@@ -91,9 +91,9 @@ Java_com_jakebarnby_filemanager_services_SourceTransferService_deleteFileNative(
 
 JNIEXPORT jint JNICALL
 Java_com_jakebarnby_filemanager_services_SourceTransferService_createFolderNative(
-    JNIEnv *env,
-    jobject instance,
-    jstring newPath_
+        JNIEnv *env,
+        jobject instance,
+        jstring newPath_
 ) {
     const char *newPath = (*env)->GetStringUTFChars(env, newPath_, 0);
 
@@ -106,10 +106,10 @@ Java_com_jakebarnby_filemanager_services_SourceTransferService_createFolderNativ
 
 JNIEXPORT jint JNICALL
 Java_com_jakebarnby_filemanager_services_SourceTransferService_renameFolderNative(
-    JNIEnv *env,
-    jobject instance,
-    jstring oldPath_,
-    jstring newPath_
+        JNIEnv *env,
+        jobject instance,
+        jstring oldPath_,
+        jstring newPath_
 ) {
     const char *oldPath = (*env)->GetStringUTFChars(env, oldPath_, 0);
     const char *newPath = (*env)->GetStringUTFChars(env, newPath_, 0);

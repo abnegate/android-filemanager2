@@ -4,9 +4,7 @@ import com.dropbox.core.v2.files.FileMetadata
 import com.dropbox.core.v2.files.FolderMetadata
 import com.dropbox.core.v2.files.Metadata
 import com.jakebarnby.filemanager.models.SourceFile
-import com.jakebarnby.filemanager.models.SourceConnectionType
 import com.jakebarnby.filemanager.models.SourceType
-import com.jakebarnby.filemanager.util.Constants.Sources
 
 /**
  * Created by Jake on 6/5/2017.

@@ -8,7 +8,7 @@ import java.io.Serializable
  * Created by Jake on 6/5/2017.
  */
 @Entity
-open class SourceFile: Serializable {
+open class SourceFile : Serializable {
 
     @PrimaryKey(autoGenerate = true)
     var fileId: Long = 0

@@ -3,13 +3,9 @@ package com.jakebarnby.filemanager.ui.sources
 import androidx.appcompat.widget.SearchView
 import androidx.viewpager.widget.ViewPager
 import com.jakebarnby.filemanager.core.BasePresenter
-import com.jakebarnby.filemanager.managers.BillingManager
-import com.jakebarnby.filemanager.managers.ConnectionManager
-import com.jakebarnby.filemanager.managers.PreferenceManager
-import com.jakebarnby.filemanager.managers.SelectedFilesManager
+import com.jakebarnby.filemanager.managers.*
 import com.jakebarnby.filemanager.models.Source
 import com.jakebarnby.filemanager.models.SourceFile
-import com.jakebarnby.filemanager.managers.SourceManager
 import com.jakebarnby.filemanager.util.TreeNode
 import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter
 

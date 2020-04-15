@@ -4,14 +4,9 @@ import com.jakebarnby.filemanager.splash.SplashActivity
 import com.jakebarnby.filemanager.tutorial.FileManagerTutorialActivity
 import com.jakebarnby.filemanager.ui.sources.SourceActivity
 import dagger.Module
-import dagger.android.AndroidInjectionModule
 import dagger.android.ContributesAndroidInjector
 
-@Module(
-    includes = [
-        AndroidInjectionModule::class
-    ]
-)
+@Module
 abstract class ActivityBindingsModule {
 
     @PerActivity

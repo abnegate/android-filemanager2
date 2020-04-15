@@ -1,7 +1,6 @@
 package com.jakebarnby.filemanager.sources.local
 
 import com.jakebarnby.filemanager.models.SourceFile
-import com.jakebarnby.filemanager.models.SourceConnectionType
 import java.io.File
 
 /**

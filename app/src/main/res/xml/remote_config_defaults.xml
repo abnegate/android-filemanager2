@@ -12,7 +12,9 @@
     </entry>
     <entry>
         <key>tut_page1_content</key>
-        <value>The easiest way to manage your files across devices, Dropbox, Google Drive and OneDrive.</value>
+        <value>The easiest way to manage your files across devices, Dropbox, Google Drive and
+            OneDrive.
+        </value>
     </entry>
     <entry>
         <key>tut_page1_summary</key>
@@ -20,7 +22,9 @@
     </entry>
     <entry>
         <key>tut_page1_image</key>
-        <value>https://firebasestorage.googleapis.com/v0/b/file-manager-4c1f2.appspot.com/o/device-2017-09-27-003008.png?alt=media&amp;token=949271da-ee07-43a0-a459-186f0e212a42</value>
+        <value>
+            https://firebasestorage.googleapis.com/v0/b/file-manager-4c1f2.appspot.com/o/device-2017-09-27-003008.png?alt=media&amp;token=949271da-ee07-43a0-a459-186f0e212a42
+        </value>
     </entry>
     <entry>
         <key>tut_page1_bgcolor</key>
@@ -42,7 +46,9 @@
     </entry>
     <entry>
         <key>tut_page2_image</key>
-        <value>https://firebasestorage.googleapis.com/v0/b/file-manager-4c1f2.appspot.com/o/device-2017-09-27-003008.png?alt=media&amp;token=949271da-ee07-43a0-a459-186f0e212a42</value>
+        <value>
+            https://firebasestorage.googleapis.com/v0/b/file-manager-4c1f2.appspot.com/o/device-2017-09-27-003008.png?alt=media&amp;token=949271da-ee07-43a0-a459-186f0e212a42
+        </value>
     </entry>
     <entry>
         <key>tut_page2_bgcolor</key>
@@ -56,7 +62,9 @@
     </entry>
     <entry>
         <key>tut_page3_content</key>
-        <value>Purchase the premium version by clicking this link or from the menu at any time. This will remove the transfer cap on remote sources.</value>
+        <value>Purchase the premium version by clicking this link or from the menu at any time. This
+            will remove the transfer cap on remote sources.
+        </value>
     </entry>
     <entry>
         <key>tut_page3_summary</key>
@@ -64,7 +72,9 @@
     </entry>
     <entry>
         <key>tut_page3_image</key>
-        <value>https://firebasestorage.googleapis.com/v0/b/file-manager-4c1f2.appspot.com/o/device-2017-09-27-003008.png?alt=media&amp;token=949271da-ee07-43a0-a459-186f0e212a42</value>
+        <value>
+            https://firebasestorage.googleapis.com/v0/b/file-manager-4c1f2.appspot.com/o/device-2017-09-27-003008.png?alt=media&amp;token=949271da-ee07-43a0-a459-186f0e212a42
+        </value>
     </entry>
     <entry>
         <key>tut_page3_bgcolor</key>

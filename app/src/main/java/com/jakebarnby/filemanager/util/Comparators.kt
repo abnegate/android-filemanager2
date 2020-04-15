@@ -13,18 +13,9 @@ import java.util.*
 object Comparators {
 
     fun resolveComparatorForPrefs(prefs: PreferenceManager): Comparator<TreeNode<out SourceFile>> {
-        val showFoldersFirst = prefs.getBoolean(
-            Prefs.FOLDER_FIRST_KEY,
-            true
-        )
-        val sortType = prefs.getInt(
-            Prefs.SORT_TYPE_KEY,
-            SortType.NAME.value
-        )
-        val orderType = prefs.getInt(
-            Prefs.ORDER_TYPE_KEY,
-            SortType.NAME.value
-        )
+        val showFoldersFirst = prefs.getBoolean(Prefs.FOLDER_FIRST_KEY, true)
+        val sortType = prefs.getInt(Prefs.SORT_TYPE_KEY, SortType.NAME.value)
+        val orderType = prefs.getInt(Prefs.ORDER_TYPE_KEY, SortType.NAME.value)
 
         return when (sortType) {
             SortType.NAME.value ->

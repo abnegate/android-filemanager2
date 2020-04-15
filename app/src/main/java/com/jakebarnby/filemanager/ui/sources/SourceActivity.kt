@@ -32,22 +32,21 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.jakebarnby.filemanager.R
-import com.jakebarnby.filemanager.managers.SelectedFilesManager
+import com.jakebarnby.filemanager.models.Source
+import com.jakebarnby.filemanager.models.SourceConnectionType
+import com.jakebarnby.filemanager.models.SourceFile
+import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.services.SourceTransferService
 import com.jakebarnby.filemanager.sources.local.LocalFragment
-import com.jakebarnby.filemanager.models.Source
-import com.jakebarnby.filemanager.models.SourceFile
-import com.jakebarnby.filemanager.models.SourceConnectionType
-import com.jakebarnby.filemanager.models.SourceType
-import com.jakebarnby.filemanager.sources.SourcePresenter
 import com.jakebarnby.filemanager.ui.adapters.*
 import com.jakebarnby.filemanager.ui.adapters.SourceLogoutAdapter.LogoutListener
 import com.jakebarnby.filemanager.ui.dialogs.*
-import com.jakebarnby.filemanager.util.*
+import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.ADS_MENU_ID
 import com.jakebarnby.filemanager.util.Constants.ADS_MENU_POSITION
 import com.jakebarnby.filemanager.util.Constants.DialogTags
 import com.jakebarnby.filemanager.util.Constants.FILE_PATH_KEY
+import com.jakebarnby.filemanager.util.Intents
 import com.jakebarnby.filemanager.util.Intents.ACTION_COMPLETE
 import com.jakebarnby.filemanager.util.Intents.ACTION_SHOW_DIALOG
 import com.jakebarnby.filemanager.util.Intents.ACTION_SHOW_ERROR
@@ -56,6 +55,8 @@ import com.jakebarnby.filemanager.util.Intents.EXTRA_DIALOG_CURRENT_VALUE
 import com.jakebarnby.filemanager.util.Intents.EXTRA_DIALOG_MAX_VALUE
 import com.jakebarnby.filemanager.util.Intents.EXTRA_DIALOG_MESSAGE
 import com.jakebarnby.filemanager.util.Intents.EXTRA_DIALOG_TITLE
+import com.jakebarnby.filemanager.util.TreeNode
+import com.jakebarnby.filemanager.util.Utils
 import dagger.android.support.DaggerAppCompatActivity
 import io.github.yavski.fabspeeddial.FabSpeedDial
 import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter
@@ -162,10 +163,10 @@ class SourceActivity : DaggerAppCompatActivity(), SourceActivityContract.View, C
         super.onResume()
 
         val filterLocal = IntentFilter().apply {
-            addAction(Intents.ACTION_SHOW_DIALOG)
-            addAction(Intents.ACTION_UPDATE_DIALOG)
-            addAction(Intents.ACTION_SHOW_ERROR)
-            addAction(Intents.ACTION_COMPLETE)
+            addAction(ACTION_SHOW_DIALOG)
+            addAction(ACTION_UPDATE_DIALOG)
+            addAction(ACTION_SHOW_ERROR)
+            addAction(ACTION_COMPLETE)
         }
         val filterSystem = IntentFilter().apply {
             addAction(Intent.ACTION_MEDIA_MOUNTED)

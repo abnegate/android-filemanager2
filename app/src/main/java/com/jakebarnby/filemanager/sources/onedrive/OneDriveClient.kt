@@ -1,39 +1,54 @@
 package com.jakebarnby.filemanager.sources.onedrive
 
+import android.content.Context
+import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.models.StorageInfo
+import com.jakebarnby.filemanager.sources.RemoteClient
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Constants.Sources
 import com.jakebarnby.filemanager.util.Utils
 import com.microsoft.graph.core.ClientException
-import com.microsoft.graph.extensions.*
+import com.microsoft.graph.extensions.DriveItem
+import com.microsoft.graph.extensions.Folder
+import com.microsoft.graph.extensions.IDriveItemCollectionPage
+import com.microsoft.graph.extensions.IGraphServiceClient
 import com.microsoft.graph.http.GraphServiceException
+import com.microsoft.identity.client.IAccount
+import com.microsoft.identity.client.IMultipleAccountPublicClientApplication
+import com.microsoft.identity.client.IPublicClientApplication.IMultipleAccountApplicationCreatedListener
+import com.microsoft.identity.client.PublicClientApplication
+import com.microsoft.identity.client.exception.MsalException
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import javax.inject.Inject
+import javax.inject.Singleton
+
 
 /**
  * Created by Jake on 6/9/2017.
  */
+@Singleton
 class OneDriveClient @Inject constructor(
     var prefsManager: PreferenceManager
 ) {
 
-    companion object {
-        var client: IGraphServiceClient? = null
-    }
+    @Inject
+    lateinit var authClient: IMultipleAccountPublicClientApplication
+    @Inject
+    lateinit var client: IGraphServiceClient
 
-    fun getFilesByParentId(id: String) =
-        client
-            ?.me
-            ?.drive
-            ?.getItems(id)
-            ?.children
-            ?.buildRequest()
-            ?.select("id,name,webUrl,folder,size,createdDateTime,lastModifiedDateTime")
-            ?.expand("thumbnails")
-            ?.get()
+    var currentAccount: IAccount? = null
+
+    fun getFilesByParentId(id: String): IDriveItemCollectionPage? =
+        client.me.drive
+            .getItems(id)
+            .children
+            .buildRequest()
+            .select("id,name,webUrl,folder,size,createdDateTime,lastModifiedDateTime")
+            .expand("thumbnails")
+            .get()
 
     fun getNextPage(collection: IDriveItemCollectionPage?) =
         collection
@@ -42,6 +57,7 @@ class OneDriveClient @Inject constructor(
             ?.select("id,name,webUrl,folder,size,createdDateTime,lastModifiedDateTime")
             ?.expand("thumbnails")
             ?.get()
+
 
     /**
      *
@@ -58,13 +74,11 @@ class OneDriveClient @Inject constructor(
     ): File? {
         val file = File(destinationPath, filename)
         try {
-            client
-                ?.me
-                ?.drive
-                ?.getItems(id)
-                ?.content
-                ?.buildRequest()
-                ?.get()
+            client.me.drive
+                .getItems(id)
+                .content
+                .buildRequest()
+                .get()
                 ?.use {
                     Utils.copyInputStreamToFile(it, file)
                     return file
@@ -93,14 +107,12 @@ class OneDriveClient @Inject constructor(
             FileInputStream(file).use {
                 val buffer = ByteArray(file.length().toInt())
                 it.read(buffer)
-                return client
-                    ?.me
-                    ?.drive
-                    ?.getItems(parentId)
-                    ?.getChildren(transformFileName(fileName))
-                    ?.content
-                    ?.buildRequest()
-                    ?.put(buffer)
+                return client.me.drive
+                    .getItems(parentId)
+                    .getChildren(transformFileName(fileName))
+                    .content
+                    .buildRequest()
+                    .put(buffer)
             }
         } catch (e: IOException) {
             throw e

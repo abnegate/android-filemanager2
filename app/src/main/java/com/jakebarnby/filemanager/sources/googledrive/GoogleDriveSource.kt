@@ -10,7 +10,6 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakebarnby.filemanager.models.Source
 import com.jakebarnby.filemanager.models.SourceConnectionType
 import com.jakebarnby.filemanager.models.SourceType
-import com.jakebarnby.filemanager.sources.dropbox.DropboxClient
 import com.jakebarnby.filemanager.ui.sources.SourceFragmentContract
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
@@ -25,8 +24,8 @@ import javax.inject.Inject
 /**
  * Created by jakebarnby on 2/08/17.
  */
-class GoogleDriveSource(
-    private val presenter: SourceFragmentContract.Presenter
+class GoogleDriveSource @Inject constructor(
+    var presenter: SourceFragmentContract.Presenter
 ) : Source(
     SourceConnectionType.REMOTE,
     SourceType.GOOGLE_DRIVE.id,
@@ -36,7 +35,7 @@ class GoogleDriveSource(
     @Inject
     lateinit var googleDriveClient: GoogleDriveClient
 
-    private var credendtial: GoogleAccountCredential? = null
+    private var credential: GoogleAccountCredential? = null
 
     companion object {
         private val SCOPES = listOf(DriveScopes.DRIVE)
@@ -58,7 +57,7 @@ class GoogleDriveSource(
     override fun loadFiles(context: Context) {
         if (!isFilesLoaded) {
 //            if (!precheckConnectionActive(context)) return
-            GoogleDriveLoaderTask(this, presenter, credendtial)
+            GoogleDriveLoaderTask(this, presenter, credential)
                 .executeOnExecutor(Dispatchers.IO.asExecutor(), "root")
         }
     }
@@ -69,7 +68,7 @@ class GoogleDriveSource(
 
             isLoggedIn = false
             isFilesLoaded = false
-            credendtial = null
+            credential = null
             presenter.onLogout()
 
             Logger.logFirebaseEvent(
@@ -80,7 +79,7 @@ class GoogleDriveSource(
     }
 
     private fun fetchCredential(context: Context) {
-        credendtial = GoogleAccountCredential
+        credential = GoogleAccountCredential
             .usingOAuth2(context, SCOPES)
             .setBackOff(ExponentialBackOff())
     }
@@ -99,7 +98,7 @@ class GoogleDriveSource(
         )
         if (accountName != null) {
             fetchCredential(fragment.context!!)
-            credendtial!!.selectedAccountName = accountName
+            credential!!.selectedAccountName = accountName
             getResultsFromApi(fragment)
         }
     }
@@ -114,8 +113,8 @@ class GoogleDriveSource(
 
         if (!GooglePlay.isGooglePlayServicesAvailable(fragment.context!!)) {
             GooglePlay.acquireGooglePlayServices(fragment.activity)
-        } else if (credendtial != null && credendtial!!.selectedAccountName == null) {
-            fragment.startActivityForResult(credendtial!!.newChooseAccountIntent(), RequestCodes.ACCOUNT_PICKER)
+        } else if (credential != null && credential!!.selectedAccountName == null) {
+            fragment.startActivityForResult(credential!!.newChooseAccountIntent(), RequestCodes.ACCOUNT_PICKER)
         } else if (!Utils.isConnectionReady(fragment.context!!)) {
             presenter.onNoConnection()
         } else {
@@ -126,7 +125,7 @@ class GoogleDriveSource(
 
     fun saveUserToken(fragment: Fragment) {
         try {
-            presenter.prefsManager.savePref(Prefs.GOOGLE_TOKEN_KEY, credendtial!!.token)
+            presenter.prefsManager.savePref(Prefs.GOOGLE_TOKEN_KEY, credential!!.token)
         } catch (e: Exception) {
             e.printStackTrace()
             //TODO: Log error
@@ -136,7 +135,7 @@ class GoogleDriveSource(
 
     fun saveUserAccount(fragment: Fragment, accountName: String?) {
         presenter.prefsManager.savePref(Prefs.GOOGLE_NAME_KEY, accountName)
-        credendtial!!.selectedAccountName = accountName
+        credential!!.selectedAccountName = accountName
         getResultsFromApi(fragment)
     }
 }

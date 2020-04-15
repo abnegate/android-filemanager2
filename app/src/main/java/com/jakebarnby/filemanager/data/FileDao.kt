@@ -3,7 +3,6 @@ package com.jakebarnby.filemanager.data
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.jakebarnby.filemanager.models.SourceFile
-import java.io.File
 
 @Dao
 interface FileDao {

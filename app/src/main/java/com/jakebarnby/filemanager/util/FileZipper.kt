@@ -12,15 +12,11 @@ import java.util.zip.ZipOutputStream
  */
 class FileZipper {
 
-    private var filePathsToZip: Collection<String> = mutableListOf()
-
     @Throws(IOException::class)
     fun zipFiles(
         destZipFilePath: String,
-        filesToZipPaths: Collection<String>
+        filePathsToZip: Collection<String>
     ) {
-        filePathsToZip = filesToZipPaths
-
         ZipOutputStream(FileOutputStream(destZipFilePath)).use {
             for (filePath in filePathsToZip) {
                 addFileToZip("", filePath, it)
@@ -37,16 +33,17 @@ class FileZipper {
         val file = File(filePath)
         if (file.isDirectory) {
             addFolderToZip(folderPath, filePath, zip)
-        } else {
-            val buf = ByteArray(2048)
-            var len: Int
-            val inStream = FileInputStream(filePath)
-            zip.putNextEntry(ZipEntry(folderPath + "/" + file.name))
-            while (inStream.read(buf).also { len = it } > 0) {
-                zip.write(buf, 0, len)
-            }
-            inStream.close()
+            return
         }
+        val buf = ByteArray(2048)
+        var len: Int
+        val inStream = FileInputStream(filePath)
+        zip.putNextEntry(ZipEntry(folderPath + "/" + file.name))
+        while (inStream.read(buf).also { len = it } > 0) {
+            zip.write(buf, 0, len)
+        }
+        inStream.close()
+
     }
 
     @Throws(IOException::class)
@@ -58,10 +55,10 @@ class FileZipper {
         val folder = File(filePath)
         if (folder.list()?.isEmpty() == true) {
             zip.putNextEntry(ZipEntry(folderPath + folder.name + "/"))
-        } else {
-            for (file in folder.listFiles() ?: emptyArray()) {
-                addFileToZip(folderPath + folder.name + "/", file.path, zip)
-            }
+            return
+        }
+        for (file in folder.listFiles() ?: emptyArray()) {
+            addFileToZip(folderPath + folder.name + "/", file.path, zip)
         }
     }
 }

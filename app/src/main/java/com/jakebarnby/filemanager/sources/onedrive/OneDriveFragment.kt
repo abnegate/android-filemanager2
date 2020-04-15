@@ -6,7 +6,6 @@ import androidx.core.os.bundleOf
 import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.ui.sources.SourceFragment
 import com.jakebarnby.filemanager.util.Constants
-import com.jakebarnby.filemanager.util.Constants.Sources
 
 /**
  * Created by Jake on 6/7/2017.
@@ -31,7 +30,7 @@ class OneDriveFragment : SourceFragment() {
         fun newInstance(sourceId: Int): SourceFragment =
             OneDriveFragment().apply {
                 arguments = bundleOf(
-                    Constants.FRAGMENT_TITLE to SourceType.values()[sourceId]
+                    Constants.FRAGMENT_TITLE to SourceType.values()[sourceId].sourceName
                 )
             }
     }

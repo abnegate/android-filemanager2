@@ -1,9 +1,7 @@
 package com.jakebarnby.filemanager.sources.onedrive
 
 import com.jakebarnby.filemanager.models.SourceFile
-import com.jakebarnby.filemanager.models.SourceConnectionType
 import com.jakebarnby.filemanager.models.SourceType
-import com.jakebarnby.filemanager.util.Constants.Sources
 import com.microsoft.graph.extensions.DriveItem
 
 /**

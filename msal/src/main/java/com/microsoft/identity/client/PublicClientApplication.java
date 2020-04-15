@@ -225,12 +225,11 @@ public final class PublicClientApplication {
         Logger.info(TAG, null, "Create new public client application.");
     }
 
-
     /**
      * @return The current version for the sdk.
      */
     public static String getSdkVersion() {
-        return BuildConfig.VERSION_NAME;
+        return "1.0.0";
     }
 
     /**

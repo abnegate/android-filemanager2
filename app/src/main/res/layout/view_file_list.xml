@@ -5,9 +5,9 @@
     android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="20dp"
     android:layout_marginStart="20dp"
     android:layout_marginTop="10dp"
+    android:layout_marginEnd="20dp"
     tools:layout_editor_absoluteX="20dp"
     tools:layout_editor_absoluteY="86dp">
 
@@ -15,8 +15,8 @@
         android:id="@+id/checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingEnd="8dp"
         android:paddingStart="0dp"
+        android:paddingEnd="8dp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -28,19 +28,19 @@
         android:layout_height="@dimen/thumb_size"
         android:padding="2dp"
         android:scaleType="centerCrop"
-            app:srcCompat="@drawable/ic_file"
         app:layout_aspectRatio="100%"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/checkbox"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_heightPercent="100%" />
+        app:layout_heightPercent="100%"
+        app:srcCompat="@drawable/ic_file" />
 
     <TextView
         android:id="@+id/txt_item_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="5dp"
         android:layout_marginStart="20dp"
+        android:layout_marginEnd="5dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@android:color/black"

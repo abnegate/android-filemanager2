@@ -7,7 +7,6 @@ import com.google.api.services.drive.Drive
 import com.google.api.services.drive.model.FileList
 import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.models.StorageInfo
-import com.jakebarnby.filemanager.sources.RemoteClient
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Utils
@@ -21,7 +20,7 @@ import javax.inject.Inject
  */
 class GoogleDriveClient @Inject constructor(
     var prefsManager: PreferenceManager
-)  {
+) {
 
     companion object {
         var client: Drive? = null

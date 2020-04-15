@@ -7,6 +7,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
  * Created by Jake on 11/3/2017.
  */
 object Logger {
+
     /**
      * Log an event to firebase with the given event name
      *

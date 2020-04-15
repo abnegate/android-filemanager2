@@ -1,8 +1,12 @@
 package com.jakebarnby.filemanager.sources
 
-interface RemoteClient<TFilesResult> {
+import android.content.Context
 
-    fun getFilesAtPath(path: String): TFilesResult?
-    fun getExternalLink(path: String): String?
+interface RemoteClient {
+
+//    fun getFilesAtPath(path: String): TFilesResult?
+//    fun getExternalLink(path: String): String?
+
+    fun authenticate(context: Context)
 
 }

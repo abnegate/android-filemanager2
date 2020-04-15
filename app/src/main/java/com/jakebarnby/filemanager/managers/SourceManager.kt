@@ -3,13 +3,14 @@ package com.jakebarnby.filemanager.managers
 import android.util.SparseArray
 import com.jakebarnby.filemanager.models.FileAction
 import com.jakebarnby.filemanager.models.Source
-import com.jakebarnby.filemanager.models.SourceType
 import java.io.Serializable
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Created by Jake on 7/29/2017.
  */
+@Singleton
 class SourceManager @Inject constructor() : Serializable {
 
     val sources: MutableList<Source> = mutableListOf()

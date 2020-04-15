@@ -4,10 +4,10 @@ import android.os.Environment
 import com.jakebarnby.filemanager.managers.ConnectionManager
 import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.managers.SelectedFilesManager
+import com.jakebarnby.filemanager.managers.SourceManager
 import com.jakebarnby.filemanager.models.FileAction
 import com.jakebarnby.filemanager.models.Source
 import com.jakebarnby.filemanager.models.SourceFile
-import com.jakebarnby.filemanager.managers.SourceManager
 import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.ui.sources.SourceFragmentContract
 import com.jakebarnby.filemanager.util.TreeNode
@@ -110,37 +110,37 @@ class SourceFragmentPresenter @Inject constructor(
             }
 
             view?.setSelectedCountTitle(selectedFilesManager.currentSelectedFiles.size)
-        } else {
-            if (file.data.isDirectory) {
-                source.currentDirectory = file
+            return
+        }
 
-                val name = if (file.parent == null) {
-                    SourceType.values()[file.data.sourceId].sourceName
-                } else {
-                    file.data.name
-                }
+        if (file.data.isDirectory) {
+            source.currentDirectory = file
 
-                view?.pushBreadCrumb(
-                    file,
-                    file.parent != null,
-                    name
-                )
-                view?.updateFileList()
+            val name = if (file.parent == null) {
+                SourceType.values()[file.data.sourceId].sourceName
             } else {
-                if (Utils.getStorageStats(Environment.getExternalStorageDirectory()).freeSpace > file.data.size) {
-                    selectedFilesManager.startNewSelection()
-
-                    sourceManager.addFileAction(
-                        selectedFilesManager.operationCount - 1,
-                        FileAction.OPEN
-                    )
-
-                    view?.startActionOpen(file.data)
-                } else {
-                    view?.showNotEnoughSpaceSnackBar()
-
-                }
+                file.data.name
             }
+
+            view?.pushBreadCrumb(
+                file,
+                file.parent != null,
+                name
+            )
+            view?.updateFileList()
+            return
+        }
+
+        if (Utils.getStorageStats(Environment.getExternalStorageDirectory()).freeSpace > file.data.size) {
+            selectedFilesManager.startNewSelection()
+
+            sourceManager.addFileAction(
+                selectedFilesManager.operationCount - 1,
+                FileAction.OPEN
+            )
+            view?.startActionOpen(file.data)
+        } else {
+            view?.showNotEnoughSpaceSnackBar()
         }
     }
 

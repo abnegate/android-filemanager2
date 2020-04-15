@@ -2,7 +2,6 @@ package com.jakebarnby.filemanager.sources.googledrive
 
 import com.google.api.services.drive.model.File
 import com.jakebarnby.filemanager.models.SourceFile
-import com.jakebarnby.filemanager.models.SourceConnectionType
 import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.util.Constants.Sources
 

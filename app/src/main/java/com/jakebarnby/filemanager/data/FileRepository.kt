@@ -4,6 +4,4 @@ import javax.inject.Inject
 
 class FileRepository @Inject constructor(
     val fileDao: FileDao
-) {
-
-}
+)

@@ -13,7 +13,6 @@ import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -57,6 +56,11 @@ abstract class SourceFragment : DaggerFragment(), SourceFragmentContract.View {
     private lateinit var breadcrumbBar: LinearLayout
     private lateinit var breadcrumbWrapper: HorizontalScrollView
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        presenter.subscribe(this)
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         presenter.checkState()
@@ -82,7 +86,6 @@ abstract class SourceFragment : DaggerFragment(), SourceFragmentContract.View {
         )
         return rootView
     }
-
 
     override fun onResume() {
         super.onResume()
@@ -134,11 +137,11 @@ abstract class SourceFragment : DaggerFragment(), SourceFragmentContract.View {
     }
 
     override fun showProgressBar() {
-        progressBar.visibility = View.GONE
+        progressBar.visibility = View.VISIBLE
     }
 
     override fun hideProgressBar() {
-        progressBar.visibility = View.VISIBLE
+        progressBar.visibility = View.GONE
     }
 
     override fun showConnectButton() {

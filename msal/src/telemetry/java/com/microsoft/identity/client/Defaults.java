@@ -45,7 +45,7 @@ final class Defaults {
     @SuppressLint("HardwareIds")
     static Defaults forApplication(final Context context, final String clientId) {
         final String applicationName = context.getPackageName();
-        final String sdkVersion = BuildConfig.VERSION_NAME;
+        final String sdkVersion = "1.0.0";
         final String sdkPlatform = PlatformIdHelper.PlatformIdParameters.PRODUCT_NAME;
 
         String applicationVersion;

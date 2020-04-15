@@ -6,11 +6,11 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.model.File
 import com.google.api.services.drive.model.FileList
-import com.jakebarnby.filemanager.workers.LoaderTask
 import com.jakebarnby.filemanager.models.Source
 import com.jakebarnby.filemanager.models.SourceFile
 import com.jakebarnby.filemanager.ui.sources.SourceFragmentContract
 import com.jakebarnby.filemanager.util.TreeNode
+import com.jakebarnby.filemanager.workers.LoaderTask
 import java.io.IOException
 import javax.inject.Inject
 

@@ -1,1 +1,1 @@
-include ':app', ':msal', ':tutorial'
+include ':app', ':tutorial'

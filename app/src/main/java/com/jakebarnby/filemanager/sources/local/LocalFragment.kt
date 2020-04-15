@@ -17,10 +17,9 @@ class LocalFragment : SourceFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val name = arguments?.getString(Constants.FRAGMENT_TITLE) ?: ""
         val rootPath = arguments?.getString(Constants.LOCAL_ROOT) ?: "/"
 
-        presenter.setFileSource( LocalSource(rootPath, presenter))
+        presenter.setFileSource(LocalSource(rootPath, presenter))
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -35,7 +34,7 @@ class LocalFragment : SourceFragment() {
         fun newInstance(sourceId: Int, rootPath: String): SourceFragment =
             LocalFragment().apply {
                 arguments = bundleOf(
-                    Constants.FRAGMENT_TITLE to SourceType.values()[sourceId],
+                    Constants.FRAGMENT_TITLE to SourceType.values()[sourceId].sourceName,
                     Constants.LOCAL_ROOT to rootPath
                 )
             }

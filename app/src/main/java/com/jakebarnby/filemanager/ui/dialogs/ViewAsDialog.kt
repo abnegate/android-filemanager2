@@ -10,7 +10,6 @@ import androidx.fragment.app.DialogFragment
 import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.models.ViewType
-import com.jakebarnby.filemanager.ui.sources.SourceActivity
 import com.jakebarnby.filemanager.util.Constants.DIALOG_ON_POSITIVE_KEY
 import com.jakebarnby.filemanager.util.Constants.DIALOG_TITLE_KEY
 import com.jakebarnby.filemanager.util.Constants.Prefs

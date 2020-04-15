@@ -8,6 +8,7 @@ import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.ui.sources.SourceFragmentContract
 import com.jakebarnby.filemanager.util.Constants.RequestCodes
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.asExecutor
 
 /**
@@ -31,7 +32,7 @@ class LocalSource(
             return
         }
         LocalLoaderTask(this, presenter)
-            .executeOnExecutor(Dispatchers.IO.asExecutor(), rootPath)
+            .executeOnExecutor(IO.asExecutor(), rootPath)
     }
 
     override fun logout(context: Context) {}

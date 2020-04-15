@@ -6,7 +6,6 @@ import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.android.Auth
 import com.dropbox.core.v2.DbxClientV2
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.models.Source
 import com.jakebarnby.filemanager.models.SourceConnectionType
 import com.jakebarnby.filemanager.models.SourceType
@@ -20,8 +19,8 @@ import javax.inject.Inject
 /**
  * Created by jakebarnby on 2/08/17.
  */
-class DropboxSource(
-    private val presenter: SourceFragmentContract.Presenter
+class DropboxSource @Inject constructor(
+    var presenter: SourceFragmentContract.Presenter
 ) : Source(
     SourceConnectionType.REMOTE,
     SourceType.DROPBOX.id,

@@ -8,7 +8,6 @@ import com.dropbox.core.v2.files.*
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.models.StorageInfo
-import com.jakebarnby.filemanager.sources.RemoteClient
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Logger

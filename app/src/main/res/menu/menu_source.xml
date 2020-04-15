@@ -4,43 +4,43 @@
     tools:context=".ui.sources.SourceActivity">
     <item
         android:id="@+id/action_search"
-        android:title="@string/search"
-        app:showAsAction="collapseActionView|always"
         android:icon="@drawable/ic_action_search"
-        app:actionViewClass="androidx.appcompat.widget.SearchView"/>
+        android:title="@string/search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="collapseActionView|always" />
     <item
         android:id="@+id/action_new_folder"
-        android:title="@string/menu_item_new_folder"
         android:orderInCategory="1"
-        app:showAsAction="never"/>
+        android:title="@string/menu_item_new_folder"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_multi_select"
-        android:title="@string/menu_item_multi_select"
         android:orderInCategory="2"
-        app:showAsAction="never"/>
+        android:title="@string/menu_item_multi_select"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_view_as"
-        android:title="@string/action_viewas"
         android:orderInCategory="3"
+        android:title="@string/action_viewas"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_sort_by"
-        android:title="@string/action_sort_by"
         android:orderInCategory="5"
+        android:title="@string/action_sort_by"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_storage_usage"
-        android:title="@string/menu_storage_usage"
         android:orderInCategory="6"
-        app:showAsAction="never"/>
+        android:title="@string/menu_storage_usage"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_logout"
-        android:title="@string/action_logout"
         android:orderInCategory="8"
+        android:title="@string/action_logout"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_settings"
-        android:title="@string/action_settings"
         android:orderInCategory="10"
+        android:title="@string/action_settings"
         app:showAsAction="never" />
 </menu>

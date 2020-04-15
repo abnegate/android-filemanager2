@@ -109,13 +109,14 @@ dependencies {
     kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
 
     //Google Drive
-    implementation "com.google.api-client:google-api-client-android:1.22.0"
-    implementation "com.google.apis:google-api-services-drive:v3-rev75-1.22.0"
+    implementation "com.google.api-client:google-api-client-android:1.30.9"
+    implementation "com.google.apis:google-api-services-drive:v3-rev20200326-1.30.9"
 
     //OneDrive
-    implementation project(':msal')
+    implementation 'com.microsoft.identity.client:msal:1.4.0'
+//    implementation project(':msal')
     implementation 'com.microsoft.graph:msgraph-sdk-android:1.4.0'
-    implementation 'com.google.code.gson:gson:2.8.5'
+//    implementation 'com.google.code.gson:gson:2.8.5'
 
     //FAB Menu Button
     implementation 'io.github.yavski:fab-speed-dial:1.0.6'

@@ -10,8 +10,8 @@ import com.jakebarnby.filemanager.util.TreeNode
  * Created by Jake on 8/2/2017.
  */
 abstract class LoaderTask(
-    protected var source: Source,
-    protected var presenter: SourceFragmentContract.Presenter
+    protected var onStart: () -> Unit,
+    protected var onComplete: (TreeNode<SourceFile>) -> Unit
 ) : AsyncTask<String, Void?, TreeNode<SourceFile>>() {
 
     protected lateinit var rootTreeNode: TreeNode<SourceFile>
@@ -24,7 +24,7 @@ abstract class LoaderTask(
 
     override fun onPreExecute() {
         super.onPreExecute()
-        presenter.onLoadStarted()
+        onStart()
     }
 
     override fun doInBackground(vararg params: String): TreeNode<SourceFile>? {
@@ -34,10 +34,11 @@ abstract class LoaderTask(
 
     override fun onPostExecute(fileTree: TreeNode<SourceFile>) {
         super.onPostExecute(fileTree)
-        if (success) {
-            source.rootNode = fileTree
-            source.isFilesLoaded = true
-            presenter.onLoadComplete(fileTree)
-        }
+        onComplete(fileTree)
+//        if (success) {
+//            source.rootNode = fileTree
+//            source.isFilesLoaded = true
+//            presenter.onLoadComplete(fileTree)
+//        }
     }
 }

@@ -10,7 +10,6 @@ import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.ui.sources.SourceFragment
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.RequestCodes
-import com.jakebarnby.filemanager.util.Constants.Sources
 import com.jakebarnby.filemanager.util.Logger
 
 /**
@@ -20,7 +19,7 @@ class GoogleDriveFragment : SourceFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        presenter.setFileSource( GoogleDriveSource(presenter))
+        presenter.setFileSource(GoogleDriveSource(presenter))
     }
 
     override fun onResume() {
@@ -55,7 +54,7 @@ class GoogleDriveFragment : SourceFragment() {
         fun newInstance(sourceId: Int): SourceFragment =
             GoogleDriveFragment().apply {
                 arguments = bundleOf(
-                    Constants.FRAGMENT_TITLE to SourceType.values()[sourceId]
+                    Constants.FRAGMENT_TITLE to SourceType.values()[sourceId].sourceName
                 )
             }
     }

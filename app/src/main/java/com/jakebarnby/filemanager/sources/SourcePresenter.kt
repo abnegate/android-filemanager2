@@ -82,7 +82,7 @@ class SourcePresenter @Inject constructor(
         for (sourceType: SourceType in SourceType.values()) {
             val source = sourceManager.sources[sourceType.id]
 
-            if (source?.sourceConnectionType == SourceConnectionType.LOCAL &&
+            if (source.sourceConnectionType == SourceConnectionType.LOCAL &&
                 source.isFilesLoaded &&
                 roothPath.contains(source.rootNode.data.path)) {
 
@@ -255,7 +255,7 @@ class SourcePresenter @Inject constructor(
     }
 
     override fun onSourceSelected(position: Int) {
-        sourceManager.activeSource = sourceManager.sources[position] ?: return
+        sourceManager.activeSource = sourceManager.sources[position]
     }
 
     override fun onChangeViewType() {

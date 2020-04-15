@@ -1,31 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="?dialogPreferredPadding"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="?dialogPreferredPadding">
 
     <TextView
         android:id="@+id/txt_dialog_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/source"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/spn_sources"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/spn_sources"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
         android:id="@+id/spn_sources"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:paddingStart="15dp"
         android:dropDownWidth="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
+        android:paddingStart="15dp"
+        app:layout_constraintBaseline_toBaselineOf="@id/txt_dialog_title"
         app:layout_constraintStart_toEndOf="@id/txt_dialog_title"
-        app:layout_constraintBaseline_toBaselineOf="@id/txt_dialog_title"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_search_results"
@@ -34,7 +33,7 @@
         android:layout_below="@+id/spn_sources"
         android:layout_marginTop="16dp"
         android:overScrollMode="never"
-        app:layout_constraintTop_toBottomOf="@id/txt_dialog_title"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/txt_dialog_title" />
 </androidx.constraintlayout.widget.ConstraintLayout>

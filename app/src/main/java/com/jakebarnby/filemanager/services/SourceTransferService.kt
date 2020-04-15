@@ -2,7 +2,6 @@ package com.jakebarnby.filemanager.services
 
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -64,12 +63,16 @@ class SourceTransferService : DaggerService(), CoroutineScope {
 
     @Inject
     lateinit var analytics: FirebaseAnalytics
+
     @Inject
     lateinit var selectedFilesManager: SelectedFilesManager
+
     @Inject
     lateinit var dropBoxClient: DropboxClient
+
     @Inject
     lateinit var googleDriveClient: GoogleDriveClient
+
     @Inject
     lateinit var oneDriveClient: OneDriveClient
 
@@ -204,10 +207,6 @@ class SourceTransferService : DaggerService(), CoroutineScope {
      * @return 0 for success, otherwise operation failed
      */
     private external fun renameFolderNative(oldPath: String?, newPath: String?): Int
-
-    override fun onCreate() {
-        analytics = FirebaseAnalytics.getInstance(this)
-    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         launch(Dispatchers.IO) {

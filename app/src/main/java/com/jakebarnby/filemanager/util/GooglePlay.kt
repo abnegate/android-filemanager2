@@ -10,6 +10,7 @@ import com.jakebarnby.filemanager.util.Constants.RequestCodes
  * Created by jakebarnby on 3/10/17.
  */
 object GooglePlay {
+
     /**
      * Check that Google Play services APK is installed and up to date.
      * @return True if Google Play Services is available and up to date on this device, false otherwise.

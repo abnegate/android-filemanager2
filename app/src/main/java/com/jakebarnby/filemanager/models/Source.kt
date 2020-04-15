@@ -25,7 +25,6 @@ abstract class Source(
     var isFilesLoaded = false
     var isMultiSelectEnabled = false
 
-
     abstract fun authenticate(context: Context)
     abstract fun loadFiles(context: Context)
     abstract fun logout(context: Context)

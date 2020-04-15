@@ -16,19 +16,19 @@
 
     <application
         android:name=".core.FileManagerApplication"
-        tools:replace="android:allowBackup"
         android:allowBackup="false"
         android:icon="@drawable/ic_folder_flat"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@drawable/ic_folder_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:requestLegacyExternalStorage="true">
+        tools:replace="android:allowBackup">
 
         <activity
             android:name=".splash.SplashActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:noHistory="true">
+            android:noHistory="true"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -37,8 +37,8 @@
 
         <activity
             android:name=".tutorial.FileManagerTutorialActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:noHistory="true" />
+            android:noHistory="true"
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name="com.jakebarnby.filemanager.ui.sources.SourceActivity"
@@ -67,8 +67,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="auth"
-                    android:scheme="msal019d333e-3e7f-4c04-a214-f12602dd5b10" />
+                    android:scheme="msauth"
+                    android:host="com.jakebarnby.filemanager" />
             </intent-filter>
         </activity>
         <activity
@@ -87,7 +87,7 @@
 
         <service
             android:name="com.jakebarnby.filemanager.services.SourceTransferService"
-            android:exported="false"/>
+            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -107,7 +107,7 @@
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-3940256099942544~3347511713" />
 
     </application>
 

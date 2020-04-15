@@ -6,7 +6,6 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakebarnby.filemanager.models.Source
 import com.jakebarnby.filemanager.models.SourceConnectionType
 import com.jakebarnby.filemanager.models.SourceType
-import com.jakebarnby.filemanager.sources.dropbox.DropboxClient
 import com.jakebarnby.filemanager.ui.sources.SourceFragmentContract
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
@@ -27,8 +26,8 @@ import javax.inject.Inject
 /**
  * Created by jakebarnby on 2/08/17.
  */
-class OneDriveSource(
-    private val presenter: SourceFragmentContract.Presenter
+class OneDriveSource @Inject constructor(
+    var presenter: SourceFragmentContract.Presenter
 ) : Source(
     SourceConnectionType.REMOTE,
     SourceType.ONEDRIVE.id,
@@ -38,21 +37,13 @@ class OneDriveSource(
     @Inject
     lateinit var oneDriveClient: OneDriveClient
 
-    var client: PublicClientApplication? = null
-
-    private var authResult: AuthenticationResult? = null
-
     override fun authenticate(context: Context) {}
 
     fun authenticateSource(fragment: Fragment) {
-        client = PublicClientApplication(fragment.context!!, CLIENT_ID)
         presenter.onLoadStarted()
         if (isLoggedIn) {
             return
         }
-//        if (!checkConnectionActive(fragment.context!!)) {
-//            return
-//        }
 
         try {
             val accessToken = presenter.prefsManager.getString(Prefs.ONEDRIVE_TOKEN_KEY, null)
@@ -71,10 +62,6 @@ class OneDriveSource(
         if (isFilesLoaded || authResult == null) {
             return
         }
-
-//        if (!checkConnectionActive(context)) {
-//            return
-//        }
 
         val clientConfig = DefaultClientConfig.createWithAuthenticationProvider {
             it.addHeader("Authorization", String.format("Bearer %s", authResult!!.accessToken))

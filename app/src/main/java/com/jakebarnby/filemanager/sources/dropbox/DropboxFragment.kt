@@ -5,7 +5,6 @@ import androidx.core.os.bundleOf
 import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.ui.sources.SourceFragment
 import com.jakebarnby.filemanager.util.Constants
-import com.jakebarnby.filemanager.util.Constants.Sources
 
 /**
  * Created by Jake on 5/31/2017.
@@ -28,7 +27,7 @@ class DropboxFragment : SourceFragment() {
         fun newInstance(sourceId: Int): SourceFragment =
             DropboxFragment().apply {
                 arguments = bundleOf(
-                    Constants.FRAGMENT_TITLE to SourceType.values()[sourceId]
+                    Constants.FRAGMENT_TITLE to SourceType.values()[sourceId].sourceName
                 )
             }
     }

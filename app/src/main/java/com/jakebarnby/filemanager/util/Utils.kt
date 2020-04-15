@@ -14,7 +14,6 @@ import androidx.core.os.EnvironmentCompat
 import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.models.StorageInfo
-import com.jakebarnby.filemanager.util.Constants.Sources
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream

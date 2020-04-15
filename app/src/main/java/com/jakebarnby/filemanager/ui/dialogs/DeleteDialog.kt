@@ -6,11 +6,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import com.jakebarnby.filemanager.R
-import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.DIALOG_DELETE_COUNT
 import com.jakebarnby.filemanager.util.Constants.DIALOG_ON_POSITIVE_KEY
 import com.jakebarnby.filemanager.util.Constants.DIALOG_TITLE_KEY
-import java.io.Serializable
 import java.util.*
 
 class DeleteDialog : DialogFragment() {
@@ -20,12 +18,12 @@ class DeleteDialog : DialogFragment() {
             count: Int,
             onPositive: () -> Unit
         ) = DeleteDialog().apply {
-                arguments = bundleOf(
-                    DIALOG_TITLE_KEY to getString(R.string.dialog_deleting),
-                    DIALOG_ON_POSITIVE_KEY to onPositive,
-                    DIALOG_DELETE_COUNT to count
-                )
-            }
+            arguments = bundleOf(
+                DIALOG_TITLE_KEY to getString(R.string.dialog_deleting),
+                DIALOG_ON_POSITIVE_KEY to onPositive,
+                DIALOG_DELETE_COUNT to count
+            )
+        }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

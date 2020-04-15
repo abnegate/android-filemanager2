@@ -11,7 +11,6 @@ import com.jakebarnby.filemanager.util.Constants.RemoteConfig
 import com.jakebarnby.tutorial.TutorialActivity
 import com.jakebarnby.tutorial.TutorialPage
 import dagger.android.AndroidInjection
-import javax.inject.Inject
 
 /**
  * Created by Jake on 9/26/2017.

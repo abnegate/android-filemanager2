@@ -4,9 +4,9 @@ import com.jakebarnby.filemanager.core.BasePresenter
 import com.jakebarnby.filemanager.managers.ConnectionManager
 import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.managers.SelectedFilesManager
+import com.jakebarnby.filemanager.managers.SourceManager
 import com.jakebarnby.filemanager.models.Source
 import com.jakebarnby.filemanager.models.SourceFile
-import com.jakebarnby.filemanager.managers.SourceManager
 import com.jakebarnby.filemanager.util.TreeNode
 
 interface SourceFragmentContract {
@@ -35,6 +35,7 @@ interface SourceFragmentContract {
             isChecked: Boolean,
             position: Int
         )
+
         fun onFileLongSelected(file: TreeNode<SourceFile>)
         fun onBreadCrumbSelected(name: String, crumbsToPop: Int)
     }
@@ -67,6 +68,7 @@ interface SourceFragmentContract {
             arrowVisible: Boolean,
             name: String
         )
+
         fun popBreadCrumb()
         fun popAllBreadCrumbs()
 
@@ -80,11 +82,7 @@ interface SourceFragmentContract {
 
     }
 
-    interface ListPresenter {
+    interface ListPresenter
 
-    }
-
-    interface ListView {
-
-    }
+    interface ListView
 }
