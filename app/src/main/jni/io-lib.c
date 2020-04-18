@@ -24,7 +24,7 @@ int rmrf(const char *path) {
 }
 
 JNIEXPORT jint JNICALL
-Java_com_jakebarnby_filemanager_services_SourceTransferService_copyFileNative(
+Java_com_jakebarnby_filemanager_models_sources_local_LocalSource_copyFileNative(
         JNIEnv *env,
         jobject instance,
         jstring sourcePath_,
@@ -76,7 +76,7 @@ Java_com_jakebarnby_filemanager_services_SourceTransferService_copyFileNative(
 }
 
 JNIEXPORT jint JNICALL
-Java_com_jakebarnby_filemanager_services_SourceTransferService_deleteFileNative(
+Java_com_jakebarnby_filemanager_models_sources_local_LocalSource_deleteFileNative(
         JNIEnv *env,
         jobject instance,
         jstring sourcePath_
@@ -90,7 +90,7 @@ Java_com_jakebarnby_filemanager_services_SourceTransferService_deleteFileNative(
 }
 
 JNIEXPORT jint JNICALL
-Java_com_jakebarnby_filemanager_services_SourceTransferService_createFolderNative(
+Java_com_jakebarnby_filemanager_models_sources_local_LocalSource_createFolderNative(
         JNIEnv *env,
         jobject instance,
         jstring newPath_
@@ -105,7 +105,7 @@ Java_com_jakebarnby_filemanager_services_SourceTransferService_createFolderNativ
 }
 
 JNIEXPORT jint JNICALL
-Java_com_jakebarnby_filemanager_services_SourceTransferService_renameFolderNative(
+Java_com_jakebarnby_filemanager_models_sources_local_LocalSource_renameFolderNative(
         JNIEnv *env,
         jobject instance,
         jstring oldPath_,

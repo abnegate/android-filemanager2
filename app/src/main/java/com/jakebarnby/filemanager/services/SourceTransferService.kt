@@ -14,13 +14,11 @@ import com.jakebarnby.filemanager.R
 import com.jakebarnby.filemanager.managers.SelectedFilesManager
 import com.jakebarnby.filemanager.models.SourceFile
 import com.jakebarnby.filemanager.models.SourceType
-import com.jakebarnby.filemanager.sources.dropbox.DropboxClient
-import com.jakebarnby.filemanager.sources.dropbox.DropboxFile
-import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveClient
-import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFile
-import com.jakebarnby.filemanager.sources.local.LocalFile
-import com.jakebarnby.filemanager.sources.onedrive.OneDriveClient
-import com.jakebarnby.filemanager.sources.onedrive.OneDriveFile
+import com.jakebarnby.filemanager.models.sources.dropbox.DropboxFile
+import com.jakebarnby.filemanager.models.sources.googledrive.GoogleDriveFile
+import com.jakebarnby.filemanager.models.sources.local.LocalFile
+import com.jakebarnby.filemanager.models.sources.onedrive.OneDriveClient
+import com.jakebarnby.filemanager.models.sources.onedrive.OneDriveFile
 import com.jakebarnby.filemanager.ui.sources.SourceActivity
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.FileZipper
@@ -63,18 +61,6 @@ class SourceTransferService : DaggerService(), CoroutineScope {
 
     @Inject
     lateinit var analytics: FirebaseAnalytics
-
-    @Inject
-    lateinit var selectedFilesManager: SelectedFilesManager
-
-    @Inject
-    lateinit var dropBoxClient: DropboxClient
-
-    @Inject
-    lateinit var googleDriveClient: GoogleDriveClient
-
-    @Inject
-    lateinit var oneDriveClient: OneDriveClient
 
     private var job = Job()
 
@@ -173,40 +159,6 @@ class SourceTransferService : DaggerService(), CoroutineScope {
             context.startService(intent)
         }
     }
-
-    /**
-     * Calls native io-lib and copies the file at the given path to the given destination
-     *
-     * @param sourcePath      The path of the file to copy
-     * @param destinationPath The destination of the file to copy
-     * @return 0 for success, otherwise operation failed
-     */
-    private external fun copyFileNative(sourcePath: String?, destinationPath: String?): Int
-
-    /**
-     * Calls native io-lib and deletes the file at the given path to the given destination
-     *
-     * @param sourcePath The path of the file to delete
-     * @return 0 for success, otherwise operation failed
-     */
-    private external fun deleteFileNative(sourcePath: String?): Int
-
-    /**
-     * Calls native io-lib and creates a new folder
-     *
-     * @param newPath The name of the folder to create
-     * @return 0 for success, otherwise operation failed
-     */
-    private external fun createFolderNative(newPath: String?): Int
-
-    /**
-     * Calls native io-lib and renames the given file or folder to the given new name
-     *
-     * @param oldPath The previous path to the file or folder
-     * @param newPath The new path to the file or folder
-     * @return 0 for success, otherwise operation failed
-     */
-    private external fun renameFolderNative(oldPath: String?, newPath: String?): Int
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         launch(Dispatchers.IO) {

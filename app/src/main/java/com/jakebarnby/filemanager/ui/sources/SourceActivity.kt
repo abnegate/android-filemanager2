@@ -37,7 +37,7 @@ import com.jakebarnby.filemanager.models.SourceConnectionType
 import com.jakebarnby.filemanager.models.SourceFile
 import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.services.SourceTransferService
-import com.jakebarnby.filemanager.sources.local.LocalFragment
+import com.jakebarnby.filemanager.models.sources.local.LocalFragment
 import com.jakebarnby.filemanager.ui.adapters.*
 import com.jakebarnby.filemanager.ui.adapters.SourceLogoutAdapter.LogoutListener
 import com.jakebarnby.filemanager.ui.dialogs.*

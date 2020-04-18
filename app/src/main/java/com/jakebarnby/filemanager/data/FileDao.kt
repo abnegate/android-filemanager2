@@ -7,8 +7,11 @@ import com.jakebarnby.filemanager.models.SourceFile
 @Dao
 interface FileDao {
 
-    @Insert
-    fun insertAll(vararg files: SourceFile)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(vararg files: SourceFile) : List<Long>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(files: Collection<SourceFile>): List<Long>
 
     @Query("SELECT * FROM SourceFile")
     suspend fun getAll(): List<SourceFile>

@@ -5,10 +5,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import com.jakebarnby.filemanager.models.SourceType
-import com.jakebarnby.filemanager.sources.dropbox.DropboxFragment
-import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFragment
-import com.jakebarnby.filemanager.sources.local.LocalFragment
-import com.jakebarnby.filemanager.sources.onedrive.OneDriveFragment
+import com.jakebarnby.filemanager.ui.sources.DropboxFragment
+import com.jakebarnby.filemanager.ui.sources.GoogleDriveFragment
+import com.jakebarnby.filemanager.models.sources.local.LocalFragment
+import com.jakebarnby.filemanager.models.sources.onedrive.OneDriveFragment
 import com.jakebarnby.filemanager.ui.sources.SourceFragment
 import java.util.*
 

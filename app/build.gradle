@@ -29,6 +29,8 @@ android {
             applicationIdSuffix ".debug"
             minifyEnabled false
             debuggable true
+
+            resValue "string", "admob_app_id", "ca-app-pub-3940256099942544/2247696110"
         }
         release {
             minifyEnabled true
@@ -38,6 +40,8 @@ android {
             firebaseCrashlytics {
                 nativeSymbolUploadEnabled true
             }
+
+            resValue "string", "admob_app_id", "ca-app-pub-4043849132226838~1030297170"
         }
     }
 
@@ -99,6 +103,12 @@ dependencies {
     implementation "androidx.room:room-runtime:$roomVersion"
     implementation "androidx.room:room-ktx:$roomVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
+    testImplementation "androidx.room:room-testing:$roomVersion"
+
+    // Work Manager
+    def workVersion = "2.3.4"
+    implementation "androidx.work:work-runtime-ktx:$workVersion"
+    androidTestImplementation "androidx.work:work-testing:$workVersion"
 
     // Dagger
     def daggerVersion = "2.27"

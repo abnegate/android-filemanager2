@@ -26,7 +26,7 @@
         tools:replace="android:allowBackup">
 
         <activity
-            android:name=".splash.SplashActivity"
+            android:name="com.jakebarnby.filemanager.ui.splash.SplashActivity"
             android:noHistory="true"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -36,7 +36,7 @@
         </activity>
 
         <activity
-            android:name=".tutorial.FileManagerTutorialActivity"
+            android:name="com.jakebarnby.filemanager.ui.tutorial.FileManagerTutorialActivity"
             android:noHistory="true"
             android:theme="@style/AppTheme.NoActionBar" />
 
@@ -107,7 +107,7 @@
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+            android:value="@string/admob_app_id" />
 
     </application>
 

@@ -1,11 +1,11 @@
 package com.jakebarnby.filemanager.di
 
-import com.jakebarnby.filemanager.sources.SourceFragmentPresenter
-import com.jakebarnby.filemanager.sources.SourcePresenter
-import com.jakebarnby.filemanager.sources.dropbox.DropboxFragment
-import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFragment
-import com.jakebarnby.filemanager.sources.local.LocalFragment
-import com.jakebarnby.filemanager.sources.onedrive.OneDriveFragment
+import com.jakebarnby.filemanager.models.sources.SourceFragmentPresenter
+import com.jakebarnby.filemanager.models.sources.SourcePresenter
+import com.jakebarnby.filemanager.ui.sources.DropboxFragment
+import com.jakebarnby.filemanager.ui.sources.GoogleDriveFragment
+import com.jakebarnby.filemanager.models.sources.local.LocalFragment
+import com.jakebarnby.filemanager.models.sources.onedrive.OneDriveFragment
 import com.jakebarnby.filemanager.ui.sources.SourceActivityContract
 import com.jakebarnby.filemanager.ui.sources.SourceFragmentContract
 import dagger.Binds

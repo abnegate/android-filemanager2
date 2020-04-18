@@ -10,10 +10,11 @@ import java.io.Serializable
 @Entity
 open class SourceFile : Serializable {
 
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     var fileId: Long = 0
 
-    var parentFileId: Long = 0
+    var remoteFileId: Long = -1
+    var parentFileId: Long = -1
     var sourceId: Int = -1
 
     lateinit var path: String

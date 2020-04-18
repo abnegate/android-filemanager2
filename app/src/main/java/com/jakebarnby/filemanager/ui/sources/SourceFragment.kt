@@ -22,11 +22,10 @@ import com.jakebarnby.filemanager.models.SourceFile
 import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.models.ViewType
 import com.jakebarnby.filemanager.services.SourceTransferService
-import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveFragment
-import com.jakebarnby.filemanager.sources.googledrive.GoogleDriveSource
-import com.jakebarnby.filemanager.sources.local.LocalFragment
-import com.jakebarnby.filemanager.sources.onedrive.OneDriveFragment
-import com.jakebarnby.filemanager.sources.onedrive.OneDriveSource
+import com.jakebarnby.filemanager.models.sources.googledrive.GoogleDriveSource
+import com.jakebarnby.filemanager.models.sources.local.LocalFragment
+import com.jakebarnby.filemanager.models.sources.onedrive.OneDriveFragment
+import com.jakebarnby.filemanager.models.sources.onedrive.OneDriveSource
 import com.jakebarnby.filemanager.ui.adapters.FileAdapter
 import com.jakebarnby.filemanager.ui.adapters.FileAdapter.OnFileLongClickedListener
 import com.jakebarnby.filemanager.ui.adapters.FileDetailedListAdapter
