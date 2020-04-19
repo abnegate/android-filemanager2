@@ -18,9 +18,12 @@ import com.jakebarnby.filemanager.models.SourceFile
 import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.ui.adapters.FileAdapter.FileViewHolder
 import com.jakebarnby.filemanager.util.Comparators
+import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.TreeNode
+import com.jakebarnby.filemanager.util.Utils
 import java.io.File
+import java.util.*
 
 /**
  * Created by Jake on 5/31/2017.
@@ -79,6 +82,9 @@ abstract class FileAdapter(
         private val selectionCheckbox: CheckBox = itemView.findViewById(R.id.checkbox)
         private val fileName: TextView = itemView.findViewById(R.id.txt_item_title)
 
+        private val sizeOrCountText: TextView? = itemView.findViewById(R.id.txt_item_size)
+        private val modifiedDateText: TextView? = itemView.findViewById(R.id.txt_item_modified_datetime)
+
         open fun bindHolder(currentDir: TreeNode<SourceFile>) {
             val name = currentDir.data.name
             if (currentDir.data.isDirectory) {
@@ -91,6 +97,22 @@ abstract class FileAdapter(
                     fileName.text = name
                 }
                 setThumbnail(currentDir)
+            }
+
+            if (currentDir.data.isDirectory) {
+                sizeOrCountText?.text = currentDir.children.size.toString() + " items"
+            } else {
+                sizeOrCountText?.text = String.format(
+                    Locale.getDefault(),
+                    "%.2f %s",
+                    currentDir.data.size / Constants.BYTES_TO_MEGABYTE,
+                    "MB"
+                )
+            }
+
+            if (currentDir.data.sourceId != SourceType.DROPBOX.id) {
+                val displayTime = Utils.getDisplayStringFromDate(currentDir.data.modifiedTime)
+                modifiedDateText?.text = displayTime
             }
 
             if (!source.isMultiSelectEnabled) {
@@ -176,20 +198,6 @@ abstract class FileAdapter(
                 )
             }
         }
-    }
-
-    /**
-     * @param mOnClickListener
-     */
-    fun setOnClickListener(mOnClickListener: OnFileClickedListener?) {
-        this.onClickListener = mOnClickListener
-    }
-
-    /**
-     * @param mOnLongClickListener
-     */
-    fun setOnLongClickListener(mOnLongClickListener: OnFileLongClickedListener?) {
-        this.onLongClickListener = mOnLongClickListener
     }
 
     @FunctionalInterface

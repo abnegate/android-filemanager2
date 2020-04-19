@@ -6,7 +6,6 @@ enum class ViewType(val value: Int) {
     GRID(2);
 
     companion object {
-        fun getFromValue(value: Int): ViewType? =
-            values().find { it.value == value }
+        fun getFromValue(value: Int): ViewType? = values()[value]
     }
 }

@@ -2,10 +2,15 @@ package com.jakebarnby.filemanager.data
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import androidx.sqlite.db.SupportSQLiteQuery
+import com.jakebarnby.filemanager.models.Source
 import com.jakebarnby.filemanager.models.SourceFile
 
 @Dao
 interface FileDao {
+
+    @RawQuery(observedEntities = [SourceFile::class])
+    fun execRaw(query: SupportSQLiteQuery) : LiveData<List<SourceFile>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(vararg files: SourceFile) : List<Long>

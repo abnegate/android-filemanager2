@@ -1,6 +1,12 @@
 package com.jakebarnby.filemanager.ui.sources
 
-import com.jakebarnby.filemanager.core.BasePresenter
+import androidx.annotation.DrawableRes
+import androidx.lifecycle.LiveData
+import com.jakebarnby.batteries.core.view.ListView
+import com.jakebarnby.batteries.mvp.presenter.ListPresenter
+import com.jakebarnby.batteries.mvp.view.MvpView
+import com.jakebarnby.filemanager.data.FileDao
+import com.jakebarnby.filemanager.data.FileDatabase
 import com.jakebarnby.filemanager.managers.ConnectionManager
 import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.managers.SelectedFilesManager
@@ -11,15 +17,16 @@ import com.jakebarnby.filemanager.util.TreeNode
 
 interface SourceFragmentContract {
 
-    interface Presenter : BasePresenter<View> {
-        var source: Source
+    interface Presenter : com.jakebarnby.batteries.mvp.presenter.Presenter<View> {
+
+        var source: Source<*,*,*,*,*,*,*,*>
         var sourceManager: SourceManager
         var selectedFilesManager: SelectedFilesManager
         var prefsManager: PreferenceManager
         var connectionManager: ConnectionManager
+        var fileRepository: FileDao
 
-
-        fun setFileSource(source: Source)
+        fun setFileSource(source: Source<*,*,*,*,*,*,*,*>)
         fun checkState()
         fun onCheckPermissions(name: String, requestCode: Int)
         fun onConnect()
@@ -27,7 +34,7 @@ interface SourceFragmentContract {
         fun onLoadStarted()
         fun onLoadAborted()
         fun onLoadError(errorMessage: String?)
-        fun onLoadComplete(rootFile: TreeNode<SourceFile>)
+        fun onLoadComplete(rootFile: SourceFile)
         fun onLogout()
 
         fun onFileSelected(
@@ -38,9 +45,11 @@ interface SourceFragmentContract {
 
         fun onFileLongSelected(file: TreeNode<SourceFile>)
         fun onBreadCrumbSelected(name: String, crumbsToPop: Int)
+
+        fun getFilesLiveData(): LiveData<List<SourceFile>>
     }
 
-    interface View {
+    interface View : MvpView {
         fun populateList()
 
         fun showProgressBar()
@@ -64,11 +73,10 @@ interface SourceFragmentContract {
         fun updateFileList()
 
         fun pushBreadCrumb(
-            directory: TreeNode<SourceFile>,
-            arrowVisible: Boolean,
-            name: String
+            fileId: Long,
+            name: String,
+            arrowVisible: Boolean
         )
-
         fun popBreadCrumb()
         fun popAllBreadCrumbs()
 
@@ -82,7 +90,14 @@ interface SourceFragmentContract {
 
     }
 
-    interface ListPresenter
+    interface ListPresenter : com.jakebarnby.batteries.mvp.presenter.ListPresenter<SourceFile, ListView>
 
-    interface ListView
+    interface ListView : com.jakebarnby.batteries.core.view.ListView {
+        fun setFileName(name: String)
+        fun setImage(url: String)
+        fun setImage(@DrawableRes imageId: Int)
+        fun setSelected(selected: Boolean)
+        fun setSize(size: Int)
+        fun setModifiedDate(date: String)
+    }
 }

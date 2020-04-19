@@ -1,15 +1,16 @@
 package com.jakebarnby.filemanager.models.sources
 
 import android.os.Environment
+import androidx.lifecycle.LiveData
+import androidx.sqlite.db.SimpleSQLiteQuery
+import com.jakebarnby.filemanager.data.FileDao
 import com.jakebarnby.filemanager.managers.ConnectionManager
 import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.managers.SelectedFilesManager
 import com.jakebarnby.filemanager.managers.SourceManager
-import com.jakebarnby.filemanager.models.FileAction
-import com.jakebarnby.filemanager.models.Source
-import com.jakebarnby.filemanager.models.SourceFile
-import com.jakebarnby.filemanager.models.SourceType
+import com.jakebarnby.filemanager.models.*
 import com.jakebarnby.filemanager.ui.sources.SourceFragmentContract
+import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.TreeNode
 import com.jakebarnby.filemanager.util.Utils
 import javax.inject.Inject
@@ -18,14 +19,48 @@ class SourceFragmentPresenter @Inject constructor(
     override var sourceManager: SourceManager,
     override var selectedFilesManager: SelectedFilesManager,
     override var prefsManager: PreferenceManager,
-    override var connectionManager: ConnectionManager
+    override var connectionManager: ConnectionManager,
+    override var fileRepository: FileDao
 ) : SourceFragmentContract.Presenter {
 
     override var view: SourceFragmentContract.View? = null
 
-    override lateinit var source: Source
+    override lateinit var source: Source<*, *, *, *, *, *, *, *>
 
-    override fun setFileSource(source: Source) {
+    override fun getFilesLiveData(): LiveData<List<SourceFile>> {
+        val viewType = ViewType.getFromValue(prefsManager.getInt(
+            Constants.Prefs.VIEW_TYPE_KEY,
+            ViewType.LIST.value
+        ))
+        val showFoldersFirst = prefsManager.getBoolean(Constants.Prefs.FOLDER_FIRST_KEY, true)
+        val sortType = prefsManager.getInt(Constants.Prefs.SORT_TYPE_KEY, SortType.NAME.ordinal)
+        val orderType = prefsManager.getInt(Constants.Prefs.ORDER_TYPE_KEY, OrderType.ASCENDING.ordinal)
+
+        val query = buildString {
+            append("SELECT * FROM SourceFile ORDER BY ")
+
+            if (showFoldersFirst) {
+                append("isDirectory ASC, ")
+            }
+
+            append(when (sortType) {
+                SortType.NAME.ordinal -> "name "
+                SortType.TYPE.ordinal -> "fileType "
+                SortType.SIZE.ordinal -> "size "
+                SortType.MODIFIED_TIME.ordinal -> "modifiedTime "
+                else -> "name "
+            })
+
+            append(when (orderType) {
+                OrderType.ASCENDING.ordinal -> "ASC"
+                OrderType.DESCENDING.ordinal -> "DESC"
+                else -> "ASC"
+            })
+        }
+        return fileRepository.execRaw(SimpleSQLiteQuery(query))
+    }
+
+    override fun setFileSource(source: Source<*, *, *, *, *, *, *, *>) {
         val index = sourceManager.sources.indexOf(source)
         if (index == -1) {
             sourceManager.sources.add(source)
@@ -77,15 +112,13 @@ class SourceFragmentPresenter @Inject constructor(
         view?.showLoadError(source.sourceId)
     }
 
-    override fun onLoadComplete(rootFile: TreeNode<SourceFile>) {
+    override fun onLoadComplete(rootFile: SourceFile) {
         view?.pushBreadCrumb(
-            rootFile,
-            false,
-            SourceType.values()[rootFile.data.sourceId].sourceName
+            rootFile.fileId,
+            SourceType.values()[rootFile.sourceId].sourceName,
+            false
         )
         view?.populateList()
-
-        source.rootNode = rootFile
         source.currentDirectory = rootFile
 
         view?.hideProgressBar()

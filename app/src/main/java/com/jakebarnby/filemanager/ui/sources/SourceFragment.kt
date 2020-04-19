@@ -17,15 +17,17 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
+import com.jakebarnby.batteries.mvp.view.BatteriesMvpListFragment
 import com.jakebarnby.filemanager.R
+import com.jakebarnby.filemanager.data.FileDatabase
 import com.jakebarnby.filemanager.models.SourceFile
 import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.models.ViewType
-import com.jakebarnby.filemanager.services.SourceTransferService
 import com.jakebarnby.filemanager.models.sources.googledrive.GoogleDriveSource
 import com.jakebarnby.filemanager.models.sources.local.LocalFragment
 import com.jakebarnby.filemanager.models.sources.onedrive.OneDriveFragment
 import com.jakebarnby.filemanager.models.sources.onedrive.OneDriveSource
+import com.jakebarnby.filemanager.services.SourceTransferService
 import com.jakebarnby.filemanager.ui.adapters.FileAdapter
 import com.jakebarnby.filemanager.ui.adapters.FileAdapter.OnFileLongClickedListener
 import com.jakebarnby.filemanager.ui.adapters.FileDetailedListAdapter
@@ -34,17 +36,27 @@ import com.jakebarnby.filemanager.ui.adapters.FileListAdapter
 import com.jakebarnby.filemanager.util.*
 import com.jakebarnby.filemanager.util.Constants.GRID_SIZE
 import com.jakebarnby.filemanager.util.Constants.Prefs
-import dagger.android.support.DaggerFragment
+import dagger.android.HasAndroidInjector
+import dagger.android.support.AndroidSupportInjection
 import java.util.*
 import javax.inject.Inject
 
-abstract class SourceFragment : DaggerFragment(), SourceFragmentContract.View {
+abstract class SourceFragment : BatteriesMvpListFragment<
+    SourceFragmentContract.Presenter,
+    SourceFragmentContract.ListPresenter,
+    SourceFragmentContract.View,
+    SourceFragmentContract.ListView,
+    SourceFile>(
+    R.layout.fragment_source
+), SourceFragmentContract.View, HasAndroidInjector {
 
     @Inject
-    protected lateinit var presenter: SourceFragmentContract.Presenter
+    override lateinit var listPresenter: SourceFragmentContract.ListPresenter
 
-    var recycler: RecyclerView? = null
+    @Inject
+    override lateinit var presenter: SourceFragmentContract.Presenter
 
+    private var recycler: RecyclerView? = null
     private val adapters = mutableMapOf<ViewType, FileAdapter>()
 
     private lateinit var progressBar: ProgressBar
@@ -56,6 +68,7 @@ abstract class SourceFragment : DaggerFragment(), SourceFragmentContract.View {
     private lateinit var breadcrumbWrapper: HorizontalScrollView
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidSupportInjection.inject(this)
         super.onCreate(savedInstanceState)
         presenter.subscribe(this)
     }
@@ -65,16 +78,14 @@ abstract class SourceFragment : DaggerFragment(), SourceFragmentContract.View {
         presenter.checkState()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_source, container, false)
-
-        breadcrumbWrapper = rootView.findViewById(R.id.breadcrumb_wrapper)
-        breadcrumbBar = rootView.findViewById(R.id.breadcrumbs)
-        recycler = rootView.findViewById(R.id.recycler_local)
-        progressBar = rootView.findViewById(R.id.animation_view)
-        divider = rootView.findViewById(R.id.divider_sort)
-        connectButton = rootView.findViewById(R.id.btn_connect)
-        sourceLogo = rootView.findViewById(R.id.img_source_logo)
+    override fun onViewCreated(view: View) {
+        breadcrumbWrapper = view.findViewById(R.id.breadcrumb_wrapper)
+        breadcrumbBar = view.findViewById(R.id.breadcrumbs)
+        recycler = view.findViewById(R.id.recycler_local)
+        progressBar = view.findViewById(R.id.animation_view)
+        divider = view.findViewById(R.id.divider_sort)
+        connectButton = view.findViewById(R.id.btn_connect)
+        sourceLogo = view.findViewById(R.id.img_source_logo)
 
         connectButton.setOnClickListener {
             presenter.onConnect()
@@ -83,17 +94,13 @@ abstract class SourceFragment : DaggerFragment(), SourceFragmentContract.View {
         sourceLogo.setImageResource(
             Utils.resolveLogoId(presenter.source.sourceId)
         )
-        return rootView
     }
 
     override fun onResume() {
         super.onResume()
-        presenter.subscribe(this)
-    }
-
-    override fun onPause() {
-        presenter.unsubscribe()
-        super.onPause()
+        listPresenter.observeItemList(
+            presenter.getFilesLiveData()
+        )
     }
 
     override fun authenticate() {
@@ -114,10 +121,6 @@ abstract class SourceFragment : DaggerFragment(), SourceFragmentContract.View {
             getString(R.string.selected_title),
             size
         )
-    }
-
-    override fun updateFileList() {
-        recycler?.adapter?.notifyDataSetChanged()
     }
 
     override fun showLoadError(sourceName: Int) {
@@ -180,16 +183,11 @@ abstract class SourceFragment : DaggerFragment(), SourceFragmentContract.View {
         Snackbar.make(recycler!!, R.string.err_no_free_space, Snackbar.LENGTH_LONG).show()
     }
 
-    fun initRecyclerView() {
+    private fun initRecyclerView() {
         val viewType = ViewType.getFromValue(presenter.prefsManager.getInt(
             Prefs.VIEW_TYPE_KEY,
             ViewType.LIST.value
         ))
-
-        TreeNode.sortTree(
-            presenter.source.rootNode,
-            Comparators.resolveComparatorForPrefs(presenter.prefsManager)
-        )
 
         val newAdapter = when (viewType) {
             ViewType.LIST -> {
@@ -274,14 +272,10 @@ abstract class SourceFragment : DaggerFragment(), SourceFragmentContract.View {
         initRecyclerView()
     }
 
-    /**
-     * Push a breadcrumb onto the view stack
-     * @param directory The directory to push
-     */
     override fun pushBreadCrumb(
-        directory: TreeNode<SourceFile>,
-        arrowVisible: Boolean,
-        name: String
+        fileId: Long,
+        name: String,
+        arrowVisible: Boolean
     ) {
         val crumbLayout = activity
             ?.layoutInflater
