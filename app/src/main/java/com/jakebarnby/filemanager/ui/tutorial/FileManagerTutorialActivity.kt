@@ -17,7 +17,7 @@ import dagger.android.AndroidInjection
  */
 class FileManagerTutorialActivity : TutorialActivity() {
 
-    lateinit var remoteConfig: FirebaseRemoteConfig
+    private lateinit var remoteConfig: FirebaseRemoteConfig
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

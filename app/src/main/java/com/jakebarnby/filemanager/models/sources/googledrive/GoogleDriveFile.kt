@@ -20,7 +20,8 @@ class GoogleDriveFile(
             path = file.webViewLink
         }
 
-        fileId = file.id.hashCode().toLong()
+        id = file.id.hashCode().toLong()
+        parentFileId = file.parents?.get(0)?.hashCode()?.toLong() ?: -1L
         remoteFileId = file.id.hashCode().toLong()
         name = file.name
         sourceId = SourceType.GOOGLE_DRIVE.id

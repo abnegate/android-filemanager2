@@ -25,9 +25,7 @@ import com.jakebarnby.filemanager.util.GooglePlay
 import com.jakebarnby.filemanager.util.Logger
 import com.jakebarnby.filemanager.util.Utils
 import com.jakebarnby.filemanager.workers.GoogleDriveFileTreeWalker
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
@@ -55,22 +53,41 @@ class GoogleDriveSource @Inject constructor(
     prefsManager
 ) {
 
-    private var credential: GoogleAccountCredential? = null
-
     companion object {
         private val SCOPES = listOf(DriveScopes.DRIVE)
 
         var client: Drive? = null
     }
 
+    private var credential: GoogleAccountCredential? = null
+
+    override val storageInfo: StorageInfo?
+        get() {
+            try {
+                val quota = client
+                    ?.about()
+                    ?.get()
+                    ?.setFields("storageQuota")
+                    ?.execute()
+                    ?.storageQuota
+                return StorageInfo(
+                    quota?.limit ?: 0,
+                    quota?.usage ?: 0
+                )
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            return null
+        }
+
     override suspend fun authenticate(context: Context) {
         //if (!checkConnectionActive(context)) return
         fetchCredential(context)
         if (prefsManager.hasSourceToken(sourceId)) {
-            loadFiles(context)
+            loadFiles<GoogleDriveFileTreeWalker>(context)
             return
         }
-        presenter.onCheckPermissions(
+        listener.onCheckPermissions(
             Manifest.permission.GET_ACCOUNTS,
             RequestCodes.ACCOUNTS_PERMISSIONS
         )
@@ -84,7 +101,7 @@ class GoogleDriveSource @Inject constructor(
             isLoggedIn = false
             isFilesLoaded = false
             credential = null
-            presenter.onLogout()
+            listener.onLogout()
 
             Logger.logFirebaseEvent(
                 FirebaseAnalytics.getInstance(context),
@@ -99,7 +116,7 @@ class GoogleDriveSource @Inject constructor(
             .setBackOff(ExponentialBackOff())
     }
 
-    fun authGoogle(fragment: Fragment) {
+    fun authenticate(fragment: Fragment) {
         getResultsFromApi(fragment)
     }
 
@@ -131,10 +148,10 @@ class GoogleDriveSource @Inject constructor(
         } else if (credential != null && credential!!.selectedAccountName == null) {
             fragment.startActivityForResult(credential!!.newChooseAccountIntent(), RequestCodes.ACCOUNT_PICKER)
         } else if (!Utils.isConnectionReady(fragment.context!!)) {
-            presenter.onNoConnection()
+            listener.onNoConnection()
         } else {
             isLoggedIn = true
-            loadFiles(fragment.context!!)
+            loadFiles<GoogleDriveFileTreeWalker>(fragment.context!!)
         }
     }
 
@@ -154,12 +171,10 @@ class GoogleDriveSource @Inject constructor(
         getResultsFromApi(fragment)
     }
 
-    fun getRootFile() = getFilesAtPath("root")
-
-    fun getFilesAtPath(path: String): com.google.api.services.drive.model.File? =
+    fun getRootFile() =
         client
             ?.files()
-            ?.get(path)
+            ?.get("root")
             ?.setFields("name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime")
             ?.execute()
 
@@ -171,11 +186,7 @@ class GoogleDriveSource @Inject constructor(
             ?.setFields("files(name,id,mimeType,parents,size,hasThumbnail,thumbnailLink,iconLink,modifiedTime)")
             ?.execute()
 
-    /**
-     * @param fileId
-     * @param destinationPath
-     * @return
-     */
+
     @Throws(IOException::class)
     override suspend fun download(
         params: GoogleDriveDownloadParams
@@ -190,11 +201,6 @@ class GoogleDriveSource @Inject constructor(
         file
     }
 
-    /**
-     * Upload a file at the given path on Google Drive
-     *
-     * @param filePath Path to upload the file to
-     */
     @Throws(IOException::class)
     override suspend fun upload(
         params: GoogleDriveUploadParams
@@ -222,11 +228,6 @@ class GoogleDriveSource @Inject constructor(
         }
     }
 
-    /**
-     * Delete the gile with the given ID from Google Drive
-     *
-     * @param fileId The ID of the file to delete
-     */
     @Throws(IOException::class)
     override suspend fun delete(params: GoogleDriveDeleteParams) {
         withContext(IO) {
@@ -237,10 +238,6 @@ class GoogleDriveSource @Inject constructor(
         }
     }
 
-    /**
-     * @param folderName
-     * @param parentId
-     */
     @Throws(IOException::class)
     override suspend fun createFolder(params: GoogleDriveCreateFolderParams): com.google.api.services.drive.model.File? {
         val fileMetadata = com.google.api.services.drive.model.File().apply {
@@ -258,11 +255,6 @@ class GoogleDriveSource @Inject constructor(
         }
     }
 
-    /**
-     * @param newName
-     * @param parentId
-     * @return
-     */
     @Throws(IOException::class)
     override suspend fun rename(params: GoogleDriveRenameParams
     ): com.google.api.services.drive.model.File? {
@@ -278,24 +270,4 @@ class GoogleDriveSource @Inject constructor(
                 ?.execute()
         }
     }
-
-    val storageInfo: StorageInfo?
-        get() {
-            try {
-                val quota = client
-                    ?.about()
-                    ?.get()
-                    ?.setFields("storageQuota")
-                    ?.execute()
-                    ?.storageQuota
-                val info = StorageInfo()
-                info.totalSpace = quota?.limit ?: 0
-                info.usedSpace = quota?.usage ?: 0
-                info.freeSpace = (quota?.limit ?: 0) - (quota?.usage ?: 0)
-                return info
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-            return null
-        }
 }

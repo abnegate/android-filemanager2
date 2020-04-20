@@ -2,17 +2,21 @@ package com.jakebarnby.filemanager.models
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.dropbox.core.v2.files.FileMetadata
+import com.dropbox.core.v2.files.FolderMetadata
+import com.dropbox.core.v2.files.Metadata
 import com.jakebarnby.batteries.core.model.Model
+import java.io.File
 import java.io.Serializable
 
 /**
  * Created by Jake on 6/5/2017.
  */
 @Entity
-open class SourceFile : Serializable, Model<Long>(0) {
+open class SourceFile : Serializable, Model<Long> {
 
     @PrimaryKey
-    var fileId: Long = 0
+    override var id: Long = 0
 
     var remoteFileId: Long = -1
     var parentFileId: Long = -1

@@ -35,10 +35,7 @@ class GoogleDriveFileTreeWalker(context: Context, params: WorkerParameters)
         var currentDirectory = rootSourceFile
         while (children.isNotEmpty()) {
             val child = children.pop()
-            val newNode = GoogleDriveFile(child).apply {
-                fileId = nodesToAdd.size.toLong()
-                parentFileId = currentDirectory.fileId
-            }
+            val newNode = GoogleDriveFile(child)
             nodesToAdd += newNode
 
             if (!newNode.isDirectory) {

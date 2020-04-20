@@ -12,6 +12,8 @@ class LocalFile(file: File) : SourceFile() {
     init {
         path = file.path
         name = file.name
+        id = file.absolutePath.hashCode().toLong()
+        parentFileId = file.absolutePath.substring(0..file.absolutePath.lastIndexOf(File.separatorChar)).hashCode().toLong()
         sourceId = SourceType.LOCAL.id
         isDirectory = file.isDirectory
         isHidden = file.name.startsWith(".")

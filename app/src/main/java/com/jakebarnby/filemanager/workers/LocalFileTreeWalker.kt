@@ -20,9 +20,7 @@ class LocalFileTreeWalker(context: Context, params: WorkerParameters)
         }
 
         val nodesToAdd = mutableSetOf<SourceFile>()
-        val rootSourceFile = LocalFile(rootNode).apply {
-            fileId = 0
-        }
+        val rootSourceFile = LocalFile(rootNode)
 
         nodesToAdd += rootSourceFile
 
@@ -33,10 +31,7 @@ class LocalFileTreeWalker(context: Context, params: WorkerParameters)
         var currentDirectory = rootSourceFile
         while (children.isNotEmpty()) {
             val child = children.pop()
-            val newNode = LocalFile(child).apply {
-                fileId = nodesToAdd.size.toLong()
-                parentFileId = currentDirectory.fileId
-            }
+            val newNode = LocalFile(child)
             nodesToAdd += newNode
 
             if (!child.isDirectory) {

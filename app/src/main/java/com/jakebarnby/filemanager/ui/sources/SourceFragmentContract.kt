@@ -13,11 +13,12 @@ import com.jakebarnby.filemanager.managers.SelectedFilesManager
 import com.jakebarnby.filemanager.managers.SourceManager
 import com.jakebarnby.filemanager.models.Source
 import com.jakebarnby.filemanager.models.SourceFile
+import com.jakebarnby.filemanager.models.SourceListener
 import com.jakebarnby.filemanager.util.TreeNode
 
 interface SourceFragmentContract {
 
-    interface Presenter : com.jakebarnby.batteries.mvp.presenter.Presenter<View> {
+    interface Presenter : com.jakebarnby.batteries.mvp.presenter.Presenter<View>, SourceListener {
 
         var source: Source<*,*,*,*,*,*,*,*>
         var sourceManager: SourceManager
@@ -27,31 +28,14 @@ interface SourceFragmentContract {
         var fileRepository: FileDao
 
         fun setFileSource(source: Source<*,*,*,*,*,*,*,*>)
-        fun checkState()
-        fun onCheckPermissions(name: String, requestCode: Int)
-        fun onConnect()
-        fun onNoConnection()
-        fun onLoadStarted()
-        fun onLoadAborted()
-        fun onLoadError(errorMessage: String?)
-        fun onLoadComplete(rootFile: SourceFile)
-        fun onLogout()
-
-        fun onFileSelected(
-            file: TreeNode<SourceFile>,
-            isChecked: Boolean,
-            position: Int
-        )
-
-        fun onFileLongSelected(file: TreeNode<SourceFile>)
+        fun onFileSelected(file: SourceFile)
+        fun onFileLongSelected(file: SourceFile)
         fun onBreadCrumbSelected(name: String, crumbsToPop: Int)
 
         fun getFilesLiveData(): LiveData<List<SourceFile>>
     }
 
     interface View : MvpView {
-        fun populateList()
-
         fun showProgressBar()
         fun hideProgressBar()
 
@@ -70,7 +54,6 @@ interface SourceFragmentContract {
         fun showNotEnoughSpaceSnackBar()
 
         fun setSelectedCountTitle(size: Int)
-        fun updateFileList()
 
         fun pushBreadCrumb(
             fileId: Long,
@@ -82,7 +65,7 @@ interface SourceFragmentContract {
 
         fun startActionOpen(toOpen: SourceFile)
 
-        fun authenticate()
+        fun startAuthentication()
 
         fun showAppSettings()
 
@@ -90,12 +73,17 @@ interface SourceFragmentContract {
 
     }
 
-    interface ListPresenter : com.jakebarnby.batteries.mvp.presenter.ListPresenter<SourceFile, ListView>
+    interface ListPresenter : com.jakebarnby.batteries.mvp.presenter.ListPresenter<SourceFile, ListView> {
+        fun onItemLongSelected(position: Int)
+    }
 
     interface ListView : com.jakebarnby.batteries.core.view.ListView {
         fun setFileName(name: String)
         fun setImage(url: String)
         fun setImage(@DrawableRes imageId: Int)
+        fun showSelection()
+        fun hideSelection()
+        fun animateSelectionIn()
         fun setSelected(selected: Boolean)
         fun setSize(size: Int)
         fun setModifiedDate(date: String)

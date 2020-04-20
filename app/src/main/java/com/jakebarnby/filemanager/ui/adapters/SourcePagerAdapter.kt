@@ -8,7 +8,7 @@ import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.ui.sources.DropboxFragment
 import com.jakebarnby.filemanager.ui.sources.GoogleDriveFragment
 import com.jakebarnby.filemanager.models.sources.local.LocalFragment
-import com.jakebarnby.filemanager.models.sources.onedrive.OneDriveFragment
+import com.jakebarnby.filemanager.ui.sources.OneDriveFragment
 import com.jakebarnby.filemanager.ui.sources.SourceFragment
 import java.util.*
 

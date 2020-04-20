@@ -11,16 +11,6 @@ import com.jakebarnby.filemanager.util.Constants
  */
 class DropboxFragment : SourceFragment() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        presenter.setFileSource(DropboxSource(presenter))
-    }
-
-    override fun onResume() {
-        super.onResume()
-        (presenter.source as DropboxSource).checkForAccessToken(context!!)
-    }
-
     companion object {
         private const val TAG = "DROPBOX"
 
@@ -30,5 +20,15 @@ class DropboxFragment : SourceFragment() {
                     Constants.FRAGMENT_TITLE to SourceType.values()[sourceId].sourceName
                 )
             }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        presenter.setFileSource(DropboxSource(presenter.prefsManager))
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (presenter.source as DropboxSource).checkForAccessToken(context!!)
     }
 }

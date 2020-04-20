@@ -13,29 +13,49 @@ import javax.inject.Singleton
 @Singleton
 class SelectedFilesManager @Inject constructor() {
 
-    private val selectedFilesMap = SparseArray<MutableList<TreeNode<SourceFile>>>()
-    private val actionableDirectories = SparseArray<TreeNode<SourceFile>>()
-
-    val currentSelectedFiles: MutableList<TreeNode<SourceFile>>
-        get() = selectedFilesMap[operationCount - 1]
+    private val selectedFilesMap = SparseArray<MutableList<SourceFile>>()
+    private val actionableDirectories = SparseArray<SourceFile>()
 
     val operationCount: Int
         get() = selectedFilesMap.size()
 
-    val currentCopySize: Long
+    val currentSelectedFiles: List<SourceFile>
+        get() = selectedFilesMap[operationCount - 1]
+
+    val currentSelectionSize: Long
         get() {
             var copySize: Long = 0
             for (file in currentSelectedFiles) {
-                copySize += file.data.size
+                copySize += file.size
             }
             return copySize
         }
 
-    fun getSelectedFiles(operationId: Int): MutableList<TreeNode<SourceFile>>? {
+    fun getSelectedFiles(operationId: Int): List<SourceFile>? {
         return selectedFilesMap[operationId - 1]
     }
 
-    fun getActionableDirectory(operationId: Int): TreeNode<SourceFile>? {
+    fun addToSelection(operationId: Int, file: SourceFile) {
+        selectedFilesMap[operationId - 1].add(file)
+    }
+
+    fun addToCurrentSelection(file: SourceFile) {
+        selectedFilesMap[operationCount - 1].add(file)
+    }
+
+    fun removeFromSelection(operationId: Int, file: SourceFile) {
+        selectedFilesMap[operationId - 1].remove(file)
+    }
+
+    fun removeFromCurrentSelection(file: SourceFile) {
+        selectedFilesMap[operationCount - 1].remove(file)
+    }
+
+    fun clearCurrentSelection() {
+        selectedFilesMap[operationCount - 1].clear()
+    }
+
+    fun getActionableDirectory(operationId: Int): SourceFile? {
         return actionableDirectories[operationId]
     }
 
@@ -45,7 +65,7 @@ class SelectedFilesManager @Inject constructor() {
 
     fun addActionableDirectory(
         operationId: Int,
-        actionableDir: TreeNode<SourceFile>
+        actionableDir: SourceFile
     ) {
         actionableDirectories.put(operationId, actionableDir)
     }

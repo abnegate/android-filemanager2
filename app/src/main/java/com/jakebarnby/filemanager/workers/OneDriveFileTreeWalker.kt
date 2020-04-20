@@ -35,10 +35,7 @@ class OneDriveFileTreeWalker(context: Context, params: WorkerParameters)
         var currentDirectory = rootSourceFile
         while (children.isNotEmpty()) {
             val child = children.pop()
-            val newNode = OneDriveFile(child).apply {
-                fileId = nodesToAdd.size.toLong()
-                parentFileId = currentDirectory.fileId
-            }
+            val newNode = OneDriveFile(child)
             nodesToAdd += newNode
 
             if (!newNode.isDirectory) {

@@ -6,38 +6,33 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.AdapterListUpdateCallback
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
+import com.jakebarnby.batteries.core.IOCoroutineScope
 import com.jakebarnby.batteries.mvp.view.BatteriesMvpListFragment
+import com.jakebarnby.batteries.mvp.view.MvpView
 import com.jakebarnby.filemanager.R
-import com.jakebarnby.filemanager.data.FileDatabase
 import com.jakebarnby.filemanager.models.SourceFile
-import com.jakebarnby.filemanager.models.SourceType
-import com.jakebarnby.filemanager.models.ViewType
 import com.jakebarnby.filemanager.models.sources.googledrive.GoogleDriveSource
 import com.jakebarnby.filemanager.models.sources.local.LocalFragment
-import com.jakebarnby.filemanager.models.sources.onedrive.OneDriveFragment
-import com.jakebarnby.filemanager.models.sources.onedrive.OneDriveSource
 import com.jakebarnby.filemanager.services.SourceTransferService
 import com.jakebarnby.filemanager.ui.adapters.FileAdapter
-import com.jakebarnby.filemanager.ui.adapters.FileAdapter.OnFileLongClickedListener
-import com.jakebarnby.filemanager.ui.adapters.FileDetailedListAdapter
-import com.jakebarnby.filemanager.ui.adapters.FileGridAdapter
-import com.jakebarnby.filemanager.ui.adapters.FileListAdapter
-import com.jakebarnby.filemanager.util.*
-import com.jakebarnby.filemanager.util.Constants.GRID_SIZE
-import com.jakebarnby.filemanager.util.Constants.Prefs
+import com.jakebarnby.filemanager.util.Constants
+import com.jakebarnby.filemanager.util.Utils
+import com.jakebarnby.filemanager.util.afterLayout
+import com.jakebarnby.filemanager.workers.LocalFileTreeWalker
+import dagger.android.AndroidInjector
+import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import dagger.android.support.AndroidSupportInjection
+import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
 
@@ -48,16 +43,20 @@ abstract class SourceFragment : BatteriesMvpListFragment<
     SourceFragmentContract.ListView,
     SourceFile>(
     R.layout.fragment_source
-), SourceFragmentContract.View, HasAndroidInjector {
+), SourceFragmentContract.View, HasAndroidInjector, IOCoroutineScope {
 
     @Inject
-    override lateinit var listPresenter: SourceFragmentContract.ListPresenter
+    lateinit var androidInjector: DispatchingAndroidInjector<Any>
 
     @Inject
     override lateinit var presenter: SourceFragmentContract.Presenter
 
-    private var recycler: RecyclerView? = null
-    private val adapters = mutableMapOf<ViewType, FileAdapter>()
+    @Inject
+    override lateinit var listPresenter: SourceFragmentContract.ListPresenter
+
+    internal var recycler: RecyclerView? = null
+
+    private var adapter: FileAdapter? = null
 
     private lateinit var progressBar: ProgressBar
     private lateinit var connectButton: Button
@@ -67,15 +66,34 @@ abstract class SourceFragment : BatteriesMvpListFragment<
     private lateinit var breadcrumbBar: LinearLayout
     private lateinit var breadcrumbWrapper: HorizontalScrollView
 
+    override fun androidInjector(): AndroidInjector<Any>  = androidInjector
+
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidSupportInjection.inject(this)
         super.onCreate(savedInstanceState)
+    }
+
+    override fun onCreatePresenters() {
         presenter.subscribe(this)
+        listPresenter.apply {
+            onItemSelectedListener = {
+                presenter.onFileSelected(it)
+            }
+        }
+        listPresenter.subscribe()
+        adapter = FileAdapter(
+            listPresenter::onItemSelected,
+            listPresenter::onItemLongSelected,
+            listPresenter::getItemViewTypeAtIndex,
+            this::onBindItemView,
+            this::onGetItemCount
+        )
+        listPresenter.updateCallback = AdapterListUpdateCallback(adapter!!)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        presenter.checkState()
+        presenter.onCheckForToken()
     }
 
     override fun onViewCreated(view: View) {
@@ -99,14 +117,13 @@ abstract class SourceFragment : BatteriesMvpListFragment<
     override fun onResume() {
         super.onResume()
         listPresenter.observeItemList(
-            presenter.getFilesLiveData()
+            presenter.getFilesLiveData(),
+            viewLifecycleOwner
         )
     }
 
-    override fun authenticate() {
-        if (this is OneDriveFragment) {
-            (presenter.source as? OneDriveSource)?.authenticateSource(this)
-        } else {
+    override fun startAuthentication() {
+        launch {
             presenter.source.authenticate(context!!)
         }
     }
@@ -162,8 +179,18 @@ abstract class SourceFragment : BatteriesMvpListFragment<
         sourceLogo.visibility = View.GONE
     }
 
+    override fun MvpView.hideNoItemsView() {
+        TODO("not implemented")
+    }
+
+    override fun MvpView.showNoItemsView() {
+        TODO("not implemented")
+    }
+
     override fun showFileList() {
-        TODO("Not yet implemented")
+        recycler?.visibility = View.VISIBLE
+        divider.visibility = View.VISIBLE
+        breadcrumbWrapper.visibility = View.VISIBLE
     }
 
     override fun hideFileList() {
@@ -181,95 +208,6 @@ abstract class SourceFragment : BatteriesMvpListFragment<
 
     override fun showNotEnoughSpaceSnackBar() {
         Snackbar.make(recycler!!, R.string.err_no_free_space, Snackbar.LENGTH_LONG).show()
-    }
-
-    private fun initRecyclerView() {
-        val viewType = ViewType.getFromValue(presenter.prefsManager.getInt(
-            Prefs.VIEW_TYPE_KEY,
-            ViewType.LIST.value
-        ))
-
-        val newAdapter = when (viewType) {
-            ViewType.LIST -> {
-                recycler?.layoutManager = LinearLayoutManager(
-                    context,
-                    LinearLayoutManager.VERTICAL,
-                    false
-                )
-                adapters[ViewType.LIST]
-            }
-            ViewType.DETAILED_LIST -> {
-                recycler?.layoutManager = LinearLayoutManager(
-                    context,
-                    LinearLayoutManager.VERTICAL,
-                    false
-                )
-                adapters[ViewType.DETAILED_LIST]
-            }
-            ViewType.GRID -> {
-                recycler?.layoutManager = GridLayoutManager(
-                    context,
-                    GRID_SIZE
-                )
-                adapters[ViewType.GRID]
-            }
-            else -> {
-                recycler?.layoutManager = LinearLayoutManager(
-                    context,
-                    LinearLayoutManager.VERTICAL,
-                    false
-                )
-                adapters[ViewType.LIST]
-            }
-        }
-        recycler?.adapter = newAdapter
-        recycler?.adapter?.notifyDataSetChanged()
-        recycler?.visibility = View.VISIBLE
-        divider.visibility = View.VISIBLE
-        breadcrumbWrapper.visibility = View.VISIBLE
-    }
-
-    override fun populateList() {
-        val clickListener = object : FileAdapter.OnFileClickedListener {
-            override fun onClick(file: TreeNode<SourceFile>, isChecked: Boolean, position: Int) {
-                presenter.onFileSelected(file, isChecked, position)
-            }
-        }
-        val longClickListener = object : OnFileLongClickedListener {
-            override fun onLongClick(file: TreeNode<SourceFile>) {
-                presenter.onFileLongSelected(file)
-            }
-        }
-        val listAdapter = FileListAdapter(
-            presenter.source,
-            presenter.selectedFilesManager,
-            presenter.prefsManager
-        ).apply {
-            setOnClickListener(clickListener)
-            setOnLongClickListener(longClickListener)
-        }
-        val gridAdapter = FileGridAdapter(
-            presenter.source,
-            presenter.selectedFilesManager,
-            presenter.prefsManager
-        ).apply {
-            setOnClickListener(clickListener)
-            setOnLongClickListener(longClickListener)
-        }
-        val detailedListAdapter = FileDetailedListAdapter(
-            presenter.source,
-            presenter.selectedFilesManager,
-            presenter.prefsManager
-        ).apply {
-            setOnClickListener(clickListener)
-            setOnLongClickListener(longClickListener)
-        }
-
-        adapters[ViewType.LIST] = listAdapter
-        adapters[ViewType.DETAILED_LIST] = detailedListAdapter
-        adapters[ViewType.GRID] = gridAdapter
-
-        initRecyclerView()
     }
 
     override fun pushBreadCrumb(
@@ -309,28 +247,6 @@ abstract class SourceFragment : BatteriesMvpListFragment<
         )
     }
 
-    fun pushAllBreadCrumbs(directory: TreeNode<SourceFile>) {
-        val breadCrumbs = Stack<TreeNode<SourceFile>>()
-        var root = directory
-        breadCrumbs.push(root)
-        while (root.parent != null) {
-            root = root.parent!!
-            breadCrumbs.push(root)
-        }
-        while (breadCrumbs.size > 0) {
-            val node = breadCrumbs.pop()
-            pushBreadCrumb(
-                node,
-                node.parent != null,
-                if (node.parent == null) {
-                    SourceType.values()[node.data.sourceId].sourceName
-                } else {
-                    node.data.name
-                }
-            )
-        }
-    }
-
     override fun popBreadCrumb() {
         breadcrumbBar.removeViewAt(breadcrumbBar.childCount - 1)
     }
@@ -351,10 +267,10 @@ abstract class SourceFragment : BatteriesMvpListFragment<
         } else {
             if (this is LocalFragment) {
                 presenter.source.isLoggedIn = true
-                presenter.source.loadFiles(activity)
+                presenter.source.loadFiles<LocalFileTreeWalker>(activity)
             } else if (this is GoogleDriveFragment) {
                 (presenter.source as GoogleDriveSource)
-                    .authGoogle(this)
+                    .authenticate(this)
             }
         }
     }
@@ -365,7 +281,7 @@ abstract class SourceFragment : BatteriesMvpListFragment<
         when (requestCode) {
             Constants.RequestCodes.STORAGE_PERMISSIONS -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    presenter.source.loadFiles(context!!)
+                    presenter.source.loadFiles<LocalFileTreeWalker>(context!!)
                     presenter.source.isLoggedIn = true
                 } else if (!shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     Snackbar.make(recycler!!, R.string.storage_permission, Snackbar.LENGTH_LONG)
@@ -374,10 +290,10 @@ abstract class SourceFragment : BatteriesMvpListFragment<
                 }
             }
             Constants.RequestCodes.ACCOUNTS_PERMISSIONS -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (this is GoogleDriveFragment) {
-                        (presenter.source as GoogleDriveSource).authGoogle(this)
-                    }
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && this is GoogleDriveFragment
+                    && presenter.source is GoogleDriveSource) {
+                    presenter.source.authenticate(this)
                 } else if (!shouldShowRequestPermissionRationale(Manifest.permission.GET_ACCOUNTS)) {
                     Snackbar.make(recycler!!, R.string.contacts_permission, Snackbar.LENGTH_LONG)
                         .setAction(R.string.action_settings) { showAppSettings() }

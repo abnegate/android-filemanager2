@@ -18,7 +18,7 @@ import java.util.*
  * Created by Jake on 7/31/2017.
  */
 class SourceUsageAdapter(
-    private val sources: List<Source>
+    private val sources: List<Source<*,*,*,*,*,*,*,*>>
 ) : RecyclerView.Adapter<UsageViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UsageViewHolder {
@@ -42,15 +42,15 @@ class SourceUsageAdapter(
         private val sourceName: TextView = itemView.findViewById(R.id.txt_source_title)
         private val sourceUsage: TextView = itemView.findViewById(R.id.txt_space_consumption)
 
-        fun bindHolder(source: Source) {
+        fun bindHolder(source: Source<*,*,*,*,*,*,*,*>) {
             sourceName.text = String.format("%s", source.sourceId)
             sourceUsage.text = constructUsageString(source)
-            animateProgress(percentBar, source.usedSpacePercent)
+            animateProgress(percentBar, source.storageInfo?.usedPercent ?: 0)
         }
 
-        private fun constructUsageString(source: Source?): String {
-            val usedGb = source?.usedSpaceGB ?: 0.0
-            val totalGb = source?.totalSpaceGB ?: 0.0
+        private fun constructUsageString(source: Source<*,*,*,*,*,*,*,*>?): String {
+            val usedGb = source?.storageInfo?.usedGB ?: 0.0
+            val totalGb = source?.storageInfo?.totalGB ?: 0.0
 
             return String.format(
                 Locale.getDefault(),

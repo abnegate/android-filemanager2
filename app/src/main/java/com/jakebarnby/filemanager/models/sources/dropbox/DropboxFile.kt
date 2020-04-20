@@ -11,7 +11,6 @@ import java.io.File
 /**
  * Created by Jake on 6/5/2017.
  */
-@Entity
 class DropboxFile(file: Metadata) : SourceFile() {
 
     init {
@@ -24,7 +23,7 @@ class DropboxFile(file: Metadata) : SourceFile() {
             size = file.size
         }
         name = file.name
-        fileId = file.pathDisplay.hashCode().toLong()
+        id = file.pathDisplay.hashCode().toLong()
         parentFileId = file.pathDisplay.substring(0..file.pathDisplay.lastIndexOf(File.separatorChar)).hashCode().toLong()
         sourceId = SourceType.DROPBOX.id
         isDirectory = file is FolderMetadata

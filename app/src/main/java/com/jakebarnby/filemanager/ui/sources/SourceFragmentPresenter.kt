@@ -1,4 +1,4 @@
-package com.jakebarnby.filemanager.models.sources
+package com.jakebarnby.filemanager.ui.sources
 
 import android.os.Environment
 import androidx.lifecycle.LiveData
@@ -9,9 +9,7 @@ import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.managers.SelectedFilesManager
 import com.jakebarnby.filemanager.managers.SourceManager
 import com.jakebarnby.filemanager.models.*
-import com.jakebarnby.filemanager.ui.sources.SourceFragmentContract
 import com.jakebarnby.filemanager.util.Constants
-import com.jakebarnby.filemanager.util.TreeNode
 import com.jakebarnby.filemanager.util.Utils
 import javax.inject.Inject
 
@@ -71,7 +69,7 @@ class SourceFragmentPresenter @Inject constructor(
         this.source = source
     }
 
-    override fun checkState() {
+    override fun onCheckForToken() {
         if (prefsManager.hasSourceToken(source.sourceId)) {
             view?.hideConnectButton()
         }
@@ -87,7 +85,7 @@ class SourceFragmentPresenter @Inject constructor(
             return
         }
 
-        view?.authenticate()
+        view?.startAuthentication()
     }
 
     override fun onNoConnection() {
@@ -114,11 +112,10 @@ class SourceFragmentPresenter @Inject constructor(
 
     override fun onLoadComplete(rootFile: SourceFile) {
         view?.pushBreadCrumb(
-            rootFile.fileId,
+            rootFile.id,
             SourceType.values()[rootFile.sourceId].sourceName,
             false
         )
-        view?.populateList()
         source.currentDirectory = rootFile
 
         view?.hideProgressBar()
@@ -130,54 +127,49 @@ class SourceFragmentPresenter @Inject constructor(
         view?.popAllBreadCrumbs()
     }
 
-    override fun onFileSelected(
-        file: TreeNode<SourceFile>,
-        isChecked: Boolean,
-        position: Int
-    ) {
+    override fun onFileSelected(file: SourceFile) {
         if (source.isMultiSelectEnabled) {
-            if (isChecked) {
-                selectedFilesManager.currentSelectedFiles.add(file)
+            if (!selectedFilesManager.currentSelectedFiles.contains(file)) {
+                selectedFilesManager.addToCurrentSelection(file)
             } else {
-                selectedFilesManager.currentSelectedFiles.remove(file)
+                selectedFilesManager.removeFromCurrentSelection(file)
             }
 
             view?.setSelectedCountTitle(selectedFilesManager.currentSelectedFiles.size)
             return
         }
 
-        if (file.data.isDirectory) {
+        if (file.isDirectory) {
             source.currentDirectory = file
 
-            val name = if (file.parent == null) {
-                SourceType.values()[file.data.sourceId].sourceName
+            val name = if (file.parentFileId != -1L) {
+                SourceType.values()[file.sourceId].sourceName
             } else {
-                file.data.name
+                file.name
             }
 
             view?.pushBreadCrumb(
-                file,
-                file.parent != null,
-                name
+                file.id,
+                name,
+                file.parentFileId != -1L
             )
-            view?.updateFileList()
             return
         }
 
-        if (Utils.getStorageStats(Environment.getExternalStorageDirectory()).freeSpace > file.data.size) {
+        if (Utils.getStorageStats(Environment.getExternalStorageDirectory()).freeBytes > file.size) {
             selectedFilesManager.startNewSelection()
 
             sourceManager.addFileAction(
                 selectedFilesManager.operationCount - 1,
                 FileAction.OPEN
             )
-            view?.startActionOpen(file.data)
+            view?.startActionOpen(file)
         } else {
             view?.showNotEnoughSpaceSnackBar()
         }
     }
 
-    override fun onFileLongSelected(file: TreeNode<SourceFile>) {
+    override fun onFileLongSelected(file: SourceFile) {
         if (source.isMultiSelectEnabled) {
             return
         }
@@ -187,8 +179,7 @@ class SourceFragmentPresenter @Inject constructor(
             selectedFilesManager.startNewSelection()
         }
         selectedFilesManager
-            .getSelectedFiles(selectedFilesManager.operationCount)
-            ?.add(file)
+            .addToSelection(selectedFilesManager.operationCount, file)
 
         val size = selectedFilesManager
             .getSelectedFiles(selectedFilesManager.operationCount)
@@ -198,18 +189,12 @@ class SourceFragmentPresenter @Inject constructor(
     }
 
     override fun onBreadCrumbSelected(name: String, crumbsToPop: Int) {
-        if (source.currentDirectory.data.name == name) {
+        if (source.currentDirectory.name == name) {
             return
         }
 
         for (i in 0 until crumbsToPop) {
             view?.popBreadCrumb()
         }
-
-        val selectedParent = TreeNode
-            .searchForParent(source.currentDirectory, name) ?: return
-
-        source.currentDirectory = selectedParent
-        view?.updateFileList()
     }
 }

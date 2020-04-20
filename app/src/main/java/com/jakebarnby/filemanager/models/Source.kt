@@ -5,9 +5,6 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.jakebarnby.filemanager.managers.PreferenceManager
-import com.jakebarnby.filemanager.util.Constants
-import com.jakebarnby.filemanager.util.TreeNode
-import com.jakebarnby.filemanager.workers.DropBoxFileTreeWalker
 import com.jakebarnby.filemanager.workers.FileTreeWalkerWorker
 import java.io.File
 import java.io.Serializable
@@ -34,37 +31,17 @@ abstract class Source<
     lateinit var currentDirectory: SourceFile
     lateinit var currentDirChildren: List<SourceFile>
 
-    var totalSpace: Long = 0
-    var usedSpace: Long = 0
-    var freeSpace: Long = 0
+    abstract val storageInfo: StorageInfo?
+
     var isLoggedIn = false
     var isFilesLoaded = false
     var isMultiSelectEnabled = false
 
-    var onLoadStart: (() -> Unit)? = null
-    var onLoadError: ((String) -> Unit)? = null
-    var onLoadAborted: ((String) -> Unit)? = null
-    var onLoadComplete: (() -> Unit)? = null
-    var onLogout: (() -> Unit)? = null
-
-    val totalSpaceGB: Double
-        get() = totalSpace / Constants.BYTES_TO_GIGABYTE
-
-    val usedSpaceGB: Double
-        get() = usedSpace / Constants.BYTES_TO_GIGABYTE
-
-    val usedSpacePercent: Int
-        get() = (100 * usedSpace / totalSpace).toInt()
-
-    val freeSpaceGB: Double
-        get() = freeSpace / Constants.BYTES_TO_GIGABYTE
+    lateinit var listener: SourceListener
 
     abstract suspend fun authenticate(context: Context)
 
-    inline fun <reified T : FileTreeWalkerWorker<*>> loadFiles(
-        context: Context,
-        treeWalkerClass: Class<T>
-    ) {
+    inline fun <reified T : FileTreeWalkerWorker<*>> loadFiles(context: Context) {
         if (isFilesLoaded) {
             return
         }
@@ -83,10 +60,4 @@ abstract class Source<
     abstract suspend fun delete(params: TDeleteParams)
     abstract suspend fun rename(params: TRenameParams): TFileType?
     abstract suspend fun logout(context: Context)
-
-    fun setQuotaInfo(info: StorageInfo?) {
-        totalSpace += info?.totalSpace ?: 0
-        usedSpace += info?.usedSpace ?: 0
-        freeSpace += info?.freeSpace ?: 0
-    }
 }

@@ -2,7 +2,9 @@ package com.jakebarnby.filemanager.models.sources.local
 
 import android.Manifest
 import android.content.Context
+import android.os.StatFs
 import androidx.room.Entity
+import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.models.*
 import com.jakebarnby.filemanager.ui.sources.SourceFragmentContract
 import com.jakebarnby.filemanager.util.Constants.RequestCodes
@@ -14,8 +16,8 @@ import java.io.File
  */
 @Entity
 class LocalSource(
-    private val rootPath: String?,
-    private val presenter: SourceFragmentContract.Presenter
+    private val rootPath: String,
+    prefsManager: PreferenceManager
 ) : Source<
     LocalCreateFolderParams,
     DownloadParams,
@@ -28,7 +30,7 @@ class LocalSource(
     >(
     SourceConnectionType.LOCAL,
     SourceType.LOCAL.id,
-    presenter.prefsManager
+    prefsManager
 ) {
 
     companion object {
@@ -36,6 +38,16 @@ class LocalSource(
             System.loadLibrary("io-lib")
         }
     }
+
+    override val storageInfo: StorageInfo?
+        get() {
+            val fileSystem = StatFs(rootPath)
+
+            return StorageInfo(
+                fileSystem.totalBytes,
+                fileSystem.availableBytes
+            )
+        }
 
     /**
      * Calls native io-lib and copies the file at the given path to the given destination
@@ -72,7 +84,7 @@ class LocalSource(
     private external fun renameFolderNative(oldPath: String?, newPath: String?): Int
 
     override suspend fun authenticate(context: Context) {
-        presenter.onCheckPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, RequestCodes.STORAGE_PERMISSIONS)
+        listener.onCheckPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, RequestCodes.STORAGE_PERMISSIONS)
     }
 
     override suspend fun logout(context: Context) {}

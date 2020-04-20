@@ -68,9 +68,11 @@
 
                 <data
                     android:scheme="msauth"
-                    android:host="com.jakebarnby.filemanager" />
+                    android:host="com.jakebarnby.filemanager"
+                    android:path="/6df1ed03-4034-438a-8f20-b1b261c819ef"/>
             </intent-filter>
         </activity>
+
         <activity
             android:name="com.dropbox.core.android.AuthActivity"
             android:configChanges="orientation|keyboard"
@@ -90,6 +92,7 @@
             android:exported="false" />
 
         <provider
+            tools:replace="android:authorities"
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.jakebarnby.filemanager"
             android:exported="false"

@@ -5,7 +5,7 @@ enum class SourceType(
     val sourceName: String
 ) {
     LOCAL(0, "Local"),
-    DROPBOX(1, "Dropbox"),
+    DROPBOX(1, "DropBox"),
     GOOGLE_DRIVE(2, "Google Drive"),
     ONEDRIVE(3, "OneDrive")
 }

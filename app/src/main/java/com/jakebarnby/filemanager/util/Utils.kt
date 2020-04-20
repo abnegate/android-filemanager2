@@ -113,20 +113,6 @@ object Utils {
     }
 
     /**
-     * Get the free space available in the given file
-     * @param dir   The dir to check free space of
-     * @return      Amount of bytes free in file
-     */
-    fun getStorageStats(dir: File): StorageInfo {
-        val fileSystem = StatFs(dir.absolutePath)
-        val info = StorageInfo()
-        info.freeSpace = fileSystem.availableBytes
-        info.totalSpace = fileSystem.totalBytes
-        info.usedSpace = fileSystem.totalBytes - fileSystem.availableBytes
-        return info
-    }
-
-    /**
      * Returns external storage paths (directory of external memory card) as array of Strings
      * @param context   Context for resources
      * @return          Array of external storage paths

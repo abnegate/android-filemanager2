@@ -1,11 +1,10 @@
-package com.jakebarnby.filemanager.models.sources
+package com.jakebarnby.filemanager.ui.sources
 
 import com.jakebarnby.filemanager.managers.*
 import com.jakebarnby.filemanager.models.FileAction
 import com.jakebarnby.filemanager.models.SourceConnectionType
 import com.jakebarnby.filemanager.models.SourceFile
 import com.jakebarnby.filemanager.models.SourceType
-import com.jakebarnby.filemanager.ui.sources.SourceActivityContract
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.TreeNode
@@ -36,7 +35,7 @@ class SourcePresenter @Inject constructor(
             val rootDirTitle = split[split.size - 1]
             var alreadyAdded = false
             for (source in sourceManager.sources) {
-                if (source.rootNode.data.path.contains(rootDirTitle)) {
+                if (source.rootFile.data.path.contains(rootDirTitle)) {
                     alreadyAdded = true
                     break
                 }
@@ -163,8 +162,7 @@ class SourcePresenter @Inject constructor(
                 view?.startMoveService()
             }
 
-            sourceManager.activeSource
-                .decreaseFreeSpace(selectedFilesManager.currentCopySize)
+//            sourceManager.activeSource.decreaseFreeSpace(selectedFilesManager.currentSelectionSize)
 
             selectedFilesManager.startNewSelection()
         }
@@ -188,8 +186,8 @@ class SourcePresenter @Inject constructor(
             return false
         }
 
-        val copySize = selectedFilesManager.currentCopySize
-        if (copySize > sourceManager.activeSource.freeSpace) {
+        val copySize = selectedFilesManager.currentSelectionSize
+        if (copySize > (sourceManager.activeSource.storageInfo?.freeBytes ?: 0)) {
             view?.showNotEnoughSpaceSnackBar()
             return false
         }
@@ -223,8 +221,7 @@ class SourcePresenter @Inject constructor(
         view?.setAppNameTitle()
         view?.startDeleteService()
 
-        sourceManager.activeSource
-            .increaseFreeSpace(selectedFilesManager.currentCopySize)
+        //sourceManager.activeSource.increaseFreeSpace(selectedFilesManager.currentSelectionSize)
 
         selectedFilesManager.startNewSelection()
     }
@@ -236,7 +233,7 @@ class SourcePresenter @Inject constructor(
             view?.toggleContextMenu(false)
             view?.setAppNameTitle()
 
-            selectedFilesManager.currentSelectedFiles.clear()
+            selectedFilesManager.clearCurrentSelection()
         } else if (sourceManager.activeSource.isLoggedIn) {
 //            val previousPosition = sourceManager.activeSource
 //                .currentDirectory.parent?.data?.positionToRestore ?: 0
@@ -246,8 +243,8 @@ class SourcePresenter @Inject constructor(
 //            (activeFragment?.recycler?.layoutManager as? LinearLayoutManager)
 //                ?.scrollToPositionWithOffset(previousPosition, 0)
 
-            sourceManager.activeSource.currentDirectory =
-                sourceManager.activeSource.currentDirectory.parent ?: return
+//            sourceManager.activeSource.currentDirectory =
+//                sourceManager.activeSource.currentDirectory.parent ?: return
 
 //            activeFragment?.refreshRecycler()
 //            activeFragment?.popBreadcrumb()
@@ -335,7 +332,7 @@ class SourcePresenter @Inject constructor(
         )
 
         val currentName = selectedFilesManager
-            .currentSelectedFiles[0].data.name
+            .currentSelectedFiles[0].name
 
         view?.showRenameDialog(currentName)
     }
@@ -413,11 +410,9 @@ class SourcePresenter @Inject constructor(
             view?.showNoSelectionSnackBar()
             return
         }
-        val selectedSize = selectedFilesManager.currentSelectedFiles.sumBy {
-            it.data.size.toInt()
-        }
+        val selectedSize = selectedFilesManager.currentSelectionSize
 
-        view?.showPropertiesDialog(selectedCount, selectedSize)
+        view?.showPropertiesDialog(selectedCount, selectedSize.toInt())
     }
 
     override fun onShowProgress() {

@@ -13,9 +13,9 @@ import javax.inject.Singleton
 @Singleton
 class SourceManager @Inject constructor() : Serializable {
 
-    val sources: MutableList<Source> = mutableListOf()
+    val sources: MutableList<Source<*,*,*,*,*,*,*,*>> = mutableListOf()
 
-    lateinit var activeSource: Source
+    lateinit var activeSource: Source<*,*,*,*,*,*,*,*>
 
     private val currentFileActions = SparseArray<FileAction>()
 

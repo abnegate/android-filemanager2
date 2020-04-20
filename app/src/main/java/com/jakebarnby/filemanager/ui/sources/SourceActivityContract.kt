@@ -97,8 +97,8 @@ interface SourceActivityContract {
         fun showProgressDialog(title: String, maxProgress: Int)
         fun isProgressShowing(): Boolean
         fun hideProgressDialog()
-        fun showUsageDialog(loadedSources: List<Source>)
-        fun showLogoutDialog(loggedInSources: List<Source>)
+        fun showUsageDialog(loadedSources: List<Source<*,*,*,*,*,*,*,*>>)
+        fun showLogoutDialog(loggedInSources: List<Source<*,*,*,*,*,*,*,*>>)
         fun showSortByDialog()
         fun showSettingsDialog()
         fun showSearchDialog(results: List<TreeNode<SourceFile>>, sourceNames: List<String>)

@@ -65,7 +65,7 @@ class SortByDialog : DialogFragment() {
         val sortGroup = rootView.findViewById<RadioGroup>(R.id.rdg_sort_by)
         val currentSortType = prefs.getInt(
             Prefs.SORT_TYPE_KEY,
-            SortType.NAME.value
+            SortType.NAME.ordinal
         )
         selectedIndex = currentSortType
 
@@ -75,7 +75,7 @@ class SortByDialog : DialogFragment() {
         val orderGroup = rootView.findViewById<RadioGroup>(R.id.rdg_order_by)
         val currentOrderType = prefs.getInt(
             Prefs.ORDER_TYPE_KEY,
-            OrderType.ASCENDING.value
+            OrderType.ASCENDING.ordinal
         )
 
         setCheckedOrderType(currentOrderType, orderGroup)
@@ -87,11 +87,11 @@ class SortByDialog : DialogFragment() {
             when (id) {
                 R.id.rdb_ascending -> prefs.savePref(
                     Prefs.ORDER_TYPE_KEY,
-                    OrderType.ASCENDING.value
+                    OrderType.ASCENDING.ordinal
                 )
                 R.id.rdb_descending -> prefs.savePref(
                     Prefs.ORDER_TYPE_KEY,
-                    OrderType.DESCENDING.value
+                    OrderType.DESCENDING.ordinal
                 )
             }
         }
@@ -99,28 +99,28 @@ class SortByDialog : DialogFragment() {
 
     private fun setCheckedOrderType(currentOrderType: Int, orderGroup: RadioGroup) {
         when (currentOrderType) {
-            OrderType.ASCENDING.value -> orderGroup.check(R.id.rdb_ascending)
-            OrderType.DESCENDING.value -> orderGroup.check(R.id.rdb_descending)
+            OrderType.ASCENDING.ordinal -> orderGroup.check(R.id.rdb_ascending)
+            OrderType.DESCENDING.ordinal -> orderGroup.check(R.id.rdb_descending)
         }
     }
 
     private fun setSortTypeListener(sortGroup: RadioGroup) {
         sortGroup.setOnCheckedChangeListener { _, id ->
             when (id) {
-                R.id.rdb_name -> selectedIndex = SortType.NAME.value
-                R.id.rdb_size -> selectedIndex = SortType.SIZE.value
-                R.id.rdb_type -> selectedIndex = SortType.TYPE.value
-                R.id.rdb_modified_time -> selectedIndex = SortType.MODIFIED_TIME.value
+                R.id.rdb_name -> selectedIndex = SortType.NAME.ordinal
+                R.id.rdb_size -> selectedIndex = SortType.SIZE.ordinal
+                R.id.rdb_type -> selectedIndex = SortType.TYPE.ordinal
+                R.id.rdb_modified_time -> selectedIndex = SortType.MODIFIED_TIME.ordinal
             }
         }
     }
 
     private fun setCheckedSortType(currentSortType: Int, sortGroup: RadioGroup) {
         when (currentSortType) {
-            SortType.NAME.value -> sortGroup.check(R.id.rdb_name)
-            SortType.SIZE.value -> sortGroup.check(R.id.rdb_size)
-            SortType.TYPE.value -> sortGroup.check(R.id.rdb_type)
-            SortType.MODIFIED_TIME.value -> sortGroup.check(R.id.rdb_modified_time)
+            SortType.NAME.ordinal -> sortGroup.check(R.id.rdb_name)
+            SortType.SIZE.ordinal -> sortGroup.check(R.id.rdb_size)
+            SortType.TYPE.ordinal -> sortGroup.check(R.id.rdb_type)
+            SortType.MODIFIED_TIME.ordinal -> sortGroup.check(R.id.rdb_modified_time)
         }
     }
 }

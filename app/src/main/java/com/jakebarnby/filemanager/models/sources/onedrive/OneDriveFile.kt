@@ -8,12 +8,12 @@ import com.microsoft.graph.extensions.DriveItem
 /**
  * Created by Jake on 6/7/2017.
  */
-@Entity
 class OneDriveFile(file: DriveItem) : SourceFile() {
 
     init {
         path = file.webUrl
-        fileId = file.id.hashCode().toLong()
+        id = file.id.hashCode().toLong()
+        parentFileId = file.parentReference?.id?.toLong() ?: -1L
         remoteFileId = file.id.hashCode().toLong()
         name = file.name
         sourceId = SourceType.ONEDRIVE.id

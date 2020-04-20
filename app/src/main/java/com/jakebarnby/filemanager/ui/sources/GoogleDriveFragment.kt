@@ -19,7 +19,7 @@ class GoogleDriveFragment : SourceFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        presenter.setFileSource(GoogleDriveSource(presenter))
+        presenter.setFileSource(GoogleDriveSource(presenter.prefsManager))
     }
 
     override fun onResume() {

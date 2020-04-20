@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import androidx.room.Room
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.jakebarnby.filemanager.data.FileDao
 import com.jakebarnby.filemanager.data.FileDatabase
 import com.jakebarnby.filemanager.managers.ConnectionManager
 import com.jakebarnby.filemanager.util.Constants
@@ -22,6 +23,7 @@ abstract class AppModule {
     abstract fun bindContext(application: Application): Context
 
     companion object {
+
         @Provides
         @Singleton
         fun provideDatabase(context: Context): FileDatabase = Room.databaseBuilder(
@@ -30,6 +32,11 @@ abstract class AppModule {
         ).build()
 
         @Provides
+        @Singleton
+        fun fileDao(db: FileDatabase): FileDao = db.fileDao()
+
+        @Provides
+        @Singleton
         fun provideSharedPreferences(context: Context): SharedPreferences =
             context.getSharedPreferences(Constants.Prefs.PREFS, MODE_PRIVATE)
 
@@ -38,6 +45,7 @@ abstract class AppModule {
         fun provideAnalytics(context: Context) = FirebaseAnalytics.getInstance(context)
 
         @Provides
+        @Singleton
         fun provideConnectionManager(context: Context) = ConnectionManager(
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         )

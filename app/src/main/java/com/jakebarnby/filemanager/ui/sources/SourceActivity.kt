@@ -120,7 +120,7 @@ class SourceActivity : DaggerAppCompatActivity(), SourceActivityContract.View, C
         initAds()
         initViews()
 
-        SourceTransferService.startClearLocalCache(this)
+        //SourceTransferService.startClearLocalCache(this)
     }
 
     private fun initViews() {
@@ -264,7 +264,7 @@ class SourceActivity : DaggerAppCompatActivity(), SourceActivityContract.View, C
     }
 
     override fun startZipService(name: String) {
-        SourceTransferService.Companion.startActionZip(this, name)
+        SourceTransferService.startActionZip(this, name)
     }
 
     override fun addLocalSourceView(position: Int, name: String, rootPath: String) {
@@ -438,7 +438,7 @@ class SourceActivity : DaggerAppCompatActivity(), SourceActivityContract.View, C
         }
     }
 
-    override fun showUsageDialog(loadedSources: List<Source>) {
+    override fun showUsageDialog(loadedSources: List<Source<*,*,*,*,*,*,*,*>>) {
         val adapter = SourceUsageAdapter(loadedSources)
         val view = layoutInflater.inflate(R.layout.dialog_source_usage, null)
         val rv: RecyclerView = view.findViewById(R.id.rv_source_usage)
@@ -454,7 +454,7 @@ class SourceActivity : DaggerAppCompatActivity(), SourceActivityContract.View, C
             .show()
     }
 
-    override fun showLogoutDialog(loggedInSources: List<Source>) {
+    override fun showLogoutDialog(loggedInSources: List<Source<*,*,*,*,*,*,*,*>>) {
         val logoutDialog = AlertDialog
             .Builder(this)
             .setNegativeButton(R.string.close) { dialog, _ -> dialog.dismiss() }

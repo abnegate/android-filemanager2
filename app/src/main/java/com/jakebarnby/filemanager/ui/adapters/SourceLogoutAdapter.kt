@@ -17,7 +17,7 @@ import com.jakebarnby.filemanager.util.Utils
  * Created by Jake on 8/6/2017.
  */
 class SourceLogoutAdapter(
-    private val sources: MutableList<Source>,
+    private val sources: MutableList<Source<*,*,*,*,*,*,*,*>>,
     private val listener: LogoutListener
 ) : RecyclerView.Adapter<LogoutViewHolder>() {
 
@@ -40,7 +40,7 @@ class SourceLogoutAdapter(
         private val sourceName: TextView = itemView.findViewById(R.id.txt_source_title)
         private val logout: Button = itemView.findViewById(R.id.btn_logout)
 
-        fun bindHolder(sources: MutableList<Source>, position: Int) {
+        fun bindHolder(sources: MutableList<Source<*,*,*,*,*,*,*,*>>, position: Int) {
 
             val source = sources[position]
 
@@ -49,7 +49,9 @@ class SourceLogoutAdapter(
             logout.setText(if (source.isLoggedIn) R.string.logout else R.string.connect)
             logout.setOnClickListener { view: View ->
                 if (!source.isLoggedIn) {
-                    source.authenticate(logo.context)
+                    launch {
+                        source.authenticate(logo.context)
+                    }
                     return@setOnClickListener
                 }
 

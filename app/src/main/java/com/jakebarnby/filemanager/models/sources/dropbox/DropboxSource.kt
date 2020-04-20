@@ -1,16 +1,15 @@
 package com.jakebarnby.filemanager.models.sources.dropbox
 
 import android.content.Context
-import android.os.AsyncTask
 import androidx.core.os.bundleOf
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import com.dropbox.core.DbxException
 import com.dropbox.core.DbxRequestConfig
 import com.dropbox.core.android.Auth
 import com.dropbox.core.v2.DbxClientV2
-import com.dropbox.core.v2.files.*
+import com.dropbox.core.v2.files.FileMetadata
+import com.dropbox.core.v2.files.FolderMetadata
+import com.dropbox.core.v2.files.Metadata
+import com.dropbox.core.v2.files.WriteMode
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakebarnby.filemanager.managers.PreferenceManager
 import com.jakebarnby.filemanager.models.Source
@@ -18,20 +17,17 @@ import com.jakebarnby.filemanager.models.SourceConnectionType
 import com.jakebarnby.filemanager.models.SourceType
 import com.jakebarnby.filemanager.models.StorageInfo
 import com.jakebarnby.filemanager.models.sources.dropbox.params.*
-import com.jakebarnby.filemanager.models.sources.googledrive.params.*
 import com.jakebarnby.filemanager.util.Constants
 import com.jakebarnby.filemanager.util.Constants.Prefs
 import com.jakebarnby.filemanager.util.Constants.Sources
 import com.jakebarnby.filemanager.util.Logger
 import com.jakebarnby.filemanager.workers.DropBoxFileTreeWalker
-import com.jakebarnby.filemanager.workers.LocalFileTreeWalker
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 /**
@@ -54,11 +50,29 @@ class DropboxSource @Inject constructor(
     prefsManager
 ) {
 
-
     companion object {
         var client: DbxClientV2? = null
     }
 
+    override val storageInfo: StorageInfo?
+        get() {
+            try {
+                val usage = client!!.users().spaceUsage
+                val used = usage.used
+                var max: Long = 0
+                val alloc = usage.allocation
+                if (alloc.isIndividual) {
+                    max += alloc.individualValue.allocated
+                }
+                if (alloc.isTeam) {
+                    max += alloc.teamValue.allocated
+                }
+                return StorageInfo(max, used)
+            } catch (e: DbxException) {
+                e.printStackTrace()
+            }
+            return null
+        }
 
     override suspend fun authenticate(context: Context) {
         if (prefsManager.hasSourceToken(sourceId)) {
@@ -88,7 +102,7 @@ class DropboxSource @Inject constructor(
         isLoggedIn = false
         isFilesLoaded = false
 
-        presenter.onLogout()
+        listener.onLogout()
 
         Logger.logFirebaseEvent(
             FirebaseAnalytics.getInstance(context),
@@ -111,6 +125,7 @@ class DropboxSource @Inject constructor(
                 .build(),
             accessToken
         )
+
         isLoggedIn = true
     }
 
@@ -173,11 +188,6 @@ class DropboxSource @Inject constructor(
             ?.getTemporaryLink(path)
             ?.link
 
-    /**
-     * @param downloadPath
-     * @param destinationPath
-     * @return
-     */
     @Throws(IOException::class, DbxException::class)
     override suspend fun download(params: DropboxDownloadParams): File = withContext(IO) {
         val file = File(params.destinationPath)
@@ -189,11 +199,6 @@ class DropboxSource @Inject constructor(
         file
     }
 
-
-    /**
-     * @param fileUri
-     * @param destPath
-     */
     @Throws(IOException::class, DbxException::class)
     override suspend fun upload(params: DropboxUploadParams): FileMetadata? {
         val localFile = File(params.filePath)
@@ -211,58 +216,22 @@ class DropboxSource @Inject constructor(
         }
     }
 
-    /**
-     * @param filePath
-     */
+
     @Throws(DbxException::class)
     override suspend fun delete(params: DropboxDeleteParams) {
         client?.files()
             ?.deleteV2(params.path)
     }
 
-    /**
-     * @param name
-     * @param path
-     */
     @Throws(DbxException::class)
     override suspend fun createFolder(params: DropboxCreateFolderParams): FolderMetadata? =
         client?.files()
             ?.createFolderV2("${params.path}${File.separator}${params.folderName}")
             ?.metadata
 
-    /**
-     * @param oldPath
-     * @param newPath
-     * @return
-     */
     @Throws(DbxException::class)
     override suspend fun rename(params: DropboxRenameParams): Metadata? =
         client?.files()
             ?.moveV2(params.oldPath, params.newPath)
             ?.metadata
-
-
-    val storageInfo: StorageInfo?
-        get() {
-            try {
-                val usage = client!!.users().spaceUsage
-                val used = usage.used
-                var max: Long = 0
-                val alloc = usage.allocation
-                if (alloc.isIndividual) {
-                    max += alloc.individualValue.allocated
-                }
-                if (alloc.isTeam) {
-                    max += alloc.teamValue.allocated
-                }
-                val info = StorageInfo()
-                info.totalSpace = max
-                info.usedSpace = used
-                info.freeSpace = max - used
-                return info
-            } catch (e: DbxException) {
-                e.printStackTrace()
-            }
-            return null
-        }
 }

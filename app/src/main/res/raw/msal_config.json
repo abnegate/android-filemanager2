@@ -1,0 +1,5 @@
+{
+  "client_id" : "9603cfeb-e6eb-4d5f-a3e0-cbceaf0295c4",
+  "redirect_uri" : "msal9603cfeb-e6eb-4d5f-a3e0-cbceaf0295c4://auth",
+  "broker_redirect_uri_registered": true
+}
